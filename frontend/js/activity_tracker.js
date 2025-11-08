@@ -12,6 +12,9 @@
   const LAST_SYNC_KEY = "CFC_last_sync";
 
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
+  // 🧹 Reset automático (solo usar si querés empezar siempre desde 0)
+totalSeconds = 0;
+localStorage.setItem(TIME_TOTAL_KEY, 0);
   let startTime = Date.now();
   let lastSync = Date.now();
   let indicator, indicatorTimer;
