@@ -2,7 +2,7 @@
 ✅ CFC_FUNC_2_18_V45.2_FIX_THEME_FINAL — Overlay Motivacional Premium Restaurado
 ========================================================== -->
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -186,7 +186,15 @@
 </head>
 
 <body>
-  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+  <!-- ✅ Botón modo claro/oscuro sincronizado -->
+<button id="theme-toggle" title="Cambiar tema claro/oscuro" 
+  style="
+    position:fixed;top:18px;right:20px;width:44px;height:44px;
+    border-radius:50%;border:2px solid var(--color-accent,#ffd700);
+    background:var(--color-panel,#111);color:var(--color-accent,#ffd700);
+    font-size:1.2rem;font-weight:700;cursor:pointer;z-index:9999;
+    transition:all .3s ease-in-out;box-shadow:0 0 10px rgba(255,215,0,0.3);
+  ">🌙</button>
 
   <main id="dashboard">
     <h1>📘 Módulos del Campus CFC Trading LITE</h1>
@@ -288,5 +296,25 @@
   <script>
     console.log("🧩 CFC_SYNC checkpoint: modules/index.html — V45.2_FIX_THEME_FINAL ✅", new Date().toLocaleString());
   </script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47_MODULES — Restauración botón claro/oscuro -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("theme-toggle");
+  const currentTheme = localStorage.getItem("theme") || "dark";
+
+  // Aplicar tema guardado
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+  // Cambiar tema
+  btn.addEventListener("click", () => {
+    const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+  });
+});
+</script>
 </body>
 </html>
