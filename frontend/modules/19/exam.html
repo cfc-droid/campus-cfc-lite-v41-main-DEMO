@@ -12,9 +12,42 @@
 
   <!-- ✅ Motivación universal -->
   <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Botón tema fijo negro-dorado -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active {
+      transform: scale(0.92);
+    }
+  </style>
 </head>
 
 <body data-module="19">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
   <main class="contenido">
     <h1>Examen — Módulo 19: Integración Total Cuerpo–Mente–Mercado</h1>
     <p><em>Reflexioná antes de responder. Este examen evalúa tu comprensión de la conexión entre cuerpo, mente y acción operativa como unidad integral del desempeño consciente.</em></p>
@@ -77,8 +110,6 @@
   <script src="../../js/exam_v2.js"></script>
   <!-- ✅ Auto-Injector Global -->
   <script src="../../js/auto_injector.js?v=20251102" defer></script>
-  <!-- ✅ Modo claro/oscuro -->
-  <script src="../../js/theme_chapter.js?v=20251102" defer></script>
   <!-- ✅ Tracker de actividad -->
   <script src="../../js/activity_tracker.js?v=20251106" defer></script>
 
@@ -86,5 +117,28 @@
   <button class="tts-btn-fixed" title="Escuchar este examen 🎧">🎧</button>
   <link rel="stylesheet" href="../../css/voiceReader.css?v=20251105">
   <script src="../../js/core/voiceReader.js?v=20251105" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Sistema persistente claro/oscuro -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      console.log("🌗 Tema cambiado a:", newTheme);
+    });
+  });
+  </script>
 </body>
 </html>
