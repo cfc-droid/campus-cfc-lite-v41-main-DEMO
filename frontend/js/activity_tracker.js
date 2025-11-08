@@ -1,10 +1,10 @@
 // ==========================================================
-// ✅ CFC_ACTIVITY_V11.9_R2_FINAL_SYNC_20251108
+// ✅ CFC_ACTIVITY_V12.0_SYNC_PROFILE_20251108
 // ----------------------------------------------------------
 // • Reinicio garantizado al limpiar o reiniciar el Campus
 // • Loop maestro exacto (pings cada 10 s)
-// • Sincronización completa con "Mi progreso" (horas + fecha)
-// • Evento global para refrescar automáticamente el perfil
+// • Sincronización directa con el perfil (horas + fecha)
+// • Actualización visual inmediata sin recargar
 // ==========================================================
 
 (function () {
@@ -18,7 +18,7 @@
   const savedSession = localStorage.getItem(SESSION_ID_KEY);
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
 
-  // 🧹 Detectar reinicio manual o limpieza de localStorage
+  // 🧹 Reinicio limpio al borrar datos
   if (!savedSession || savedSession !== currentSession) {
     console.log("🧹 Reinicio detectado → tiempo total = 0 min.");
     totalSeconds = 0;
@@ -62,8 +62,9 @@
   setInterval(updateIndicator, 1000);
 
   // ===== BLOQUE 2 — Loop maestro con sincronización completa =====
-  const SYNC_PERIOD = 10000; // 10s exactos
-  const SYNC_TOLERANCE = 250; // ±0.25s
+  const SYNC_PERIOD = 10000; // 10 s
+  const SYNC_TOLERANCE = 250; // ±0.25 s
+
   const loop = () => {
     const now = Date.now();
     const diff = now - lastSync;
@@ -75,7 +76,7 @@
       localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
       localStorage.setItem(LAST_SYNC_KEY, now);
 
-      // ✅ Actualiza estadísticas globales visibles en el perfil
+      // ✅ Actualiza estadísticas visibles en perfil
       let study = JSON.parse(localStorage.getItem("studyStats") || "{}");
       if (typeof study !== "object") study = {};
       study.minutesActive = Math.floor(totalSeconds / 60);
@@ -86,8 +87,13 @@
       });
       localStorage.setItem("studyStats", JSON.stringify(study));
 
-      // ✅ Notifica a todos los módulos para refrescar el progreso
+      // ✅ Dispara evento y actualiza panel activo si está abierto
       window.dispatchEvent(new Event("CFC_STATS_UPDATED"));
+      if (typeof loadProfileStats === "function") {
+        try {
+          loadProfileStats(); // Refresca "Tu progreso" en vivo
+        } catch (e) {}
+      }
 
       console.log(
         `CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`
@@ -103,7 +109,7 @@
     startTime = Date.now();
     lastSync = Date.now();
     requestAnimationFrame(loop);
-    console.log("🔁 Loop maestro CFC iniciado (exact 10s)");
+    console.log("🔁 Loop maestro CFC iniciado (10s exactos, 100% uptime)");
   };
   if (document.readyState === "complete" || document.readyState === "interactive")
     init();
@@ -114,5 +120,9 @@
     localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
   });
 
-  console.log(`✅ CFC_ACTIVITY_V11.9_R2_FINAL_SYNC | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V12.0_SYNC_PROFILE | TAB:${TAB_ID}`);
 })();
+
+/* ==========================================================
+🔒 CFC_LOCK: V12.0-SYNC-PROFILE-activity_tracker-20251108
+========================================================== */
