@@ -1,7 +1,7 @@
 /* =========================================================
-   ✅ CFC_FUNC_5_3_FIX_V41.20 — Sistema unificado de tema global (dark/light)
-   📄 Archivo: /frontend/js/theme_chapter.js
-   🔒 CFC-SYNC V8.9 | QA-SYNC V41.20 (Cloudflare SAFE)
+   ✅ CFC_FUNC_5_3_FIX_V41.21 — Sistema unificado de tema global (dark/light)
+   📄 Archivo: /frontend/js/theme_chapter_v2.js
+   🔒 CFC-SYNC V8.9 | QA-SYNC V41.21 (Cloudflare SAFE)
    ========================================================= */
 
 (function () {
@@ -83,7 +83,7 @@
 
   const preTheme = localStorage.getItem(THEME_KEY) || "dark";
   applyTheme(preTheme);
-  console.log("🧩 CFC_SYNC checkpoint:", "theme_chapter.js activo en", window.location.pathname);
+  console.log("🧩 CFC_SYNC checkpoint:", "theme_chapter_v2.js activo en", window.location.pathname);
 
   // ✅ Función pública para “Cambiar fondo” desde el botón global del Campus
   window.toggleTheme = function() {
