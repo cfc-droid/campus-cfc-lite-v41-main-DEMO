@@ -1,10 +1,10 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V11.5_REAL_SYNC_FIX_20251108
+✅ CFC_ACTIVITY_V11.6_HARD_FIX_SINGLETON_20251108
 ----------------------------------------------------------
-• Soluciona sobreconteo por múltiples instancias
-• Garantiza que solo 1 tracker por pestaña quede activo
-• Usa sendBeacon en cierre para sincronía atómica
-• Compatible con profile.html y progress_v2.js
+• Una sola instancia de tracker por sesión (singleton)
+• Reinicio del temporizador cada 10 s exactos
+• Pausa inmediata al perder foco o cambiar módulo
+• Indicador visual con ping QA
 ========================================================== */
 
 (function () {
@@ -15,36 +15,47 @@
 
   let startTime = Date.now();
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
+  let syncTimer = null;
   let isActive = false;
-  let syncInterval = null;
 
   /* =====================================================
      BLOQUE 0 — Exclusión de pestañas duplicadas
      ===================================================== */
+  const activateTab = () => {
+    localStorage.setItem(TAB_KEY, TAB_ID);
+    isActive = true;
+    restartSync();
+  };
+
   const checkTab = () => {
-    const activeTab = localStorage.getItem(TAB_KEY);
-    if (!activeTab || activeTab === TAB_ID) {
-      localStorage.setItem(TAB_KEY, TAB_ID);
-      isActive = true;
+    const active = localStorage.getItem(TAB_KEY);
+    if (!active || active === TAB_ID) {
+      activateTab();
     } else {
       isActive = false;
+      stopSync();
     }
   };
-  checkTab();
-  window.addEventListener("focus", checkTab);
+
+  window.addEventListener("focus", activateTab);
+  window.addEventListener("blur", () => {
+    isActive = false;
+    stopSync();
+  });
   window.addEventListener("storage", (e) => {
     if (e.key === TAB_KEY) checkTab();
   });
+  checkTab();
 
   /* =====================================================
-     BLOQUE 1 — Indicador visual dorado QA
+     BLOQUE 1 — Indicador visual QA
      ===================================================== */
   const indicator = document.createElement("div");
   Object.assign(indicator.style, {
     position: "fixed",
     bottom: "10px",
     right: "20px",
-    background: "rgba(255,215,0,0.15)",
+    background: "rgba(255,215,0,0.1)",
     color: "#FFD700",
     padding: "6px 14px",
     border: "1px solid #FFD700",
@@ -52,32 +63,38 @@
     fontSize: "0.9rem",
     fontFamily: "Poppins,sans-serif",
     zIndex: "9999",
-    backdropFilter: "blur(6px)",
+    transition: "box-shadow 0.2s ease",
   });
   document.body.appendChild(indicator);
 
-  const updateIndicator = () => {
+  const bell = new Audio("../../assets/audio/bell-gold.wav");
+  bell.volume = 0.25;
+
+  const updateIndicator = (ping = false) => {
     const elapsed = (Date.now() - startTime) / 1000;
     const m = Math.floor(elapsed / 60);
     const s = Math.floor(elapsed % 60);
-    indicator.textContent = `🕒 Sesión activa: ${m} min ${s
+    indicator.textContent = `🕒 ${m}m ${s
       .toString()
-      .padStart(2, "0")} s ${isActive ? "✅" : "⏸️"}`;
+      .padStart(2, "0")}s ${isActive ? "✅" : "⏸️"}`;
+    if (ping) {
+      indicator.style.boxShadow = "0 0 12px 2px #FFD700";
+      setTimeout(() => (indicator.style.boxShadow = "none"), 300);
+    }
   };
   setInterval(updateIndicator, 1000);
 
   /* =====================================================
-     BLOQUE 2 — Función de sincronización
+     BLOQUE 2 — Funciones de sincronización
      ===================================================== */
   const sync = (origin = "auto") => {
     if (!isActive) return;
     const now = Date.now();
-    const lastSync = parseInt(localStorage.getItem(LAST_SYNC_KEY) || 0);
-    if (now - lastSync < 9500 && origin === "auto") return;
-
     const elapsed = (now - startTime) / 1000;
-    startTime = now;
+    if (elapsed <= 0) return;
+
     totalSeconds += elapsed;
+    startTime = now;
     localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
     localStorage.setItem(LAST_SYNC_KEY, now);
 
@@ -86,56 +103,34 @@
     localStorage.setItem("studyStats", JSON.stringify(study));
 
     console.log(
-      `🧩 [${origin}] +${(elapsed / 60).toFixed(1)} min → Total ${(totalSeconds / 60).toFixed(1)} min`
+      `CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`
     );
+    updateIndicator(true);
+    bell.play().catch(() => {});
   };
 
-  syncInterval = setInterval(() => sync("auto"), 10000);
+  const restartSync = () => {
+    stopSync();
+    startTime = Date.now();
+    syncTimer = setInterval(() => sync("auto"), 10000);
+  };
+
+  const stopSync = () => {
+    if (syncTimer) clearInterval(syncTimer);
+    syncTimer = null;
+  };
 
   /* =====================================================
-     BLOQUE 3 — Sincronización al cerrar pestaña
+     BLOQUE 3 — Unload seguro
      ===================================================== */
   window.addEventListener("beforeunload", () => {
     sync("unload");
-    try {
-      const payload = JSON.stringify({
-        total: totalSeconds,
-        time: new Date().toISOString(),
-      });
-      navigator.sendBeacon?.("/cfc-sync", payload);
-    } catch (err) {}
+    stopSync();
   });
 
-  /* =====================================================
-     BLOQUE 4 — Reset total sincronizado
-     ===================================================== */
-  const performReset = () => {
-    console.warn("🧹 Reset total ejecutado (CFC_forceReset)");
-    totalSeconds = 0;
-    startTime = Date.now();
-    localStorage.setItem(TIME_TOTAL_KEY, 0);
-    localStorage.setItem("CFC_time", 0);
-  };
-
-  window.addEventListener("CFC_forceReset", performReset);
-  window.addEventListener("storage", (e) => {
-    if (e.key === "CFC_triggerReset") performReset();
-  });
-
-  /* =====================================================
-     BLOQUE 5 — Audio de ping QA (cada 10 s)
-     ===================================================== */
-  const bell = new Audio("../../assets/audio/bell-gold.wav");
-  bell.volume = 0.25;
-  setInterval(() => {
-    if (isActive) bell.play().catch(() => {});
-  }, 10000);
-
-  console.log(
-    `✅ CFC_ACTIVITY_V11.5_REAL_SYNC_FIX listo | TAB:${TAB_ID} | Activo:${isActive}`
-  );
+  console.log(`✅ CFC_ACTIVITY_V11.6_HARD_FIX_SINGLETON | TAB:${TAB_ID}`);
 })();
 
 /* ==========================================================
-🔒 CFC_LOCK: V11.5-REAL_SYNC_FIX-activity_tracker-20251108
+🔒 CFC_LOCK: V11.6-HARD_FIX_SINGLETON-activity_tracker-20251108
 ========================================================== */
