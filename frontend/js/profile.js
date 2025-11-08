@@ -1,59 +1,70 @@
 // ==========================================================
-// ✅ CFC_PROFILE_SYNC_V12.2_FINAL_DOMTEXT_FIX_20251108
+// ✅ CFC_PROFILE_SYNC_V12.3_REALTIME_FORCE_REFRESH_20251108
 // ----------------------------------------------------------
-// • Sincroniza en vivo las "Horas activas" y "Última sesión"
-// • Detecta etiquetas <li> por su texto (no requiere clases)
-// • Escucha evento CFC_STATS_UPDATED del activity_tracker
-// • Compatible con todas las estructuras del perfil CFC LITE
+// • Actualiza “Tu progreso” cada 5 s leyendo studyStats
+// • Compatible con estructuras dinámicas (íconos, emojis, etc.)
+// • No requiere clases ni textos específicos
+// • Sin dependencia del evento ni del orden del DOM
 // ==========================================================
 
-function loadProfileStats() {
-  const stats = JSON.parse(localStorage.getItem("studyStats") || "{}");
+(function () {
+  const SYNC_INTERVAL = 5000;
 
-  // 🧠 Generar texto actualizado
-  const totalMin = stats.minutesActive || 0;
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  const hoursDisplay = stats.hoursDisplay || `${h} h ${m} min`;
-  const lastSession =
-    stats.lastSession ||
-    new Date().toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+  function getStats() {
+    const stats = JSON.parse(localStorage.getItem("studyStats") || "{}");
+    const totalMin = stats.minutesActive || 0;
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    const hoursDisplay = stats.hoursDisplay || `${h} h ${m} min`;
+    const lastSession =
+      stats.lastSession ||
+      new Date().toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
+    return { hoursDisplay, lastSession };
+  }
+
+  function updateUI() {
+    const { hoursDisplay, lastSession } = getStats();
+
+    // Buscar por texto aproximado dentro de <li>, <p> o <div>
+    document.querySelectorAll("li, p, div, span").forEach((el) => {
+      const text = el.textContent.trim();
+
+      // 🕒 Horas activas
+      if (text.match(/Horas\s+activas/i) || text.includes("🕒")) {
+        const strong = el.querySelector("strong");
+        if (strong) strong.textContent = hoursDisplay;
+        else el.innerHTML = `🕒 Horas activas: <strong>${hoursDisplay}</strong>`;
+      }
+
+      // 📅 Última sesión
+      if (text.match(/Última\s+sesión/i) || text.includes("📅")) {
+        const strong = el.querySelector("strong");
+        if (strong) strong.textContent = lastSession;
+        else el.innerHTML = `📅 Última sesión: <strong>${lastSession}</strong>`;
+      }
     });
 
-  // 🎯 Buscar dinámicamente los elementos del modal "Tu progreso"
-  const items = document.querySelectorAll("li, p, div, span");
-  items.forEach((el) => {
-    const text = el.textContent.trim();
+    console.log(`🔄 Perfil actualizado → ${hoursDisplay} | ${lastSession}`);
+  }
 
-    // Horas activas
-    if (text.startsWith("Horas activas") || text.includes("Horas activas")) {
-      const strong = el.querySelector("strong");
-      if (strong) strong.textContent = hoursDisplay;
-      else el.innerHTML = `Horas activas: <strong>${hoursDisplay}</strong>`;
-    }
-
-    // Última sesión
-    if (text.startsWith("Última sesión") || text.includes("Última sesión")) {
-      const strong = el.querySelector("strong");
-      if (strong) strong.textContent = lastSession;
-      else el.innerHTML = `Última sesión: <strong>${lastSession}</strong>`;
-    }
+  // Primer refresco después del render
+  document.addEventListener("DOMContentLoaded", () => {
+    setTimeout(updateUI, 1000);
   });
 
-  console.log(`🔄 Perfil actualizado → ${hoursDisplay} | ${lastSession}`);
-}
+  // Refresco automático cada 5 s
+  setInterval(updateUI, SYNC_INTERVAL);
 
-// 🔁 Escucha evento de sincronización global
-window.addEventListener("CFC_STATS_UPDATED", loadProfileStats);
+  // También se ejecuta si se recibe evento del tracker
+  window.addEventListener("CFC_STATS_UPDATED", updateUI);
 
-// 🔁 Ejecuta al cargar el perfil
-document.addEventListener("DOMContentLoaded", () => {
-  setTimeout(loadProfileStats, 500); // pequeño delay para asegurar render completo
-});
+  console.log("✅ CFC_PROFILE_SYNC_V12.3 activo (refresco automático 5 s)");
+})();
 
 /* ==========================================================
-🔒 CFC_LOCK: V12.2-FINAL-DOMTEXT-FIX-profile_sync-20251108
+🔒 CFC_LOCK: V12.3-REALTIME-FORCE-REFRESH-profile_sync-20251108
 ========================================================== */
