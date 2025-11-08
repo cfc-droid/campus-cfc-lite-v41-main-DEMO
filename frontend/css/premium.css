@@ -6,14 +6,31 @@
 @import url("./variables.css");
 @import url("./glass.css");
 
-/* Configuración general */
+/* =====================================================
+✅ CFC_FUNC_FIX_V47_THEME_PRIORITY — Corrección modo claro/oscuro visible
+===================================================== */
+:root[data-theme="dark"] {
+  --color-bg: #000;
+  --color-text: #f5f5f5;
+  --color-accent: #ffd700;
+  --color-panel: #111;
+}
+
+:root[data-theme="light"] {
+  --color-bg: #f5f5f5;
+  --color-text: #111;
+  --color-accent: #c9a634;
+  --color-panel: #fff;
+}
+
 body {
-  background-color: var(--dark);
-  color: var(--text-light);
+  background-color: var(--color-bg);
+  color: var(--color-text);
   font-family: "Poppins", "Segoe UI", Arial, sans-serif;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
+  transition: background-color 0.6s ease, color 0.6s ease;
 }
 
 /* Navegación */
