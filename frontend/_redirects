@@ -1,0 +1,20 @@
+# =====================================================
+# ✅ CFC-SYNC V8.1 — Redirecciones limpias (fix loop + JS)
+# =====================================================
+
+# Módulos
+/modules/*        /modules/:splat      200
+
+# Archivos estáticos (JS, CSS, imágenes)
+# ✅ Estas reglas deben ir antes que la SPA
+/js/*             /js/:splat           200
+/css/*            /css/:splat          200
+/img/*            /img/:splat          200
+/frontend/*       /frontend/:splat     200
+
+# Archivos raíz (asegura que service worker y otros carguen bien)
+/sw.js            /sw.js               200
+/manifest.json    /manifest.json       200
+
+# Página única SPA (debe ir al FINAL)
+/*                /index.html          200
