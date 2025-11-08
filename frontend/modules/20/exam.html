@@ -169,40 +169,93 @@
     </div>
   </div>
 
-  <!-- ✅ Control de graduación + tema persistente -->
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    /* 🌗 Tema persistente */
-    const btn = document.getElementById("theme-toggle");
-    if (btn) {
-      const currentTheme = localStorage.getItem("theme") || "dark";
-      document.documentElement.setAttribute("data-theme", currentTheme);
-      btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
-      btn.addEventListener("click", () => {
-        const newTheme =
-          document.documentElement.getAttribute("data-theme") === "dark"
-            ? "light" : "dark";
-        document.documentElement.setAttribute("data-theme", newTheme);
-        localStorage.setItem("theme", newTheme);
-        btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+ <!-- ✅ Control de graduación + validación del examen -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  /* 🌗 Tema persistente */
+  const btn = document.getElementById("theme-toggle");
+  if (btn) {
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    });
+  }
+
+  /* 🎓 Overlay de graduación con audio + confetti */
+  const overlay = document.getElementById("graduacion-overlay");
+  const cerrar = document.getElementById("cerrarGraduacion");
+
+  // 🎵 Voz de cierre (puede reemplazarse por tu grabación final)
+  const voice = new Audio("../../assets/audio/voice-final-campus.wav");
+  voice.volume = 0.7;
+
+  // 🎉 Confetti dorado dinámico
+  const lanzarConfetti = () => {
+    const count = 120;
+    for (let i = 0; i < count; i++) {
+      const conf = document.createElement("div");
+      conf.className = "confetti";
+      Object.assign(conf.style, {
+        position: "fixed",
+        left: `${Math.random() * 100}%`,
+        top: "-10px",
+        width: "8px",
+        height: "8px",
+        background: i % 2 ? "#FFD700" : "#FFF4B0",
+        opacity: 0.9,
+        borderRadius: "50%",
+        zIndex: 9999,
+        transform: `rotate(${Math.random() * 360}deg)`,
+        animation: `fall ${2 + Math.random() * 3}s linear forwards`
       });
+      document.body.appendChild(conf);
+      setTimeout(() => conf.remove(), 5000);
     }
+  };
 
-    /* 🎓 Overlay de graduación */
-    const overlay = document.getElementById("graduacion-overlay");
-    const cerrar = document.getElementById("cerrarGraduacion");
-    const btnEnviar = document.getElementById("btnEnviar");
+  // 🧩 Interceptar resultado del examen
+  const originalAlert = window.alert;
+  window.alert = function (msg) {
+    if (msg.includes("Aprobado")) {
+      const match = msg.match(/(\d+\/\d+)\s*\((\d+)%\)/);
+      const porcentaje = match ? parseInt(match[2]) : 0;
 
-    btnEnviar.addEventListener("click", () => {
-      // simulación: mostrar overlay tras enviar examen
-      overlay.classList.add("activo");
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    });
+      if (porcentaje >= 75) {
+        setTimeout(() => {
+          overlay.classList.add("activo");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          lanzarConfetti();
+          voice.play().catch(() => {});
+        }, 500);
+      }
+    }
+    originalAlert(msg);
+  };
 
-    cerrar.addEventListener("click", () => {
-      overlay.classList.remove("activo");
-    });
+  cerrar.addEventListener("click", () => {
+    overlay.classList.remove("activo");
+    window.scrollTo({ top: 0, behavior: "smooth" });
   });
-  </script>
-</body>
-</html>
+});
+
+/* ✨ Animación confetti */
+const style = document.createElement("style");
+style.textContent = `
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+`;
+document.head.appendChild(style);
+
+console.log("✅ CFC_GRADUATION_V41.25_REAL_FINAL_20251108 — Validación completa de examen final");
+</script>
