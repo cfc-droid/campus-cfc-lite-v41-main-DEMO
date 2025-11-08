@@ -34,7 +34,7 @@
 
   // 🧩 Núcleo base
   injectScript("theme.js?v=20251102", "Tema global base");
-  injectScript("theme_chapter.js?v=20251102", "Modo claro/oscuro modular");
+  injectScript("theme_chapter_v2.js?v=20251106", "Modo claro/oscuro modular");
   injectScript("badge.js?v=20251102", "Badge motivacional persistente");
   // Opcionales
   // injectScript("daily-review.js?v=20251102");
