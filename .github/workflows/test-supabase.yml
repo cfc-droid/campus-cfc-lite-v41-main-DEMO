@@ -1,0 +1,28 @@
+name: Test Supabase Connection
+
+on:
+  workflow_dispatch:  # Permite ejecución manual
+
+jobs:
+  test-supabase:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install @supabase/supabase-js
+      - name: Install tslib (dependency required)
+        run: npm install tslib
+
+      - name: Run Supabase connection test
+        run: node backend/test-connection.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
