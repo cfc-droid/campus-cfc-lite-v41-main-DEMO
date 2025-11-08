@@ -1,50 +1,45 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Perfil — Campus CFC LITE</title>
-  <link rel="stylesheet" href="../css/premium.css?v=20251105" />
+  <link rel="stylesheet" href="../css/premium.css?v=20251106" />
 
   <style>
     /* =========================================================
-       ✅ CFC_FUNC_8_2D_20251105 — Botón flotante modo oscuro/claro sincronizado
+       ✅ CFC_FUNC_5_1C_FIX_V47_PROFILE — Modo claro/oscuro independiente y sincronizado
        ========================================================= */
-    #themeToggle {
+    #theme-toggle {
       position: fixed;
       top: 18px;
       right: 22px;
-      background: rgba(255,215,0,0.2);
-      border: 2px solid rgba(255,215,0,0.4);
-      color: #FFD700;
+      width: 44px;
+      height: 44px;
       border-radius: 50%;
-      width: 42px;
-      height: 42px;
+      border: 2px solid var(--color-accent, #ffd700);
+      background: var(--color-panel, #111);
+      color: var(--color-accent, #ffd700);
       font-size: 1.2rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      font-weight: 700;
       cursor: pointer;
-      transition: 0.3s;
-      backdrop-filter: blur(8px);
+      z-index: 9999;
+      transition: all 0.3s ease-in-out;
       box-shadow: 0 0 10px rgba(255,215,0,0.3);
-      z-index: 1000;
     }
-    #themeToggle:hover { background:#FFD700; color:#000; transform:scale(1.05); }
-
-    body.light-mode { background:#f9f9f9; color:#111; }
-    body.dark-mode { background:#000; color:#e0e0e0; }
-
-    /* ✅ Bloque examen dinámico adaptativo */
-    .ultimo-examen h3 { color: #FFD700; font-size: 1.1rem; }
-    .ultimo-examen p {
-      font-size: 0.95rem;
-      line-height: 1.4;
-      margin-top: 6px;
-      transition: color 0.3s ease;
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
     }
-    body.dark-mode .ultimo-examen p { color: #fff; }
-    body.light-mode .ultimo-examen p { color: #000; }
+
+    /* Adaptaciones visuales del perfil */
+    main {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .ultimo-examen h3 { color: var(--color-accent, #ffd700); font-size: 1.1rem; }
+    .ultimo-examen p { font-size: 0.95rem; line-height: 1.4; margin-top: 6px; }
   </style>
 </head>
 
@@ -53,10 +48,10 @@
     <h2>👤 Perfil del Usuario</h2>
   </header>
 
-  <!-- 🌗 Botón de cambio de tema -->
-  <div id="themeToggle" title="Cambiar tema">🌙</div>
+  <!-- 🌗 Botón modo claro/oscuro -->
+  <button id="theme-toggle" title="Cambiar tema">🌙</button>
 
-  <main style="text-align:center;">
+  <main>
     <p>Esta es la página de Perfil del Campus CFC LITE V41 REAL.</p>
 
     <div style="margin-top:30px;">
@@ -65,15 +60,15 @@
 
     <section id="emocion-section" style="margin-top:30px;">
       <h3>🧠 Estado Emocional Diario</h3>
-      <div id="emotionScore" style="font-size:1.5rem;margin-top:10px;font-weight:bold;color:#FFD700;"></div>
-      <p id="emotionMessage" style="color:#ccc;font-size:0.9rem;margin-top:8px;"></p>
+      <div id="emotionScore" style="font-size:1.5rem;margin-top:10px;font-weight:bold;color:var(--color-accent);"></div>
+      <p id="emotionMessage" style="font-size:0.9rem;margin-top:8px;opacity:0.8;"></p>
     </section>
 
     <div class="bitacora-access" style="margin-top:30px;">
-    <button class="btn-bitacora" onclick="window.location.href='../pages/bitacora_v416.html?v=20251107CFC_FIX4'">
+      <button class="btn-bitacora" onclick="window.location.href='../pages/bitacora_v416.html?v=20251107CFC_FIX4'">
         🧠 Bitácora Mental del Trader
       </button>
-      <p style="font-size:0.85rem;color:#aaa;margin-top:6px;">Registrá tus reflexiones y aprendizajes del día.</p>
+      <p style="font-size:0.85rem;margin-top:6px;">Registrá tus reflexiones y aprendizajes del día.</p>
     </div>
 
     <div class="return-container" style="margin-top:25px;">
@@ -85,13 +80,30 @@
   <script src="../js/footer.js" defer></script>
   <script src="../js/stats_v1.js" defer></script>
   <script src="../js/activity_tracker.js?v=20251106" defer></script>
-  <script src="../js/theme_chapter.js?v=20251105" defer></script>
+
+  <!-- =========================================================
+       ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración independiente modo claro/oscuro
+       ========================================================= -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    btn.addEventListener("click", () => {
+      const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    });
+  });
+  </script>
 
   <!-- =========================================================
        ✅ CFC_FUNC_10_4_V41.16 — Estado emocional + último examen
        ========================================================= -->
   <script>
-    // ✅ Estado emocional
     const scoreRaw = localStorage.getItem("emotionScore");
     const box = document.getElementById("emotionScore");
     const msg = document.getElementById("emotionMessage");
@@ -122,7 +134,7 @@
           <h3>📘 Último examen completado</h3>
           <p>
             <strong>${ultimo.module}</strong><br>
-            Puntaje: <b style="color:#FFD700;">${ultimo.score}%</b> — ${ultimo.status}<br>
+            Puntaje: <b style="color:var(--color-accent);">${ultimo.score}%</b> — ${ultimo.status}<br>
             ⏱️ ${ultimo.duration} &nbsp;|&nbsp; 📅 ${ultimo.date} ${ultimo.time}
           </p>`;
         contenedor.appendChild(bloque);
@@ -130,30 +142,11 @@
         console.warn("⚠️ Error al mostrar último examen:", err);
       }
     }
-
-    function actualizarColoresExamen() {
-      const body = document.body;
-      const bloque = document.querySelector(".ultimo-examen p");
-      if (!bloque) return;
-      bloque.style.color = body.classList.contains("light-mode") ? "#000" : "#fff";
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      mostrarUltimoExamen();
-      actualizarColoresExamen();
-    });
-
-    window.addEventListener("storage", (e) => {
-      if (e.key === "CFC_THEME_STATE") actualizarColoresExamen();
-    });
-    const observer = new MutationObserver(actualizarColoresExamen);
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+    document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
   </script>
 
   <!-- =========================================================
-       ✅ CFC_FUNC_11_3_V41.34 — Panel “Mi progreso” unificado (fondo fix + última sesión)
-       📄 Archivo: /frontend/pages/profile.html
-       🔒 CFC-SYNC V11.3 | QA-SYNC V41.34
+       ✅ CFC_FUNC_11_3_V41.34 — Panel “Mi progreso” unificado
        ========================================================= -->
   <script>
   document.getElementById("btnStats").addEventListener("click", () => {
@@ -212,20 +205,13 @@
     `;
     document.body.appendChild(overlay);
     setTimeout(() => (overlay.style.opacity = 1), 50);
-
     document.getElementById("cerrarProgreso").addEventListener("click", () => {
       overlay.style.opacity = 0;
       setTimeout(() => overlay.remove(), 300);
     });
-
-    console.log(
-      "🧩 CFC_SYNC checkpoint:",
-      `Progreso actualizado → ${hours}h ${remMin}min — ${percent}% — Última sesión: ${lastDate}`,
-      new Date().toLocaleString()
-    );
   });
   </script>
 
-  <!-- 🔒 CFC_LOCK: V41.34-profile_fixOverlayLastDate-20251106 -->
+  <!-- 🔒 CFC_LOCK: V41.34-profile_fixThemeIndep-20251108 -->
 </body>
 </html>
