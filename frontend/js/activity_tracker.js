@@ -1,16 +1,16 @@
 // ==========================================================
-// ✅ CFC_ACTIVITY_V11.9_R1_CLEAN_RESET_20251108
+// ✅ CFC_ACTIVITY_V11.9_R2_FINAL_SYNC_20251108
 // ----------------------------------------------------------
-// • Reinicio a 0 min garantizado al limpiar o reiniciar el Campus
-// • Loop maestro exacto, pings cada 10s, sin interrupciones
-// • Persistencia confiable del tiempo activo y minutos totales
+// • Reinicio garantizado al limpiar o reiniciar el Campus
+// • Loop maestro exacto (pings cada 10 s)
+// • Sincronización completa con "Mi progreso" (horas + fecha)
+// • Evento global para refrescar automáticamente el perfil
 // ==========================================================
 
 (function () {
   const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
   const TIME_TOTAL_KEY = "CFC_time_total";
   const LAST_SYNC_KEY = "CFC_last_sync";
-  const RESET_FLAG = "CFC_reset_done";
   const SESSION_ID_KEY = "CFC_session_id";
 
   // ===== BLOQUE 0 — Inicialización segura =====
@@ -31,7 +31,7 @@
   const bell = new Audio("../../assets/audio/bell-gold.wav");
   bell.volume = 0.25;
 
-  // ===== BLOQUE 1 — Indicador visual =====
+  // ===== BLOQUE 1 — Indicador visual (cronómetro dorado) =====
   const indicator = document.createElement("div");
   Object.assign(indicator.style, {
     position: "fixed",
@@ -61,7 +61,7 @@
   };
   setInterval(updateIndicator, 1000);
 
-  // ===== BLOQUE 2 — Loop maestro =====
+  // ===== BLOQUE 2 — Loop maestro con sincronización completa =====
   const SYNC_PERIOD = 10000; // 10s exactos
   const SYNC_TOLERANCE = 250; // ±0.25s
   const loop = () => {
@@ -75,10 +75,19 @@
       localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
       localStorage.setItem(LAST_SYNC_KEY, now);
 
-      // Actualiza estadísticas
+      // ✅ Actualiza estadísticas globales visibles en el perfil
       let study = JSON.parse(localStorage.getItem("studyStats") || "{}");
+      if (typeof study !== "object") study = {};
       study.minutesActive = Math.floor(totalSeconds / 60);
+      study.lastSession = new Date().toLocaleDateString("es-AR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      });
       localStorage.setItem("studyStats", JSON.stringify(study));
+
+      // ✅ Notifica a todos los módulos para refrescar el progreso
+      window.dispatchEvent(new Event("CFC_STATS_UPDATED"));
 
       console.log(
         `CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`
@@ -100,10 +109,10 @@
     init();
   else document.addEventListener("DOMContentLoaded", init);
 
-  // ===== BLOQUE 4 — Sincronización al cerrar =====
+  // ===== BLOQUE 4 — Guardado al cerrar =====
   window.addEventListener("beforeunload", () => {
     localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
   });
 
-  console.log(`✅ CFC_ACTIVITY_V11.9_R1_CLEAN_RESET | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V11.9_R2_FINAL_SYNC | TAB:${TAB_ID}`);
 })();
