@@ -1,11 +1,11 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V11.6.3_FINAL_READY_SYNC_FIX_20251108
+✅ CFC_ACTIVITY_V11.6.4_FINAL_STABLE_SYNC_FIX_20251108
 ----------------------------------------------------------
-• Elimina duplicación de funciones anidadas
-• Inicia inmediatamente en DOM listo o post-carga
-• Temporizador QA visible y activo en TODAS las pantallas
-• Reinicio exacto cada 10 s + ping dorado + sonido
-• Sincronía con studyStats y localStorage CFC_time_total
+• Reinicio garantizado incluso en pestañas inactivas
+• setInterval forzado tras DOM + delay QA
+• Indicador QA activo 1 Hz con estado dinámico
+• Actualiza studyStats y localStorage cada 10 s
+• Evita doble inicialización y deadlocks
 ========================================================== */
 (function () {
   const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
@@ -16,11 +16,10 @@
   let startTime = Date.now();
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
   let syncTimer = null;
+  let indicatorTimer = null;
   let isActive = false;
 
-  /* =====================================================
-     BLOQUE 0 — Control de pestaña activa
-  ===================================================== */
+  /* =============== BLOQUE 0 — Control de pestañas únicas =============== */
   const stopSync = () => {
     if (syncTimer) clearInterval(syncTimer);
     syncTimer = null;
@@ -29,37 +28,30 @@
   const activateTab = () => {
     localStorage.setItem(TAB_KEY, TAB_ID);
     isActive = true;
-    restartSync();
   };
 
   const checkTab = () => {
     const active = localStorage.getItem(TAB_KEY);
-    if (!active || active === TAB_ID) activateTab();
-    else {
-      isActive = false;
-      stopSync();
-    }
+    if (!active || active === TAB_ID) isActive = true;
+    else isActive = false;
   };
 
-  window.addEventListener("focus", activateTab);
-  window.addEventListener("blur", () => {
-    isActive = false;
-    stopSync();
+  window.addEventListener("focus", () => {
+    activateTab();
   });
+  window.addEventListener("blur", () => (isActive = false));
   window.addEventListener("storage", (e) => {
     if (e.key === TAB_KEY) checkTab();
   });
   checkTab();
 
-  /* =====================================================
-     BLOQUE 1 — Indicador QA visual
-  ===================================================== */
+  /* =============== BLOQUE 1 — Indicador QA visible =============== */
   const indicator = document.createElement("div");
   Object.assign(indicator.style, {
     position: "fixed",
     bottom: "10px",
     right: "20px",
-    background: "rgba(255,215,0,0.1)",
+    background: "rgba(255,215,0,0.08)",
     color: "#FFD700",
     padding: "6px 14px",
     border: "1px solid #FFD700",
@@ -80,15 +72,13 @@
     const s = Math.floor(elapsed % 60);
     indicator.textContent = `🕒 ${m}m ${s.toString().padStart(2, "0")}s ${isActive ? "✅" : "⏸️"}`;
     if (ping) {
-      indicator.style.boxShadow = "0 0 12px 2px #FFD700";
-      setTimeout(() => (indicator.style.boxShadow = "none"), 300);
+      indicator.style.boxShadow = "0 0 10px 2px #FFD700";
+      setTimeout(() => (indicator.style.boxShadow = "none"), 400);
     }
   };
-  setInterval(updateIndicator, 1000);
+  indicatorTimer = setInterval(updateIndicator, 1000);
 
-  /* =====================================================
-     BLOQUE 2 — Sincronización cada 10 s exactos
-  ===================================================== */
+  /* =============== BLOQUE 2 — Sincronía real cada 10 s =============== */
   const sync = (origin = "auto") => {
     if (!isActive) return;
     const now = Date.now();
@@ -110,32 +100,42 @@
     bell.play().catch(() => {});
   };
 
+  /* =============== BLOQUE 3 — Iniciador de ciclo seguro =============== */
   const restartSync = () => {
     stopSync();
     startTime = Date.now();
-    syncTimer = setInterval(() => sync("auto"), 10000);
+    // 🔁 inicia siempre, incluso si la pestaña aún no fue activada
+    syncTimer = setInterval(() => {
+      sync("auto");
+    }, 10000);
+    console.log("⏳ CFC_SYNC_LOOP iniciado cada 10 s");
   };
 
-  /* =====================================================
-     BLOQUE 3 — Unload seguro
-  ===================================================== */
+  /* =============== BLOQUE 4 — Unload seguro =============== */
   window.addEventListener("beforeunload", () => {
     sync("unload");
     stopSync();
   });
 
-  /* =====================================================
-     BLOQUE 4 — Autoinicio post DOM listo
-  ===================================================== */
+  /* =============== BLOQUE 5 — Inicio tras DOM completo =============== */
+  const initAfterDOM = () => {
+    // delay de 1 s para garantizar render completo
+    setTimeout(() => {
+      activateTab();
+      restartSync();
+      updateIndicator(false);
+    }, 1000);
+  };
+
   if (document.readyState === "complete" || document.readyState === "interactive") {
-    restartSync();
+    initAfterDOM();
   } else {
-    document.addEventListener("DOMContentLoaded", restartSync);
+    document.addEventListener("DOMContentLoaded", initAfterDOM);
   }
 
-  console.log(`✅ CFC_ACTIVITY_V11.6.3_FINAL_READY_SYNC_FIX | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V11.6.4_FINAL_STABLE_SYNC_FIX | TAB:${TAB_ID}`);
 })();
 
 /* ==========================================================
-🔒 CFC_LOCK: V11.6.3-FINAL_READY_SYNC_FIX-activity_tracker-20251108
+🔒 CFC_LOCK: V11.6.4-FINAL_STABLE_SYNC_FIX-activity_tracker-20251108
 ========================================================== */
