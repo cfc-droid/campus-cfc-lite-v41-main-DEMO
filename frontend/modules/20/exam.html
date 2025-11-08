@@ -10,11 +10,85 @@
   <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
   <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
 
-  <!-- ✅ motivación universal -->
+  <!-- ✅ Motivación universal -->
   <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Botón tema fijo negro-dorado -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active { transform: scale(0.92); }
+
+    /* 🎓 Overlay de graduación */
+    #graduacion-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+      animation: fadeIn 0.6s ease forwards;
+    }
+    #graduacion-overlay.activo { display: flex; }
+
+    .grad-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,215,0,0.4);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      text-align: center;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      max-width: 480px;
+      animation: popIn 0.6s ease forwards;
+      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+    }
+    .grad-card h2 {
+      color: var(--color-accent, #ffd700);
+      margin-bottom: 1rem;
+    }
+    .grad-card button {
+      margin-top: 1rem;
+      padding: 0.6rem 1.4rem;
+      background: var(--color-accent, #ffd700);
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .grad-card button:hover { background: #fff; color: #000; }
+    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+    @keyframes popIn { from {transform: scale(0.9);opacity:0;} to {transform: scale(1);opacity:1;} }
+  </style>
 </head>
 
 <body data-module="20">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
   <main class="contenido">
     <h1>Examen — Módulo 20: Legado Final del Trader Consciente</h1>
     <p><em>Reflexioná antes de responder. Este examen evalúa tu grado de integración entre propósito, servicio y coherencia interior, pilares del legado del trader consciente.</em></p>
@@ -60,7 +134,7 @@
         <label><input name="q4" type="radio" value="D"> D) Dejar de operar y dedicarse únicamente a reflexionar sobre los capítulos del Campus.</label>
       </fieldset>
 
-      <button type="button" onclick="enviarExamen()">Enviar respuestas</button>
+      <button type="button" id="btnEnviar" onclick="enviarExamen()">Enviar respuestas</button>
     </form>
   </main>
 
@@ -77,8 +151,6 @@
   <script src="../../js/exam_v2.js?v=20251106"></script>
   <!-- ✅ Auto-Injector Global -->
   <script src="../../js/auto_injector.js?v=20251102" defer></script>
-  <!-- ✅ Modo claro/oscuro -->
-  <script src="../../js/theme_chapter.js?v=20251102" defer></script>
   <!-- ✅ Tracker de actividad -->
   <script src="../../js/activity_tracker.js?v=20251106" defer></script>
 
@@ -87,9 +159,9 @@
   <link rel="stylesheet" href="../../css/voiceReader.css?v=20251105">
   <script src="../../js/core/voiceReader.js?v=20251105" defer></script>
 
-  <!-- 🎓 CFC_FUNC_20_1_GRADUACION_V41_1_CELEBRATION -->
-  <div id="graduacion-overlay" class="oculto">
-    <div class="grad-card glass">
+  <!-- 🎓 Overlay de graduación -->
+  <div id="graduacion-overlay">
+    <div class="grad-card">
       <h2>🎓 ¡Felicidades, Trader Consciente!</h2>
       <p>Completaste los 20 módulos del <strong>Campus CFC Trading LITE V41</strong>.<br>
       Tu coherencia, disciplina y constancia te convirtieron en el reflejo de un <em>Trader Consciente</em>.</p>
@@ -97,7 +169,40 @@
     </div>
   </div>
 
-  <link rel="stylesheet" href="../../css/graduacion.css?v=20251106">
-  <script src="../../js/graduacion.js?v=20251106" defer></script>
+  <!-- ✅ Control de graduación + tema persistente -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    /* 🌗 Tema persistente */
+    const btn = document.getElementById("theme-toggle");
+    if (btn) {
+      const currentTheme = localStorage.getItem("theme") || "dark";
+      document.documentElement.setAttribute("data-theme", currentTheme);
+      btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+      btn.addEventListener("click", () => {
+        const newTheme =
+          document.documentElement.getAttribute("data-theme") === "dark"
+            ? "light" : "dark";
+        document.documentElement.setAttribute("data-theme", newTheme);
+        localStorage.setItem("theme", newTheme);
+        btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      });
+    }
+
+    /* 🎓 Overlay de graduación */
+    const overlay = document.getElementById("graduacion-overlay");
+    const cerrar = document.getElementById("cerrarGraduacion");
+    const btnEnviar = document.getElementById("btnEnviar");
+
+    btnEnviar.addEventListener("click", () => {
+      // simulación: mostrar overlay tras enviar examen
+      overlay.classList.add("activo");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    cerrar.addEventListener("click", () => {
+      overlay.classList.remove("activo");
+    });
+  });
+  </script>
 </body>
 </html>
