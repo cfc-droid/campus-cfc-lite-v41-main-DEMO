@@ -245,5 +245,34 @@
   <script>
     console.log("🧩 CFC_SYNC checkpoint:", "index.html — CFC_FUNC_7_2BIS_20251102 aplicado", new Date().toLocaleString());
   </script>
+
+<!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Evitar duplicados
+  if (!document.getElementById("theme-toggle")) {
+    const btn = document.createElement("button");
+    btn.id = "theme-toggle";
+    btn.textContent = "☀️";
+    document.body.appendChild(btn);
+
+    // Cargar estado previo
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    // Evento de cambio
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    });
+  }
+});
+</script>
 </body>
 </html>
