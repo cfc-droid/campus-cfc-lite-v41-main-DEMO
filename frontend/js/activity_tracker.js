@@ -1,13 +1,13 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V11.6_HARD_FIX_SINGLETON_20251108
+✅ CFC_ACTIVITY_V11.6.1_DOM_SAFE_QA_SYNC_20251108
 ----------------------------------------------------------
-• Una sola instancia de tracker por sesión (singleton)
-• Reinicio del temporizador cada 10 s exactos
-• Pausa inmediata al perder foco o cambiar módulo
-• Indicador visual con ping QA
+• Espera a que el DOM esté listo antes de crear el indicador
+• Garantiza que siempre se vea el temporizador
+• Reinicio exacto cada 10 s
+• QA Ping dorado + sonido
 ========================================================== */
 
-(function () {
+document.addEventListener("DOMContentLoaded", () => {
   const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
   const TAB_KEY = "CFC_ACTIVE_TAB";
   const LAST_SYNC_KEY = "CFC_last_sync";
@@ -25,6 +25,11 @@
     localStorage.setItem(TAB_KEY, TAB_ID);
     isActive = true;
     restartSync();
+  };
+
+  const stopSync = () => {
+    if (syncTimer) clearInterval(syncTimer);
+    syncTimer = null;
   };
 
   const checkTab = () => {
@@ -74,9 +79,9 @@
     const elapsed = (Date.now() - startTime) / 1000;
     const m = Math.floor(elapsed / 60);
     const s = Math.floor(elapsed % 60);
-    indicator.textContent = `🕒 ${m}m ${s
-      .toString()
-      .padStart(2, "0")}s ${isActive ? "✅" : "⏸️"}`;
+    indicator.textContent = `🕒 ${m}m ${s.toString().padStart(2, "0")}s ${
+      isActive ? "✅" : "⏸️"
+    }`;
     if (ping) {
       indicator.style.boxShadow = "0 0 12px 2px #FFD700";
       setTimeout(() => (indicator.style.boxShadow = "none"), 300);
@@ -85,7 +90,7 @@
   setInterval(updateIndicator, 1000);
 
   /* =====================================================
-     BLOQUE 2 — Funciones de sincronización
+     BLOQUE 2 — Sincronización cada 10 s exactos
      ===================================================== */
   const sync = (origin = "auto") => {
     if (!isActive) return;
@@ -115,11 +120,6 @@
     syncTimer = setInterval(() => sync("auto"), 10000);
   };
 
-  const stopSync = () => {
-    if (syncTimer) clearInterval(syncTimer);
-    syncTimer = null;
-  };
-
   /* =====================================================
      BLOQUE 3 — Unload seguro
      ===================================================== */
@@ -128,9 +128,9 @@
     stopSync();
   });
 
-  console.log(`✅ CFC_ACTIVITY_V11.6_HARD_FIX_SINGLETON | TAB:${TAB_ID}`);
-})();
+  console.log(`✅ CFC_ACTIVITY_V11.6.1_DOM_SAFE_QA_SYNC | TAB:${TAB_ID}`);
+});
 
 /* ==========================================================
-🔒 CFC_LOCK: V11.6-HARD_FIX_SINGLETON-activity_tracker-20251108
+🔒 CFC_LOCK: V11.6.1-DOM_SAFE_QA_SYNC-activity_tracker-20251108
 ========================================================== */
