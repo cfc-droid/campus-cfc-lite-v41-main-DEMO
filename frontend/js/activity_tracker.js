@@ -1,37 +1,37 @@
-// ==========================================================
-// ✅ CFC_ACTIVITY_V12.1_FINAL_FIX_SYNC_PROFILE_20251108
-// ----------------------------------------------------------
-// • Conversión interna a horas:minutos (sin depender del perfil)
-// • Reinicio garantizado y loop maestro exacto cada 10 s
-// • Actualización visible inmediata en “Tu progreso”
-// • Compatible con todas las versiones del Campus CFC LITE
-// ==========================================================
-
+/* ==========================================================
+✅ CFC_ACTIVITY_V11.8_R2_FINAL_SYNC_20251108
+----------------------------------------------------------
+• Loop maestro con timestamps exactos (sin interrupciones)
+• Indicador verde constante y ping cada 10 s
+• Reinicio limpio a 0 min cuando se resetea el progreso
+• Persistencia de tiempo dentro de la sesión actual
+========================================================== */
 (function () {
   const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
   const TIME_TOTAL_KEY = "CFC_time_total";
   const LAST_SYNC_KEY = "CFC_last_sync";
-  const SESSION_ID_KEY = "CFC_session_id";
+  const RESET_FLAG = "CFC_reset_done";
 
-  // ===== BLOQUE 0 — Inicialización segura =====
-  const currentSession = Date.now().toString();
-  const savedSession = localStorage.getItem(SESSION_ID_KEY);
+  /* ===== BLOQUE 0 — Inicialización base ===== */
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
 
-  if (!savedSession || savedSession !== currentSession) {
-    console.log("🧹 Reinicio detectado → tiempo total = 0 min.");
+  // 🧹 Reset automático cada vez que el progreso se reinicia manualmente
+  // (por ejemplo, al borrar localStorage o reiniciar Campus)
+  if (!localStorage.getItem(RESET_FLAG)) {
     totalSeconds = 0;
     localStorage.setItem(TIME_TOTAL_KEY, 0);
-    localStorage.setItem(SESSION_ID_KEY, currentSession);
+    localStorage.setItem(RESET_FLAG, "true");
+    console.log("🧹 Reinicio detectado → Tiempo total inicializado a 0 min.");
   }
 
   let startTime = Date.now();
   let lastSync = Date.now();
+  let indicator;
   const bell = new Audio("../../assets/audio/bell-gold.wav");
   bell.volume = 0.25;
 
-  // ===== BLOQUE 1 — Indicador visual =====
-  const indicator = document.createElement("div");
+  /* ===== BLOQUE 1 — Indicador visual permanente ===== */
+  indicator = document.createElement("div");
   Object.assign(indicator.style, {
     position: "fixed",
     bottom: "10px",
@@ -60,76 +60,60 @@
   };
   setInterval(updateIndicator, 1000);
 
-  // ===== BLOQUE 2 — Loop maestro =====
-  const SYNC_PERIOD = 10000; // 10 s
-  const SYNC_TOLERANCE = 250;
+  /* ===== BLOQUE 2 — Loop maestro exacto ===== */
+  const SYNC_PERIOD = 10000; // cada 10 s
+  const SYNC_TOLERANCE = 250; // margen ±250 ms
 
-  const loop = () => {
+  const forcedLoop = () => {
     const now = Date.now();
     const diff = now - lastSync;
+
+    // 🔁 ejecutar sincronización cada 10 s ± tolerancia
     if (diff >= SYNC_PERIOD - SYNC_TOLERANCE) {
       const elapsed = (now - startTime) / 1000;
       totalSeconds += elapsed;
       startTime = now;
       lastSync = now;
+
       localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
       localStorage.setItem(LAST_SYNC_KEY, now);
 
-      // ✅ Conversión directa a horas:minutos
-      const totalMinutes = Math.floor(totalSeconds / 60);
-      const hours = Math.floor(totalMinutes / 60);
-      const minutes = totalMinutes % 60;
-      const timeDisplay = `${hours} h ${minutes} min`;
-
-      // ✅ Actualiza estadísticas del perfil
+      // 🧠 Actualiza estadísticas de estudio
       let study = JSON.parse(localStorage.getItem("studyStats") || "{}");
       if (typeof study !== "object") study = {};
-      study.minutesActive = totalMinutes;
-      study.hoursDisplay = timeDisplay;
-      study.lastSession = new Date().toLocaleDateString("es-AR", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "numeric",
-      });
+      study.minutesActive = Math.floor(totalSeconds / 60);
       localStorage.setItem("studyStats", JSON.stringify(study));
 
-      // ✅ Notifica y refresca si el perfil está abierto
-      window.dispatchEvent(new Event("CFC_STATS_UPDATED"));
-      if (typeof loadProfileStats === "function") {
-        try {
-          loadProfileStats();
-        } catch {}
-      }
-
       console.log(
-        `CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(
-          2
-        )} min | ${timeDisplay}`
+        `CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`
       );
       updateIndicator(true);
       bell.play().catch(() => {});
     }
-    requestAnimationFrame(loop);
+
+    requestAnimationFrame(forcedLoop); // loop estable sin throttling
   };
 
-  // ===== BLOQUE 3 — Inicialización =====
-  const init = () => {
+  /* ===== BLOQUE 3 — Inicio automático ===== */
+  const initAfterDOM = () => {
     startTime = Date.now();
     lastSync = Date.now();
-    requestAnimationFrame(loop);
-    console.log("🔁 Loop maestro CFC iniciado (10s exactos, 100% uptime)");
+    requestAnimationFrame(forcedLoop);
+    console.log("🔁 Loop maestro CFC iniciado (10 s exactos, uptime 100%)");
   };
-  if (document.readyState === "complete" || document.readyState === "interactive") init();
-  else document.addEventListener("DOMContentLoaded", init);
 
-  // ===== BLOQUE 4 — Guardado al cerrar =====
+  if (document.readyState === "complete" || document.readyState === "interactive")
+    initAfterDOM();
+  else document.addEventListener("DOMContentLoaded", initAfterDOM);
+
+  /* ===== BLOQUE 4 — Sincronización al cerrar pestaña ===== */
   window.addEventListener("beforeunload", () => {
     localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
   });
 
-  console.log(`✅ CFC_ACTIVITY_V12.1_FINAL_FIX_SYNC_PROFILE | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V11.8_R2_FINAL_SYNC | TAB:${TAB_ID}`);
 })();
 
 /* ==========================================================
-🔒 CFC_LOCK: V12.1-FINAL-FIX-SYNC-PROFILE-activity_tracker-20251108
+🔒 CFC_LOCK: V11.8-R2-FINAL-SYNC-activity_tracker-20251108
 ========================================================== */
