@@ -15,6 +15,10 @@
 </head>
 
 <body data-module="1">
+  
+  <!-- 🌗 Botón cambio de tema -->
+<button id="theme-toggle" title="Cambiar modo">🌙</button>
+
   <main class="contenido">
     <h1>Examen — Módulo 1: Introducción a la Psicología del Trader</h1>
     <p><em>Reflexioná antes de responder. Este examen no mide memoria, sino conciencia emocional, disciplina y claridad mental frente al mercado.</em></p>
@@ -86,5 +90,30 @@
   <button class="tts-btn-fixed" title="Escuchar este examen 🎧">🎧</button>
   <link rel="stylesheet" href="../../css/voiceReader.css?v=20251105">
   <script src="../../js/core/voiceReader.js?v=20251105" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro independiente -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+
+  // Cargar estado previo
+  const currentTheme = localStorage.getItem("theme") || "dark";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+  // Evento de cambio
+  btn.addEventListener("click", () => {
+    const newTheme =
+      document.documentElement.getAttribute("data-theme") === "dark"
+        ? "light"
+        : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    console.log("🌗 Tema cambiado a:", newTheme);
+  });
+});
+</script>
 </body>
 </html>
