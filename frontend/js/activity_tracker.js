@@ -1,24 +1,33 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V11.8_STABLE_FORCED_LOOP_20251108
+✅ CFC_ACTIVITY_V11.8_R2_FINAL_SYNC_20251108
 ----------------------------------------------------------
-• Loop maestro forzado con timestamps exactos
-• Sin dependencia de foco ni visibilidad
-• Sin pausas ni interrupciones
-• Reinicio exacto cada 10 s, 100 % de uptime
+• Loop maestro con timestamps exactos (sin interrupciones)
+• Indicador verde constante y ping cada 10 s
+• Reinicio limpio a 0 min cuando se resetea el progreso
+• Persistencia de tiempo dentro de la sesión actual
 ========================================================== */
 (function () {
   const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
   const TIME_TOTAL_KEY = "CFC_time_total";
   const LAST_SYNC_KEY = "CFC_last_sync";
+  const RESET_FLAG = "CFC_reset_done";
 
+  /* ===== BLOQUE 0 — Inicialización base ===== */
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
-  // 🧹 Reset automático (solo usar si querés empezar siempre desde 0)
-totalSeconds = 0;
-localStorage.setItem(TIME_TOTAL_KEY, 0);
+
+  // 🧹 Reset automático cada vez que el progreso se reinicia manualmente
+  // (por ejemplo, al borrar localStorage o reiniciar Campus)
+  if (!localStorage.getItem(RESET_FLAG)) {
+    totalSeconds = 0;
+    localStorage.setItem(TIME_TOTAL_KEY, 0);
+    localStorage.setItem(RESET_FLAG, "true");
+    console.log("🧹 Reinicio detectado → Tiempo total inicializado a 0 min.");
+  }
+
   let startTime = Date.now();
   let lastSync = Date.now();
-  let indicator, indicatorTimer;
-  let bell = new Audio("../../assets/audio/bell-gold.wav");
+  let indicator;
+  const bell = new Audio("../../assets/audio/bell-gold.wav");
   bell.volume = 0.25;
 
   /* ===== BLOQUE 1 — Indicador visual permanente ===== */
@@ -49,18 +58,17 @@ localStorage.setItem(TIME_TOTAL_KEY, 0);
       setTimeout(() => (indicator.style.boxShadow = "none"), 400);
     }
   };
-  indicatorTimer = setInterval(updateIndicator, 1000);
+  setInterval(updateIndicator, 1000);
 
   /* ===== BLOQUE 2 — Loop maestro exacto ===== */
-  const FORCE_INTERVAL = 1000; // verificación cada segundo
   const SYNC_PERIOD = 10000; // cada 10 s
-  const SYNC_TOLERANCE = 250; // margen por lag
+  const SYNC_TOLERANCE = 250; // margen ±250 ms
 
   const forcedLoop = () => {
     const now = Date.now();
     const diff = now - lastSync;
 
-    // 🔁 fuerza ejecución si pasaron 10 s ± tolerancia
+    // 🔁 ejecutar sincronización cada 10 s ± tolerancia
     if (diff >= SYNC_PERIOD - SYNC_TOLERANCE) {
       const elapsed = (now - startTime) / 1000;
       totalSeconds += elapsed;
@@ -70,6 +78,7 @@ localStorage.setItem(TIME_TOTAL_KEY, 0);
       localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
       localStorage.setItem(LAST_SYNC_KEY, now);
 
+      // 🧠 Actualiza estadísticas de estudio
       let study = JSON.parse(localStorage.getItem("studyStats") || "{}");
       if (typeof study !== "object") study = {};
       study.minutesActive = Math.floor(totalSeconds / 60);
@@ -82,28 +91,29 @@ localStorage.setItem(TIME_TOTAL_KEY, 0);
       bell.play().catch(() => {});
     }
 
-    requestAnimationFrame(forcedLoop); // reemplaza setInterval por estabilidad
+    requestAnimationFrame(forcedLoop); // loop estable sin throttling
   };
 
-  /* ===== BLOQUE 3 — Arranque automático ===== */
+  /* ===== BLOQUE 3 — Inicio automático ===== */
   const initAfterDOM = () => {
     startTime = Date.now();
     lastSync = Date.now();
     requestAnimationFrame(forcedLoop);
-    console.log("🔁 Loop maestro CFC iniciado (10 s exactos, sin interrupciones)");
+    console.log("🔁 Loop maestro CFC iniciado (10 s exactos, uptime 100%)");
   };
 
   if (document.readyState === "complete" || document.readyState === "interactive")
     initAfterDOM();
   else document.addEventListener("DOMContentLoaded", initAfterDOM);
 
+  /* ===== BLOQUE 4 — Sincronización al cerrar pestaña ===== */
   window.addEventListener("beforeunload", () => {
     localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
   });
 
-  console.log(`✅ CFC_ACTIVITY_V11.8_STABLE_FORCED_LOOP | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V11.8_R2_FINAL_SYNC | TAB:${TAB_ID}`);
 })();
 
 /* ==========================================================
-🔒 CFC_LOCK: V11.8-STABLE-FORCED-LOOP-activity_tracker-20251108
+🔒 CFC_LOCK: V11.8-R2-FINAL-SYNC-activity_tracker-20251108
 ========================================================== */
