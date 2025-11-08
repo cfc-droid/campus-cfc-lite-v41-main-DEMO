@@ -1,11 +1,12 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V11.8_R2_FINAL_SYNC_20251108
+✅ CFC_ACTIVITY_V11.9_R1_RESET_FIX_20251108
 ----------------------------------------------------------
-• Loop maestro con timestamps exactos (sin interrupciones)
-• Indicador verde constante y ping cada 10 s
-• Reinicio limpio a 0 min cuando se resetea el progreso
-• Persistencia de tiempo dentro de la sesión actual
+• Igual estabilidad que V11.8_R2 (ping exacto 10 s)
+• Reinicio real al borrar progreso o limpiar localStorage
+• Persiste el tiempo correctamente dentro de la sesión
+• Indicador dorado en tiempo real
 ========================================================== */
+
 (function () {
   const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
   const TIME_TOTAL_KEY = "CFC_time_total";
@@ -14,24 +15,30 @@
 
   /* ===== BLOQUE 0 — Inicialización base ===== */
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
+  const resetFlag = localStorage.getItem(RESET_FLAG);
 
-  // 🧹 Reset automático cada vez que el progreso se reinicia manualmente
-  // (por ejemplo, al borrar localStorage o reiniciar Campus)
-  if (!localStorage.getItem(RESET_FLAG)) {
+  // 🧹 Detectar reinicio manual (cuando el usuario borra progreso)
+  const study = localStorage.getItem("studyStats");
+  const isManualReset =
+    !study ||
+    study === "{}" ||
+    totalSeconds === 0 ||
+    localStorage.getItem(TIME_TOTAL_KEY) === null;
+
+  if (!resetFlag || isManualReset) {
+    console.log("🧹 Reinicio manual detectado → tiempo total = 0 min.");
     totalSeconds = 0;
     localStorage.setItem(TIME_TOTAL_KEY, 0);
     localStorage.setItem(RESET_FLAG, "true");
-    console.log("🧹 Reinicio detectado → Tiempo total inicializado a 0 min.");
   }
 
   let startTime = Date.now();
   let lastSync = Date.now();
-  let indicator;
   const bell = new Audio("../../assets/audio/bell-gold.wav");
   bell.volume = 0.25;
 
   /* ===== BLOQUE 1 — Indicador visual permanente ===== */
-  indicator = document.createElement("div");
+  const indicator = document.createElement("div");
   Object.assign(indicator.style, {
     position: "fixed",
     bottom: "10px",
@@ -50,8 +57,8 @@
 
   const updateIndicator = (ping = false) => {
     const elapsed = (Date.now() - startTime) / 1000;
-    const m = Math.floor(elapsed / 60);
-    const s = Math.floor(elapsed % 60);
+    const m = Math.floor((totalSeconds + elapsed) / 60);
+    const s = Math.floor((totalSeconds + elapsed) % 60);
     indicator.textContent = `🕒 ${m}m ${s.toString().padStart(2, "0")}s ✅`;
     if (ping) {
       indicator.style.boxShadow = "0 0 12px 2px #FFD700";
@@ -62,13 +69,12 @@
 
   /* ===== BLOQUE 2 — Loop maestro exacto ===== */
   const SYNC_PERIOD = 10000; // cada 10 s
-  const SYNC_TOLERANCE = 250; // margen ±250 ms
+  const SYNC_TOLERANCE = 250;
 
   const forcedLoop = () => {
     const now = Date.now();
     const diff = now - lastSync;
 
-    // 🔁 ejecutar sincronización cada 10 s ± tolerancia
     if (diff >= SYNC_PERIOD - SYNC_TOLERANCE) {
       const elapsed = (now - startTime) / 1000;
       totalSeconds += elapsed;
@@ -91,7 +97,7 @@
       bell.play().catch(() => {});
     }
 
-    requestAnimationFrame(forcedLoop); // loop estable sin throttling
+    requestAnimationFrame(forcedLoop);
   };
 
   /* ===== BLOQUE 3 — Inicio automático ===== */
@@ -106,14 +112,10 @@
     initAfterDOM();
   else document.addEventListener("DOMContentLoaded", initAfterDOM);
 
-  /* ===== BLOQUE 4 — Sincronización al cerrar pestaña ===== */
+  /* ===== BLOQUE 4 — Guardado al cerrar pestaña ===== */
   window.addEventListener("beforeunload", () => {
     localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
   });
 
-  console.log(`✅ CFC_ACTIVITY_V11.8_R2_FINAL_SYNC | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V11.9_R1_RESET_FIX | TAB:${TAB_ID}`);
 })();
-
-/* ==========================================================
-🔒 CFC_LOCK: V11.8-R2-FINAL-SYNC-activity_tracker-20251108
-========================================================== */
