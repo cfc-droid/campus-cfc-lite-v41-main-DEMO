@@ -84,4 +84,13 @@
   const preTheme = localStorage.getItem(THEME_KEY) || "dark";
   applyTheme(preTheme);
   console.log("🧩 CFC_SYNC checkpoint:", "theme_chapter.js activo en", window.location.pathname);
+
+  // ✅ Función pública para “Cambiar fondo” desde el botón global del Campus
+  window.toggleTheme = function() {
+    let currentTheme = localStorage.getItem(THEME_KEY) || "dark";
+    const newTheme = currentTheme === "dark" ? "light" : "dark";
+    localStorage.setItem(THEME_KEY, newTheme);
+    applyTheme(newTheme, document.getElementById(CFC_ID));
+    console.log("🌗 toggleTheme ejecutado desde botón principal →", newTheme);
+  };
 })();
