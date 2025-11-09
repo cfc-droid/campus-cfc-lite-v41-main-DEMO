@@ -1,63 +1,88 @@
-/* ✅ CFC_FUNC_47_0_IDENTITY_FIREBASE */
-import { initializeApp } 
-  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithEmailAndPassword, 
-  onAuthStateChanged, 
-  signOut 
-} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-auth.js";
+/* ✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION */
+import { CFC_showBlockOverlay } from "../overlay_block.js";
 
-// ⚙️ Configuración del proyecto Firebase (rellenar con tus valores)
+// 🔹 Inicialización Firebase
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+import {
+  getAuth,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut,
+} from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
+
+// 🔹 Configuración Firebase (reemplaza con tus credenciales reales)
 const firebaseConfig = {
   apiKey: "TU_API_KEY",
-  authDomain: "tu-proyecto.firebaseapp.com",
-  projectId: "tu-proyecto",
-  appId: "TU_APP_ID"
+  authDomain: "TU_AUTH_DOMAIN",
+  projectId: "TU_PROJECT_ID",
+  appId: "TU_APP_ID",
 };
 
-// 🚀 Inicialización de Firebase
+// 🔹 Inicializa Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
-// 🔑 Inicio de sesión manual
-async function CFC_login(email, pass){
-  try{
-    await signInWithEmailAndPassword(auth, email, pass);
-    localStorage.setItem("CFC_user", email);
-    localStorage.setItem("CFC_session", crypto.randomUUID());
-    console.log("✅ Sesión iniciada correctamente");
-  }catch(e){
-    alert("Error: " + e.message);
+// ==========================================================
+// 🔐 Función principal de login
+// ==========================================================
+export async function CFC_login(email, pass) {
+  try {
+    const userCred = await signInWithEmailAndPassword(auth, email, pass);
+    const user = userCred.user;
+    console.log("✅ Usuario autenticado:", user.email);
+
+    // Guardar ID de sesión para control de duplicado
+    localStorage.setItem("CFC_SESSION_UID", user.uid);
+    localStorage.setItem("CFC_SESSION_ACTIVE", "true");
+
+    // Redirigir al dashboard o inicio
+    window.location.href = "../index.html";
+  } catch (err) {
+    console.warn("⚠️ Error al iniciar sesión:", err.code);
+    alert("Credenciales inválidas o usuario no autorizado.");
   }
 }
 
-// 🔐 Detección de cierre remoto de sesión
-onAuthStateChanged(auth, user => { 
-  if(!user) CFC_showBlockedOverlay(); 
+// ==========================================================
+// 🧠 Observador de cambios de sesión
+// ==========================================================
+onAuthStateChanged(auth, (user) => {
+  const uidLocal = localStorage.getItem("CFC_SESSION_UID");
+
+  if (user) {
+    // Sesión válida
+    console.log("🟢 Sesión activa:", user.email);
+
+    // Validar sesión única
+    if (uidLocal && uidLocal !== user.uid) {
+      console.warn("⚠️ Sesión duplicada detectada, cerrando sesión...");
+      CFC_showBlockOverlay("Sesión cerrada en otro dispositivo");
+      signOut(auth);
+    }
+  } else {
+    // Sin sesión activa → mostrar overlay y forzar cierre
+    console.log("🔴 No hay usuario activo, mostrando overlay...");
+    localStorage.clear();
+    CFC_showBlockOverlay("Sesión no autorizada o expirada");
+  }
 });
 
-// 🟡 Overlay dorado de sesión cerrada
-function CFC_showBlockedOverlay(){
-  document.body.innerHTML = `
-  <div style="
-      text-align:center;
-      margin-top:25vh;
-      color:#FFD700;
-      font-family:Poppins,sans-serif;">
-    <h2>🚫 Sesión cerrada en otro dispositivo</h2>
-    <p>Vuelve a iniciar sesión para continuar.</p>
-  </div>`;
-  localStorage.clear();
-}
-
-// 🧩 Función de cierre manual (opcional)
-async function CFC_logout(){
+// ==========================================================
+// 🔒 Función de cierre manual
+// ==========================================================
+export async function CFC_logout() {
   await signOut(auth);
-  CFC_showBlockedOverlay();
+  localStorage.clear();
+  CFC_showBlockOverlay("Cierre de sesión exitoso");
 }
 
-// 🌍 Exposición global para HTML
+// ==========================================================
+// 🧩 Exposición global
+// ==========================================================
 window.CFC_login = CFC_login;
 window.CFC_logout = CFC_logout;
-window.CFC_showBlockedOverlay = CFC_showBlockedOverlay;
+
+// ==========================================================
+// 🔖 CFC_LOCK línea de control
+// ==========================================================
+console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-F");
