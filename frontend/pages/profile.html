@@ -109,27 +109,46 @@
       msg.textContent="Registrá tu autoevaluación al cargar el Campus.";
     }
 
-    // ✅ Último examen completado
-    function mostrarUltimoExamen() {
-      try {
-        const examResults = JSON.parse(localStorage.getItem("examResults")) || [];
-        if (!examResults.length) return;
-        const ultimo = examResults.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        const contenedor = document.querySelector("main");
-        const bloque = document.createElement("div");
-        bloque.className = "ultimo-examen";
-        bloque.innerHTML = `
-          <h3>📘 Último examen completado</h3>
-          <p>
-            <strong>${ultimo.module}</strong><br>
-            Puntaje: <b style="color:#FFD700;">${ultimo.score}%</b> — ${ultimo.status}<br>
-            ⏱️ ${ultimo.duration} &nbsp;|&nbsp; 📅 ${ultimo.date} ${ultimo.time}
-          </p>`;
-        contenedor.appendChild(bloque);
-      } catch (err) {
-        console.warn("⚠️ Error al mostrar último examen:", err);
+    <!-- ✅ Último examen completado -->
+<script>
+/* ==========================================================
+✅ CFC_PROFILE_V9.8_EXAM_RELINK_REAL
+----------------------------------------------------------
+• Lee examResults o examResults_backup
+• Re-renderiza automáticamente si examResults estaba vacío
+• Totalmente sincronizado con LOCK_TOTAL_PERSIST_REAL
+========================================================== */
+function mostrarUltimoExamen() {
+  try {
+    let examResults = JSON.parse(localStorage.getItem("examResults") || "[]");
+    if (!examResults.length) {
+      const backup = JSON.parse(localStorage.getItem("examResults_backup") || "[]");
+      if (backup.length) {
+        examResults = backup;
+        localStorage.setItem("examResults", JSON.stringify(backup));
+        console.log("♻️ Perfil: examResults restaurado desde backup.");
       }
     }
+
+    if (!examResults.length) return;
+    const ultimo = examResults.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    const contenedor = document.querySelector("main");
+    const bloque = document.createElement("div");
+    bloque.className = "ultimo-examen";
+    bloque.innerHTML = `
+      <h3>📘 Último examen completado</h3>
+      <p>
+        <strong>${ultimo.module}</strong><br>
+        Puntaje: <b style="color:var(--color-accent);">${ultimo.score}%</b> — ${ultimo.status}<br>
+        ⏱️ ${ultimo.duration || "-"} &nbsp;|&nbsp; 📅 ${ultimo.date || "-"} ${ultimo.time || ""}
+      </p>`;
+    contenedor.appendChild(bloque);
+  } catch (err) {
+    console.warn("⚠️ Error al mostrar último examen:", err);
+  }
+}
+document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
+</script>
 
     function actualizarColoresExamen() {
       const body = document.body;
