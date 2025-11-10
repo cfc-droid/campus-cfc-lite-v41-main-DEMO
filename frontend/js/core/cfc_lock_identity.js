@@ -1,8 +1,8 @@
 /* ==========================================================
-   ✅ CFC_FUNC_47_2_LOCK_STATE
-   Sistema: CFC-LOCK IDENTITY (Firebase Auth + Overlay + Preservación local)
-   Versión: V47.2-F — Fecha: 2025-11-10
-   Auditor: CFC-SYNC REAL LOCK
+   ✅ CFC_FUNC_47_4_LOCK_PERSIST_FINAL
+   Sistema: CFC-LOCK IDENTITY (Firebase Auth + Overlay + Persistencia real)
+   Versión: V47.4-F — Fecha: 2025-11-10
+   Auditor: CFC-SYNC QA FINAL
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -76,35 +76,43 @@ async function CFC_login(email, pass) {
 // ==========================================================
 async function CFC_logout() {
   try {
+    // ✅ Marcamos logout manual
+    localStorage.setItem("CFC_LOGOUT_INTENT", "true");
+
     await signOut(auth);
 
-    // ✅ CFC_FUNC_47_2_LOCK_STATE — Preservar progreso local
+    // Guardar progreso protegido
     const preserveKeys = [
       "CFC_PROGRESS",
       "CFC_TIMER",
       "CFC_MODULE_STATE",
       "CFC_EMO_STATE",
       "CFC_LAST_LOGIN",
+      "progressData",
+      "progressPercent",
     ];
 
-    // Guardar temporalmente las claves protegidas
     const preservedData = {};
     preserveKeys.forEach((k) => {
       const value = localStorage.getItem(k);
       if (value !== null) preservedData[k] = value;
     });
 
-    // Borrar todo
+    // Borrar todo lo demás
     localStorage.clear();
     sessionStorage.clear();
 
-    // Restaurar las claves protegidas
+    // Restaurar progreso
     Object.entries(preservedData).forEach(([k, v]) => {
       localStorage.setItem(k, v);
     });
 
-    console.log("✅ CFC_LOCK_STATE: progreso local preservado tras logout.");
+    console.log("✅ CFC_LOCK_STATE: progreso local preservado tras logout manual.");
+
+    // Mostrar overlay dorado
     CFC_showBlockOverlay("Cierre de sesión exitoso");
+
+    // El flag se eliminará después de recargar el login
   } catch (err) {
     console.error("❌ Error durante logout:", err);
     alert("Error al cerrar sesión. Intenta nuevamente.");
@@ -126,6 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   onAuthStateChanged(auth, (user) => {
     const uidLocal = localStorage.getItem("CFC_SESSION_UID");
+    const isLogoutIntent = localStorage.getItem("CFC_LOGOUT_INTENT") === "true";
 
     if (user) {
       console.log("🟢 Sesión activa:", user.email);
@@ -138,11 +147,15 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else {
       if (!isLoginPage) {
-        console.log("🔴 Usuario no autenticado → overlay ON");
-
-        CFC_showBlockOverlay("Sesión no autorizada o expirada");
+        if (isLogoutIntent) {
+          console.log("🟡 Logout manual detectado → evitando overlay de bloqueo.");
+          localStorage.removeItem("CFC_LOGOUT_INTENT");
+        } else {
+          console.log("🔴 Usuario no autenticado (expirado) → overlay ON");
+          CFC_showBlockOverlay("Sesión no autorizada o expirada");
+        }
       } else {
-        console.log("🟡 En login.html — overlay desactivado correctamente.");
+        console.log("🟢 En login.html — overlay desactivado correctamente.");
       }
     }
   });
@@ -157,5 +170,5 @@ export { CFC_login, CFC_logout };
 // 🧾 QA-SYNC
 // ==========================================================
 console.log(
-  "✅ CFC_FUNC_47_2_LOCK_STATE activo — V47.2-F (Preservación de progreso local + Logout visual OK)"
+  "✅ CFC_FUNC_47_4_LOCK_PERSIST_FINAL activo — QA-SYNC VERIFIED — V47.4-F"
 );
