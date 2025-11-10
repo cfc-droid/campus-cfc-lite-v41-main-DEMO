@@ -18,12 +18,12 @@ import {
 // 🔹 Configuración Firebase (actualizada desde consola)
 // ==========================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyDWLoJykDXebApU6E-7abSdyB8abysI",
+  apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
   authDomain: "cfc-lock-firebase.firebaseapp.com",
   projectId: "cfc-lock-firebase",
-  storageBucket: "cfc-lock-firebase.appspot.com",
-  messagingSenderId: "352796892343",
-  appId: "1:352796892343:web:a2bb8b30a35f45579efc1e",
+  storageBucket: "cfc-lock-firebase.firebasestorage.app",
+  messagingSenderId: "352796893243",
+  appId: "1:352796893243:web:a2bb8b30a35f45579efc1e",
 };
 
 // ==========================================================
