@@ -1,4 +1,4 @@
-<!-- ✅ CFC_FUNC_47_1_LOGIN_UI_FIREBASE -->
+<!-- ✅ CFC_FUNC_47_1_LOGIN_UI_FIREBASE_V47.0-F REAL -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -8,6 +8,7 @@
 
   <!-- Estilos globales -->
   <link rel="stylesheet" href="../css/premium.min.css?v=20251109">
+  <link rel="stylesheet" href="../css/variables.css?v=20251109">
 
   <style>
     body {
@@ -70,16 +71,43 @@
     }
   </style>
 </head>
+
 <body>
   <div class="login-box">
     <h1>Bienvenido</h1>
     <p>Acceso exclusivo al Campus CFC</p>
-    <input id="email" type="email" placeholder="Correo electrónico" autocomplete="username">
-    <input id="pass" type="password" placeholder="Contraseña" autocomplete="current-password">
-    <button onclick="CFC_login(email.value, pass.value)">Entrar</button>
+    <form id="loginForm">
+      <input id="email" type="email" placeholder="Correo electrónico" autocomplete="username" required>
+      <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password" required>
+      <button type="submit">Entrar</button>
+    </form>
   </div>
 
-  <!-- Script principal de autenticación -->
-  <script type="module" src="../js/core/cfc_lock_identity.js?v=20251109"></script>
+  <!-- Scripts -->
+  <script type="module">
+    import { CFC_login } from "../js/core/cfc_lock_identity.js";
+
+    // Capturar envío del formulario
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      console.log("Intentando login con:", email);
+
+      try {
+        await CFC_login(email, password);
+      } catch (err) {
+        console.warn("⚠️ Error durante el login:", err.code || err.message);
+      }
+    });
+  </script>
+
+  <script src="../js/overlay_block.js" type="module"></script>
+
+  <!-- 🔖 CFC_LOCK línea de control -->
+  <script>
+    console.log("✅ CFC_FUNC_47_1_LOGIN_UI_FIREBASE_V47.0-F activo");
+  </script>
 </body>
 </html>
