@@ -1,6 +1,6 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V48.9_CLOUDFLARE_STATIC_FINAL
-   Sistema: CFC-LOCK — Control de sesión única (sin backend)
+   ✅ CFC_LOCK_IDENTITY_V49.0_CLOUDFLARE_REALTIME_HYBRID
+   Sistema: CFC-LOCK — Cierre remoto automático entre dispositivos
    Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
 
@@ -15,7 +15,6 @@ import {
   browserLocalPersistence,
   setPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
-
 import {
   getFirestore,
   doc,
@@ -41,18 +40,12 @@ const firebaseConfig = {
 let app, auth, db;
 
 /* ==========================================================
-   🔧 Inicialización Cloudflare SAFE (sin recaptcha ni cache)
+   🔧 Inicialización SAFE para Cloudflare Pages
    ========================================================== */
 try {
-  if (!getApps().length) {
-    app = initializeApp(firebaseConfig);
-    console.log("🔥 Firebase app inicializada (CFC_LOCK).");
-  } else {
-    app = getApp();
-    console.log("⚙️ Firebase app reutilizada (ya existente).");
-  }
+  if (!getApps().length) app = initializeApp(firebaseConfig);
+  else app = getApp();
 
-  // 🔧 Parche anti recaptcha global
   const safeGlobal = globalThis;
   safeGlobal.firebase = safeGlobal.firebase || {};
   safeGlobal.firebase.auth = safeGlobal.firebase.auth || {};
@@ -61,13 +54,10 @@ try {
   safeGlobal.firebase.auth.AuthImpl.prototype._getRecaptchaConfig = () => null;
 
   auth = getAuth(app);
-  db = getFirestore(app); // ✅ reemplazo seguro para Cloudflare
+  db = getFirestore(app);
 
-  await setPersistence(auth, browserLocalPersistence)
-    .then(() => console.log("⚙️ Persistencia local configurada."))
-    .catch(() => console.warn("⚠️ No se pudo establecer persistencia local."));
-
-  console.log("🧩 Cloudflare SAFE init completado sin reCAPTCHA.");
+  await setPersistence(auth, browserLocalPersistence);
+  console.log("🧩 Cloudflare SAFE init completado.");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
@@ -77,6 +67,9 @@ try {
    ========================================================== */
 function makeSessionId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+async function wait(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
 
 /* ==========================================================
@@ -91,7 +84,6 @@ export async function CFC_login(email, pass) {
     const newSID = makeSessionId();
     localStorage.setItem("CFC_SESSION_UID", user.uid);
     localStorage.setItem("CFC_SESSION_ACTIVE", "true");
-    localStorage.setItem("CFC_SESSION_TIMESTAMP", new Date().toISOString());
     localStorage.setItem("CFC_SESSION_ID", newSID);
 
     await setDoc(doc(db, "sessions", user.uid), {
@@ -112,41 +104,18 @@ export async function CFC_login(email, pass) {
    ========================================================== */
 export async function CFC_logout() {
   try {
-    localStorage.setItem("CFC_LOGOUT_INTENT", "true");
     const uid = localStorage.getItem("CFC_SESSION_UID");
-
-    const preserveKeys = [
-      "CFC_PROGRESS", "CFC_TIMER", "CFC_MODULE_STATE", "CFC_EMO_STATE",
-      "CFC_LAST_LOGIN", "progressData", "progressPercent",
-      "examResults", "examResults_backup", "exam_history",
-      "studyStats", "CFC_time_total", "CFC_last_sync",
-      "CFC_lastDate", "CFC_days", "CFC_totalDays",
-      "emotionScore", "CFC_THEME_STATE",
-      "bitacoraData", "bitacoraFilters", "CFC_bitacoraState",
-      "CFC_LOCK_BADGE", "CFC_LOCK_VERSION", "CFC_BADGE_STATE"
-    ];
-
-    const preservedData = {};
-    preserveKeys.forEach(k => {
-      const v = localStorage.getItem(k);
-      if (v !== null) preservedData[k] = v;
-    });
-
     if (uid && db) {
       try {
         await deleteDoc(doc(db, "sessions", uid));
         console.log(`[QA-SYNC] 🗑️ Sesión remota eliminada UID=${uid}`);
       } catch (e) {
-        console.warn("⚠️ Error al eliminar sesión en Firestore:", e);
+        console.warn("⚠️ Error al eliminar sesión:", e);
       }
     }
-
     await signOut(auth);
     localStorage.clear();
     sessionStorage.clear();
-    Object.entries(preservedData).forEach(([k, v]) => localStorage.setItem(k, v));
-
-    console.log("[QA-SYNC] ✅ Logout completo (datos del Campus preservados).");
     CFC_showBlockOverlay("Cierre de sesión exitoso");
   } catch (err) {
     console.error("❌ Error durante logout:", err);
@@ -154,95 +123,52 @@ export async function CFC_logout() {
 }
 
 /* ==========================================================
-   🧠 OBSERVADOR PRINCIPAL (listener remoto)
+   🧠 OBSERVADOR HÍBRIDO — tiempo real + verificación periódica
    ========================================================== */
-let unsubscribe = null;
-
 document.addEventListener("DOMContentLoaded", () => {
-  const href = window.location.href.toLowerCase();
-  const isLoginPage =
-    href.includes("login.html") ||
-    href.endsWith("/login") ||
-    document.title.toLowerCase().includes("iniciar sesión");
-
   onAuthStateChanged(auth, async (user) => {
-    if (!user) {
-      const logoutIntent = localStorage.getItem("CFC_LOGOUT_INTENT") === "true";
-      localStorage.setItem("CFC_SESSION_ACTIVE", "false");
-      if (!isLoginPage && !logoutIntent) {
-        console.warn("[QA-SYNC] 🔴 Sesión cerrada o expirada — overlay activado.");
-        CFC_showBlockOverlay("🚫 Sesión cerrada o expirada");
-      } else {
-        localStorage.removeItem("CFC_LOGOUT_INTENT");
-      }
-      return;
-    }
+    if (!user) return;
 
     const uid = user.uid;
-    const localSID = localStorage.getItem("CFC_SESSION_ID") || makeSessionId();
     const sessionRef = doc(db, "sessions", uid);
+    let localSID = localStorage.getItem("CFC_SESSION_ID");
 
-    try {
-      const snap = await getDoc(sessionRef);
-      if (!snap.exists()) {
-        await setDoc(sessionRef, { sessionId: localSID, updatedAt: serverTimestamp() });
-        console.log(`[QA-SYNC] 🆕 Nueva sesión registrada para UID=${uid}`);
-      } else {
-        const remoteSID = snap.data().sessionId;
-        if (remoteSID !== localSID) {
-          console.warn(`[QA-SYNC] ⚠️ Mismatch detectado (Local=${localSID}, Remote=${remoteSID})`);
-          await signOut(auth);
-          CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-          return;
-        }
+    // Listener Firestore (modo real-time)
+    onSnapshot(sessionRef, (snap) => {
+      const remoteSID = snap.data()?.sessionId;
+      if (remoteSID && localSID && remoteSID !== localSID) {
+        console.warn("[QA-SYNC] 🚨 Cierre remoto detectado vía snapshot");
+        signOut(auth);
+        CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
       }
+    });
 
-      if (unsubscribe) unsubscribe();
-      unsubscribe = onSnapshot(sessionRef, (docSnap) => {
-        if (!docSnap.exists()) {
-          console.warn("[QA-SYNC] ⚠️ Documento de sesión eliminado remotamente → cierre forzado.");
-          signOut(auth);
-          CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-          return;
-        }
-
-        const remoteData = docSnap.data();
-        const remoteSID = remoteData?.sessionId;
-        const localSID2 = localStorage.getItem("CFC_SESSION_ID");
-
-        if (remoteSID && localSID2 && remoteSID !== localSID2) {
-          console.warn("[QA-SYNC] 🚨 Mismatch detectado → cierre remoto.");
-          signOut(auth);
-          CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-        }
-      });
-
-      console.log(`[QA-SYNC] 👁️ Listener activo para UID=${uid}`);
-    } catch (e) {
-      console.error("[QA-SYNC] ❌ Error iniciando observador remoto:", e);
-    }
-
+    // Polling redundante cada 15s
     setInterval(async () => {
       try {
-        await getIdToken(user, true);
+        const docSnap = await getDoc(sessionRef);
+        const remoteSID = docSnap.data()?.sessionId;
+        if (remoteSID && localSID && remoteSID !== localSID) {
+          console.warn("[QA-SYNC] 🚨 Cierre remoto detectado vía polling");
+          await signOut(auth);
+          CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+        }
       } catch (err) {
-        console.warn("[QA-SYNC] ⚠️ Error de token — posible sesión expirada:", err);
-        signOut(auth);
-        CFC_showBlockOverlay("Sesión no autorizada o expirada");
+        console.warn("⚠️ Error al verificar sesión:", err);
       }
-    }, 45000);
+    }, 15000);
+
+    console.log(`[QA-SYNC] 👁️ Monitoreo activo para UID=${uid}`);
   });
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.9_CLOUDFLARE_STATIC_FINAL
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V49.0_CLOUDFLARE_REALTIME_HYBRID
 -----------------------------------------
 🔹 Cloudflare SAFE mode (sin recaptcha)
-🔹 Firestore con getFirestore() (sin persistencia)
-🔹 Fix _getRecaptchaConfig global
-🔹 Cache desactivada
+🔹 Firestore modo estático + polling 15s
+🔹 Cierre remoto inmediato detectado
 🔹 Overlay activo (CFC_showBlockOverlay)
-🔹 Intervalo token: 45 s
 🔹 Auditor: CFC-SYNC QA FINAL — 2025-11-10
 -----------------------------------------
 `);
