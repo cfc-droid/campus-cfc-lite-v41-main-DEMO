@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V48.5_FINAL_DIAG_QA
+   ✅ CFC_LOCK_IDENTITY_V48.5b_PATCH_FIXED_FINAL
    Sistema: CFC-LOCK — Control de sesión única (sin backend)
    Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
@@ -15,7 +15,6 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
 import {
-  getFirestore,
   initializeFirestore,
   clearIndexedDbPersistence,
   doc,
@@ -42,15 +41,23 @@ let app, auth, db;
 
 try {
   app = initializeApp(firebaseConfig);
-  // 🔧 Desactivar caché local y limpiar IndexedDB
-  await clearIndexedDbPersistence(app).catch(() => {});
+
+  // Inicializar Firestore sin persistencia local
   db = initializeFirestore(app, {
     ignoreUndefinedProperties: true,
     experimentalForceLongPolling: true,
     cacheSizeBytes: 0
   });
+
+  // 🔧 Limpiar IndexedDB (evita caché local entre sesiones)
+  clearIndexedDbPersistence(db)
+    .then(() => console.log("🧹 IndexedDB Firestore limpiado correctamente."))
+    .catch((err) => console.warn("⚠️ IndexedDB ya estaba limpio o no se pudo limpiar:", err));
+
+  // Inicializar Auth
   auth = getAuth(app);
-  console.log("🔥 Firebase inicializado (sin caché local, modo QA-SYNC).");
+
+  console.log("🔥 Firebase inicializado correctamente (modo QA-SYNC sin caché local).");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
@@ -70,6 +77,7 @@ function wait(ms) {
    ========================================================== */
 async function CFC_login(email, pass) {
   try {
+    console.log(`[QA-SYNC] 🟡 Intentando login con: ${email}`);
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
 
@@ -87,6 +95,7 @@ async function CFC_login(email, pass) {
     console.log(`[QA-SYNC] ✅ Sesión creada: UID=${user.uid}, SID=${newSID}`);
     window.location.href = "../index.html";
   } catch (err) {
+    console.error("❌ Error en login:", err);
     alert("Error al iniciar sesión: " + (err.message || err.code));
   }
 }
@@ -234,7 +243,7 @@ export { CFC_login, CFC_logout };
    🧾 QA-SYNC LOG (Diagnóstico)
    ========================================================== */
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.5_FINAL_DIAG_QA
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.5b_PATCH_FIXED_FINAL
 -----------------------------------------
 🔹 Modo: Sesión única (Firebase + Firestore)
 🔹 Caché: Desactivada (sin persistencia local)
