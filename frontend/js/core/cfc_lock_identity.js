@@ -235,8 +235,6 @@ export { CFC_login, CFC_logout };
    Refuerzo: Escucha global del documento de sesión (UID real)
    ========================================================== */
 
-import { onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
-
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     const uid = localStorage.getItem("CFC_SESSION_UID");
