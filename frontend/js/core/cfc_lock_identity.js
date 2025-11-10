@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V49.0_CLOUDFLARE_REALTIME_HYBRID
+   ✅ CFC_LOCK_IDENTITY_V49.1_REALTIME_HYBRID_FIX_FINAL
    Sistema: CFC-LOCK — Cierre remoto automático entre dispositivos
    Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
@@ -11,7 +11,6 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
-  getIdToken,
   browserLocalPersistence,
   setPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
@@ -20,6 +19,7 @@ import {
   doc,
   setDoc,
   getDoc,
+  getDocFromServer,
   onSnapshot,
   serverTimestamp,
   deleteDoc
@@ -40,7 +40,7 @@ const firebaseConfig = {
 let app, auth, db;
 
 /* ==========================================================
-   🔧 Inicialización SAFE para Cloudflare Pages
+   🔧 Inicialización SAFE (sin recaptcha ni cache)
    ========================================================== */
 try {
   if (!getApps().length) app = initializeApp(firebaseConfig);
@@ -50,14 +50,15 @@ try {
   safeGlobal.firebase = safeGlobal.firebase || {};
   safeGlobal.firebase.auth = safeGlobal.firebase.auth || {};
   safeGlobal.firebase.auth.AuthImpl = safeGlobal.firebase.auth.AuthImpl || {};
-  safeGlobal.firebase.auth.AuthImpl.prototype = safeGlobal.firebase.auth.AuthImpl.prototype || {};
+  safeGlobal.firebase.auth.AuthImpl.prototype =
+    safeGlobal.firebase.auth.AuthImpl.prototype || {};
   safeGlobal.firebase.auth.AuthImpl.prototype._getRecaptchaConfig = () => null;
 
   auth = getAuth(app);
   db = getFirestore(app);
-
   await setPersistence(auth, browserLocalPersistence);
-  console.log("🧩 Cloudflare SAFE init completado.");
+
+  console.log("🧩 Cloudflare SAFE init completado sin reCAPTCHA.");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
@@ -68,9 +69,6 @@ try {
 function makeSessionId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
-async function wait(ms) {
-  return new Promise(r => setTimeout(r, ms));
-}
 
 /* ==========================================================
    🔐 LOGIN
@@ -80,11 +78,11 @@ export async function CFC_login(email, pass) {
     console.log(`[QA-SYNC] 🟡 Intentando login con: ${email}`);
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
-
     const newSID = makeSessionId();
+
     localStorage.setItem("CFC_SESSION_UID", user.uid);
-    localStorage.setItem("CFC_SESSION_ACTIVE", "true");
     localStorage.setItem("CFC_SESSION_ID", newSID);
+    localStorage.setItem("CFC_SESSION_ACTIVE", "true");
 
     await setDoc(doc(db, "sessions", user.uid), {
       sessionId: newSID,
@@ -123,7 +121,7 @@ export async function CFC_logout() {
 }
 
 /* ==========================================================
-   🧠 OBSERVADOR HÍBRIDO — tiempo real + verificación periódica
+   🧠 MONITOR HÍBRIDO — cierre remoto entre dispositivos
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, async (user) => {
@@ -131,43 +129,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const uid = user.uid;
     const sessionRef = doc(db, "sessions", uid);
-    let localSID = localStorage.getItem("CFC_SESSION_ID");
+    const localSID = localStorage.getItem("CFC_SESSION_ID");
 
-    // Listener Firestore (modo real-time)
-    onSnapshot(sessionRef, (snap) => {
-      const remoteSID = snap.data()?.sessionId;
-      if (remoteSID && localSID && remoteSID !== localSID) {
-        console.warn("[QA-SYNC] 🚨 Cierre remoto detectado vía snapshot");
-        signOut(auth);
-        CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-      }
-    });
+    /* 🔹 Listener realtime si Firestore WebSocket disponible */
+    try {
+      const unsub = onSnapshot(sessionRef, (snap) => {
+        const remoteSID = snap.data()?.sessionId;
+        if (remoteSID && localSID && remoteSID !== localSID) {
+          console.warn("[QA-SYNC] 🚨 Cierre remoto detectado (onSnapshot)");
+          signOut(auth);
+          CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+        }
+      });
+      console.log("📡 Listener Firestore activo (realtime).");
+    } catch {
+      console.log("⚙️ Listener no disponible, se usará modo polling híbrido.");
+    }
 
-    // Polling redundante cada 15s
+    /* 🔹 Polling directo al servidor cada 8 s */
     setInterval(async () => {
       try {
-        const docSnap = await getDoc(sessionRef);
-        const remoteSID = docSnap.data()?.sessionId;
+        const snap = await getDocFromServer(sessionRef);
+        const remoteSID = snap.data()?.sessionId;
         if (remoteSID && localSID && remoteSID !== localSID) {
-          console.warn("[QA-SYNC] 🚨 Cierre remoto detectado vía polling");
+          console.warn("[QA-SYNC] 🚨 Cierre remoto detectado (getDocFromServer)");
           await signOut(auth);
           CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
         }
       } catch (err) {
-        console.warn("⚠️ Error al verificar sesión:", err);
+        console.warn("⚠️ Error verificando sesión:", err);
       }
-    }, 15000);
+    }, 8000);
 
-    console.log(`[QA-SYNC] 👁️ Monitoreo activo para UID=${uid}`);
+    console.log(`[QA-SYNC] 👁️ Monitoreo híbrido activo para UID=${uid}`);
   });
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V49.0_CLOUDFLARE_REALTIME_HYBRID
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V49.1_REALTIME_HYBRID_FIX_FINAL
 -----------------------------------------
 🔹 Cloudflare SAFE mode (sin recaptcha)
-🔹 Firestore modo estático + polling 15s
-🔹 Cierre remoto inmediato detectado
+🔹 Firestore híbrido (snapshot + getDocFromServer)
+🔹 Verificación cada 8 s sin cache local
 🔹 Overlay activo (CFC_showBlockOverlay)
 🔹 Auditor: CFC-SYNC QA FINAL — 2025-11-10
 -----------------------------------------
