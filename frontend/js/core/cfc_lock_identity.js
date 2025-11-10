@@ -1,8 +1,8 @@
 /* ==========================================================
    ✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION
    Sistema: CFC-LOCK IDENTITY (Firebase Auth + Overlay)
-   Versión: V47.0-H — Fecha: 2025-11-09
-   Auditor: CFC-SYNC REAL LOCK FINAL FIX (LOAD ORDER)
+   Versión: V47.0-I — Fecha: 2025-11-09
+   Auditor: CFC-SYNC REAL LOCK FINAL CONTEXT FIX
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -15,7 +15,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
 // ==========================================================
-// 🔹 Configuración Firebase (CFC_LOCK_FIREBASE)
+// 🔹 Configuración Firebase
 // ==========================================================
 const firebaseConfig = {
   apiKey: "AIzaSyDLWJlayKYbXeDAp8uE6-7abSdyB8Babys",
@@ -27,14 +27,12 @@ const firebaseConfig = {
 };
 
 // ==========================================================
-// 🔹 Inicialización controlada
+// 🔹 Inicialización
 // ==========================================================
-let app, auth, firebaseReady = false;
-
+let app, auth;
 try {
   app = initializeApp(firebaseConfig);
   auth = getAuth(app);
-  firebaseReady = true;
   console.log("🔥 Firebase inicializado correctamente (CFC_LOCK).");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
@@ -45,7 +43,6 @@ try {
 // ==========================================================
 async function CFC_login(email, pass) {
   try {
-    if (!firebaseReady) throw new Error("Firebase no está listo.");
     console.log("⏳ Intentando login con:", email);
 
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
@@ -56,6 +53,7 @@ async function CFC_login(email, pass) {
     localStorage.setItem("CFC_SESSION_ACTIVE", "true");
     localStorage.setItem("CFC_SESSION_TIMESTAMP", new Date().toISOString());
 
+    // Redirigir
     window.location.href = "../index.html";
   } catch (err) {
     console.warn("⚠️ Error al iniciar sesión:", err.code);
@@ -64,7 +62,7 @@ async function CFC_login(email, pass) {
 }
 
 // ==========================================================
-// 🔒 Función de cierre manual
+// 🔒 Cierre manual
 // ==========================================================
 async function CFC_logout() {
   await signOut(auth);
@@ -73,43 +71,41 @@ async function CFC_logout() {
 }
 
 // ==========================================================
-// 🧠 Observador de cambios de sesión
+// 🧠 Observador de sesión con verificación de contexto
 // ==========================================================
-onAuthStateChanged(auth, (user) => {
-  const isLoginPage = window.location.pathname.includes("login.html");
-  const uidLocal = localStorage.getItem("CFC_SESSION_UID");
+document.addEventListener("DOMContentLoaded", () => {
+  const currentPage = window.location.pathname.split("/").pop();
+  const isLoginPage = currentPage === "login.html";
 
-  // 🔸 Esperar a que Firebase esté listo
-  if (!firebaseReady) {
-    console.log("🕐 Esperando inicialización de Firebase...");
-    return;
-  }
+  onAuthStateChanged(auth, (user) => {
+    const uidLocal = localStorage.getItem("CFC_SESSION_UID");
 
-  if (user) {
-    console.log("🟢 Sesión activa:", user.email);
+    if (user) {
+      console.log("🟢 Sesión activa:", user.email);
 
-    if (uidLocal && uidLocal !== user.uid) {
-      console.warn("⚠️ Sesión duplicada detectada, cerrando sesión...");
-      CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-      signOut(auth);
-    }
-  } else {
-    if (!isLoginPage) {
-      console.log("🔴 No hay usuario activo (fuera del login) → overlay ON");
-      localStorage.clear();
-      CFC_showBlockOverlay("Sesión no autorizada o expirada");
+      if (uidLocal && uidLocal !== user.uid) {
+        console.warn("⚠️ Sesión duplicada detectada, cerrando sesión...");
+        signOut(auth);
+        CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+      }
     } else {
-      console.log("🟡 En login.html — overlay desactivado, esperando login.");
+      if (!isLoginPage) {
+        console.log("🔴 Usuario no autenticado (fuera del login) → overlay ON");
+        localStorage.clear();
+        CFC_showBlockOverlay("Sesión no autorizada o expirada");
+      } else {
+        console.log("🟡 En login.html — overlay bloqueado correctamente.");
+      }
     }
-  }
+  });
 });
 
 // ==========================================================
-// 🧩 Exportaciones para uso modular
+// 🧩 Exportaciones
 // ==========================================================
 export { CFC_login, CFC_logout };
 
 // ==========================================================
-// 🟡 QA-SYNC Line
+// 🟡 Línea QA-SYNC
 // ==========================================================
-console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-H FINAL LOAD FIX");
+console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-I FINAL CONTEXT FIX");
