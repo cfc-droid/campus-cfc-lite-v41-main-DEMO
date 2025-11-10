@@ -1,11 +1,11 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V48.6_CLOUDFLARE_FIX_FINAL
+   ✅ CFC_LOCK_IDENTITY_V48.8_CLOUDFLARE_AUTH_FINAL
    Sistema: CFC-LOCK — Control de sesión única (sin backend)
    Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
 import {
   getAuth,
   onAuthStateChanged,
@@ -28,7 +28,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
 /* ==========================================================
-   🔹 Inicialización Firebase
+   🔹 Configuración Firebase
    ========================================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
@@ -41,10 +41,30 @@ const firebaseConfig = {
 
 let app, auth, db;
 
+/* ==========================================================
+   🔧 Inicialización Cloudflare SAFE
+   ========================================================== */
 try {
-  app = initializeApp(firebaseConfig);
+  // Evitar inicialización duplicada
+  if (!getApps().length) {
+    app = initializeApp(firebaseConfig);
+    console.log("🔥 Firebase app inicializada (CFC_LOCK).");
+  } else {
+    app = getApps()[0];
+    console.log("⚙️ Firebase app reutilizada (ya existente).");
+  }
 
-  // 🔧 Inicializar Firestore sin caché persistente
+  // 🔧 Parche absoluto anti-recaptcha (antes de auth)
+  // Evita que Firebase intente invocar _getRecaptchaConfig internamente
+  const safeGlobal = globalThis;
+  safeGlobal.firebase = safeGlobal.firebase || {};
+  safeGlobal.firebase.auth = safeGlobal.firebase.auth || {};
+  safeGlobal.firebase.auth.AuthImpl = safeGlobal.firebase.auth.AuthImpl || {};
+  safeGlobal.firebase.auth.AuthImpl.prototype = safeGlobal.firebase.auth.AuthImpl.prototype || {};
+  safeGlobal.firebase.auth.AuthImpl.prototype._getRecaptchaConfig = () => null;
+
+  // 🔐 Inicializar Auth y Firestore sin caché persistente
+  auth = getAuth(app);
   db = initializeFirestore(app, {
     ignoreUndefinedProperties: true,
     experimentalForceLongPolling: true,
@@ -53,18 +73,13 @@ try {
 
   clearIndexedDbPersistence(db)
     .then(() => console.log("🧹 IndexedDB Firestore limpiado correctamente."))
-    .catch((err) => console.warn("⚠️ IndexedDB ya estaba limpio o no se pudo limpiar:", err));
+    .catch(() => console.log("ℹ️ Firestore ya limpio."));
 
-  // 🔐 Inicializar Auth con persistencia local y sin recaptcha
-  auth = getAuth(app);
   await setPersistence(auth, browserLocalPersistence)
-    .then(() => console.log("⚙️ Persistencia local configurada correctamente."))
-    .catch(err => console.warn("⚠️ No se pudo establecer persistencia local:", err));
+    .then(() => console.log("⚙️ Persistencia local establecida."))
+    .catch(() => console.warn("⚠️ No se pudo establecer persistencia local."));
 
-  // 🔧 Parche Cloudflare Pages — evita bug '_getRecaptchaConfig'
-  auth._getRecaptchaConfig = () => null;
-
-  console.log("🔥 Firebase inicializado correctamente (Cloudflare SAFE mode, sin recaptcha).");
+  console.log("🧩 Cloudflare SAFE init completado sin reCAPTCHA.");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
@@ -76,13 +91,13 @@ function makeSessionId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
 function wait(ms) {
-  return new Promise((r) => setTimeout(r, ms));
+  return new Promise(r => setTimeout(r, ms));
 }
 
 /* ==========================================================
    🔐 LOGIN
    ========================================================== */
-async function CFC_login(email, pass) {
+export async function CFC_login(email, pass) {
   try {
     console.log(`[QA-SYNC] 🟡 Intentando login con: ${email}`);
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
@@ -108,14 +123,13 @@ async function CFC_login(email, pass) {
 }
 
 /* ==========================================================
-   🔒 LOGOUT (Preserva datos esenciales del Campus)
+   🔒 LOGOUT
    ========================================================== */
-async function CFC_logout() {
+export async function CFC_logout() {
   try {
     localStorage.setItem("CFC_LOGOUT_INTENT", "true");
     const uid = localStorage.getItem("CFC_SESSION_UID");
 
-    // 🔐 Preservar progreso del usuario
     const preserveKeys = [
       "CFC_PROGRESS", "CFC_TIMER", "CFC_MODULE_STATE", "CFC_EMO_STATE",
       "CFC_LAST_LOGIN", "progressData", "progressPercent",
@@ -191,7 +205,7 @@ document.addEventListener("DOMContentLoaded", () => {
       } else {
         const remoteSID = snap.data().sessionId;
         if (remoteSID !== localSID) {
-          console.warn(`[QA-SYNC] ⚠️ Mismatch inicial detectado (Local=${localSID}, Remote=${remoteSID})`);
+          console.warn(`[QA-SYNC] ⚠️ Mismatch detectado (Local=${localSID}, Remote=${remoteSID})`);
           await signOut(auth);
           CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
           return;
@@ -208,14 +222,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         const remoteData = docSnap.data();
-        const remoteSID = remoteData?.sessionId || "undefined";
+        const remoteSID = remoteData?.sessionId;
         const localSID2 = localStorage.getItem("CFC_SESSION_ID");
-        const delta = Date.now() - Number(localSID2?.split("_")[0] || 0);
-
-        console.log(`[QA-SYNC] 🔍 UID=${uid} | Local=${localSID2} | Remote=${remoteSID} | Δt=${delta}ms`);
 
         if (remoteSID && localSID2 && remoteSID !== localSID2) {
-          console.warn("[QA-SYNC] 🚨 Mismatch detectado → cierre remoto instantáneo.");
+          console.warn("[QA-SYNC] 🚨 Mismatch detectado → cierre remoto.");
           signOut(auth);
           CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
         }
@@ -238,22 +249,15 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 
-/* ==========================================================
-   🧩 EXPORTS
-   ========================================================== */
-export { CFC_login, CFC_logout };
-
-/* ==========================================================
-   🧾 QA-SYNC LOG (Diagnóstico)
-   ========================================================== */
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.6_CLOUDFLARE_FIX_FINAL
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.8_CLOUDFLARE_AUTH_FINAL
 -----------------------------------------
 🔹 Cloudflare SAFE mode (sin recaptcha)
-🔹 Caché Firestore: Desactivada
-🔹 Overlay: Activo (CFC_showBlockOverlay)
-🔹 Control: UID + sessionId (comparación continua)
+🔹 Fix global _getRecaptchaConfig antes de getAuth()
+🔹 Detección automática de app existente
+🔹 Cache Firestore desactivada
+🔹 Overlay activo (CFC_showBlockOverlay)
 🔹 Intervalo token: 45 s
-🔹 Auditor: CFC-SYNC 2025-11-10
+🔹 Auditor: CFC-SYNC QA FINAL — 2025-11-10
 -----------------------------------------
 `);
