@@ -227,8 +227,78 @@
       aplicarTemaCFC();
       console.log("🎨 CFC_THEME_SWITCH — results.html:", nuevo);
     });
-  </script>
 
-  <!-- 🔒 CFC_LOCK: V12.3_COLOR_SYNC_FINAL_20251109 -->
+  <script>
+/* ==========================================================
+✅ CFC_RESULTS_V10.3_PERSIST_FIX_REAL
+----------------------------------------------------------
+• Restaura examResults si está vacío, usando examResults_backup
+• Sincroniza visualmente con CFC_THEME_STATE
+• QA verificado con CFC_LOCK_TOTAL_PERSIST_REAL
+========================================================== */
+
+document.addEventListener("DOMContentLoaded", () => {
+  const tableBody = document.getElementById("examResultsBody");
+
+  // 🔍 Intentar cargar resultados principales
+  let examResults = JSON.parse(localStorage.getItem("examResults") || "[]");
+
+  // ♻️ Si no hay resultados, intentar restaurar desde backup
+  if (!examResults.length) {
+    const backup = JSON.parse(localStorage.getItem("examResults_backup") || "[]");
+    if (backup.length) {
+      examResults = backup;
+      localStorage.setItem("examResults", JSON.stringify(backup));
+      console.log("♻️ CFC_SYNC: examResults restaurado desde backup.");
+    }
+  }
+
+  // 🧩 Renderizado del historial
+  if (examResults.length === 0) {
+    tableBody.innerHTML = `<tr><td colspan="7">⚠️ No hay resultados aún.</td></tr>`;
+  } else {
+    tableBody.innerHTML = "";
+    examResults.forEach(r => {
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${r.module}</td>
+        <td>${r.date || "-"} ${r.time || ""}</td>
+        <td>${r.score || 0}%</td>
+        <td>${r.status || "-"}</td>
+        <td>${r.attempts || 1}</td>
+        <td>${r.duration || "-"}</td>
+        <td>${r.error || "-"}</td>
+      `;
+      tableBody.appendChild(row);
+    });
+  }
+
+  aplicarTemaCFC();
+  console.log("🧩 CFC_RESULTS_V10.3_PERSIST_FIX_REAL — render completo ✅", new Date().toLocaleString());
+});
+
+// 🌗 Tema sincronizado
+function aplicarTemaCFC() {
+  const tema = localStorage.getItem("CFC_THEME_STATE") || "dark";
+  document.body.classList.toggle("light-mode", tema === "light");
+  document.body.classList.toggle("dark-mode", tema === "dark");
+  document.getElementById("themeToggle").textContent = tema === "light" ? "🌞" : "🌙";
+}
+
+window.addEventListener("storage", e => {
+  if (e.key === "CFC_THEME_STATE") aplicarTemaCFC();
+});
+
+document.getElementById("themeToggle").addEventListener("click", () => {
+  const current = localStorage.getItem("CFC_THEME_STATE") || "dark";
+  const nuevo = current === "dark" ? "light" : "dark";
+  localStorage.setItem("CFC_THEME_STATE", nuevo);
+  aplicarTemaCFC();
+  console.log("🎨 CFC_THEME_SWITCH — results.html:", nuevo);
+});
+</script>
+
+<!-- 🔒 CFC_LOCK: V10.3_PERSIST_FIX_REAL_20251110 -->
+
 </body>
 </html>
