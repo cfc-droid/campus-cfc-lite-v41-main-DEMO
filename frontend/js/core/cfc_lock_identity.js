@@ -5,6 +5,9 @@
    Auditor: CFC-SYNC REAL LOCK
    ========================================================== */
 
+// ==========================================================
+// 🔹 Importaciones globales (fuera de funciones)
+// ==========================================================
 import { CFC_showBlockOverlay } from "../overlay_block.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
 import {
@@ -41,15 +44,26 @@ async function CFC_login(email, pass) {
     const user = userCred.user;
     console.log("✅ Usuario autenticado:", user.email);
 
+    // Guardar sesión
     localStorage.setItem("CFC_SESSION_UID", user.uid);
     localStorage.setItem("CFC_SESSION_ACTIVE", "true");
     localStorage.setItem("CFC_SESSION_TIMESTAMP", new Date().toISOString());
 
+    // Redirigir al dashboard
     window.location.href = "../index.html";
   } catch (err) {
     console.warn("⚠️ Error al iniciar sesión:", err.code);
     alert("Credenciales inválidas o usuario no autorizado.");
   }
+}
+
+// ==========================================================
+// 🔒 Función de cierre manual
+// ==========================================================
+async function CFC_logout() {
+  await signOut(auth);
+  localStorage.clear();
+  CFC_showBlockOverlay("Cierre de sesión exitoso");
 }
 
 // ==========================================================
@@ -61,6 +75,7 @@ onAuthStateChanged(auth, (user) => {
   if (user) {
     console.log("🟢 Sesión activa:", user.email);
 
+    // Control de sesión duplicada
     if (uidLocal && uidLocal !== user.uid) {
       console.warn("⚠️ Sesión duplicada detectada, cerrando sesión...");
       CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
@@ -74,21 +89,11 @@ onAuthStateChanged(auth, (user) => {
 });
 
 // ==========================================================
-// 🔒 Función de cierre manual
+// 🧩 Exportaciones para uso modular
 // ==========================================================
-async function CFC_logout() {
-  await signOut(auth);
-  localStorage.clear();
-  CFC_showBlockOverlay("Cierre de sesión exitoso");
-}
-
-// ==========================================================
-// 🧩 Exposición global
-// ==========================================================
-window.CFC_login = CFC_login;
-window.CFC_logout = CFC_logout;
+export { CFC_login, CFC_logout };
 
 // ==========================================================
 // 🟡 Línea de control QA-SYNC
 // ==========================================================
-console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-F REAL LOCK");
+console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-F REAL LOCK FINAL");
