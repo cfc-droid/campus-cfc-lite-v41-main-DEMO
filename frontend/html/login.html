@@ -1,66 +1,85 @@
-<!-- ✅ CFC_FUNC_47_0_LOGIN_INTERFACE -->
+<!-- ✅ CFC_FUNC_47_1_LOGIN_UI_FIREBASE -->
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Iniciar sesión | Campus CFC</title>
+  <title>Iniciar sesión — Campus CFC LITE</title>
+
+  <!-- Estilos globales -->
   <link rel="stylesheet" href="../css/premium.min.css?v=20251109">
+
   <style>
     body {
-      background: #000;
+      background: radial-gradient(circle at center, #000 85%, #111);
       color: #FFD700;
       font-family: Poppins, sans-serif;
       display: flex;
+      flex-direction: column;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
-      flex-direction: column;
     }
     .login-box {
-      border: 1px solid #FFD700;
+      border: 1px solid rgba(255,215,0,0.5);
       border-radius: 20px;
       padding: 40px 30px;
-      box-shadow: 0 0 25px rgba(255,215,0,0.2);
+      box-shadow: 0 0 25px rgba(255,215,0,0.15);
       text-align: center;
-      width: 300px;
+      width: 320px;
+      background: rgba(255,255,255,0.03);
+    }
+    h1 {
+      font-size: 22px;
+      margin-bottom: 5px;
+      color: #FFD700;
+    }
+    p {
+      font-size: 13px;
+      opacity: 0.85;
+      margin-bottom: 20px;
     }
     input {
-      width: 90%;
+      width: 100%;
       margin: 10px 0;
       padding: 10px;
       border-radius: 10px;
-      border: 1px solid #FFD700;
-      background: transparent;
+      border: none;
+      background: rgba(255,255,255,0.1);
       color: #FFD700;
       text-align: center;
       font-size: 14px;
+      outline: none;
     }
     button {
       background-color: #FFD700;
       color: #000;
       border: none;
-      padding: 10px 20px;
+      padding: 10px;
       border-radius: 10px;
       cursor: pointer;
-      transition: 0.3s;
+      transition: 0.25s;
       font-weight: bold;
+      width: 100%;
+      margin-top: 10px;
     }
-    button:hover { background-color: #E5C100; }
-    h1 { font-size: 22px; margin-bottom: 10px; }
-    p { font-size: 13px; opacity: 0.8; }
+    button:hover {
+      background-color: #FFF;
+      color: #000;
+    }
   </style>
 </head>
 <body>
   <div class="login-box">
     <h1>Bienvenido</h1>
     <p>Acceso exclusivo al Campus CFC</p>
-    <input id="email" type="email" placeholder="Correo electrónico">
-    <input id="pass" type="password" placeholder="Contraseña">
+    <input id="email" type="email" placeholder="Correo electrónico" autocomplete="username">
+    <input id="pass" type="password" placeholder="Contraseña" autocomplete="current-password">
     <button onclick="CFC_login(email.value, pass.value)">Entrar</button>
   </div>
 
-  <script type="module" src="../js/core/cfc_lock_identity.js?v=47.0"></script>
+  <!-- Script principal de autenticación -->
+  <script type="module" src="../js/core/cfc_lock_identity.js?v=20251109"></script>
 </body>
 </html>
