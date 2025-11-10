@@ -1,8 +1,8 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V12.1_RESET_FIX_REAL_20251110
+✅ CFC_ACTIVITY_V12.2_FIX_PAUSE_REAL_20251110
 ----------------------------------------------------------
-• Corrige reinicio completo del temporizador (CFC_resetTimer)
-• Mantiene persistencia entre sesiones si no hay logout
+• Pausa automática al cambiar pestaña o cerrar navegador
+• Reanuda desde el tiempo exacto al volver
 • Compatible con LOCK_TOTAL_PERSIST_REAL + stats_v1.js
 ========================================================== */
 
@@ -15,6 +15,9 @@
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
   let startTime = Date.now();
   let lastSync = Date.now();
+  let paused = false;
+  let rafId = null;
+
   const bell = new Audio("../../assets/audio/bell-gold.wav");
   bell.volume = 0.25;
 
@@ -71,7 +74,7 @@
   document.body.appendChild(indicator);
 
   const updateIndicator = (ping = false) => {
-    const elapsed = (Date.now() - startTime) / 1000;
+    const elapsed = paused ? 0 : (Date.now() - startTime) / 1000;
     const m = Math.floor((totalSeconds + elapsed) / 60);
     const s = Math.floor((totalSeconds + elapsed) % 60);
     indicator.textContent = `🕒 ${m}m ${s.toString().padStart(2, "0")}s ✅`;
@@ -80,13 +83,13 @@
       setTimeout(() => (indicator.style.boxShadow = "none"), 400);
     }
   };
-  setInterval(updateIndicator, 1000);
 
   // ======== 🔁 Loop maestro persistente ========
   const SYNC_PERIOD = 10000;
   const SYNC_TOLERANCE = 250;
 
   const forcedLoop = () => {
+    if (paused) return;
     const now = Date.now();
     const diff = now - lastSync;
 
@@ -109,13 +112,46 @@
       console.log(`CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`);
     }
 
-    requestAnimationFrame(forcedLoop);
+    rafId = requestAnimationFrame(forcedLoop);
   };
 
+  const startLoop = () => {
+    if (paused) {
+      paused = false;
+      startTime = Date.now();
+      lastSync = Date.now();
+      rafId = requestAnimationFrame(forcedLoop);
+      console.log("▶️ CFC_TIMER reanudado.");
+    }
+  };
+
+  const stopLoop = () => {
+    if (!paused) {
+      paused = true;
+      cancelAnimationFrame(rafId);
+      const now = Date.now();
+      const elapsed = (now - startTime) / 1000;
+      totalSeconds += elapsed;
+      localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
+      localStorage.setItem(LAST_SYNC_KEY, now);
+      console.log("⏸️ CFC_TIMER pausado (pestaña oculta o cierre).");
+    }
+  };
+
+  // ======== 🎯 Control de visibilidad y cierre ========
+  document.addEventListener("visibilitychange", () => {
+    if (document.hidden) stopLoop();
+    else startLoop();
+  });
+
+  window.addEventListener("beforeunload", stopLoop);
+
+  // ======== 🚀 Inicio ========
   const initAfterDOM = () => {
     startTime = Date.now();
     lastSync = Date.now();
-    requestAnimationFrame(forcedLoop);
+    paused = false;
+    rafId = requestAnimationFrame(forcedLoop);
     console.log("🔁 Loop maestro CFC iniciado (10 s exactos)");
   };
 
@@ -123,9 +159,7 @@
     initAfterDOM();
   else document.addEventListener("DOMContentLoaded", initAfterDOM);
 
-  window.addEventListener("beforeunload", () => {
-    localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
-  });
+  setInterval(() => updateIndicator(), 1000);
 
-  console.log(`✅ CFC_ACTIVITY_V12.1_RESET_FIX_REAL | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V12.2_FIX_PAUSE_REAL | TAB:${TAB_ID}`);
 })();
