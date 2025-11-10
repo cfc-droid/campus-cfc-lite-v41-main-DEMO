@@ -181,7 +181,16 @@
   <!-- ==========================================================
        ✅ CFC_RESULTS_V10.3_PERSIST_FIX_REAL
        ========================================================== -->
+    <!-- ✅ Script -->
   <script>
+  /* ==========================================================
+  ✅ CFC_RESULTS_V10.3_PERSIST_FIX_REAL
+  ----------------------------------------------------------
+  • Restaura examResults si está vacío, usando examResults_backup
+  • Sincroniza visualmente con CFC_THEME_STATE
+  • QA verificado con CFC_LOCK_TOTAL_PERSIST_REAL
+  ========================================================== */
+
   document.addEventListener("DOMContentLoaded", () => {
     const tableBody = document.getElementById("examResultsBody");
 
@@ -244,5 +253,3 @@
   </script>
 
   <!-- 🔒 CFC_LOCK: V10.3_PERSIST_FIX_REAL_20251110 -->
-</body>
-</html>
