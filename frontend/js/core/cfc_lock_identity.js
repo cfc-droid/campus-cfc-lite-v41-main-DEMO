@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V48.5b_PATCH_FIXED_FINAL
+   ✅ CFC_LOCK_IDENTITY_V48.6_CLOUDFLARE_FIX_FINAL
    Sistema: CFC-LOCK — Control de sesión única (sin backend)
    Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
@@ -11,7 +11,9 @@ import {
   onAuthStateChanged,
   signInWithEmailAndPassword,
   signOut,
-  getIdToken
+  getIdToken,
+  browserLocalPersistence,
+  setPersistence
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
 import {
@@ -42,22 +44,27 @@ let app, auth, db;
 try {
   app = initializeApp(firebaseConfig);
 
-  // Inicializar Firestore sin persistencia local
+  // 🔧 Inicializar Firestore sin caché persistente
   db = initializeFirestore(app, {
     ignoreUndefinedProperties: true,
     experimentalForceLongPolling: true,
     cacheSizeBytes: 0
   });
 
-  // 🔧 Limpiar IndexedDB (evita caché local entre sesiones)
   clearIndexedDbPersistence(db)
     .then(() => console.log("🧹 IndexedDB Firestore limpiado correctamente."))
     .catch((err) => console.warn("⚠️ IndexedDB ya estaba limpio o no se pudo limpiar:", err));
 
-  // Inicializar Auth
+  // 🔐 Inicializar Auth con persistencia local y sin recaptcha
   auth = getAuth(app);
+  await setPersistence(auth, browserLocalPersistence)
+    .then(() => console.log("⚙️ Persistencia local configurada correctamente."))
+    .catch(err => console.warn("⚠️ No se pudo establecer persistencia local:", err));
 
-  console.log("🔥 Firebase inicializado correctamente (modo QA-SYNC sin caché local).");
+  // 🔧 Parche Cloudflare Pages — evita bug '_getRecaptchaConfig'
+  auth._getRecaptchaConfig = () => null;
+
+  console.log("🔥 Firebase inicializado correctamente (Cloudflare SAFE mode, sin recaptcha).");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
@@ -177,7 +184,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const sessionRef = doc(db, "sessions", uid);
 
     try {
-      // 🔍 Sincronizar sesión remota y local
       const snap = await getDoc(sessionRef);
       if (!snap.exists()) {
         await setDoc(sessionRef, { sessionId: localSID, updatedAt: serverTimestamp() });
@@ -192,7 +198,6 @@ document.addEventListener("DOMContentLoaded", () => {
         }
       }
 
-      // 🔄 Listener activo (onSnapshot)
       if (unsubscribe) unsubscribe();
       unsubscribe = onSnapshot(sessionRef, (docSnap) => {
         if (!docSnap.exists()) {
@@ -221,7 +226,6 @@ document.addEventListener("DOMContentLoaded", () => {
       console.error("[QA-SYNC] ❌ Error iniciando observador remoto:", e);
     }
 
-    // 🔁 Refresco de token cada 45s
     setInterval(async () => {
       try {
         await getIdToken(user, true);
@@ -243,13 +247,13 @@ export { CFC_login, CFC_logout };
    🧾 QA-SYNC LOG (Diagnóstico)
    ========================================================== */
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.5b_PATCH_FIXED_FINAL
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.6_CLOUDFLARE_FIX_FINAL
 -----------------------------------------
-🔹 Modo: Sesión única (Firebase + Firestore)
-🔹 Caché: Desactivada (sin persistencia local)
+🔹 Cloudflare SAFE mode (sin recaptcha)
+🔹 Caché Firestore: Desactivada
 🔹 Overlay: Activo (CFC_showBlockOverlay)
 🔹 Control: UID + sessionId (comparación continua)
-🔹 Intervalo de token: 45s
+🔹 Intervalo token: 45 s
 🔹 Auditor: CFC-SYNC 2025-11-10
 -----------------------------------------
 `);
