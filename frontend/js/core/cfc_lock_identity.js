@@ -1,11 +1,11 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V48.8_CLOUDFLARE_AUTH_FINAL
+   ✅ CFC_LOCK_IDENTITY_V48.9_CLOUDFLARE_STATIC_FINAL
    Sistema: CFC-LOCK — Control de sesión única (sin backend)
    Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
-import { initializeApp, getApps } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
 import {
   getAuth,
   onAuthStateChanged,
@@ -17,8 +17,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
 import {
-  initializeFirestore,
-  clearIndexedDbPersistence,
+  getFirestore,
   doc,
   setDoc,
   getDoc,
@@ -42,20 +41,18 @@ const firebaseConfig = {
 let app, auth, db;
 
 /* ==========================================================
-   🔧 Inicialización Cloudflare SAFE
+   🔧 Inicialización Cloudflare SAFE (sin recaptcha ni cache)
    ========================================================== */
 try {
-  // Evitar inicialización duplicada
   if (!getApps().length) {
     app = initializeApp(firebaseConfig);
     console.log("🔥 Firebase app inicializada (CFC_LOCK).");
   } else {
-    app = getApps()[0];
+    app = getApp();
     console.log("⚙️ Firebase app reutilizada (ya existente).");
   }
 
-  // 🔧 Parche absoluto anti-recaptcha (antes de auth)
-  // Evita que Firebase intente invocar _getRecaptchaConfig internamente
+  // 🔧 Parche anti recaptcha global
   const safeGlobal = globalThis;
   safeGlobal.firebase = safeGlobal.firebase || {};
   safeGlobal.firebase.auth = safeGlobal.firebase.auth || {};
@@ -63,20 +60,11 @@ try {
   safeGlobal.firebase.auth.AuthImpl.prototype = safeGlobal.firebase.auth.AuthImpl.prototype || {};
   safeGlobal.firebase.auth.AuthImpl.prototype._getRecaptchaConfig = () => null;
 
-  // 🔐 Inicializar Auth y Firestore sin caché persistente
   auth = getAuth(app);
-  db = initializeFirestore(app, {
-    ignoreUndefinedProperties: true,
-    experimentalForceLongPolling: true,
-    cacheSizeBytes: 0
-  });
-
-  clearIndexedDbPersistence(db)
-    .then(() => console.log("🧹 IndexedDB Firestore limpiado correctamente."))
-    .catch(() => console.log("ℹ️ Firestore ya limpio."));
+  db = getFirestore(app); // ✅ reemplazo seguro para Cloudflare
 
   await setPersistence(auth, browserLocalPersistence)
-    .then(() => console.log("⚙️ Persistencia local establecida."))
+    .then(() => console.log("⚙️ Persistencia local configurada."))
     .catch(() => console.warn("⚠️ No se pudo establecer persistencia local."));
 
   console.log("🧩 Cloudflare SAFE init completado sin reCAPTCHA.");
@@ -89,9 +77,6 @@ try {
    ========================================================== */
 function makeSessionId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-}
-function wait(ms) {
-  return new Promise(r => setTimeout(r, ms));
 }
 
 /* ==========================================================
@@ -250,12 +235,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.8_CLOUDFLARE_AUTH_FINAL
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.9_CLOUDFLARE_STATIC_FINAL
 -----------------------------------------
 🔹 Cloudflare SAFE mode (sin recaptcha)
-🔹 Fix global _getRecaptchaConfig antes de getAuth()
-🔹 Detección automática de app existente
-🔹 Cache Firestore desactivada
+🔹 Firestore con getFirestore() (sin persistencia)
+🔹 Fix _getRecaptchaConfig global
+🔹 Cache desactivada
 🔹 Overlay activo (CFC_showBlockOverlay)
 🔹 Intervalo token: 45 s
 🔹 Auditor: CFC-SYNC QA FINAL — 2025-11-10
