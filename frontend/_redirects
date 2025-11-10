@@ -1,20 +1,22 @@
-# =====================================================
-# ✅ CFC-SYNC V8.1 — Redirecciones limpias (fix loop + JS)
-# =====================================================
+# =========================================================
+# ✅ CFC-SYNC V8.2 — Rutas limpias + Login.html habilitado
+# =========================================================
 
 # Módulos
-/modules/*        /modules/:splat      200
+/modules/*          /modules/:splat            200
 
-# Archivos estáticos (JS, CSS, imágenes)
-# ✅ Estas reglas deben ir antes que la SPA
-/js/*             /js/:splat           200
-/css/*            /css/:splat          200
-/img/*            /img/:splat          200
-/frontend/*       /frontend/:splat     200
+# Archivos estáticos (CSS, JS, IMG)
+#/js/*               /js/:splat                 200
+#/css/*              /css/:splat                200
+#/img/*              /img/:splat                200
+/frontend/*          /frontend/:splat           200
 
-# Archivos raíz (asegura que service worker y otros carguen bien)
-/sw.js            /sw.js               200
-/manifest.json    /manifest.json       200
+# Rutas HTML específicas
+/frontend/html/*     /frontend/html/:splat      200
 
-# Página única SPA (debe ir al FINAL)
-/*                /index.html          200
+# Archivos raíz (asegurar carga correcta del service worker, manifest, etc)
+#/sw.js              /sw.js                     200
+#/manifest.json      /manifest.json             200
+
+# Página única SPA (solo para el Campus principal)
+ /*                   /index.html                200
