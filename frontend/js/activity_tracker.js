@@ -1,10 +1,9 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V11.9_R1_RESET_FIX_20251108
+✅ CFC_ACTIVITY_V11.9_R2_PERSIST_FIX_REAL
 ----------------------------------------------------------
-• Igual estabilidad que V11.8_R2 (ping exacto 10 s)
-• Reinicio real al borrar progreso o limpiar localStorage
-• Persiste el tiempo correctamente dentro de la sesión
-• Indicador dorado en tiempo real
+• Corrige reinicio falso tras logout (mantiene CFC_time_total)
+• Evita reset si existe studyStats con estructura válida
+• Totalmente compatible con CFC_FUNC_47_5_LOCK_TOTAL_PERSIST_REAL
 ========================================================== */
 
 (function () {
@@ -13,23 +12,28 @@
   const LAST_SYNC_KEY = "CFC_last_sync";
   const RESET_FLAG = "CFC_reset_done";
 
-  /* ===== BLOQUE 0 — Inicialización base ===== */
+  // 🔹 Cargar valores previos sin reiniciar
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
-  const resetFlag = localStorage.getItem(RESET_FLAG);
+  let study = {};
+  try {
+    study = JSON.parse(localStorage.getItem("studyStats") || "{}");
+  } catch {
+    study = {};
+  }
 
-  // 🧹 Detectar reinicio manual (cuando el usuario borra progreso)
-  const study = localStorage.getItem("studyStats");
-  const isManualReset =
-    !study ||
-    study === "{}" ||
-    totalSeconds === 0 ||
-    localStorage.getItem(TIME_TOTAL_KEY) === null;
+  // 🧠 Validación más inteligente: sólo reset si NO existen claves reales
+  const hasValidStudy =
+    typeof study === "object" &&
+    Object.keys(study).length > 0 &&
+    !isNaN(totalSeconds) &&
+    totalSeconds > 0;
 
-  if (!resetFlag || isManualReset) {
-    console.log("🧹 Reinicio manual detectado → tiempo total = 0 min.");
-    totalSeconds = 0;
-    localStorage.setItem(TIME_TOTAL_KEY, 0);
+  if (!hasValidStudy) {
+    console.log("🧠 Modo nuevo: no se detectó estudio previo válido, inicializando sin reset.");
+    localStorage.setItem("studyStats", JSON.stringify({ minutesActive: Math.floor(totalSeconds / 60) }));
     localStorage.setItem(RESET_FLAG, "true");
+  } else {
+    console.log("✅ Reanudando sesión de estudio previa — tiempo acumulado preservado.");
   }
 
   let startTime = Date.now();
@@ -68,7 +72,7 @@
   setInterval(updateIndicator, 1000);
 
   /* ===== BLOQUE 2 — Loop maestro exacto ===== */
-  const SYNC_PERIOD = 10000; // cada 10 s
+  const SYNC_PERIOD = 10000;
   const SYNC_TOLERANCE = 250;
 
   const forcedLoop = () => {
@@ -84,15 +88,12 @@
       localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
       localStorage.setItem(LAST_SYNC_KEY, now);
 
-      // 🧠 Actualiza estadísticas de estudio
       let study = JSON.parse(localStorage.getItem("studyStats") || "{}");
       if (typeof study !== "object") study = {};
       study.minutesActive = Math.floor(totalSeconds / 60);
       localStorage.setItem("studyStats", JSON.stringify(study));
 
-      console.log(
-        `CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`
-      );
+      console.log(`CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`);
       updateIndicator(true);
       bell.play().catch(() => {});
     }
@@ -117,5 +118,5 @@
     localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
   });
 
-  console.log(`✅ CFC_ACTIVITY_V11.9_R1_RESET_FIX | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V11.9_R2_PERSIST_FIX_REAL | TAB:${TAB_ID}`);
 })();
