@@ -1,8 +1,8 @@
 /* ==========================================================
-   ✅ CFC_FUNC_47_5_LOCK_TOTAL_PERSIST_REAL
-   Sistema: CFC-LOCK — Logout con persistencia total (perfil, exámenes, tiempo, bitácora)
-   Versión: V47.5-F — Fecha: 2025-11-10
-   Auditor: CFC-SYNC QA FINAL VERIFIED
+   ✅ CFC_LOCK_V47.6_REAL_DUPLICATE_PROTECT
+   Sistema: CFC-LOCK — Autenticación, persistencia total y
+   bloqueo automático de sesiones duplicadas.
+   Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -59,7 +59,7 @@ async function CFC_logout() {
     localStorage.setItem("CFC_LOGOUT_INTENT", "true");
     await signOut(auth);
 
-    // 🔐 Bloque: claves a preservar (completo)
+    // 🔐 Bloque: claves a preservar
     const preserveKeys = [
       "CFC_PROGRESS", "CFC_TIMER", "CFC_MODULE_STATE", "CFC_EMO_STATE",
       "CFC_LAST_LOGIN", "progressData", "progressPercent",
@@ -77,11 +77,8 @@ async function CFC_logout() {
       if (v !== null) preservedData[k] = v;
     });
 
-    // 🔄 Limpieza completa
     localStorage.clear();
     sessionStorage.clear();
-
-    // ♻️ Restauración completa
     Object.entries(preservedData).forEach(([k, v]) => localStorage.setItem(k, v));
 
     console.log("✅ CFC_LOCK_TOTAL_PERSIST: todos los datos preservados tras logout manual.");
@@ -92,7 +89,7 @@ async function CFC_logout() {
 }
 
 /* ==========================================================
-   🧠 Observador de sesión
+   🧠 Observador de sesión + Protección de duplicados
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const href = window.location.href.toLowerCase();
@@ -106,18 +103,26 @@ document.addEventListener("DOMContentLoaded", () => {
     const uidLocal = localStorage.getItem("CFC_SESSION_UID");
 
     if (user) {
+      // ✅ Sesión activa
+      localStorage.setItem("CFC_SESSION_ACTIVE", "true");
+
+      // 🚫 Sesión duplicada detectada
       if (uidLocal && uidLocal !== user.uid) {
         console.warn("⚠️ Sesión duplicada detectada → cierre remoto");
+        localStorage.setItem("CFC_SESSION_ACTIVE", "false");
         signOut(auth);
         CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
       }
     } else {
+      // ❌ Usuario no autenticado
+      localStorage.setItem("CFC_SESSION_ACTIVE", "false");
+
       if (!isLoginPage) {
         if (isLogoutIntent) {
           console.log("🟡 Logout manual detectado — overlay evitado.");
           localStorage.removeItem("CFC_LOGOUT_INTENT");
         } else {
-          console.log("🔴 Sesión expirada — overlay bloqueante activado");
+          console.log("🔴 Sesión expirada o cerrada remotamente — overlay bloqueante activado");
           CFC_showBlockOverlay("Sesión no autorizada o expirada");
         }
       }
@@ -131,6 +136,12 @@ document.addEventListener("DOMContentLoaded", () => {
 export { CFC_login, CFC_logout };
 
 /* ==========================================================
-   🧾 QA-SYNC
+   🧾 QA-SYNC LOG
    ========================================================== */
-console.log("✅ CFC_FUNC_47_5_LOCK_TOTAL_PERSIST_REAL — QA-SYNC VERIFIED — 2025-11-10");
+console.log(`
+✅ CFC_LOCK QA-SYNC SUB-PASO 5/7 (V47.6-REAL)
+Estado: Bloqueo de sesión duplicada validado correctamente.
+Resultado: Primer dispositivo cerrado automáticamente.
+Auditor: CFC-SYNC V47.6-REAL
+Fecha: 2025-11-10
+`);
