@@ -231,6 +231,55 @@ document.addEventListener("DOMContentLoaded", () => {
 export { CFC_login, CFC_logout };
 
 /* ==========================================================
+   🛰️ CFC_MONITOR_GLOBAL_V47.8_DEBUG — Firestore Live Sync
+   Refuerzo: Escucha global del documento de sesión (UID real)
+   ========================================================== */
+
+import { onSnapshot, doc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
+document.addEventListener("DOMContentLoaded", async () => {
+  try {
+    const uid = localStorage.getItem("CFC_SESSION_UID");
+    const localSID = localStorage.getItem("CFC_SESSION_ID");
+
+    if (!uid || !localSID) {
+      console.log("🟡 CFC_MONITOR_GLOBAL: no hay UID/SID locales aún → skip.");
+      return;
+    }
+
+    const ref = doc(db, "sessions", uid);
+    console.log("📡 CFC_MONITOR_GLOBAL activo — escuchando cambios en:", uid);
+
+    onSnapshot(ref, (snap) => {
+      if (!snap.exists()) {
+        console.warn("🛑 Documento Firestore eliminado → cierre remoto.");
+        try { signOut(auth); } catch (e) {}
+        CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+        return;
+      }
+
+      const data = snap.data();
+      const remoteSID = data.sessionId;
+      if (remoteSID !== localSID) {
+        console.warn("⚠️ CFC_MONITOR_GLOBAL: cambio remoto detectado → cierre inmediato.");
+        try { signOut(auth); } catch (e) {}
+        CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+
+        // 🔔 Alerta sonora para confirmar cierre remoto
+        try {
+          const beep = new Audio("../audio/error.wav");
+          beep.play().catch(() => {});
+        } catch {}
+      } else {
+        console.log("🛰️ CFC_MONITOR_GLOBAL: snapshot recibido y SID coincide ✅");
+      }
+    });
+  } catch (err) {
+    console.error("❌ Error en CFC_MONITOR_GLOBAL:", err);
+  }
+});
+
+/* ==========================================================
    🧾 QA-SYNC LOG
    ========================================================== */
 console.log(`
