@@ -1,7 +1,6 @@
 /* ==========================================================
-   ✅ CFC_LOCK_V47.6_REAL_DUPLICATE_PROTECT + FIRESTORE_SESSION
-   Sistema: CFC-LOCK — Autenticación, persistencia total y
-   bloqueo automático de sesiones duplicadas (refuerzo).
+   ✅ CFC_LOCK_IDENTITY_V48.5_FINAL_DIAG_QA
+   Sistema: CFC-LOCK — Control de sesión única (sin backend)
    Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
 
@@ -17,6 +16,8 @@ import {
 
 import {
   getFirestore,
+  initializeFirestore,
+  clearIndexedDbPersistence,
   doc,
   setDoc,
   getDoc,
@@ -26,7 +27,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
 /* ==========================================================
-   🔹 Inicialización Firebase (copiá tus credenciales reales)
+   🔹 Inicialización Firebase
    ========================================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
@@ -38,23 +39,30 @@ const firebaseConfig = {
 };
 
 let app, auth, db;
+
 try {
   app = initializeApp(firebaseConfig);
+  // 🔧 Desactivar caché local y limpiar IndexedDB
+  await clearIndexedDbPersistence(app).catch(() => {});
+  db = initializeFirestore(app, {
+    ignoreUndefinedProperties: true,
+    experimentalForceLongPolling: true,
+    cacheSizeBytes: 0
+  });
   auth = getAuth(app);
-  db = getFirestore(app);
-  console.log("🔥 Firebase inicializado correctamente (CFC_LOCK + Firestore).");
+  console.log("🔥 Firebase inicializado (sin caché local, modo QA-SYNC).");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
 
 /* ==========================================================
-   🔐 Helpers
+   🧩 Utilidades
    ========================================================== */
 function makeSessionId() {
   return `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 }
-function safeParse(v) {
-  try { return JSON.parse(v); } catch { return null; }
+function wait(ms) {
+  return new Promise((r) => setTimeout(r, ms));
 }
 
 /* ==========================================================
@@ -65,25 +73,18 @@ async function CFC_login(email, pass) {
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
 
-    // Generar sessionId y persistir local + firestore
-    const sessionId = makeSessionId();
+    const newSID = makeSessionId();
     localStorage.setItem("CFC_SESSION_UID", user.uid);
     localStorage.setItem("CFC_SESSION_ACTIVE", "true");
     localStorage.setItem("CFC_SESSION_TIMESTAMP", new Date().toISOString());
-    localStorage.setItem("CFC_SESSION_ID", sessionId);
+    localStorage.setItem("CFC_SESSION_ID", newSID);
 
-    // Guardar en Firestore: sessions/<uid> -> { sessionId, ts }
-    try {
-      await setDoc(doc(db, "sessions", user.uid), {
-        sessionId,
-        updatedAt: serverTimestamp()
-      });
-      console.log("♻️ Session registrada en Firestore:", sessionId);
-    } catch (e) {
-      console.warn("⚠️ No se pudo escribir session en Firestore:", e);
-    }
+    await setDoc(doc(db, "sessions", user.uid), {
+      sessionId: newSID,
+      updatedAt: serverTimestamp(),
+    });
 
-    // Redirigir al index del campus
+    console.log(`[QA-SYNC] ✅ Sesión creada: UID=${user.uid}, SID=${newSID}`);
     window.location.href = "../index.html";
   } catch (err) {
     alert("Error al iniciar sesión: " + (err.message || err.code));
@@ -91,28 +92,14 @@ async function CFC_login(email, pass) {
 }
 
 /* ==========================================================
-   🔒 LOGOUT — Preservación total de datos del Campus
+   🔒 LOGOUT (Preserva datos esenciales del Campus)
    ========================================================== */
 async function CFC_logout() {
   try {
     localStorage.setItem("CFC_LOGOUT_INTENT", "true");
-
-    // Antes de desconectar, intentar invalidar session en Firestore
     const uid = localStorage.getItem("CFC_SESSION_UID");
-    if (uid && db) {
-      try {
-        // Opcional: eliminar doc de session (invalida sesión)
-        await deleteDoc(doc(db, "sessions", uid));
-        console.log("🗑️ Session Firestore eliminada para uid:", uid);
-      } catch (e) {
-        console.warn("⚠️ Error eliminando session en Firestore:", e);
-      }
-    }
 
-    // Ejecutar signOut de Firebase
-    await signOut(auth);
-
-    // 🔐 Bloque: claves a preservar (completo)
+    // 🔐 Preservar progreso del usuario
     const preserveKeys = [
       "CFC_PROGRESS", "CFC_TIMER", "CFC_MODULE_STATE", "CFC_EMO_STATE",
       "CFC_LAST_LOGIN", "progressData", "progressPercent",
@@ -130,14 +117,21 @@ async function CFC_logout() {
       if (v !== null) preservedData[k] = v;
     });
 
-    // 🔄 Limpieza completa
+    if (uid && db) {
+      try {
+        await deleteDoc(doc(db, "sessions", uid));
+        console.log(`[QA-SYNC] 🗑️ Sesión remota eliminada UID=${uid}`);
+      } catch (e) {
+        console.warn("⚠️ Error al eliminar sesión en Firestore:", e);
+      }
+    }
+
+    await signOut(auth);
     localStorage.clear();
     sessionStorage.clear();
-
-    // ♻️ Restauración completa
     Object.entries(preservedData).forEach(([k, v]) => localStorage.setItem(k, v));
 
-    console.log("✅ CFC_LOCK_TOTAL_PERSIST: todos los datos preservados tras logout manual.");
+    console.log("[QA-SYNC] ✅ Logout completo (datos del Campus preservados).");
     CFC_showBlockOverlay("Cierre de sesión exitoso");
   } catch (err) {
     console.error("❌ Error durante logout:", err);
@@ -145,10 +139,9 @@ async function CFC_logout() {
 }
 
 /* ==========================================================
-   🧠 Observador de sesión + Protección de duplicados reforzada
+   🧠 OBSERVADOR PRINCIPAL (listener remoto)
    ========================================================== */
-let firestoreUnsubscribe = null;
-let tokenCheckerInterval = null;
+let unsubscribe = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   const href = window.location.href.toLowerCase();
@@ -157,105 +150,97 @@ document.addEventListener("DOMContentLoaded", () => {
     href.endsWith("/login") ||
     document.title.toLowerCase().includes("iniciar sesión");
 
-  // Observador de Firebase Auth
   onAuthStateChanged(auth, async (user) => {
-    const isLogoutIntent = localStorage.getItem("CFC_LOGOUT_INTENT") === "true";
-    const uidLocal = localStorage.getItem("CFC_SESSION_UID");
-    const sessionIdLocal = localStorage.getItem("CFC_SESSION_ID");
-
-    // limpiar listeners previos
-    if (firestoreUnsubscribe) { firestoreUnsubscribe(); firestoreUnsubscribe = null; }
-    if (tokenCheckerInterval) { clearInterval(tokenCheckerInterval); tokenCheckerInterval = null; }
-
-    if (user) {
-      // Marca sesión activa local
-      localStorage.setItem("CFC_SESSION_ACTIVE", "true");
-      // Si no tenemos sessionId local, intentar sincronizar con Firestore o crear nueva
-      try {
-        const sessionDocRef = doc(db, "sessions", user.uid);
-        const snap = await getDoc(sessionDocRef);
-        if (!snap.exists()) {
-          // No hay session registrada -> crearla
-          const newSessionId = sessionIdLocal || makeSessionId();
-          await setDoc(sessionDocRef, { sessionId: newSessionId, updatedAt: serverTimestamp() });
-          localStorage.setItem("CFC_SESSION_ID", newSessionId);
-          console.log("♻️ Nueva session creada en Firestore (no existía).");
-        } else {
-          const remote = snap.data();
-          if (!sessionIdLocal) {
-            // Ninguna session local -> adoptamos la remota
-            localStorage.setItem("CFC_SESSION_ID", remote.sessionId);
-            console.log("♻️ Adoptada session remota en localStorage.");
-          } else if (sessionIdLocal !== remote.sessionId) {
-            // Sesión duplicada detectada: la remote NO coincide con local -> cerrar
-            console.warn("⚠️ Sesión duplicada / mismatch sessionId → cierre remoto.");
-            try { await signOut(auth); } catch (e) {}
-            CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-            return;
-          }
-        }
-
-        // Subscribir a cambios remotos (si la sessionId se modifica, cerramos)
-        firestoreUnsubscribe = onSnapshot(sessionDocRef, (snap2) => {
-          if (!snap2.exists()) {
-            // doc eliminado => se indicó logout remoto
-            console.warn("⚠️ Session doc eliminado remotamente → cierre de sesión forzado.");
-            try { signOut(auth); } catch(e) {}
-            CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-            return;
-          }
-          const remoteData = snap2.data();
-          const localSID = localStorage.getItem("CFC_SESSION_ID");
-          if (remoteData && remoteData.sessionId && localSID && remoteData.sessionId !== localSID) {
-            console.warn("⚠️ SessionId mismatch detectado por snapshot → cierre forzado.");
-            try { signOut(auth); } catch(e) {}
-            CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-          }
-        });
-      } catch (e) {
-        console.warn("⚠️ Error sincronizando session Firestore:", e);
-      }
-
-      // Periodic token check: forzar refresh de token para detectar revocaciones a tiempo real
-      tokenCheckerInterval = setInterval(async () => {
-        try {
-          // Forzar refresh; si falla -> token revocado y onAuthStateChanged disparará
-          await getIdToken(user, /* forceRefresh */ true);
-        } catch (err) {
-          console.warn("⚠️ getIdToken(true) falló — posible revocación:", err);
-          try { await signOut(auth); } catch(e) {}
-          CFC_showBlockOverlay("Sesión no autorizada o expirada");
-        }
-      }, 60 * 1000); // cada 60s
-    } else {
-      // No hay usuario autenticado
+    if (!user) {
+      const logoutIntent = localStorage.getItem("CFC_LOGOUT_INTENT") === "true";
       localStorage.setItem("CFC_SESSION_ACTIVE", "false");
+      if (!isLoginPage && !logoutIntent) {
+        console.warn("[QA-SYNC] 🔴 Sesión cerrada o expirada — overlay activado.");
+        CFC_showBlockOverlay("🚫 Sesión cerrada o expirada");
+      } else {
+        localStorage.removeItem("CFC_LOGOUT_INTENT");
+      }
+      return;
+    }
 
-      if (!isLoginPage) {
-        if (isLogoutIntent) {
-          console.log("🟡 Logout manual detectado — overlay evitado.");
-          localStorage.removeItem("CFC_LOGOUT_INTENT");
-        } else {
-          console.log("🔴 Sesión expirada o cerrada remotamente — overlay bloqueante activado");
-          CFC_showBlockOverlay("Sesión no autorizada o expirada");
+    const uid = user.uid;
+    const localSID = localStorage.getItem("CFC_SESSION_ID") || makeSessionId();
+    const sessionRef = doc(db, "sessions", uid);
+
+    try {
+      // 🔍 Sincronizar sesión remota y local
+      const snap = await getDoc(sessionRef);
+      if (!snap.exists()) {
+        await setDoc(sessionRef, { sessionId: localSID, updatedAt: serverTimestamp() });
+        console.log(`[QA-SYNC] 🆕 Nueva sesión registrada para UID=${uid}`);
+      } else {
+        const remoteSID = snap.data().sessionId;
+        if (remoteSID !== localSID) {
+          console.warn(`[QA-SYNC] ⚠️ Mismatch inicial detectado (Local=${localSID}, Remote=${remoteSID})`);
+          await signOut(auth);
+          CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+          return;
         }
       }
+
+      // 🔄 Listener activo (onSnapshot)
+      if (unsubscribe) unsubscribe();
+      unsubscribe = onSnapshot(sessionRef, (docSnap) => {
+        if (!docSnap.exists()) {
+          console.warn("[QA-SYNC] ⚠️ Documento de sesión eliminado remotamente → cierre forzado.");
+          signOut(auth);
+          CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+          return;
+        }
+
+        const remoteData = docSnap.data();
+        const remoteSID = remoteData?.sessionId || "undefined";
+        const localSID2 = localStorage.getItem("CFC_SESSION_ID");
+        const delta = Date.now() - Number(localSID2?.split("_")[0] || 0);
+
+        console.log(`[QA-SYNC] 🔍 UID=${uid} | Local=${localSID2} | Remote=${remoteSID} | Δt=${delta}ms`);
+
+        if (remoteSID && localSID2 && remoteSID !== localSID2) {
+          console.warn("[QA-SYNC] 🚨 Mismatch detectado → cierre remoto instantáneo.");
+          signOut(auth);
+          CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+        }
+      });
+
+      console.log(`[QA-SYNC] 👁️ Listener activo para UID=${uid}`);
+    } catch (e) {
+      console.error("[QA-SYNC] ❌ Error iniciando observador remoto:", e);
     }
+
+    // 🔁 Refresco de token cada 45s
+    setInterval(async () => {
+      try {
+        await getIdToken(user, true);
+      } catch (err) {
+        console.warn("[QA-SYNC] ⚠️ Error de token — posible sesión expirada:", err);
+        signOut(auth);
+        CFC_showBlockOverlay("Sesión no autorizada o expirada");
+      }
+    }, 45000);
   });
 });
 
 /* ==========================================================
-   🧩 EXPORTACIONES
+   🧩 EXPORTS
    ========================================================== */
 export { CFC_login, CFC_logout };
 
 /* ==========================================================
-   🧾 QA-SYNC LOG
+   🧾 QA-SYNC LOG (Diagnóstico)
    ========================================================== */
 console.log(`
-✅ CFC_LOCK QA-SYNC SUB-PASO 5/7 (V47.6-REAL + Firestore)
-Estado: Bloqueo de sesión duplicada reforzado con Firestore.
-Resultado: Primer dispositivo cerrado automáticamente al iniciar sesión en otro.
-Auditor: CFC-SYNC V47.6-REAL
-Fecha: ${new Date().toISOString()}
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V48.5_FINAL_DIAG_QA
+-----------------------------------------
+🔹 Modo: Sesión única (Firebase + Firestore)
+🔹 Caché: Desactivada (sin persistencia local)
+🔹 Overlay: Activo (CFC_showBlockOverlay)
+🔹 Control: UID + sessionId (comparación continua)
+🔹 Intervalo de token: 45s
+🔹 Auditor: CFC-SYNC 2025-11-10
+-----------------------------------------
 `);
