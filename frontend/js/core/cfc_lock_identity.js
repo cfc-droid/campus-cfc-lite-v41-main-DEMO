@@ -1,6 +1,6 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V48.3_REINIT_FIX_FINAL
-   Sistema: CFC-LOCK — Re-inicialización controlada + sesión única real
+   ✅ CFC_LOCK_IDENTITY_V48.4_AUTH_RESET_FINAL
+   Sistema: CFC-LOCK — Auth reset completo + sesión única 100%
    Auditoría QA-SYNC: 2025-11-10
    ========================================================== */
 
@@ -8,7 +8,7 @@ import { CFC_showBlockOverlay } from "../overlay_block.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
 import {
   getAuth, onAuthStateChanged, signInWithEmailAndPassword,
-  signOut, getIdToken, deleteUser
+  signOut, getIdToken
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, onSnapshot,
@@ -30,33 +30,48 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
-console.log("🔥 Firebase inicializado — V48.3");
+console.log("🔥 Firebase inicializado — V48.4");
 
 /* ==========================================================
-   🧠 Helpers
+   🧩 Helpers
    ========================================================== */
 const makeSessionId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+async function hardAuthReset() {
+  try {
+    await signOut(auth);
+  } catch {}
+  // 🔄 Elimina caché local de Firebase (IndexedDB)
+  if (window.indexedDB) {
+    await new Promise((resolve) => {
+      const req = indexedDB.deleteDatabase("firebaseLocalStorageDb");
+      req.onsuccess = resolve;
+      req.onerror = resolve;
+      req.onblocked = resolve;
+    });
+  }
+  console.log("🧹 Firebase Auth local completamente reseteado");
+}
+
 /* ==========================================================
-   🔐 LOGIN — borra sesión vieja y re-inicia listener
+   🔐 LOGIN — con hard reset previo
    ========================================================== */
 export async function CFC_login(email, pass) {
   try {
+    console.log("🧠 Iniciando hard reset antes del login...");
+    await hardAuthReset();
+    await sleep(500);
+
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
     const uid = user.uid;
     const newSID = makeSessionId();
 
-    console.log(`🧠 Login detectado → UID=${uid}`);
+    console.log(`🔐 Login completado UID=${uid}`);
 
-    // 🔄 Apagar listener temporalmente
-    window.CFC_SESSION_WATCHER_SUSPENDED = true;
-
-    // 🧹 Borrar sesión vieja antes de crear la nueva
+    // 🔄 Eliminar sesión previa y registrar nueva
     await deleteDoc(doc(db, "sessions", uid)).catch(() => {});
-    await sleep(400);
-
     await setDoc(doc(db, "sessions", uid), {
       sessionId: newSID,
       updatedAt: serverTimestamp()
@@ -65,15 +80,14 @@ export async function CFC_login(email, pass) {
     localStorage.setItem("CFC_SESSION_UID", uid);
     localStorage.setItem("CFC_SESSION_ID", newSID);
     localStorage.setItem("CFC_SESSION_ACTIVE", "true");
-    localStorage.setItem("CFC_LAST_LOGIN", new Date().toISOString());
     localStorage.setItem("CFC_TIMER", "0");
     localStorage.setItem("CFC_time_total", "0");
 
-    console.log(`✅ Nueva sesión creada: ${uid} | ${newSID}`);
-
-    // 🔁 Reactivar listener con delay para evitar loop
+    // 🔧 Suspender listener por 1.5s para evitar overlay
+    window.CFC_SESSION_WATCHER_SUSPENDED = true;
     setTimeout(() => { window.CFC_SESSION_WATCHER_SUSPENDED = false; }, 1500);
 
+    console.log(`✅ Nueva sesión registrada ${uid} | SID=${newSID}`);
     window.location.href = "../index.html";
   } catch (err) {
     console.error("❌ Error en login:", err);
@@ -82,23 +96,17 @@ export async function CFC_login(email, pass) {
 }
 
 /* ==========================================================
-   🔒 LOGOUT — preserva progreso
+   🔒 LOGOUT
    ========================================================== */
 export async function CFC_logout() {
   try {
     const uid = localStorage.getItem("CFC_SESSION_UID");
     localStorage.setItem("CFC_LOGOUT_INTENT", "true");
-
     if (uid) await deleteDoc(doc(db, "sessions", uid)).catch(() => {});
     await signOut(auth);
+    await hardAuthReset();
 
-    const preserve = ["CFC_PROGRESS","CFC_TIMER","CFC_time_total"];
-    const data = {};
-    preserve.forEach(k => { const v = localStorage.getItem(k); if (v) data[k] = v; });
-    localStorage.clear();
-    Object.entries(data).forEach(([k,v])=>localStorage.setItem(k,v));
-
-    console.log("✅ Logout exitoso con progreso preservado");
+    console.log("✅ Logout completo");
     CFC_showBlockOverlay("Cierre de sesión exitoso");
   } catch (err) {
     console.error("❌ Error durante logout:", err);
@@ -106,19 +114,15 @@ export async function CFC_logout() {
 }
 
 /* ==========================================================
-   🧩 Listener global — control remoto de sesión
+   🧠 Listener global de sesión
    ========================================================== */
 if (!window.CFC_SESSION_WATCHER_ACTIVE) {
   window.CFC_SESSION_WATCHER_ACTIVE = true;
-
   let unsubscribe = null;
   let tokenTimer = null;
 
   onAuthStateChanged(auth, async (user) => {
-    if (window.CFC_SESSION_WATCHER_SUSPENDED) {
-      console.log("⏸️ Listener suspendido temporalmente (login activo)");
-      return;
-    }
+    if (window.CFC_SESSION_WATCHER_SUSPENDED) return;
 
     const href = window.location.href.toLowerCase();
     const isLogin = href.includes("login.html");
@@ -127,7 +131,6 @@ if (!window.CFC_SESSION_WATCHER_ACTIVE) {
     if (!user) {
       localStorage.setItem("CFC_SESSION_ACTIVE", "false");
       if (!isLogin && !logoutIntent) {
-        console.warn("🔴 Sesión cerrada remotamente");
         CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
       }
       if (unsubscribe) unsubscribe();
@@ -138,11 +141,11 @@ if (!window.CFC_SESSION_WATCHER_ACTIVE) {
     const uid = user.uid;
     const localSID = localStorage.getItem("CFC_SESSION_ID");
     const ref = doc(db, "sessions", uid);
-
     const snap = await getDoc(ref);
+
     if (snap.exists() && snap.data().sessionId !== localSID) {
-      console.warn("⚠️ Sesión duplicada detectada → cierre inmediato");
       await signOut(auth);
+      await hardAuthReset();
       CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
       return;
     }
@@ -150,17 +153,13 @@ if (!window.CFC_SESSION_WATCHER_ACTIVE) {
     if (unsubscribe) unsubscribe();
     unsubscribe = onSnapshot(ref, (docSnap) => {
       if (window.CFC_SESSION_WATCHER_SUSPENDED) return;
-
       if (!docSnap.exists()) {
-        console.warn("🛑 Documento eliminado → cierre remoto");
         signOut(auth);
         CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
         return;
       }
-
       const remote = docSnap.data();
       if (remote.sessionId !== localSID) {
-        console.warn("⚠️ Cambio remoto detectado → cierre");
         signOut(auth);
         CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
       }
@@ -177,10 +176,7 @@ if (!window.CFC_SESSION_WATCHER_ACTIVE) {
   });
 }
 
-/* ==========================================================
-   🧾 QA-SYNC LOG
-   ========================================================== */
 console.log(`
-✅ CFC_LOCK QA-SYNC FINAL V48.3 — Reinit Fix completado
+✅ CFC_LOCK QA-SYNC FINAL V48.4 — Auth reset fix aplicado
 Fecha: ${new Date().toISOString()}
 `);
