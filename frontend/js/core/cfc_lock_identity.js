@@ -6,7 +6,7 @@
    ========================================================== */
 
 // ==========================================================
-// 🔹 Importaciones globales (fuera de funciones)
+// 🔹 Importaciones globales
 // ==========================================================
 import { CFC_showBlockOverlay } from "../overlay_block.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
@@ -40,6 +40,7 @@ const auth = getAuth(app);
 // ==========================================================
 async function CFC_login(email, pass) {
   try {
+    console.log("⏳ Intentando login con:", email);
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
     console.log("✅ Usuario autenticado:", user.email);
@@ -69,8 +70,11 @@ async function CFC_logout() {
 // ==========================================================
 // 🧠 Observador de cambios de sesión
 // ==========================================================
+// ⚠️ Prevención: no mostrar overlay si estamos en login.html
+// ==========================================================
 onAuthStateChanged(auth, (user) => {
   const uidLocal = localStorage.getItem("CFC_SESSION_UID");
+  const isLoginPage = window.location.pathname.includes("login.html");
 
   if (user) {
     console.log("🟢 Sesión activa:", user.email);
@@ -82,9 +86,13 @@ onAuthStateChanged(auth, (user) => {
       signOut(auth);
     }
   } else {
-    console.log("🔴 No hay usuario activo, mostrando overlay...");
-    localStorage.clear();
-    CFC_showBlockOverlay("Sesión no autorizada o expirada");
+    if (!isLoginPage) {
+      console.log("🔴 No hay usuario activo, mostrando overlay...");
+      localStorage.clear();
+      CFC_showBlockOverlay("Sesión no autorizada o expirada");
+    } else {
+      console.log("🟡 Modo login activo — overlay desactivado.");
+    }
   }
 });
 
@@ -96,4 +104,4 @@ export { CFC_login, CFC_logout };
 // ==========================================================
 // 🟡 Línea de control QA-SYNC
 // ==========================================================
-console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-F REAL LOCK FINAL");
+console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-F REAL LOCK FIX CONTEXT");
