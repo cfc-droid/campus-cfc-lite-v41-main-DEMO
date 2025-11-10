@@ -108,7 +108,34 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       if (!isLoginPage) {
         console.log("🔴 Usuario no autenticado → overlay ON");
-        localStorage.clear();
+         
+        // ✅ CFC_FUNC_47_2_LOCK_STATE — Preservar progreso local
+const preserveKeys = [
+  "CFC_PROGRESS",
+  "CFC_TIMER",
+  "CFC_MODULE_STATE",
+  "CFC_EMO_STATE",
+  "CFC_LAST_LOGIN"
+];
+
+// Guardar temporalmente las claves protegidas
+const preservedData = {};
+preserveKeys.forEach(k => {
+  const value = localStorage.getItem(k);
+  if (value !== null) preservedData[k] = value;
+});
+
+// Borrar todo
+localStorage.clear();
+sessionStorage.clear();
+
+// Restaurar las claves protegidas
+Object.entries(preservedData).forEach(([k, v]) => {
+  localStorage.setItem(k, v);
+});
+
+console.log("✅ CFC_LOCK_STATE: progreso local preservado tras logout.");
+
         CFC_showBlockOverlay("Sesión no autorizada o expirada");
       } else {
         console.log("🟡 En login.html — overlay desactivado correctamente.");
