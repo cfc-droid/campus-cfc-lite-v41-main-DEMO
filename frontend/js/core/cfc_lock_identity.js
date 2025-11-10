@@ -1,8 +1,8 @@
 /* ==========================================================
-   ✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION
-   Sistema: CFC-LOCK IDENTITY (Firebase Auth + Overlay)
-   Versión: V47.0-K — Fecha: 2025-11-09
-   Auditor: CFC-SYNC SECURE API KEY FIX (FINAL STABLE)
+   ✅ CFC_FUNC_47_2_LOCK_STATE
+   Sistema: CFC-LOCK IDENTITY (Firebase Auth + Overlay + Preservación local)
+   Versión: V47.2-F — Fecha: 2025-11-10
+   Auditor: CFC-SYNC REAL LOCK
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -15,7 +15,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
 // ==========================================================
-// 🔹 Configuración Firebase (actualizada desde consola)
+// 🔹 Configuración Firebase (desde consola oficial)
 // ==========================================================
 const firebaseConfig = {
   apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
@@ -40,7 +40,7 @@ try {
 }
 
 // ==========================================================
-// 🔐 Login
+// 🔐 LOGIN
 // ==========================================================
 async function CFC_login(email, pass) {
   try {
@@ -72,12 +72,43 @@ async function CFC_login(email, pass) {
 }
 
 // ==========================================================
-// 🔒 Logout manual
+// 🔒 LOGOUT — preservando progreso local
 // ==========================================================
 async function CFC_logout() {
-  await signOut(auth);
-  localStorage.clear();
-  CFC_showBlockOverlay("Cierre de sesión exitoso");
+  try {
+    await signOut(auth);
+
+    // ✅ CFC_FUNC_47_2_LOCK_STATE — Preservar progreso local
+    const preserveKeys = [
+      "CFC_PROGRESS",
+      "CFC_TIMER",
+      "CFC_MODULE_STATE",
+      "CFC_EMO_STATE",
+      "CFC_LAST_LOGIN",
+    ];
+
+    // Guardar temporalmente las claves protegidas
+    const preservedData = {};
+    preserveKeys.forEach((k) => {
+      const value = localStorage.getItem(k);
+      if (value !== null) preservedData[k] = value;
+    });
+
+    // Borrar todo
+    localStorage.clear();
+    sessionStorage.clear();
+
+    // Restaurar las claves protegidas
+    Object.entries(preservedData).forEach(([k, v]) => {
+      localStorage.setItem(k, v);
+    });
+
+    console.log("✅ CFC_LOCK_STATE: progreso local preservado tras logout.");
+    CFC_showBlockOverlay("Cierre de sesión exitoso");
+  } catch (err) {
+    console.error("❌ Error durante logout:", err);
+    alert("Error al cerrar sesión. Intenta nuevamente.");
+  }
 }
 
 // ==========================================================
@@ -108,33 +139,6 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       if (!isLoginPage) {
         console.log("🔴 Usuario no autenticado → overlay ON");
-         
-        // ✅ CFC_FUNC_47_2_LOCK_STATE — Preservar progreso local
-const preserveKeys = [
-  "CFC_PROGRESS",
-  "CFC_TIMER",
-  "CFC_MODULE_STATE",
-  "CFC_EMO_STATE",
-  "CFC_LAST_LOGIN"
-];
-
-// Guardar temporalmente las claves protegidas
-const preservedData = {};
-preserveKeys.forEach(k => {
-  const value = localStorage.getItem(k);
-  if (value !== null) preservedData[k] = value;
-});
-
-// Borrar todo
-localStorage.clear();
-sessionStorage.clear();
-
-// Restaurar las claves protegidas
-Object.entries(preservedData).forEach(([k, v]) => {
-  localStorage.setItem(k, v);
-});
-
-console.log("✅ CFC_LOCK_STATE: progreso local preservado tras logout.");
 
         CFC_showBlockOverlay("Sesión no autorizada o expirada");
       } else {
@@ -145,11 +149,13 @@ console.log("✅ CFC_LOCK_STATE: progreso local preservado tras logout.");
 });
 
 // ==========================================================
-// 🧩 Exportaciones
+// 🧩 EXPORTACIONES
 // ==========================================================
 export { CFC_login, CFC_logout };
 
 // ==========================================================
-// QA-SYNC
+// 🧾 QA-SYNC
 // ==========================================================
-console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-K SECURE STABLE");
+console.log(
+  "✅ CFC_FUNC_47_2_LOCK_STATE activo — V47.2-F (Preservación de progreso local + Logout visual OK)"
+);
