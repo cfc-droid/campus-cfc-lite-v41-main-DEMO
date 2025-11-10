@@ -1,13 +1,10 @@
 /* ==========================================================
    ✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION
    Sistema: CFC-LOCK IDENTITY (Firebase Auth + Overlay)
-   Versión: V47.0-F — Fecha: 2025-11-09
-   Auditor: CFC-SYNC REAL LOCK
+   Versión: V47.0-H — Fecha: 2025-11-09
+   Auditor: CFC-SYNC REAL LOCK FINAL FIX (LOAD ORDER)
    ========================================================== */
 
-// ==========================================================
-// 🔹 Importaciones globales
-// ==========================================================
 import { CFC_showBlockOverlay } from "../overlay_block.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
 import {
@@ -30,27 +27,35 @@ const firebaseConfig = {
 };
 
 // ==========================================================
-// 🔹 Inicializa Firebase
+// 🔹 Inicialización controlada
 // ==========================================================
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
+let app, auth, firebaseReady = false;
+
+try {
+  app = initializeApp(firebaseConfig);
+  auth = getAuth(app);
+  firebaseReady = true;
+  console.log("🔥 Firebase inicializado correctamente (CFC_LOCK).");
+} catch (e) {
+  console.error("❌ Error inicializando Firebase:", e);
+}
 
 // ==========================================================
 // 🔐 Función principal de login
 // ==========================================================
 async function CFC_login(email, pass) {
   try {
+    if (!firebaseReady) throw new Error("Firebase no está listo.");
     console.log("⏳ Intentando login con:", email);
+
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
     console.log("✅ Usuario autenticado:", user.email);
 
-    // Guardar sesión
     localStorage.setItem("CFC_SESSION_UID", user.uid);
     localStorage.setItem("CFC_SESSION_ACTIVE", "true");
     localStorage.setItem("CFC_SESSION_TIMESTAMP", new Date().toISOString());
 
-    // Redirigir al dashboard
     window.location.href = "../index.html";
   } catch (err) {
     console.warn("⚠️ Error al iniciar sesión:", err.code);
@@ -70,16 +75,19 @@ async function CFC_logout() {
 // ==========================================================
 // 🧠 Observador de cambios de sesión
 // ==========================================================
-// ⚠️ Prevención: no mostrar overlay si estamos en login.html
-// ==========================================================
 onAuthStateChanged(auth, (user) => {
-  const uidLocal = localStorage.getItem("CFC_SESSION_UID");
   const isLoginPage = window.location.pathname.includes("login.html");
+  const uidLocal = localStorage.getItem("CFC_SESSION_UID");
+
+  // 🔸 Esperar a que Firebase esté listo
+  if (!firebaseReady) {
+    console.log("🕐 Esperando inicialización de Firebase...");
+    return;
+  }
 
   if (user) {
     console.log("🟢 Sesión activa:", user.email);
 
-    // Control de sesión duplicada
     if (uidLocal && uidLocal !== user.uid) {
       console.warn("⚠️ Sesión duplicada detectada, cerrando sesión...");
       CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
@@ -87,11 +95,11 @@ onAuthStateChanged(auth, (user) => {
     }
   } else {
     if (!isLoginPage) {
-      console.log("🔴 No hay usuario activo, mostrando overlay...");
+      console.log("🔴 No hay usuario activo (fuera del login) → overlay ON");
       localStorage.clear();
       CFC_showBlockOverlay("Sesión no autorizada o expirada");
     } else {
-      console.log("🟡 Modo login activo — overlay desactivado.");
+      console.log("🟡 En login.html — overlay desactivado, esperando login.");
     }
   }
 });
@@ -102,6 +110,6 @@ onAuthStateChanged(auth, (user) => {
 export { CFC_login, CFC_logout };
 
 // ==========================================================
-// 🟡 Línea de control QA-SYNC
+// 🟡 QA-SYNC Line
 // ==========================================================
-console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-F REAL LOCK FIX CONTEXT");
+console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-H FINAL LOAD FIX");
