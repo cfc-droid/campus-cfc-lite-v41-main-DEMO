@@ -1,8 +1,8 @@
 /* ==========================================================
    ✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION
    Sistema: CFC-LOCK IDENTITY (Firebase Auth + Overlay)
-   Versión: V47.0-J — Fecha: 2025-11-09
-   Auditor: CFC-SYNC CONTEXT FIX ULTRA STABLE
+   Versión: V47.0-K — Fecha: 2025-11-09
+   Auditor: CFC-SYNC SECURE API KEY FIX (FINAL STABLE)
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -15,19 +15,19 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
 // ==========================================================
-// 🔹 Configuración Firebase
+// 🔹 Configuración Firebase (actualizada desde consola)
 // ==========================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyDLWJlayKYbXeDAp8uE6-7abSdyB8Babys",
+  apiKey: "AIzaSyDWLoJykDXebApU6E-7abSdyB8abysI",
   authDomain: "cfc-lock-firebase.firebaseapp.com",
   projectId: "cfc-lock-firebase",
   storageBucket: "cfc-lock-firebase.appspot.com",
   messagingSenderId: "352796892343",
-  appId: "1:352796892343:web:2b8bb30a35f45579efc1e",
+  appId: "1:352796892343:web:a2bb8b30a35f45579efc1e",
 };
 
 // ==========================================================
-// 🔹 Inicialización
+// 🔹 Inicialización controlada
 // ==========================================================
 let app, auth;
 try {
@@ -36,6 +36,7 @@ try {
   console.log("🔥 Firebase inicializado correctamente (CFC_LOCK).");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
+  alert("Error de conexión con Firebase. Verifica tu API Key o dominio.");
 }
 
 // ==========================================================
@@ -46,21 +47,32 @@ async function CFC_login(email, pass) {
     console.log("⏳ Intentando login con:", email);
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
+
     console.log("✅ Usuario autenticado:", user.email);
 
+    // Guardar sesión local
     localStorage.setItem("CFC_SESSION_UID", user.uid);
     localStorage.setItem("CFC_SESSION_ACTIVE", "true");
     localStorage.setItem("CFC_SESSION_TIMESTAMP", new Date().toISOString());
 
+    // Redirección al índice principal
     window.location.href = "../index.html";
   } catch (err) {
-    console.warn("⚠️ Error al iniciar sesión:", err.code);
-    alert("Credenciales inválidas o usuario no autorizado.");
+    console.warn("⚠️ Error al iniciar sesión:", err.code || err.message);
+    if (err.code?.includes("auth/invalid-api-key")) {
+      alert("Error de configuración: API key inválida. Verifica el archivo.");
+    } else if (err.code?.includes("auth/invalid-email")) {
+      alert("El formato del correo no es válido.");
+    } else if (err.code?.includes("auth/invalid-credential")) {
+      alert("Credenciales incorrectas o usuario no autorizado.");
+    } else {
+      alert("Error al iniciar sesión. Verifica tus datos o la conexión.");
+    }
   }
 }
 
 // ==========================================================
-// 🔒 Logout
+// 🔒 Logout manual
 // ==========================================================
 async function CFC_logout() {
   await signOut(auth);
@@ -87,6 +99,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (user) {
       console.log("🟢 Sesión activa:", user.email);
 
+      // Prevención de sesión duplicada
       if (uidLocal && uidLocal !== user.uid) {
         console.warn("⚠️ Sesión duplicada detectada → cerrando sesión");
         signOut(auth);
@@ -112,4 +125,4 @@ export { CFC_login, CFC_logout };
 // ==========================================================
 // QA-SYNC
 // ==========================================================
-console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-J FINAL ULTRA STABLE");
+console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-K SECURE STABLE");
