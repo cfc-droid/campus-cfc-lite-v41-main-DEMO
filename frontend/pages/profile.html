@@ -99,51 +99,65 @@
     });
   });
   </script>
+  
+<!-- =========================================================
+     ✅ CFC_FUNC_10_4_V41.16 — Estado emocional
+     ========================================================= -->
 
-  <!-- =========================================================
-       ✅ CFC_FUNC_10_4_V41.16 — Estado emocional + último examen
-       ========================================================= -->
   <script>
-    const scoreRaw = localStorage.getItem("emotionScore");
-    const box = document.getElementById("emotionScore");
-    const msg = document.getElementById("emotionMessage");
-    if (scoreRaw && !isNaN(parseInt(scoreRaw))) {
-      const val = parseInt(scoreRaw, 10);
-      let emoji="🙂",mensaje="Buen enfoque mental.";
-      if (val<=3){emoji="😔";mensaje="Momento de reconectar con tu calma.";}
-      else if (val<=6){emoji="😐";mensaje="Estás estable, pero podés mejorar tu enfoque.";}
-      else if (val<=8){emoji="😊";mensaje="Excelente disciplina emocional.";}
-      else if (val<=10){emoji="🔥";mensaje="Máxima claridad mental, seguí así.";}
-      box.textContent=`${emoji} ${val}/10`;
-      msg.textContent=mensaje;
-    } else {
-      box.textContent="⚠️ Aún no registraste tu emoción de hoy.";
-      msg.textContent="Registrá tu autoevaluación al cargar el Campus.";
-    }
+  const scoreRaw = localStorage.getItem("emotionScore");
+  const box = document.getElementById("emotionScore");
+  const msg = document.getElementById("emotionMessage");
+  if (scoreRaw && !isNaN(parseInt(scoreRaw))) {
+    const val = parseInt(scoreRaw, 10);
+    let emoji="🙂",mensaje="Buen enfoque mental.";
+    if (val<=3){emoji="😔";mensaje="Momento de reconectar con tu calma.";}
+    else if (val<=6){emoji="😐";mensaje="Estás estable, pero podés mejorar tu enfoque.";}
+    else if (val<=8){emoji="😊";mensaje="Excelente disciplina emocional.";}
+    else if (val<=10){emoji="🔥";mensaje="Máxima claridad mental, seguí así.";}
+    box.textContent=`${emoji} ${val}/10`;
+    msg.textContent=mensaje;
+  } else {
+    box.textContent="⚠️ Aún no registraste tu emoción de hoy.";
+    msg.textContent="Registrá tu autoevaluación al cargar el Campus.";
+  }
+</script>
 
-    // ✅ Último examen completado
-    function mostrarUltimoExamen() {
-      try {
-        const examResults = JSON.parse(localStorage.getItem("examResults")) || [];
-        if (!examResults.length) return;
-        const ultimo = examResults.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-        const contenedor = document.querySelector("main");
-        const bloque = document.createElement("div");
-        bloque.className = "ultimo-examen";
-        bloque.innerHTML = `
-          <h3>📘 Último examen completado</h3>
-          <p>
-            <strong>${ultimo.module}</strong><br>
-            Puntaje: <b style="color:var(--color-accent);">${ultimo.score}%</b> — ${ultimo.status}<br>
-            ⏱️ ${ultimo.duration} &nbsp;|&nbsp; 📅 ${ultimo.date} ${ultimo.time}
-          </p>`;
-        contenedor.appendChild(bloque);
-      } catch (err) {
-        console.warn("⚠️ Error al mostrar último examen:", err);
+<!-- =========================================================
+     ✅ CFC_PROFILE_V9.8_EXAM_RELINK_REAL
+========================================================= -->
+<script>
+function mostrarUltimoExamen() {
+  try {
+    let examResults = JSON.parse(localStorage.getItem("examResults") || "[]");
+    if (!examResults.length) {
+      const backup = JSON.parse(localStorage.getItem("examResults_backup") || "[]");
+      if (backup.length) {
+        examResults = backup;
+        localStorage.setItem("examResults", JSON.stringify(backup));
+        console.log("♻️ Perfil: examResults restaurado desde backup.");
       }
     }
-    document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
-  </script>
+
+    if (!examResults.length) return;
+    const ultimo = examResults.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+    const contenedor = document.querySelector("main");
+    const bloque = document.createElement("div");
+    bloque.className = "ultimo-examen";
+    bloque.innerHTML = `
+      <h3>📘 Último examen completado</h3>
+      <p>
+        <strong>${ultimo.module}</strong><br>
+        Puntaje: <b style="color:var(--color-accent);">${ultimo.score}%</b> — ${ultimo.status}<br>
+        ⏱️ ${ultimo.duration || "-"} &nbsp;|&nbsp; 📅 ${ultimo.date || "-"} ${ultimo.time || ""}
+      </p>`;
+    contenedor.appendChild(bloque);
+  } catch (err) {
+    console.warn("⚠️ Error al mostrar último examen:", err);
+  }
+}
+document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
+</script>
 
   <!-- =========================================================
        ✅ CFC_FUNC_11_3_V41.34 — Panel “Mi progreso” unificado
