@@ -1,9 +1,11 @@
-/* ✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION */
-import { CFC_showBlockOverlay } from "../overlay_block.js";
+/* ==========================================================
+   ✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION
+   Sistema: CFC-LOCK IDENTITY (Firebase Auth + Overlay)
+   Versión: V47.0-F — Fecha: 2025-11-09
+   Auditor: CFC-SYNC REAL LOCK
+   ========================================================== */
 
-// ==========================================================
-// 🔹 Inicialización Firebase
-// ==========================================================
+import { CFC_showBlockOverlay } from "../overlay_block.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
 import {
   getAuth,
@@ -16,12 +18,12 @@ import {
 // 🔹 Configuración Firebase (CFC_LOCK_FIREBASE)
 // ==========================================================
 const firebaseConfig = {
-  apiKey: "AIzaSyDLwdA1y0XbDApBu6e-7abSdyB8Abys",
+  apiKey: "AIzaSyDLWJlayKYbXeDAp8uE6-7abSdyB8Babys",
   authDomain: "cfc-lock-firebase.firebaseapp.com",
   projectId: "cfc-lock-firebase",
   storageBucket: "cfc-lock-firebase.appspot.com",
   messagingSenderId: "352796892343",
-  appId: "1:352796892343:web:2b8bb30a3f54579efc1e"
+  appId: "1:352796892343:web:2b8bb30a35f45579efc1e",
 };
 
 // ==========================================================
@@ -33,17 +35,16 @@ const auth = getAuth(app);
 // ==========================================================
 // 🔐 Función principal de login
 // ==========================================================
-export async function CFC_login(email, pass) {
+async function CFC_login(email, pass) {
   try {
     const userCred = await signInWithEmailAndPassword(auth, email, pass);
     const user = userCred.user;
     console.log("✅ Usuario autenticado:", user.email);
 
-    // Guardar ID de sesión para control de duplicado
     localStorage.setItem("CFC_SESSION_UID", user.uid);
     localStorage.setItem("CFC_SESSION_ACTIVE", "true");
+    localStorage.setItem("CFC_SESSION_TIMESTAMP", new Date().toISOString());
 
-    // Redirigir al dashboard o inicio
     window.location.href = "../index.html";
   } catch (err) {
     console.warn("⚠️ Error al iniciar sesión:", err.code);
@@ -58,17 +59,14 @@ onAuthStateChanged(auth, (user) => {
   const uidLocal = localStorage.getItem("CFC_SESSION_UID");
 
   if (user) {
-    // Sesión válida
     console.log("🟢 Sesión activa:", user.email);
 
-    // Validar sesión única
     if (uidLocal && uidLocal !== user.uid) {
       console.warn("⚠️ Sesión duplicada detectada, cerrando sesión...");
       CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
       signOut(auth);
     }
   } else {
-    // Sin sesión activa → mostrar overlay y forzar cierre
     console.log("🔴 No hay usuario activo, mostrando overlay...");
     localStorage.clear();
     CFC_showBlockOverlay("Sesión no autorizada o expirada");
@@ -78,7 +76,7 @@ onAuthStateChanged(auth, (user) => {
 // ==========================================================
 // 🔒 Función de cierre manual
 // ==========================================================
-export async function CFC_logout() {
+async function CFC_logout() {
   await signOut(auth);
   localStorage.clear();
   CFC_showBlockOverlay("Cierre de sesión exitoso");
@@ -91,6 +89,6 @@ window.CFC_login = CFC_login;
 window.CFC_logout = CFC_logout;
 
 // ==========================================================
-// 🔖 CFC_LOCK línea de control
+// 🟡 Línea de control QA-SYNC
 // ==========================================================
-console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-F");
+console.log("✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION activo — V47.0-F REAL LOCK");
