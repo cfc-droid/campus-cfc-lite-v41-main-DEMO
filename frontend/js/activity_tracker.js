@@ -1,9 +1,9 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V11.9_R2_PERSIST_FIX_REAL
+✅ CFC_ACTIVITY_V12.1_RESET_FIX_REAL_20251110
 ----------------------------------------------------------
-• Corrige reinicio falso tras logout (mantiene CFC_time_total)
-• Evita reset si existe studyStats con estructura válida
-• Totalmente compatible con CFC_FUNC_47_5_LOCK_TOTAL_PERSIST_REAL
+• Corrige reinicio completo del temporizador (CFC_resetTimer)
+• Mantiene persistencia entre sesiones si no hay logout
+• Compatible con LOCK_TOTAL_PERSIST_REAL + stats_v1.js
 ========================================================== */
 
 (function () {
@@ -12,8 +12,24 @@
   const LAST_SYNC_KEY = "CFC_last_sync";
   const RESET_FLAG = "CFC_reset_done";
 
-  // 🔹 Cargar valores previos sin reiniciar
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
+  let startTime = Date.now();
+  let lastSync = Date.now();
+  const bell = new Audio("../../assets/audio/bell-gold.wav");
+  bell.volume = 0.25;
+
+  // ======== 🧠 Reinicio manual seguro ========
+  window.CFC_resetTimer = function () {
+    localStorage.removeItem(TIME_TOTAL_KEY);
+    localStorage.removeItem(LAST_SYNC_KEY);
+    localStorage.removeItem("studyStats");
+    localStorage.removeItem(RESET_FLAG);
+    totalSeconds = 0;
+    indicator.textContent = "🕒 0m 00s ✅";
+    console.log("🔄 CFC_resetTimer → Temporizador reiniciado a 0 ✅");
+  };
+
+  // ======== 🔹 Estado inicial ========
   let study = {};
   try {
     study = JSON.parse(localStorage.getItem("studyStats") || "{}");
@@ -21,7 +37,6 @@
     study = {};
   }
 
-  // 🧠 Validación más inteligente: sólo reset si NO existen claves reales
   const hasValidStudy =
     typeof study === "object" &&
     Object.keys(study).length > 0 &&
@@ -29,19 +44,15 @@
     totalSeconds > 0;
 
   if (!hasValidStudy) {
-    console.log("🧠 Modo nuevo: no se detectó estudio previo válido, inicializando sin reset.");
-    localStorage.setItem("studyStats", JSON.stringify({ minutesActive: Math.floor(totalSeconds / 60) }));
+    console.log("🧠 Modo nuevo: inicializando sin estudio previo.");
+    localStorage.setItem("studyStats", JSON.stringify({ minutesActive: 0 }));
     localStorage.setItem(RESET_FLAG, "true");
+    totalSeconds = 0;
   } else {
-    console.log("✅ Reanudando sesión de estudio previa — tiempo acumulado preservado.");
+    console.log("✅ Reanudando sesión previa — tiempo acumulado preservado.");
   }
 
-  let startTime = Date.now();
-  let lastSync = Date.now();
-  const bell = new Audio("../../assets/audio/bell-gold.wav");
-  bell.volume = 0.25;
-
-  /* ===== BLOQUE 1 — Indicador visual permanente ===== */
+  // ======== 🔔 Indicador visual ========
   const indicator = document.createElement("div");
   Object.assign(indicator.style, {
     position: "fixed",
@@ -71,7 +82,7 @@
   };
   setInterval(updateIndicator, 1000);
 
-  /* ===== BLOQUE 2 — Loop maestro exacto ===== */
+  // ======== 🔁 Loop maestro persistente ========
   const SYNC_PERIOD = 10000;
   const SYNC_TOLERANCE = 250;
 
@@ -93,30 +104,28 @@
       study.minutesActive = Math.floor(totalSeconds / 60);
       localStorage.setItem("studyStats", JSON.stringify(study));
 
-      console.log(`CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`);
       updateIndicator(true);
       bell.play().catch(() => {});
+      console.log(`CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`);
     }
 
     requestAnimationFrame(forcedLoop);
   };
 
-  /* ===== BLOQUE 3 — Inicio automático ===== */
   const initAfterDOM = () => {
     startTime = Date.now();
     lastSync = Date.now();
     requestAnimationFrame(forcedLoop);
-    console.log("🔁 Loop maestro CFC iniciado (10 s exactos, uptime 100%)");
+    console.log("🔁 Loop maestro CFC iniciado (10 s exactos)");
   };
 
   if (document.readyState === "complete" || document.readyState === "interactive")
     initAfterDOM();
   else document.addEventListener("DOMContentLoaded", initAfterDOM);
 
-  /* ===== BLOQUE 4 — Guardado al cerrar pestaña ===== */
   window.addEventListener("beforeunload", () => {
     localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
   });
 
-  console.log(`✅ CFC_ACTIVITY_V11.9_R2_PERSIST_FIX_REAL | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V12.1_RESET_FIX_REAL | TAB:${TAB_ID}`);
 })();
