@@ -1,7 +1,9 @@
 /* ✅ CFC_FUNC_47_0_IDENTITY_OVERLAY_INTEGRATION */
 import { CFC_showBlockOverlay } from "../overlay_block.js";
 
+// ==========================================================
 // 🔹 Inicialización Firebase
+// ==========================================================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
 import {
   getAuth,
@@ -10,15 +12,21 @@ import {
   signOut,
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-auth.js";
 
-// 🔹 Configuración Firebase (reemplaza con tus credenciales reales)
+// ==========================================================
+// 🔹 Configuración Firebase (CFC_LOCK_FIREBASE)
+// ==========================================================
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
-  appId: "TU_APP_ID",
+  apiKey: "AIzaSyDLwdA1y0XbDApBu6e-7abSdyB8Abys",
+  authDomain: "cfc-lock-firebase.firebaseapp.com",
+  projectId: "cfc-lock-firebase",
+  storageBucket: "cfc-lock-firebase.appspot.com",
+  messagingSenderId: "352796892343",
+  appId: "1:352796892343:web:2b8bb30a3f54579efc1e"
 };
 
+// ==========================================================
 // 🔹 Inicializa Firebase
+// ==========================================================
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 
@@ -56,7 +64,7 @@ onAuthStateChanged(auth, (user) => {
     // Validar sesión única
     if (uidLocal && uidLocal !== user.uid) {
       console.warn("⚠️ Sesión duplicada detectada, cerrando sesión...");
-      CFC_showBlockOverlay("Sesión cerrada en otro dispositivo");
+      CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
       signOut(auth);
     }
   } else {
