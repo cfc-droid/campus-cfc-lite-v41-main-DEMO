@@ -181,8 +181,6 @@
       <button class="btn-main" onclick="location.href='pages/faq.html'">❓ FAQ</button>
       <button class="btn-main" onclick="location.href='pages/profile.html'">👤 Perfil</button>
       <button class="btn-main" onclick="toggleThemeSafe()">🌗 Cambiar fondo</button>
-      <!-- ✅ CFC_FUNC_47_1_LOCK_BTN — Botón visual de cierre de sesión -->
-<button class="btn-main" id="btnLogoutCFC">🔒 Cerrar sesión</button>
     </div>
 <!-- ✅ CFC_FUNC_9_1_20251105 — CFC-PACK PLUS V1 -->
 <a href="/assets/CFC_Pack_2025.zip" download class="btn-premium">
@@ -278,27 +276,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
-</script>
-<!-- ✅ CFC_FUNC_47_1_LOCK_LOGOUT_BIND — Integración visual Firebase Logout -->
-<script type="module">
-  import { CFC_logout } from "./js/core/cfc_lock_identity.js";
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const btnLogout = document.getElementById("btnLogoutCFC");
-    if (btnLogout) {
-      btnLogout.addEventListener("click", async () => {
-        console.log("🔒 CFC_LOCK: ejecutando cierre de sesión...");
-        try {
-          await CFC_logout();
-        } catch (err) {
-          console.error("❌ Error ejecutando CFC_logout():", err);
-          alert("Error al cerrar sesión. Verifica la conexión o recarga la página.");
-        }
-      });
-    } else {
-      console.warn("⚠️ Botón CFC_LOGOUT no encontrado en DOM.");
-    }
-  });
-</script>  
+</script> 
+  
 </body>
 </html>
