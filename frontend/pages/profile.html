@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Perfil — Campus CFC LITE</title>
   <link rel="stylesheet" href="../css/premium.css?v=20251105" />
-
   <style>
     /* =========================================================
        ✅ CFC_FUNC_8_2D_20251105 — Botón flotante modo oscuro/claro sincronizado
@@ -35,25 +34,14 @@
     body.light-mode { background:#f9f9f9; color:#111; }
     body.dark-mode { background:#000; color:#e0e0e0; }
 
-    /* ✅ Bloque examen dinámico adaptativo */
     .ultimo-examen h3 { color: #FFD700; font-size: 1.1rem; }
-    .ultimo-examen p {
-      font-size: 0.95rem;
-      line-height: 1.4;
-      margin-top: 6px;
-      transition: color 0.3s ease;
-    }
-    body.dark-mode .ultimo-examen p { color: #fff; }
-    body.light-mode .ultimo-examen p { color: #000; }
+    .ultimo-examen p { font-size: 0.95rem; line-height: 1.4; margin-top: 6px; }
   </style>
 </head>
 
 <body>
-  <header>
-    <h2>👤 Perfil del Usuario</h2>
-  </header>
+  <header><h2>👤 Perfil del Usuario</h2></header>
 
-  <!-- 🌗 Botón de cambio de tema -->
   <div id="themeToggle" title="Cambiar tema">🌙</div>
 
   <main style="text-align:center;">
@@ -70,9 +58,7 @@
     </section>
 
     <div class="bitacora-access" style="margin-top:30px;">
-    <button class="btn-bitacora" onclick="window.location.href='../pages/bitacora_v416.html?v=20251107CFC_FIX4'">
-        🧠 Bitácora Mental del Trader
-      </button>
+      <button class="btn-bitacora" onclick="window.location.href='../pages/bitacora_v416.html?v=20251107CFC_FIX4'">🧠 Bitácora Mental del Trader</button>
       <p style="font-size:0.85rem;color:#aaa;margin-top:6px;">Registrá tus reflexiones y aprendizajes del día.</p>
     </div>
 
@@ -85,94 +71,66 @@
   <script src="../js/footer.js" defer></script>
   <script src="../js/stats_v1.js" defer></script>
   <script src="../js/activity_tracker.js?v=20251106" defer></script>
-  <script src="../js/theme_chapter.js?v=20251105" defer></script>
 
   <!-- =========================================================
        ✅ CFC_FUNC_10_4_V41.16 — Estado emocional + último examen
        ========================================================= -->
   <script>
-    // ✅ Estado emocional
-    const scoreRaw = localStorage.getItem("emotionScore");
-    const box = document.getElementById("emotionScore");
-    const msg = document.getElementById("emotionMessage");
-    if (scoreRaw && !isNaN(parseInt(scoreRaw))) {
-      const val = parseInt(scoreRaw, 10);
-      let emoji="🙂",mensaje="Buen enfoque mental.";
-      if (val<=3){emoji="😔";mensaje="Momento de reconectar con tu calma.";}
-      else if (val<=6){emoji="😐";mensaje="Estás estable, pero podés mejorar tu enfoque.";}
-      else if (val<=8){emoji="😊";mensaje="Excelente disciplina emocional.";}
-      else if (val<=10){emoji="🔥";mensaje="Máxima claridad mental, seguí así.";}
-      box.textContent=`${emoji} ${val}/10`;
-      msg.textContent=mensaje;
-    } else {
-      box.textContent="⚠️ Aún no registraste tu emoción de hoy.";
-      msg.textContent="Registrá tu autoevaluación al cargar el Campus.";
-    }
-
-    <!-- ✅ Último examen completado -->
-<script>
-/* ==========================================================
-✅ CFC_PROFILE_V9.8_EXAM_RELINK_REAL
-----------------------------------------------------------
-• Lee examResults o examResults_backup
-• Re-renderiza automáticamente si examResults estaba vacío
-• Totalmente sincronizado con LOCK_TOTAL_PERSIST_REAL
-========================================================== */
-function mostrarUltimoExamen() {
-  try {
-    let examResults = JSON.parse(localStorage.getItem("examResults") || "[]");
-    if (!examResults.length) {
-      const backup = JSON.parse(localStorage.getItem("examResults_backup") || "[]");
-      if (backup.length) {
-        examResults = backup;
-        localStorage.setItem("examResults", JSON.stringify(backup));
-        console.log("♻️ Perfil: examResults restaurado desde backup.");
-      }
-    }
-
-    if (!examResults.length) return;
-    const ultimo = examResults.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
-    const contenedor = document.querySelector("main");
-    const bloque = document.createElement("div");
-    bloque.className = "ultimo-examen";
-    bloque.innerHTML = `
-      <h3>📘 Último examen completado</h3>
-      <p>
-        <strong>${ultimo.module}</strong><br>
-        Puntaje: <b style="color:var(--color-accent);">${ultimo.score}%</b> — ${ultimo.status}<br>
-        ⏱️ ${ultimo.duration || "-"} &nbsp;|&nbsp; 📅 ${ultimo.date || "-"} ${ultimo.time || ""}
-      </p>`;
-    contenedor.appendChild(bloque);
-  } catch (err) {
-    console.warn("⚠️ Error al mostrar último examen:", err);
+  const scoreRaw = localStorage.getItem("emotionScore");
+  const box = document.getElementById("emotionScore");
+  const msg = document.getElementById("emotionMessage");
+  if (scoreRaw && !isNaN(parseInt(scoreRaw))) {
+    const val = parseInt(scoreRaw, 10);
+    let emoji="🙂",mensaje="Buen enfoque mental.";
+    if (val<=3){emoji="😔";mensaje="Momento de reconectar con tu calma.";}
+    else if (val<=6){emoji="😐";mensaje="Estás estable, pero podés mejorar tu enfoque.";}
+    else if (val<=8){emoji="😊";mensaje="Excelente disciplina emocional.";}
+    else if (val<=10){emoji="🔥";mensaje="Máxima claridad mental, seguí así.";}
+    box.textContent=`${emoji} ${val}/10`;
+    msg.textContent=mensaje;
+  } else {
+    box.textContent="⚠️ Aún no registraste tu emoción de hoy.";
+    msg.textContent="Registrá tu autoevaluación al cargar el Campus.";
   }
-}
-document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
-</script>
+  </script>
 
-    function actualizarColoresExamen() {
-      const body = document.body;
-      const bloque = document.querySelector(".ultimo-examen p");
-      if (!bloque) return;
-      bloque.style.color = body.classList.contains("light-mode") ? "#000" : "#fff";
+  <!-- ==========================================================
+       ✅ CFC_PROFILE_V9.8_EXAM_RELINK_REAL
+       ========================================================== -->
+  <script>
+  function mostrarUltimoExamen() {
+    try {
+      let examResults = JSON.parse(localStorage.getItem("examResults") || "[]");
+      if (!examResults.length) {
+        const backup = JSON.parse(localStorage.getItem("examResults_backup") || "[]");
+        if (backup.length) {
+          examResults = backup;
+          localStorage.setItem("examResults", JSON.stringify(backup));
+          console.log("♻️ Perfil: examResults restaurado desde backup.");
+        }
+      }
+      if (!examResults.length) return;
+      const ultimo = examResults.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+      const contenedor = document.querySelector("main");
+      const bloque = document.createElement("div");
+      bloque.className = "ultimo-examen";
+      bloque.innerHTML = `
+        <h3>📘 Último examen completado</h3>
+        <p>
+          <strong>${ultimo.module}</strong><br>
+          Puntaje: <b style="color:var(--color-accent);">${ultimo.score}%</b> — ${ultimo.status}<br>
+          ⏱️ ${ultimo.duration || "-"} &nbsp;|&nbsp; 📅 ${ultimo.date || "-"} ${ultimo.time || ""}
+        </p>`;
+      contenedor.appendChild(bloque);
+    } catch (err) {
+      console.warn("⚠️ Error al mostrar último examen:", err);
     }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      mostrarUltimoExamen();
-      actualizarColoresExamen();
-    });
-
-    window.addEventListener("storage", (e) => {
-      if (e.key === "CFC_THEME_STATE") actualizarColoresExamen();
-    });
-    const observer = new MutationObserver(actualizarColoresExamen);
-    observer.observe(document.body, { attributes: true, attributeFilter: ["class"] });
+  }
+  document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
   </script>
 
   <!-- =========================================================
-       ✅ CFC_FUNC_11_3_V41.34 — Panel “Mi progreso” unificado (fondo fix + última sesión)
-       📄 Archivo: /frontend/pages/profile.html
-       🔒 CFC-SYNC V11.3 | QA-SYNC V41.34
+       ✅ CFC_FUNC_11_3_V41.34 — Panel “Mi progreso” unificado
        ========================================================= -->
   <script>
   document.getElementById("btnStats").addEventListener("click", () => {
@@ -211,40 +169,4 @@ document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
 
     overlay.innerHTML = `
       <div style="max-width:480px;padding:30px;
-        background:rgba(40,40,40,0.85);
-        backdrop-filter:blur(10px);
-        border:1px solid #FFD700;border-radius:14px;
-        box-shadow:0 0 25px rgba(255,215,0,0.5);
-        text-align:left;">
-        <h2 style="text-align:center;">📊 Tu progreso</h2>
-        <ul style="list-style:none;padding-left:0;font-size:0.95rem;line-height:1.8;">
-          <li>📘 <b>Módulos completados:</b> ${completed}/20 (${percent}%)</li>
-          <li>⏱️ <b>Horas activas:</b> ${hours} h ${remMin} min</li>
-          <li>📅 <b>Última sesión:</b> ${lastDate}</li>
-          <li>🔁 <b>Días consecutivos de estudio:</b> ${consecutive}</li>
-          <li>🗓️ <b>Días totales de estudio:</b> ${totalDays}</li>
-        </ul>
-        <div style="text-align:center;margin-top:20px;">
-          <button id="cerrarProgreso" class="btn-main">Cerrar</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    setTimeout(() => (overlay.style.opacity = 1), 50);
-
-    document.getElementById("cerrarProgreso").addEventListener("click", () => {
-      overlay.style.opacity = 0;
-      setTimeout(() => overlay.remove(), 300);
-    });
-
-    console.log(
-      "🧩 CFC_SYNC checkpoint:",
-      `Progreso actualizado → ${hours}h ${remMin}min — ${percent}% — Última sesión: ${lastDate}`,
-      new Date().toLocaleString()
-    );
-  });
-  </script>
-
-  <!-- 🔒 CFC_LOCK: V41.34-profile_fixOverlayLastDate-20251106 -->
-</body>
-</html>
+        background:rgba(40,
