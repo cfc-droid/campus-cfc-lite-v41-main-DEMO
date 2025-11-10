@@ -87,14 +87,14 @@
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("theme-toggle");
-    const currentTheme = localStorage.getItem("theme") || "dark";
+    const currentTheme = localStorage.getItem("CFC_THEME_STATE") || "dark";
     document.documentElement.setAttribute("data-theme", currentTheme);
     btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
 
     btn.addEventListener("click", () => {
       const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
       document.documentElement.setAttribute("data-theme", newTheme);
-      localStorage.setItem("theme", newTheme);
+      localStorage.setItem("CFC_THEME_STATE", newTheme);
       btn.textContent = newTheme === "light" ? "🌙" : "☀️";
     });
   });
