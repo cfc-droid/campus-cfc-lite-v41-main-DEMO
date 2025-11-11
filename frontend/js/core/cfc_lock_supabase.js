@@ -1,18 +1,14 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V5.9_STABLE — Sesión Única (Modo LITE)
+   ✅ CFC_LOCK_SUPABASE_V6.1 — Sesión Única Realtime + Cloudflare SAFE
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
-   Descripción:
-   - Garantiza 1 sola sesión activa por usuario.
-   - Cierra automáticamente la anterior al iniciar en otro dispositivo.
-   - Sin Realtime, sin WebSocket, sin dependencias adicionales.
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = "https://kcunrrmvmvdlkdigzpcy.supabase.co";
 const SUPABASE_ANON_KEY =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjdW5ycm12bXZkbGtkaWd6cGN5Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3NjI0NzU0MDQsImV4cCI6MjA3ODA1MTQwNH0.SluKoDu-Al8OeyHtSFQOcsRnTyYqKw3ZdXxdOBJ0h3g";
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjdW5ycm12bXZkbGtkaWd6cGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NzU0MDQsImV4cCI6MjA3ODA1MTQwNH0.SluKoDu-Al8OeyHtSFQOcsRnTyYqKw3ZdXxdOBJ0h3g";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -27,7 +23,7 @@ export async function CFC_login(email, licenseKey) {
   const e = String(email || "").trim().toLowerCase();
   const k = String(licenseKey || "").trim();
 
-  console.log("🔐 Intentando login Supabase (modo seguro):", e, k);
+  console.log("🔐 Intentando login Supabase CLOUDSAFE:", e, k);
 
   // 1️⃣ Buscar licencia válida
   const { data: rows, error: lookupError } = await supabase
@@ -56,7 +52,7 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 2️⃣ Cerrar cualquier sesión previa del mismo usuario
+  // 2️⃣ Cerrar sesiones anteriores del mismo usuario (si existieran)
   await supabase
     .from("licenses")
     .update({
@@ -66,7 +62,7 @@ export async function CFC_login(email, licenseKey) {
     })
     .eq("email", e);
 
-  // 3️⃣ Registrar nueva sesión
+  // 3️⃣ Registrar nueva sesión activa
   const { error: updateError } = await supabase
     .from("licenses")
     .update({
@@ -82,14 +78,17 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 4️⃣ Guardar datos locales
+  // 4️⃣ Guardar localmente
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
   console.log("✅ Sesión iniciada correctamente:", sessionId);
 
-  // 5️⃣ Redirigir
+  // 5️⃣ Activar monitor Realtime
+  startRealtimeMonitor(e, sessionId);
+
+  // 6️⃣ Redirigir
   window.location.href = "../index.html";
 }
 
@@ -115,31 +114,56 @@ export async function CFC_logout(manual = true) {
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD — Verifica si la sesión local sigue activa
+   ⚡ MONITOR — Cierra si otro dispositivo inicia sesión
    ========================================================== */
-document.addEventListener("DOMContentLoaded", async () => {
+export function startRealtimeMonitor(email, localSessionId) {
+  console.log("👁️ Realtime activo para:", email);
+
+  const channel = supabase
+    .channel("licenses-stream")
+    .on(
+      "postgres_changes",
+      {
+        event: "UPDATE",
+        schema: "public",
+        table: "licenses",
+        filter: `email=eq.${email}`,
+      },
+      (payload) => {
+        const remoteSID = payload?.new?.session_id;
+        const active = payload?.new?.active_session;
+
+        // 🔍 Detecta si otro dispositivo activó una nueva sesión
+        if (active && remoteSID && remoteSID !== localSessionId) {
+          console.warn("🚨 Sesión duplicada detectada (auto-cierre)");
+          localStorage.clear();
+          alert("⚠️ Tu sesión fue cerrada automáticamente porque iniciaste en otro dispositivo.");
+          window.location.href = "../html/login.html";
+        }
+      }
+    )
+    .subscribe((status) => {
+      console.log("🟢 Canal Realtime conectado:", status);
+    });
+
+  // 🔁 Reintento automático de conexión
+  setInterval(() => {
+    if (channel.state !== "joined") {
+      console.warn("🔄 Reintentando conexión Realtime...");
+      startRealtimeMonitor(email, localSessionId);
+    }
+  }, 60000); // cada 60 segundos
+}
+
+/* ==========================================================
+   🧩 AUTOLOAD — Restaura sesión previa y mantiene monitor
+   ========================================================== */
+document.addEventListener("DOMContentLoaded", () => {
   const email = localStorage.getItem("CFC_EMAIL");
   const sid = localStorage.getItem("CFC_SESSION_ID");
 
-  if (!email || !sid) return;
-
-  // Verifica en Supabase si la sesión local sigue siendo válida
-  const { data, error } = await supabase
-    .from("licenses")
-    .select("session_id,active_session")
-    .eq("email", email)
-    .single();
-
-  if (!error && data) {
-    if (!data.active_session || data.session_id !== sid) {
-      console.warn("🚨 Sesión inválida o reemplazada, cierre forzado local");
-      localStorage.clear();
-      alert(
-        "⚠️ Tu sesión fue cerrada automáticamente porque iniciaste en otro dispositivo."
-      );
-      window.location.href = "../html/login.html";
-    } else {
-      console.log("🟢 Sesión activa validada:", sid);
-    }
+  if (email && sid) {
+    console.log("♻️ Restaurando sesión previa:", sid);
+    startRealtimeMonitor(email, sid);
   }
 });
