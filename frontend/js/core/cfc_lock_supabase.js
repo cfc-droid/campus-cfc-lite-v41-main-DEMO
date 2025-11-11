@@ -26,13 +26,23 @@ export async function CFC_login(email, licenseKey) {
 
   console.log("🔐 Intentando login Supabase CLOUDSAFE:", e, k);
 
-  // 1️⃣ Buscar registro exacto
-  const { data: row, error: lookupError } = await supabase
+    // 1️⃣ Buscar registro exacto — CLOUDSAFE FORCED STRING MATCH
+  const { data: rows, error: lookupError } = await supabase
     .from("licenses")
-    .select("*")
-    .eq("email", e)
-    .eq("license_key", k)
-    .maybeSingle();
+    .select("*");
+
+  if (lookupError) {
+    console.error("❌ Error al consultar Supabase:", lookupError);
+    alert("Error de conexión con Supabase.");
+    return;
+  }
+
+  // 🔍 Buscar coincidencia manual en cliente (Cloudflare SAFE)
+  const row = (rows || []).find(
+    (r) =>
+      String(r.email).trim().toLowerCase() === e &&
+      String(r.license_key).trim() === k
+  );
 
   if (lookupError) {
     console.error("❌ Error al consultar Supabase:", lookupError);
