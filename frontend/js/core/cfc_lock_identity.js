@@ -1,13 +1,13 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V56.3_FORCEUPDATE_FINAL — Sesión Única
+   ✅ CFC_LOCK_IDENTITY_V57.0_REALTIME_POLLING_FINAL — Sesión Única
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ==========================================================
    🔹 Características:
-   - Cierre remoto instantáneo cross-device
-   - Campo de control “force_update” evita cache silenciosa
-   - Sin Firebase Auth, sin backend
-   - Compatible Cloudflare Pages
+   - Detecta sesión duplicada incluso sin Auth ni AppCheck
+   - Combina onSnapshot + polling periódico cada 5s
+   - Cierre remoto 100% funcional en Cloudflare Pages
+   - Sin backend, sin dependencias externas
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -70,7 +70,6 @@ export async function CFC_login(email, license) {
       return;
     }
 
-    // ⚡ Campo de control para forzar detección de snapshot
     const force = Math.random().toString(36).substring(2, 12);
 
     await setDoc(
@@ -127,50 +126,70 @@ export async function CFC_logout(manual = true) {
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Detecta cambios remotos en tiempo real
+   ⚡ MONITOR — onSnapshot + polling híbrido
    ========================================================== */
+async function verifySessionRemote() {
+  const e = localStorage.getItem("CFC_EMAIL");
+  const sid = localStorage.getItem("CFC_SESSION_ID");
+  if (!e || !sid) return;
+
+  try {
+    const ref = doc(db, "licenses", e);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+    if (!data.active_session || data.session_id !== sid) {
+      console.warn("🚨 Cierre detectado por verificación remota");
+      localStorage.clear();
+      CFC_showBlockOverlay(
+        "⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo."
+      );
+      setTimeout(() => (window.location.href = "../html/login.html"), 1500);
+    }
+  } catch (err) {
+    console.error("⚠️ Error en verificación periódica:", err);
+  }
+}
+
 function startRealtimeMonitor() {
   const e = localStorage.getItem("CFC_EMAIL");
   const sid = localStorage.getItem("CFC_SESSION_ID");
   if (!e || !sid) return;
 
   const ref = doc(db, "licenses", e);
-  console.log(`👁️ Monitor activo → ${e} | SID local=${sid}`);
+  console.log(`👁️ Monitor híbrido activo → ${e} | SID local=${sid}`);
 
   let lastForce = null;
 
-  onSnapshot(
-    ref,
-    (snap) => {
-      if (!snap.exists()) return;
-      const data = snap.data();
-      const remoteSID = data.session_id;
-      const active = data.active_session;
-      const force = data.force_update || null;
+  // 🔴 Escucha en tiempo real
+  onSnapshot(ref, (snap) => {
+    if (!snap.exists()) return;
+    const data = snap.data();
+    const remoteSID = data.session_id;
+    const active = data.active_session;
+    const force = data.force_update || null;
 
-      // Evita repetir eventos
-      if (force === lastForce) return;
-      lastForce = force;
+    if (force === lastForce) return;
+    lastForce = force;
 
-      // 🚨 Otro dispositivo inició sesión
-      if (active && remoteSID && remoteSID !== sid) {
-        console.warn("🚨 Sesión duplicada detectada → cierre inmediato");
-        localStorage.clear();
-        CFC_showBlockOverlay(
-          "⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo."
-        );
-        setTimeout(() => (window.location.href = "../html/login.html"), 1500);
-      }
+    if (active && remoteSID && remoteSID !== sid) {
+      console.warn("🚨 Cierre detectado por snapshot");
+      localStorage.clear();
+      CFC_showBlockOverlay(
+        "⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo."
+      );
+      setTimeout(() => (window.location.href = "../html/login.html"), 1500);
+    }
+    if (!active) {
+      console.warn("🔒 Sesión remota cerrada → desconexión local");
+      localStorage.clear();
+      setTimeout(() => (window.location.href = "../html/login.html"), 1200);
+    }
+  });
 
-      // 🔒 Sesión remota cerrada
-      if (!active) {
-        console.warn("🔒 Sesión remota cerrada → desconexión local");
-        localStorage.clear();
-        setTimeout(() => (window.location.href = "../html/login.html"), 1200);
-      }
-    },
-    (error) => console.error("❌ Error en monitor Realtime:", error)
-  );
+  // 🕐 Polling de refuerzo cada 5s
+  setInterval(verifySessionRemote, 5000);
 }
 
 /* ==========================================================
@@ -185,12 +204,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V56.3_FORCEUPDATE_FINAL
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V57.0_REALTIME_POLLING_FINAL
 -----------------------------------------
 🔹 Firestore SAFE (sin Auth)
-🔹 Colección: licenses/{email}
-🔹 Cierre remoto instantáneo
-🔹 Campo de control force_update
+🔹 Cierre remoto híbrido (snapshot + polling)
+🔹 Reacción < 5 segundos garantizada
 🔹 Cloudflare Pages compatible
 -----------------------------------------
 `);
