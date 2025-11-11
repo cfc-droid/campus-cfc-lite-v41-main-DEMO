@@ -1,23 +1,19 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V5.9.2_FINAL_FIX — Sesión Única (SAFE)
+   ✅ CFC_LOCK_SUPABASE_V6.0_REALCHECK_LOOP — Cloudflare SAFE
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    Descripción:
-   - Soluciona error 401 (Auth Header Legacy)
-   - Compatible con Cloudflare Pages
-   - Usa headers forzados para la anon key
+   - 100% funcional sin Realtime ni Auth
+   - Verifica cada 30s si la sesión sigue activa
+   - Cierra automáticamente en todos los dispositivos
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-// ==========================================================
-// 🔧 Configuración del proyecto Supabase
-// ==========================================================
 const SUPABASE_URL = "https://kcunrrmvmvdlkdigzpcy.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjdW5ycm12bXZkbGtkaWd6cGN5Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3NjI0NzU0MDQsImV4cCI6MjA3ODA1MTQwNH0.SluKoDu-Al8OeyHtSFQOcsRnTyYqKw3ZdXxdOBJ0h3g";
 
-// 🧩 FIX: Forzar headers legacy
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   db: { schema: "public" },
   global: {
@@ -32,9 +28,9 @@ const nowISO = () => new Date().toISOString();
 const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
-// ==========================================================
-// 🔐 LOGIN — Crea o reemplaza sesión activa
-// ==========================================================
+/* ==========================================================
+   🔐 LOGIN — Crea o reemplaza sesión activa
+   ========================================================== */
 export async function CFC_login(email, licenseKey) {
   const sessionId = makeSessionId();
   const e = String(email || "").trim().toLowerCase();
@@ -42,23 +38,20 @@ export async function CFC_login(email, licenseKey) {
 
   console.log("🔐 Intentando login Supabase:", e, k);
 
-  const { data: rows, error: lookupError, status } = await supabase
+  const { data: rows, error } = await supabase
     .from("licenses")
     .select("id,email,license_key,active_session,session_id");
 
-  if (lookupError || status === 401) {
-    console.warn("⚠️ Error de conexión o API (401). Verifica la clave anon o las políticas.");
-    alert("Error de conexión con Supabase (ver consola).");
+  if (error) {
+    console.error("❌ Error al conectar con Supabase:", error);
+    alert("Error al conectar con Supabase (ver consola).");
     return;
   }
 
   const row = rows?.find((r) => {
     const dbEmail = String(r.email || "").trim().toLowerCase();
     const dbKey = String(r.license_key || "").trim();
-    return (
-      dbEmail === e &&
-      (dbKey === k || dbKey === String(Number(k)) || String(Number(dbKey)) === k)
-    );
+    return dbEmail === e && dbKey === k;
   });
 
   if (!row) {
@@ -66,7 +59,7 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // Cierra sesión anterior
+  // Cierra sesión previa del mismo usuario
   await supabase
     .from("licenses")
     .update({
@@ -77,7 +70,7 @@ export async function CFC_login(email, licenseKey) {
     .eq("email", e);
 
   // Registra nueva sesión
-  const { error: updateError } = await supabase
+  const { error: updErr } = await supabase
     .from("licenses")
     .update({
       active_session: true,
@@ -86,8 +79,8 @@ export async function CFC_login(email, licenseKey) {
     })
     .eq("id", row.id);
 
-  if (updateError) {
-    console.error("❌ Error al actualizar sesión:", updateError);
+  if (updErr) {
+    console.error("❌ Error al actualizar sesión:", updErr);
     alert("Error al actualizar sesión en Supabase.");
     return;
   }
@@ -100,9 +93,9 @@ export async function CFC_login(email, licenseKey) {
   window.location.href = "../index.html";
 }
 
-// ==========================================================
-// 🔒 LOGOUT — Cierre manual o remoto
-// ==========================================================
+/* ==========================================================
+   🔒 LOGOUT — Manual o remoto
+   ========================================================== */
 export async function CFC_logout(manual = true) {
   const email = localStorage.getItem("CFC_EMAIL");
   if (!email) return;
@@ -121,31 +114,35 @@ export async function CFC_logout(manual = true) {
   window.location.href = "../html/login.html";
 }
 
-// ==========================================================
-// 🧩 AUTOLOAD — Verifica sesión activa cada carga
-// ==========================================================
-document.addEventListener("DOMContentLoaded", async () => {
+/* ==========================================================
+   🧩 AUTOLOAD + LOOP — Verificación periódica
+   ========================================================== */
+async function checkSession() {
   const email = localStorage.getItem("CFC_EMAIL");
   const sid = localStorage.getItem("CFC_SESSION_ID");
   if (!email || !sid) return;
 
-  const { data, error, status } = await supabase
+  const { data, error } = await supabase
     .from("licenses")
     .select("session_id,active_session")
     .eq("email", email)
     .single();
 
-  if (status === 401 || error) {
-    console.warn("⚠️ No se pudo validar sesión (401).");
+  if (error) {
+    console.warn("⚠️ No se pudo validar sesión:", error.message);
     return;
   }
 
   if (!data.active_session || data.session_id !== sid) {
-    console.warn("🚨 Sesión inválida → cierre local.");
+    console.warn("🚨 Sesión inválida o reemplazada → cierre local.");
     localStorage.clear();
     alert("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
     window.location.href = "../html/login.html";
-  } else {
-    console.log("🟢 Sesión validada:", sid);
   }
+}
+
+// Validación inicial y cada 30 segundos
+document.addEventListener("DOMContentLoaded", () => {
+  checkSession();
+  setInterval(checkSession, 30000); // 🔁 cada 30s
 });
