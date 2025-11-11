@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V52.5_FIRESTORE_SAFE_REALTIME
+   ✅ CFC_LOCK_IDENTITY_V53.0_FIRESTORE_SDK_FORCE_READ
    Sistema: CFC-LOCK — Cloudflare SAFE (sin backend)
    Auditor: CFC-SYNC QA FINAL — 2025-11-10
    ========================================================== */
@@ -19,6 +19,7 @@ import {
   doc,
   setDoc,
   deleteDoc,
+  getDoc,
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
@@ -39,7 +40,7 @@ try {
   auth = getAuth(app);
   db = getFirestore(app);
   await setPersistence(auth, browserLocalPersistence);
-  console.log("🧩 Firebase init — FIRESTORE SAFE REALTIME MODE");
+  console.log("🧩 Firebase init — FIRESTORE SDK FORCE READ");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
@@ -67,7 +68,7 @@ export async function CFC_login(email, pass) {
     await setDoc(doc(db, "sessions", uid), {
       sessionId: sid,
       updatedAt: serverTimestamp(),
-      updatedAtISO: nowISO(), // 🔹 clave para lectura REST
+      updatedAtISO: nowISO(), // 🔹 campo clave legible
     });
 
     console.log(`[QA-SYNC] ✅ Nueva sesión UID=${uid}, SID=${sid}`);
@@ -95,8 +96,6 @@ export async function CFC_logout() {
 /* ==========================================================
    🧠 MONITOR remoto — SDK directo (sin REST)
    ========================================================== */
-import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
-
 async function getRemoteSession(uid) {
   try {
     const ref = doc(db, "sessions", uid);
@@ -121,7 +120,6 @@ document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
     const uid = user.uid;
-
     console.log(`[QA-SYNC] 👁️ Firestore-SDK monitor activo para UID=${uid}`);
 
     setInterval(async () => {
@@ -148,11 +146,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V52.5_FIRESTORE_SAFE_REALTIME
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V53.0_FIRESTORE_SDK_FORCE_READ
 -----------------------------------------
-🔹 Doble campo timestamp (server + ISO)
-🔹 Comparación temporal robusta (20s)
-🔹 Logout inmediato sin backend
-🔹 100% Cloudflare Pages compatible
+🔹 Usa SDK nativo (getDoc) sin cache REST
+🔹 Doble timestamp (server + ISO)
+🔹 Detección en 8s, sin backend
+🔹 Totalmente funcional en Cloudflare Pages
 -----------------------------------------
 `);
