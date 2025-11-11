@@ -1,19 +1,35 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V6.1 — Sesión Única Realtime + Cloudflare SAFE
+   ✅ CFC_LOCK_SUPABASE_V6.2 — Sesión Única Realtime + Cloudflare SAFE + CORS FIX
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+/* ==========================================================
+   🌐 Configuración Supabase (modo seguro Cloudflare)
+   ========================================================== */
 const SUPABASE_URL = "https://kcunrrmvmvdlkdigzpcy.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjdW5ycm12bXZkbGtkaWd6cGN5Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3NjI0NzU0MDQsImV4cCI6MjA3ODA1MTQwNH0.SluKoDu-Al8OeyHtSFQOcsRnTyYqKw3ZdXxdOBJ0h3g";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+/* 🧩 FIX — Autenticación reforzada con cabeceras CORS seguras */
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  global: {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      "Content-Type": "application/json",
+    },
+  },
+});
 
+/* ==========================================================
+   🕓 Utilidades
+   ========================================================== */
 const nowISO = () => new Date().toISOString();
-const makeSessionId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+const makeSessionId = () =>
+  `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
 /* ==========================================================
    🔐 LOGIN — Crea sesión única y cierra las anteriores
@@ -32,11 +48,11 @@ export async function CFC_login(email, licenseKey) {
 
   if (lookupError) {
     console.error("❌ Error al consultar Supabase:", lookupError);
-    alert("Error de conexión con Supabase.");
+    alert("Error de conexión con Supabase (CORS o clave).");
     return;
   }
 
-  const row = rows.find((r) => {
+  const row = rows?.find((r) => {
     const dbEmail = String(r.email || "").trim().toLowerCase();
     const dbKey = String(r.license_key || "").trim();
     return (
@@ -50,7 +66,7 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 2️⃣ Cerrar sesiones anteriores del mismo usuario (si existieran)
+  // 2️⃣ Cerrar sesiones anteriores del mismo usuario
   await supabase
     .from("licenses")
     .update({
@@ -72,7 +88,7 @@ export async function CFC_login(email, licenseKey) {
 
   if (updateError) {
     console.error("❌ Error al actualizar sesión:", updateError);
-    alert("Error al actualizar sesión en Supabase.");
+    alert("Error al registrar sesión en Supabase.");
     return;
   }
 
@@ -131,7 +147,6 @@ export function startRealtimeMonitor(email, localSessionId) {
         const remoteSID = payload?.new?.session_id;
         const active = payload?.new?.active_session;
 
-        // 🔍 Detecta si otro dispositivo activó una nueva sesión
         if (active && remoteSID && remoteSID !== localSessionId) {
           console.warn("🚨 Sesión duplicada detectada (auto-cierre)");
           localStorage.clear();
@@ -146,7 +161,6 @@ export function startRealtimeMonitor(email, localSessionId) {
       console.log("🟢 Canal Realtime conectado:", status);
     });
 
-  // 🔁 Reintento automático de conexión
   setInterval(() => {
     if (channel.state !== "joined") {
       console.warn("🔄 Reintentando conexión Realtime...");
