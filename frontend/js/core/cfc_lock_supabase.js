@@ -1,8 +1,8 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V7.4C — CLOUDSAFE+ QA-SYNC
+   ✅ CFC_LOCK_SUPABASE_V7.5C — CLOUDSAFE+ AUTO-FORCE DETECTOR
    Sistema: Campus CFC LITE V41-DEMO
-   Autor: CFC-DROID | QA-SYNC V41.4 | 2025-11-11
-   Objetivo: Sesión única con cierre automático y logging extendido
+   Autor: CFC-DROID | QA-SYNC V41.5 | 2025-11-11
+   Objetivo: Cierre inmediato de sesión anterior (Realtime + Polling backup)
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -22,7 +22,6 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 const nowISO = () => new Date().toISOString();
 const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-
 const logQA = (msg) =>
   console.log(`[QA_SYNC ${new Date().toLocaleTimeString()}] ${msg}`);
 
@@ -116,13 +115,13 @@ export async function CFC_logout(manual = true) {
 }
 
 // ==========================================================
-// ⚡ MONITOR — QA-SYNC Directional (Cierre remoto en 100 ms)
+// ⚡ MONITOR — Cierre remoto + Backup por verificación periódica
 // ==========================================================
 export function startRealtimeMonitor(email, localSessionId) {
   logQA(`👁️ Iniciando monitor Realtime para ${email}`);
+  supabase.removeAllChannels();
 
-  supabase.removeAllChannels(); // Limpieza
-
+  // 🔹 Canal realtime principal
   const channel = supabase
     .channel(`licenses-${email}`)
     .on(
@@ -134,30 +133,46 @@ export function startRealtimeMonitor(email, localSessionId) {
         filter: `email=eq.${email}`,
       },
       (payload) => {
-        const newSessionId = payload?.new?.session_id;
-        const newActive = payload?.new?.active_session;
-        const oldSessionId = payload?.old?.session_id;
+        const newSID = payload?.new?.session_id;
+        const oldSID = payload?.old?.session_id;
+        const active = payload?.new?.active_session;
 
-        // Log detallado QA
         logQA(
-          `📡 Evento recibido: newSID=${newSessionId} | oldSID=${oldSessionId} | active=${newActive}`
+          `📡 Evento realtime: oldSID=${oldSID}, newSID=${newSID}, active=${active}`
         );
 
-        // Cierra sesión local si detecta cambio de session_id
-        if (newSessionId && newSessionId !== localSessionId) {
-          logQA("🚨 Cambio remoto detectado → cerrando sesión local");
-          localStorage.clear();
-          alert("⚠️ Tu sesión se cerró porque iniciaste en otro dispositivo.");
-          window.location.href = "../html/login.html";
+        if (newSID && newSID !== localSessionId) {
+          logQA("🚨 Detectado cambio de sesión realtime → cierre local");
+          forceCloseSession();
         }
       }
     )
     .subscribe((status) => {
       logQA(`🟢 Estado del canal: ${status}`);
-      if (status === "SUBSCRIBED") logQA("✅ Realtime suscrito correctamente");
     });
 
-  // 🔁 Reconexión segura cada 45s (Cloudflare SAFE)
+  // 🔹 Backup: chequeo manual cada 10 s (por si falla el WS)
+  setInterval(async () => {
+    try {
+      const { data } = await supabase
+        .from("licenses")
+        .select("session_id, active_session")
+        .eq("email", email)
+        .single();
+
+      if (!data) return;
+      const { session_id: remoteSID, active_session } = data;
+
+      if (remoteSID && remoteSID !== localSessionId && active_session) {
+        logQA("⚡ Detección por verificación manual → cierre local");
+        forceCloseSession();
+      }
+    } catch (err) {
+      logQA("⚠️ Error en verificación manual: " + err.message);
+    }
+  }, 10000);
+
+  // 🔁 Reconexión Cloudflare cada 45 s
   setInterval(() => {
     if (channel.state !== "joined" && channel.state !== "subscribed") {
       logQA("🔄 Reintentando conexión Realtime...");
@@ -165,6 +180,15 @@ export function startRealtimeMonitor(email, localSessionId) {
       startRealtimeMonitor(email, localSessionId);
     }
   }, 45000);
+}
+
+// ==========================================================
+// 🔧 Cierre local forzado
+// ==========================================================
+function forceCloseSession() {
+  localStorage.clear();
+  alert("⚠️ Tu sesión se cerró porque iniciaste en otro dispositivo.");
+  window.location.href = "../html/login.html";
 }
 
 // ==========================================================
