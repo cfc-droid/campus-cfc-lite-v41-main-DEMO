@@ -1,8 +1,8 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V6.2 — Cloudsafe + Force Override
+   ✅ CFC_LOCK_SUPABASE_V6.1 — BLOQUEO PREVENTIVO REAL
    Sistema: Campus CFC LITE V41-DEMO
    Autor: CFC-DROID | QA-SYNC V41.6 | 2025-11-11
-   Objetivo: Sesión única con opción de cierre remoto manual
+   Objetivo: Sesión única sin realtime, estable en Cloudflare
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -18,14 +18,14 @@ const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
 /* ==========================================================
-   🔐 LOGIN — Crea sesión única y permite forzar cierre remoto
+   🔐 LOGIN — Bloquea si ya hay sesión activa
    ========================================================== */
 export async function CFC_login(email, licenseKey) {
   const e = String(email || "").trim().toLowerCase();
   const k = String(licenseKey || "").trim();
   const sessionId = makeSessionId();
 
-  console.log("🔐 Intentando login Supabase CLOUDSAFE:", e, k);
+  console.log("🔐 Intentando login Supabase:", e, k);
 
   const { data: rows, error } = await supabase
     .from("licenses")
@@ -44,30 +44,15 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 🚫 Si ya hay una sesión activa, ofrecer cierre remoto
+  // 🚫 Verificar si ya hay una sesión activa
   if (row.active_session && row.session_id) {
-    const confirmar = confirm(
-      "⚠️ Ya hay una sesión activa en otro dispositivo.\n¿Deseás cerrarla y continuar aquí?"
+    alert(
+      "⚠️ Tu cuenta ya está activa en otro dispositivo.\nCerrá la sesión anterior antes de volver a ingresar."
     );
-    if (!confirmar) {
-      alert("Operación cancelada. Cerrá la otra sesión primero.");
-      return;
-    }
-
-    // 🧹 Forzar cierre remoto
-    await supabase
-      .from("licenses")
-      .update({
-        active_session: false,
-        session_id: null,
-        updated_at: nowISO(),
-      })
-      .eq("email", e);
-
-    console.log("🧹 Sesión remota cerrada manualmente.");
+    return;
   }
 
-  // 🔄 Registrar nueva sesión
+  // ✅ Registrar nueva sesión
   const { error: updateError } = await supabase
     .from("licenses")
     .update({
@@ -90,12 +75,11 @@ export async function CFC_login(email, licenseKey) {
 
   console.log("✅ Sesión iniciada:", sessionId);
 
-  startRealtimeMonitor(e, sessionId);
   window.location.href = "../index.html";
 }
 
 /* ==========================================================
-   🔒 LOGOUT — Manual o remoto
+   🔒 LOGOUT — Finaliza sesión manual
    ========================================================== */
 export async function CFC_logout(manual = true) {
   const email = localStorage.getItem("CFC_EMAIL");
@@ -116,55 +100,8 @@ export async function CFC_logout(manual = true) {
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Prevención Realtime
-   ========================================================== */
-export function startRealtimeMonitor(email, localSessionId) {
-  console.log("👁️ Realtime activo para:", email);
-
-  const channel = supabase
-    .channel("licenses-stream")
-    .on(
-      "postgres_changes",
-      {
-        event: "UPDATE",
-        schema: "public",
-        table: "licenses",
-        filter: `email=eq.${email}`,
-      },
-      (payload) => {
-        const remoteSID = payload?.new?.session_id;
-        const active = payload?.new?.active_session;
-        if (active && remoteSID && remoteSID !== localSessionId) {
-          console.warn("🚨 Sesión duplicada detectada (auto-cierre)");
-          localStorage.clear();
-          alert(
-            "⚠️ Tu sesión fue cerrada automáticamente porque iniciaste en otro dispositivo."
-          );
-          window.location.href = "../html/login.html";
-        }
-      }
-    )
-    .subscribe((status) =>
-      console.log("🟢 Canal Realtime conectado:", status)
-    );
-
-  // 🔁 Reconexión cada 60 s
-  setInterval(() => {
-    if (channel.state !== "joined") {
-      console.warn("🔄 Reintentando conexión Realtime...");
-      startRealtimeMonitor(email, localSessionId);
-    }
-  }, 60000);
-}
-
-/* ==========================================================
-   ♻️ AUTOLOAD
+   ♻️ AUTOLOAD — No usa realtime
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-  const email = localStorage.getItem("CFC_EMAIL");
-  const sid = localStorage.getItem("CFC_SESSION_ID");
-  if (email && sid) {
-    console.log("♻️ Restaurando sesión previa:", sid);
-    startRealtimeMonitor(email, sid);
-  }
+  console.log("♻️ CFC_LOCK_SUPABASE_V6.1 activo (modo bloqueo preventivo).");
 });
