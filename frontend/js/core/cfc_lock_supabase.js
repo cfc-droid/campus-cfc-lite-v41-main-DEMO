@@ -1,8 +1,7 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V6.1 — BLOQUEO PREVENTIVO REAL
+   ✅ CFC_LOCK_SUPABASE_V6.1_FIX_REAL — Bloqueo Preventivo Seguro
    Sistema: Campus CFC LITE V41-DEMO
-   Autor: CFC-DROID | QA-SYNC V41.6 | 2025-11-11
-   Objetivo: Sesión única sin realtime, estable en Cloudflare
+   Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -18,7 +17,7 @@ const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
 /* ==========================================================
-   🔐 LOGIN — Bloquea si ya hay sesión activa
+   🔐 LOGIN — Bloqueo preventivo con limpieza previa
    ========================================================== */
 export async function CFC_login(email, licenseKey) {
   const e = String(email || "").trim().toLowerCase();
@@ -27,6 +26,7 @@ export async function CFC_login(email, licenseKey) {
 
   console.log("🔐 Intentando login Supabase:", e, k);
 
+  // 1️⃣ Buscar licencia
   const { data: rows, error } = await supabase
     .from("licenses")
     .select("*")
@@ -44,7 +44,25 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 🚫 Verificar si ya hay una sesión activa
+  // 2️⃣ Limpieza automática de sesión vieja (más de 12h o sin conexión)
+  const lastUpdate = new Date(row.updated_at || 0).getTime();
+  const twelveHours = 1000 * 60 * 60 * 12;
+  const now = Date.now();
+
+  if (row.active_session && row.session_id && now - lastUpdate > twelveHours) {
+    console.warn("🧹 Limpiando sesión vieja (expirada +12h)...");
+    await supabase
+      .from("licenses")
+      .update({
+        active_session: false,
+        session_id: null,
+        updated_at: nowISO(),
+      })
+      .eq("email", e);
+    row.active_session = false;
+  }
+
+  // 3️⃣ Verificación real
   if (row.active_session && row.session_id) {
     alert(
       "⚠️ Tu cuenta ya está activa en otro dispositivo.\nCerrá la sesión anterior antes de volver a ingresar."
@@ -52,7 +70,7 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // ✅ Registrar nueva sesión
+  // 4️⃣ Registrar nueva sesión
   const { error: updateError } = await supabase
     .from("licenses")
     .update({
@@ -68,18 +86,17 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 💾 Guardar local
+  // 5️⃣ Guardar local
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
   console.log("✅ Sesión iniciada:", sessionId);
-
   window.location.href = "../index.html";
 }
 
 /* ==========================================================
-   🔒 LOGOUT — Finaliza sesión manual
+   🔒 LOGOUT — Limpieza manual
    ========================================================== */
 export async function CFC_logout(manual = true) {
   const email = localStorage.getItem("CFC_EMAIL");
@@ -103,5 +120,5 @@ export async function CFC_logout(manual = true) {
    ♻️ AUTOLOAD — No usa realtime
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("♻️ CFC_LOCK_SUPABASE_V6.1 activo (modo bloqueo preventivo).");
+  console.log("♻️ CFC_LOCK_SUPABASE_V6.1_FIX_REAL activo (modo seguro).");
 });
