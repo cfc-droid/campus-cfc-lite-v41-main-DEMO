@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V6.0 — Sesión Única Realtime + Cloudflare SAFE
+   ✅ CFC_LOCK_SUPABASE_V6.1 — Sesión Única Realtime + Cloudflare SAFE
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
@@ -13,8 +13,7 @@ const SUPABASE_ANON_KEY =
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 const nowISO = () => new Date().toISOString();
-const makeSessionId = () =>
-  `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+const makeSessionId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
 /* ==========================================================
    🔐 LOGIN — Crea sesión única y cierra las anteriores
@@ -120,7 +119,7 @@ export async function CFC_logout(manual = true) {
 export function startRealtimeMonitor(email, localSessionId) {
   console.log("👁️ Realtime activo para:", email);
 
-  supabase
+  const channel = supabase
     .channel("licenses-stream")
     .on(
       "postgres_changes",
@@ -134,13 +133,11 @@ export function startRealtimeMonitor(email, localSessionId) {
         const remoteSID = payload?.new?.session_id;
         const active = payload?.new?.active_session;
 
-        // Si la sesión activa cambió → cerramos automáticamente
+        // 🔍 Detecta si otro dispositivo activó una nueva sesión
         if (active && remoteSID && remoteSID !== localSessionId) {
           console.warn("🚨 Sesión duplicada detectada (auto-cierre)");
           localStorage.clear();
-          alert(
-            "⚠️ Tu sesión fue cerrada automáticamente porque iniciaste en otro dispositivo."
-          );
+          alert("⚠️ Tu sesión fue cerrada automáticamente porque iniciaste en otro dispositivo.");
           window.location.href = "../html/login.html";
         }
       }
@@ -148,6 +145,14 @@ export function startRealtimeMonitor(email, localSessionId) {
     .subscribe((status) => {
       console.log("🟢 Canal Realtime conectado:", status);
     });
+
+  // 🔁 Reintento automático de conexión
+  setInterval(() => {
+    if (channel.state !== "joined") {
+      console.warn("🔄 Reintentando conexión Realtime...");
+      startRealtimeMonitor(email, localSessionId);
+    }
+  }, 60000); // cada 60 segundos
 }
 
 /* ==========================================================
@@ -156,5 +161,9 @@ export function startRealtimeMonitor(email, localSessionId) {
 document.addEventListener("DOMContentLoaded", () => {
   const email = localStorage.getItem("CFC_EMAIL");
   const sid = localStorage.getItem("CFC_SESSION_ID");
-  if (email && sid) startRealtimeMonitor(email, sid);
+
+  if (email && sid) {
+    console.log("♻️ Restaurando sesión previa:", sid);
+    startRealtimeMonitor(email, sid);
+  }
 });
