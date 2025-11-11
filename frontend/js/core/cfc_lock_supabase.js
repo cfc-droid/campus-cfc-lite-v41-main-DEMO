@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V5.1 — Realtime + Cloudflare SAFE (Stable)
+   ✅ CFC_LOCK_SUPABASE_V5.2 — Realtime + Cloudflare SAFE (Final)
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
@@ -22,11 +22,11 @@ const makeSessionId = () =>
 export async function CFC_login(email, licenseKey) {
   const sessionId = makeSessionId();
   const e = String(email || "").trim().toLowerCase();
-  const k = String(licenseKey || "").trim(); // ✅ no lowercase para claves numéricas
+  const k = String(licenseKey || "").trim(); // mantener exacto (puede ser numérico)
 
   console.log("🔐 Intentando login Supabase CLOUDSAFE:", e, k);
 
-    // 1️⃣ Buscar registro exacto — CLOUDSAFE FORCED STRING MATCH
+  // 1️⃣ Buscar registro exacto — Cloudflare SAFE (sin .eq)
   const { data: rows, error: lookupError } = await supabase
     .from("licenses")
     .select("*");
@@ -37,21 +37,16 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 🔍 Buscar coincidencia manual en cliente (Cloudflare SAFE)
+  // 🔍 Coincidencia manual local (evita bug de tipo en Cloudflare)
   const row = (rows || []).find(
     (r) =>
       String(r.email).trim().toLowerCase() === e &&
       String(r.license_key).trim() === k
   );
 
-  if (lookupError) {
-    console.error("❌ Error al consultar Supabase:", lookupError);
-    alert("Error de conexión con Supabase.");
-    return;
-  }
-
   if (!row) {
     alert("❌ Licencia o email inválidos (no encontrado en la base)");
+    console.warn("🧩 No se encontró coincidencia en los registros locales.");
     return;
   }
 
@@ -136,9 +131,9 @@ export function startRealtimeMonitor(email, localSessionId) {
         }
       }
     )
-    .subscribe((status) =>
-      console.log("🟢 Canal Realtime conectado:", status)
-    );
+    .subscribe((status) => {
+      console.log("🟢 Canal Realtime conectado:", status);
+    });
 }
 
 /* ==========================================================
