@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V6.1 — Sesión Única Realtime + Cloudflare SAFE
+   ✅ CFC_LOCK_SUPABASE_V6.2 — Sesión Única Realtime (Prioridad Nueva Sesión)
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
@@ -52,17 +52,7 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 2️⃣ Cerrar sesiones anteriores del mismo usuario (si existieran)
-  await supabase
-    .from("licenses")
-    .update({
-      active_session: false,
-      session_id: null,
-      updated_at: nowISO(),
-    })
-    .eq("email", e);
-
-  // 3️⃣ Registrar nueva sesión activa
+  // 2️⃣ Registrar nueva sesión activa directamente (sin limpiar antes)
   const { error: updateError } = await supabase
     .from("licenses")
     .update({
@@ -78,17 +68,17 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 4️⃣ Guardar localmente
+  // 3️⃣ Guardar localmente
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
   console.log("✅ Sesión iniciada correctamente:", sessionId);
 
-  // 5️⃣ Activar monitor Realtime
+  // 4️⃣ Activar monitor Realtime
   startRealtimeMonitor(e, sessionId);
 
-  // 6️⃣ Redirigir
+  // 5️⃣ Redirigir
   window.location.href = "../index.html";
 }
 
@@ -114,13 +104,13 @@ export async function CFC_logout(manual = true) {
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Cierra si otro dispositivo inicia sesión
+   ⚡ MONITOR — Cierra si la sesión local deja de ser la activa
    ========================================================== */
 export function startRealtimeMonitor(email, localSessionId) {
   console.log("👁️ Realtime activo para:", email);
 
   const channel = supabase
-    .channel("licenses-stream")
+    .channel("licenses-monitor")
     .on(
       "postgres_changes",
       {
@@ -133,9 +123,9 @@ export function startRealtimeMonitor(email, localSessionId) {
         const remoteSID = payload?.new?.session_id;
         const active = payload?.new?.active_session;
 
-        // 🔍 Detecta si otro dispositivo activó una nueva sesión
+        // ✅ Si la sesión cambió en la BD y ya no coincide → cerrar esta instancia
         if (active && remoteSID && remoteSID !== localSessionId) {
-          console.warn("🚨 Sesión duplicada detectada (auto-cierre)");
+          console.warn("🚨 Esta sesión fue reemplazada por una nueva → cierre local");
           localStorage.clear();
           alert("⚠️ Tu sesión fue cerrada automáticamente porque iniciaste en otro dispositivo.");
           window.location.href = "../html/login.html";
@@ -152,11 +142,11 @@ export function startRealtimeMonitor(email, localSessionId) {
       console.warn("🔄 Reintentando conexión Realtime...");
       startRealtimeMonitor(email, localSessionId);
     }
-  }, 60000); // cada 60 segundos
+  }, 60000);
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD — Restaura sesión previa y mantiene monitor
+   🧩 AUTOLOAD — Restaura sesión previa y mantiene monitor activo
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const email = localStorage.getItem("CFC_EMAIL");
