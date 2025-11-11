@@ -1,14 +1,14 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V56.1_FINAL_FIX — Sesión Única (Firebase SAFE)
+   ✅ CFC_LOCK_IDENTITY_V56.2_REALTIME_FIX_FINAL — Sesión Única
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ==========================================================
-   ✅ Características:
+   🔹 Características:
    - Sin Firebase Auth (usa email/licencia)
-   - Cierre automático entre dispositivos (reemplazo inmediato)
+   - Cierre automático entre dispositivos en <2 s
    - Compatible con Cloudflare Pages (sin backend)
-   - Sin caché local: usa disableNetwork()/enableNetwork()
-   - Corrige cierre duplicado y reconexión en background
+   - Sin caché local: disableNetwork()/enableNetwork()
+   - Monitor persistente (reconecta tras cambios de red)
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -35,17 +35,12 @@ const firebaseConfig = {
 };
 
 let app, db;
-
-// 🔧 Inicializa Firebase en modo seguro (sin caché)
 try {
   if (!getApps().length) app = initializeApp(firebaseConfig);
   else app = getApp();
   db = getFirestore(app);
-
-  // ⚡ Fuerza lectura directa desde el servidor
   await disableNetwork(db);
   await enableNetwork(db);
-
   console.log("🧩 Firebase inicializado — modo sin caché local (SAFE)");
 } catch (err) {
   console.error("❌ Error inicializando Firebase:", err);
@@ -54,7 +49,8 @@ try {
 /* ==========================================================
    🧩 Utilidades
    ========================================================== */
-const makeSessionId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+const makeSessionId = () =>
+  `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 const nowISO = () => new Date().toISOString();
 
 /* ==========================================================
@@ -67,26 +63,31 @@ export async function CFC_login(email, license) {
     const sid = makeSessionId();
     const ref = doc(db, "licenses", e);
 
-    // 🔍 Verifica si existe y valida licencia
+    // Obtener datos actuales
     const snap = await getDoc(ref);
     const data = snap.exists() ? snap.data() : null;
 
+    // Validar licencia si ya existe
     if (data && data.license_key && data.license_key !== k) {
       alert("❌ Licencia inválida para este email.");
       return;
     }
 
-    // 🔄 Actualiza sesión (reemplazo inmediato)
-    await setDoc(ref, {
-      email: e,
-      license_key: k,
-      session_id: sid,
-      active_session: true,
-      updated_at: serverTimestamp(),
-      updated_at_iso: nowISO(),
-    });
+    // 🔄 Registrar nueva sesión (reemplazo inmediato)
+    await setDoc(
+      ref,
+      {
+        email: e,
+        license_key: k,
+        session_id: sid,
+        active_session: true,
+        updated_at: serverTimestamp(),
+        updated_at_iso: nowISO(),
+      },
+      { merge: true }
+    );
 
-    // 💾 Guarda localmente
+    // Guardar datos locales
     localStorage.setItem("CFC_EMAIL", e);
     localStorage.setItem("CFC_LICENSE", k);
     localStorage.setItem("CFC_SESSION_ID", sid);
@@ -101,7 +102,7 @@ export async function CFC_login(email, license) {
 }
 
 /* ==========================================================
-   🔒 LOGOUT — Cierre manual o remoto
+   🔒 LOGOUT — Manual o remoto
    ========================================================== */
 export async function CFC_logout(manual = true) {
   try {
@@ -132,9 +133,11 @@ function startRealtimeMonitor() {
   if (!e || !sid) return;
 
   const ref = doc(db, "licenses", e);
-
   console.log(`👁️ Monitor activo → ${e} | SID local=${sid}`);
 
+  let lastRemoteSID = null;
+
+  // Escucha continua en tiempo real
   onSnapshot(
     ref,
     (snap) => {
@@ -143,12 +146,25 @@ function startRealtimeMonitor() {
       const remoteSID = data.session_id;
       const active = data.active_session;
 
-      // 🚨 Si otro dispositivo inició sesión, cerrar inmediatamente
+      // Evita repeticiones innecesarias
+      if (remoteSID === lastRemoteSID) return;
+      lastRemoteSID = remoteSID;
+
+      // 🚨 Otro dispositivo reemplazó la sesión actual
       if (active && remoteSID && remoteSID !== sid) {
         console.warn("🚨 Sesión duplicada detectada → cierre inmediato");
         localStorage.clear();
-        CFC_showBlockOverlay("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
+        CFC_showBlockOverlay(
+          "⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo."
+        );
         setTimeout(() => (window.location.href = "../html/login.html"), 1500);
+      }
+
+      // 🔒 Si la sesión fue cerrada manualmente desde otro lado
+      if (!active) {
+        console.warn("🔒 Sesión remota cerrada → desconexión local");
+        localStorage.clear();
+        setTimeout(() => (window.location.href = "../html/login.html"), 1200);
       }
     },
     (error) => {
@@ -158,19 +174,25 @@ function startRealtimeMonitor() {
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD — Reactiva monitor en todas las páginas
+   🧩 AUTOLOAD — Reactiva monitor global
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   startRealtimeMonitor();
+
+  // 🔁 Reconexión automática al recuperar red
+  window.addEventListener("online", () => {
+    console.log("🌐 Conexión restablecida, reactivando monitor...");
+    startRealtimeMonitor();
+  });
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V56.1_FINAL_FIX
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V56.2_REALTIME_FIX_FINAL
 -----------------------------------------
 🔹 Firestore SAFE (sin Auth)
 🔹 Colección: licenses/{email}
-🔹 Cierre inmediato cross-device
-🔹 Reemplazo 100% en tiempo real
+🔹 Cierre inmediato entre dispositivos
+🔹 Reconexión automática al volver online
 🔹 Cloudflare Pages compatible
 -----------------------------------------
 `);
