@@ -1,11 +1,11 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V5.9.1_STABLE_FINAL — Sesión Única (SAFE)
+   ✅ CFC_LOCK_SUPABASE_V5.9.2_FINAL_FIX — Sesión Única (SAFE)
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    Descripción:
-   - Garantiza una sola sesión activa por usuario (email/licencia)
-   - Compatible con Cloudflare Pages (modo SAFE)
-   - Tolera errores 401 y se auto-reconecta en fallback
+   - Soluciona error 401 (Auth Header Legacy)
+   - Compatible con Cloudflare Pages
+   - Usa headers forzados para la anon key
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -17,7 +17,16 @@ const SUPABASE_URL = "https://kcunrrmvmvdlkdigzpcy.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjdW5ycm12bXZkbGtkaWd6cGN5Iiwicm9zZSI6ImFub24iLCJpYXQiOjE3NjI0NzU0MDQsImV4cCI6MjA3ODA1MTQwNH0.SluKoDu-Al8OeyHtSFQOcsRnTyYqKw3ZdXxdOBJ0h3g";
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// 🧩 FIX: Forzar headers legacy
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+  db: { schema: "public" },
+  global: {
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+    },
+  },
+});
 
 const nowISO = () => new Date().toISOString();
 const makeSessionId = () =>
@@ -33,13 +42,12 @@ export async function CFC_login(email, licenseKey) {
 
   console.log("🔐 Intentando login Supabase:", e, k);
 
-  // Intento de conexión
   const { data: rows, error: lookupError, status } = await supabase
     .from("licenses")
     .select("id,email,license_key,active_session,session_id");
 
   if (lookupError || status === 401) {
-    console.warn("⚠️ Error de conexión o API (401). Revisa la clave anon o activa 'legacy API keys' en Supabase.");
+    console.warn("⚠️ Error de conexión o API (401). Verifica la clave anon o las políticas.");
     alert("Error de conexión con Supabase (ver consola).");
     return;
   }
@@ -58,7 +66,7 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // Cierra sesión anterior del mismo usuario
+  // Cierra sesión anterior
   await supabase
     .from("licenses")
     .update({
@@ -68,7 +76,7 @@ export async function CFC_login(email, licenseKey) {
     })
     .eq("email", e);
 
-  // Registra la nueva
+  // Registra nueva sesión
   const { error: updateError } = await supabase
     .from("licenses")
     .update({
@@ -84,7 +92,6 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // Guarda datos locales
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
