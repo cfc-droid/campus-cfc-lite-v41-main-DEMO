@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V3 — Control de sesión Realtime
+   ✅ CFC_LOCK_SUPABASE_V4.2 — Control de sesión Realtime (Stable)
    Sistema: Campus CFC LITE V41-DEMO (Cloudflare SAFE)
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
@@ -27,45 +27,51 @@ const makeSessionId = () =>
    ========================================================== */
 export async function CFC_login(email, licenseKey) {
   const sessionId = makeSessionId();
-  console.log("🔐 Intentando login Supabase para:", email);
+  console.log("🔐 Intentando login Supabase QA-SYNC:", email);
 
-  // 1️⃣ Buscar la licencia
-  const { data: existing } = await supabase
+  // 1️⃣ Buscar la licencia (insensible a mayúsculas)
+  const { data: existing, error: errLookup } = await supabase
     .from("licenses")
     .select("*")
-    .eq("email", email)
-    .eq("license_key", licenseKey)
+    .ilike("email", email.trim())
+    .ilike("license_key", licenseKey.trim())
     .maybeSingle();
+
+  if (errLookup) {
+    console.error("❌ Error al consultar la licencia:", errLookup);
+    alert("Error de conexión con Supabase.");
+    return;
+  }
 
   if (!existing) {
     alert("❌ Licencia o email inválidos (no encontrado en la base)");
     return;
   }
 
-  // 2️⃣ Actualizar el registro con el nuevo session_id
-  const { error } = await supabase
+  // 2️⃣ Actualizar el registro
+  const { error: errUpdate } = await supabase
     .from("licenses")
     .update({
       active_session: true,
       session_id: sessionId,
       updated_at: nowISO(),
     })
-    .eq("email", email);
+    .eq("id", existing.id);
 
-  if (error) {
-    console.error("❌ Error al actualizar sesión:", error);
+  if (errUpdate) {
+    console.error("❌ Error al actualizar sesión:", errUpdate);
     return;
   }
 
   // 3️⃣ Guardar localmente
-  localStorage.setItem("CFC_EMAIL", email);
-  localStorage.setItem("CFC_LICENSE", licenseKey);
+  localStorage.setItem("CFC_EMAIL", existing.email);
+  localStorage.setItem("CFC_LICENSE", existing.license_key);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
-  console.log("✅ Sesión iniciada correctamente:", sessionId);
+  console.log("✅ Sesión iniciada:", sessionId);
 
-  // 4️⃣ Activar monitor Realtime
-  startRealtimeMonitor(email, sessionId);
+  // 4️⃣ Activar monitor
+  startRealtimeMonitor(existing.email, sessionId);
 
   // 5️⃣ Redirigir
   window.location.href = "../index.html";
@@ -85,7 +91,7 @@ export async function CFC_logout() {
       session_id: null,
       updated_at: nowISO(),
     })
-    .eq("email", email);
+    .ilike("email", email);
 
   localStorage.clear();
   alert("🔒 Sesión cerrada correctamente.");
@@ -93,13 +99,13 @@ export async function CFC_logout() {
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Realtime detection de duplicado
+   ⚡ MONITOR — Detección Realtime
    ========================================================== */
 export function startRealtimeMonitor(email, localSessionId) {
-  console.log("👁️ Monitor Realtime activo para:", email);
+  console.log("👁️ Monitor Realtime activo QA-SYNC para:", email);
 
   const channel = supabase
-    .channel("licenses-changes")
+    .channel("licenses-realtime")
     .on(
       "postgres_changes",
       {
@@ -109,11 +115,14 @@ export function startRealtimeMonitor(email, localSessionId) {
         filter: `email=eq.${email}`,
       },
       (payload) => {
-        const newSID = payload.new.session_id;
+        if (!payload?.new) return;
+
+        const remoteSID = payload.new.session_id;
         const active = payload.new.active_session;
 
-        if (active && newSID !== localSessionId) {
-          console.warn("🚨 Sesión duplicada detectada — cierre remoto");
+        // 🚨 Sesión duplicada
+        if (active && remoteSID !== localSessionId) {
+          console.warn("[QA-SYNC] 🚨 Sesión duplicada detectada");
           localStorage.clear();
           alert("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
           window.location.href = "../html/login.html";
@@ -121,7 +130,7 @@ export function startRealtimeMonitor(email, localSessionId) {
       }
     )
     .subscribe((status) =>
-      console.log("🟢 Canal Realtime conectado:", status)
+      console.log("🟢 Canal Realtime conectado (QA-SYNC):", status)
     );
 
   return channel;
