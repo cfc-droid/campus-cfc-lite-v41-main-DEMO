@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V5.2 — Realtime + Cloudflare SAFE (Final)
+   ✅ CFC_LOCK_SUPABASE_V5.3 — Realtime + Cloudflare SAFE (Force Match)
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
@@ -22,14 +22,14 @@ const makeSessionId = () =>
 export async function CFC_login(email, licenseKey) {
   const sessionId = makeSessionId();
   const e = String(email || "").trim().toLowerCase();
-  const k = String(licenseKey || "").trim(); // mantener exacto (puede ser numérico)
+  const k = String(licenseKey || "").trim();
 
   console.log("🔐 Intentando login Supabase CLOUDSAFE:", e, k);
 
-  // 1️⃣ Buscar registro exacto — Cloudflare SAFE (sin .eq)
+  // 1️⃣ Obtener todas las licencias (modo seguro)
   const { data: rows, error: lookupError } = await supabase
     .from("licenses")
-    .select("*");
+    .select("id,email,license_key,active_session,session_id");
 
   if (lookupError) {
     console.error("❌ Error al consultar Supabase:", lookupError);
@@ -37,16 +37,27 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 🔍 Coincidencia manual local (evita bug de tipo en Cloudflare)
-  const row = (rows || []).find(
-    (r) =>
-      String(r.email).trim().toLowerCase() === e &&
-      String(r.license_key).trim() === k
-  );
+  if (!rows?.length) {
+    alert("⚠️ No hay registros en la tabla de licencias.");
+    return;
+  }
+
+  // 🔍 Coincidencia forzada (normaliza todo: minúsculas, trim, tipo numérico y textual)
+  const row = rows.find((r) => {
+    const dbEmail = String(r.email || "").trim().toLowerCase();
+    const dbKey = String(r.license_key || "").trim();
+    return (
+      dbEmail === e &&
+      (dbKey === k ||
+        dbKey === String(Number(k)) ||
+        String(Number(dbKey)) === k)
+    );
+  });
 
   if (!row) {
     alert("❌ Licencia o email inválidos (no encontrado en la base)");
-    console.warn("🧩 No se encontró coincidencia en los registros locales.");
+    console.warn("🧩 No se encontró coincidencia exacta en registros locales.");
+    console.table(rows);
     return;
   }
 
@@ -71,7 +82,7 @@ export async function CFC_login(email, licenseKey) {
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
-  console.log("✅ Sesión iniciada:", sessionId);
+  console.log("✅ Sesión iniciada correctamente:", sessionId);
 
   // 4️⃣ Activar monitor Realtime
   startRealtimeMonitor(e, sessionId);
