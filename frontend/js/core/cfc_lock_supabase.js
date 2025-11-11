@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V5.0 — Realtime + Cloudflare Safe
+   ✅ CFC_LOCK_SUPABASE_V5.1 — Realtime + Cloudflare SAFE (Stable)
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
@@ -21,9 +21,10 @@ const makeSessionId = () =>
    ========================================================== */
 export async function CFC_login(email, licenseKey) {
   const sessionId = makeSessionId();
-  const e = email.trim().toLowerCase();
-  const k = licenseKey.trim().toLowerCase();
-  console.log("🔐 Intentando login Supabase CLOUDSAFE:", e);
+  const e = String(email || "").trim().toLowerCase();
+  const k = String(licenseKey || "").trim(); // ✅ no lowercase para claves numéricas
+
+  console.log("🔐 Intentando login Supabase CLOUDSAFE:", e, k);
 
   // 1️⃣ Buscar registro exacto
   const { data: row, error: lookupError } = await supabase
