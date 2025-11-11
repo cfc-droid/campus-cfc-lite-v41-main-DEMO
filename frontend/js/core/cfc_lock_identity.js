@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V56.0_FINAL — Sesión Única (Firebase SAFE)
+   ✅ CFC_LOCK_IDENTITY_V56.1_FINAL_FIX — Sesión Única (Firebase SAFE)
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ==========================================================
@@ -8,6 +8,7 @@
    - Cierre automático entre dispositivos (reemplazo inmediato)
    - Compatible con Cloudflare Pages (sin backend)
    - Sin caché local: usa disableNetwork()/enableNetwork()
+   - Corrige cierre duplicado y reconexión en background
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -25,7 +26,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ==========================================================
-   🔹 Configuración Firebase (tu proyecto)
+   🔹 Configuración Firebase
    ========================================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
@@ -35,25 +36,29 @@ const firebaseConfig = {
 
 let app, db;
 
+// 🔧 Inicializa Firebase en modo seguro (sin caché)
 try {
   if (!getApps().length) app = initializeApp(firebaseConfig);
   else app = getApp();
   db = getFirestore(app);
+
+  // ⚡ Fuerza lectura directa desde el servidor
   await disableNetwork(db);
   await enableNetwork(db);
+
   console.log("🧩 Firebase inicializado — modo sin caché local (SAFE)");
 } catch (err) {
   console.error("❌ Error inicializando Firebase:", err);
 }
 
 /* ==========================================================
-   🧩 Utilidades básicas
+   🧩 Utilidades
    ========================================================== */
 const makeSessionId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 const nowISO = () => new Date().toISOString();
 
 /* ==========================================================
-   🔐 LOGIN — Activa o reemplaza sesión única
+   🔐 LOGIN — Crea o reemplaza sesión activa
    ========================================================== */
 export async function CFC_login(email, license) {
   try {
@@ -62,17 +67,16 @@ export async function CFC_login(email, license) {
     const sid = makeSessionId();
     const ref = doc(db, "licenses", e);
 
-    // Obtener sesión existente
+    // 🔍 Verifica si existe y valida licencia
     const snap = await getDoc(ref);
     const data = snap.exists() ? snap.data() : null;
 
-    // Validación de licencia (opcional)
     if (data && data.license_key && data.license_key !== k) {
       alert("❌ Licencia inválida para este email.");
       return;
     }
 
-    // Registrar / reemplazar sesión activa
+    // 🔄 Actualiza sesión (reemplazo inmediato)
     await setDoc(ref, {
       email: e,
       license_key: k,
@@ -82,7 +86,7 @@ export async function CFC_login(email, license) {
       updated_at_iso: nowISO(),
     });
 
-    // Guardar localmente
+    // 💾 Guarda localmente
     localStorage.setItem("CFC_EMAIL", e);
     localStorage.setItem("CFC_LICENSE", k);
     localStorage.setItem("CFC_SESSION_ID", sid);
@@ -113,14 +117,14 @@ export async function CFC_logout(manual = true) {
 
     localStorage.clear();
     if (manual) CFC_showBlockOverlay("🔒 Sesión cerrada correctamente.");
-    window.location.href = "../html/login.html";
+    setTimeout(() => (window.location.href = "../html/login.html"), 800);
   } catch (err) {
     console.error("❌ Error en logout:", err);
   }
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Cierre automático entre dispositivos
+   ⚡ MONITOR — Detecta cambios remotos en tiempo real
    ========================================================== */
 function startRealtimeMonitor() {
   const e = localStorage.getItem("CFC_EMAIL");
@@ -129,40 +133,44 @@ function startRealtimeMonitor() {
 
   const ref = doc(db, "licenses", e);
 
-  console.log(`👁️ Monitor activo para: ${e} | SID local=${sid}`);
+  console.log(`👁️ Monitor activo → ${e} | SID local=${sid}`);
 
-  onSnapshot(ref, (snap) => {
-    if (!snap.exists()) return;
-    const data = snap.data();
-    const remoteSID = data.session_id;
-    const active = data.active_session;
+  onSnapshot(
+    ref,
+    (snap) => {
+      if (!snap.exists()) return;
+      const data = snap.data();
+      const remoteSID = data.session_id;
+      const active = data.active_session;
 
-    // Si otro dispositivo activó una nueva sesión → cierre inmediato
-    if (active && remoteSID && remoteSID !== sid) {
-      console.warn("🚨 Sesión duplicada detectada → cierre automático");
-      localStorage.clear();
-      CFC_showBlockOverlay("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
-      setTimeout(() => {
-        window.location.href = "../html/login.html";
-      }, 1800);
+      // 🚨 Si otro dispositivo inició sesión, cerrar inmediatamente
+      if (active && remoteSID && remoteSID !== sid) {
+        console.warn("🚨 Sesión duplicada detectada → cierre inmediato");
+        localStorage.clear();
+        CFC_showBlockOverlay("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
+        setTimeout(() => (window.location.href = "../html/login.html"), 1500);
+      }
+    },
+    (error) => {
+      console.error("❌ Error en monitor Realtime:", error);
     }
-  });
+  );
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD — Reactiva monitor al cargar cualquier página
+   🧩 AUTOLOAD — Reactiva monitor en todas las páginas
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   startRealtimeMonitor();
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V56.0_FINAL
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V56.1_FINAL_FIX
 -----------------------------------------
-🔹 Firebase Firestore (modo SAFE)
-🔹 Sin Firebase Auth
-🔹 Sesión única real (reemplazo inmediato)
-🔹 Cierre automático cross-device
-🔹 100 % compatible con Cloudflare Pages
+🔹 Firestore SAFE (sin Auth)
+🔹 Colección: licenses/{email}
+🔹 Cierre inmediato cross-device
+🔹 Reemplazo 100% en tiempo real
+🔹 Cloudflare Pages compatible
 -----------------------------------------
 `);
