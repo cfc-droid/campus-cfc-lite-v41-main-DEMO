@@ -114,50 +114,53 @@ async function getRemoteSession(uid) {
 }
 
 /* ==========================================================
-   🔁 MONITOR ACTIVO — “Force Boot Mode”
+   🔁 MONITOR ACTIVO — Realtime con onSnapshot()
    ========================================================== */
-async function startMonitor() {
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
+function startRealtimeMonitor() {
   const uid = localStorage.getItem("CFC_SESSION_UID");
   const localSID = localStorage.getItem("CFC_SESSION_ID");
   const localUpdate = localStorage.getItem("CFC_SESSION_LASTUPDATE");
 
   if (!uid || !localSID) return;
 
-  console.log(`[QA-SYNC] 🚀 Force Boot Monitor activo para UID=${uid}`);
+  console.log(`[QA-SYNC] ⚡ Realtime Monitor activo para UID=${uid}`);
 
-  setInterval(async () => {
-    const remote = await getRemoteSession(uid);
-    if (!remote || !remote.sid) return;
+  const ref = doc(db, "sessions", uid);
 
-    const remoteSID = remote.sid;
-    const remoteTime = new Date(remote.updatedISO).getTime();
+  onSnapshot(ref, async (snapshot) => {
+    if (!snapshot.exists()) return;
+    const data = snapshot.data();
+    const remoteSID = data.sessionId;
+    const remoteTime = new Date(data.updatedAtISO).getTime();
     const localTime = new Date(localUpdate).getTime();
     const diff = Math.abs(remoteTime - localTime);
 
-    if (remoteSID !== localSID && diff < 30000) {
-      console.warn("[QA-SYNC] 🚨 Sesión más reciente detectada — cierre forzado");
+    if (remoteSID !== localSID && diff < 60000) {
+      console.warn("[QA-SYNC] 🚨 Sesión duplicada detectada — cierre remoto");
       localStorage.clear();
       await signOut(auth);
       CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
     }
-  }, 8000);
+  });
 }
 
 /* ==========================================================
    🧩 INICIO AUTOMÁTICO DEL MONITOR
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-  startMonitor(); // 🔹 se ejecuta aunque el usuario ya esté autenticado
+  startRealtimeMonitor();
   onAuthStateChanged(auth, (user) => {
     if (user) console.log(`[QA-SYNC] 👁️ Usuario autenticado: ${user.email}`);
   });
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V53.2_FORCE_BOOT_MONITOR
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V54.0_ONSNAPSHOT_REALTIME_MODE
 -----------------------------------------
-🔹 Inicia monitor incluso si ya hay sesión activa
-🔹 Detección de doble login en 8 s
+🔹 Listener Firestore onSnapshot()
+🔹 Cierre inmediato entre dispositivos
 🔹 100 % Cloudflare SAFE — sin backend
 -----------------------------------------
 `);
