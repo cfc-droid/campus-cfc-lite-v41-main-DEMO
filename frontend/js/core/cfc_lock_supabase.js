@@ -1,23 +1,17 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V4.2 — Control de sesión Realtime (Stable)
-   Sistema: Campus CFC LITE V41-DEMO (Cloudflare SAFE)
+   ✅ CFC_LOCK_SUPABASE_V5.0 — Realtime + Cloudflare Safe
+   Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-/* ==========================================================
-   🔹 Configuración Supabase
-   ========================================================== */
 const SUPABASE_URL = "https://kcunrrmvmvdlkdigzpcy.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjdW5ycm12bXZkbGtkaWd6cGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NzU0MDQsImV4cCI6MjA3ODA1MTQwNH0.SluKoDu-Al8OeyHtSFQOcsRnTyYqKw3ZdXxdOBJ0h3g";
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-/* ==========================================================
-   🧩 Utilidades
-   ========================================================== */
 const nowISO = () => new Date().toISOString();
 const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
@@ -27,51 +21,54 @@ const makeSessionId = () =>
    ========================================================== */
 export async function CFC_login(email, licenseKey) {
   const sessionId = makeSessionId();
-  console.log("🔐 Intentando login Supabase QA-SYNC:", email);
+  const e = email.trim().toLowerCase();
+  const k = licenseKey.trim().toLowerCase();
+  console.log("🔐 Intentando login Supabase CLOUDSAFE:", e);
 
-  // 1️⃣ Buscar la licencia (insensible a mayúsculas)
-  const { data: existing, error: errLookup } = await supabase
+  // 1️⃣ Buscar registro exacto
+  const { data: row, error: lookupError } = await supabase
     .from("licenses")
     .select("*")
-    .ilike("email", email.trim())
-    .ilike("license_key", licenseKey.trim())
+    .eq("email", e)
+    .eq("license_key", k)
     .maybeSingle();
 
-  if (errLookup) {
-    console.error("❌ Error al consultar la licencia:", errLookup);
+  if (lookupError) {
+    console.error("❌ Error al consultar Supabase:", lookupError);
     alert("Error de conexión con Supabase.");
     return;
   }
 
-  if (!existing) {
+  if (!row) {
     alert("❌ Licencia o email inválidos (no encontrado en la base)");
     return;
   }
 
-  // 2️⃣ Actualizar el registro
-  const { error: errUpdate } = await supabase
+  // 2️⃣ Actualizar la sesión
+  const { error: updateError } = await supabase
     .from("licenses")
     .update({
       active_session: true,
       session_id: sessionId,
       updated_at: nowISO(),
     })
-    .eq("id", existing.id);
+    .eq("id", row.id);
 
-  if (errUpdate) {
-    console.error("❌ Error al actualizar sesión:", errUpdate);
+  if (updateError) {
+    console.error("❌ Error al actualizar sesión:", updateError);
+    alert("Error al actualizar la sesión.");
     return;
   }
 
   // 3️⃣ Guardar localmente
-  localStorage.setItem("CFC_EMAIL", existing.email);
-  localStorage.setItem("CFC_LICENSE", existing.license_key);
+  localStorage.setItem("CFC_EMAIL", e);
+  localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
   console.log("✅ Sesión iniciada:", sessionId);
 
-  // 4️⃣ Activar monitor
-  startRealtimeMonitor(existing.email, sessionId);
+  // 4️⃣ Activar monitor Realtime
+  startRealtimeMonitor(e, sessionId);
 
   // 5️⃣ Redirigir
   window.location.href = "../index.html";
@@ -91,7 +88,7 @@ export async function CFC_logout() {
       session_id: null,
       updated_at: nowISO(),
     })
-    .ilike("email", email);
+    .eq("email", email);
 
   localStorage.clear();
   alert("🔒 Sesión cerrada correctamente.");
@@ -99,13 +96,13 @@ export async function CFC_logout() {
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Detección Realtime
+   ⚡ MONITOR — Detección Realtime duplicada
    ========================================================== */
 export function startRealtimeMonitor(email, localSessionId) {
-  console.log("👁️ Monitor Realtime activo QA-SYNC para:", email);
+  console.log("👁️ Realtime activo para:", email);
 
-  const channel = supabase
-    .channel("licenses-realtime")
+  supabase
+    .channel("licenses-stream")
     .on(
       "postgres_changes",
       {
@@ -115,14 +112,13 @@ export function startRealtimeMonitor(email, localSessionId) {
         filter: `email=eq.${email}`,
       },
       (payload) => {
-        if (!payload?.new) return;
+        const remoteSID = payload?.new?.session_id;
+        const active = payload?.new?.active_session;
 
-        const remoteSID = payload.new.session_id;
-        const active = payload.new.active_session;
+        if (!remoteSID) return;
 
-        // 🚨 Sesión duplicada
         if (active && remoteSID !== localSessionId) {
-          console.warn("[QA-SYNC] 🚨 Sesión duplicada detectada");
+          console.warn("🚨 Sesión duplicada detectada (QA-SYNC)");
           localStorage.clear();
           alert("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
           window.location.href = "../html/login.html";
@@ -130,14 +126,12 @@ export function startRealtimeMonitor(email, localSessionId) {
       }
     )
     .subscribe((status) =>
-      console.log("🟢 Canal Realtime conectado (QA-SYNC):", status)
+      console.log("🟢 Canal Realtime conectado:", status)
     );
-
-  return channel;
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD — si hay sesión local
+   🧩 AUTOLOAD — Sesión previa
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const email = localStorage.getItem("CFC_EMAIL");
