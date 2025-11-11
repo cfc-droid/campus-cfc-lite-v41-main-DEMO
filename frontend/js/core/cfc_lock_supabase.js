@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V5.3 — Realtime + Cloudflare SAFE (Force Match)
+   ✅ CFC_LOCK_SUPABASE_V6.0 — Sesión Única Realtime + Cloudflare SAFE
    Sistema: Campus CFC LITE V41-DEMO
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
@@ -17,7 +17,7 @@ const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
 /* ==========================================================
-   🔐 LOGIN — Crea o actualiza la sesión
+   🔐 LOGIN — Crea sesión única y cierra las anteriores
    ========================================================== */
 export async function CFC_login(email, licenseKey) {
   const sessionId = makeSessionId();
@@ -26,7 +26,7 @@ export async function CFC_login(email, licenseKey) {
 
   console.log("🔐 Intentando login Supabase CLOUDSAFE:", e, k);
 
-  // 1️⃣ Obtener todas las licencias (modo seguro)
+  // 1️⃣ Buscar licencia válida
   const { data: rows, error: lookupError } = await supabase
     .from("licenses")
     .select("id,email,license_key,active_session,session_id");
@@ -37,12 +37,6 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  if (!rows?.length) {
-    alert("⚠️ No hay registros en la tabla de licencias.");
-    return;
-  }
-
-  // 🔍 Coincidencia forzada (normaliza todo: minúsculas, trim, tipo numérico y textual)
   const row = rows.find((r) => {
     const dbEmail = String(r.email || "").trim().toLowerCase();
     const dbKey = String(r.license_key || "").trim();
@@ -55,13 +49,21 @@ export async function CFC_login(email, licenseKey) {
   });
 
   if (!row) {
-    alert("❌ Licencia o email inválidos (no encontrado en la base)");
-    console.warn("🧩 No se encontró coincidencia exacta en registros locales.");
-    console.table(rows);
+    alert("❌ Email o licencia inválida.");
     return;
   }
 
-  // 2️⃣ Actualizar la sesión
+  // 2️⃣ Cerrar sesiones anteriores del mismo usuario (si existieran)
+  await supabase
+    .from("licenses")
+    .update({
+      active_session: false,
+      session_id: null,
+      updated_at: nowISO(),
+    })
+    .eq("email", e);
+
+  // 3️⃣ Registrar nueva sesión activa
   const { error: updateError } = await supabase
     .from("licenses")
     .update({
@@ -73,28 +75,28 @@ export async function CFC_login(email, licenseKey) {
 
   if (updateError) {
     console.error("❌ Error al actualizar sesión:", updateError);
-    alert("Error al actualizar la sesión.");
+    alert("Error al actualizar sesión en Supabase.");
     return;
   }
 
-  // 3️⃣ Guardar localmente
+  // 4️⃣ Guardar localmente
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
   console.log("✅ Sesión iniciada correctamente:", sessionId);
 
-  // 4️⃣ Activar monitor Realtime
+  // 5️⃣ Activar monitor Realtime
   startRealtimeMonitor(e, sessionId);
 
-  // 5️⃣ Redirigir
+  // 6️⃣ Redirigir
   window.location.href = "../index.html";
 }
 
 /* ==========================================================
-   🔒 LOGOUT — Finaliza sesión
+   🔒 LOGOUT — Finaliza sesión manual o remota
    ========================================================== */
-export async function CFC_logout() {
+export async function CFC_logout(manual = true) {
   const email = localStorage.getItem("CFC_EMAIL");
   if (!email) return;
 
@@ -108,12 +110,12 @@ export async function CFC_logout() {
     .eq("email", email);
 
   localStorage.clear();
-  alert("🔒 Sesión cerrada correctamente.");
+  if (manual) alert("🔒 Sesión cerrada correctamente.");
   window.location.href = "../html/login.html";
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Detección Realtime duplicada
+   ⚡ MONITOR — Cierra si otro dispositivo inicia sesión
    ========================================================== */
 export function startRealtimeMonitor(email, localSessionId) {
   console.log("👁️ Realtime activo para:", email);
@@ -132,12 +134,13 @@ export function startRealtimeMonitor(email, localSessionId) {
         const remoteSID = payload?.new?.session_id;
         const active = payload?.new?.active_session;
 
-        if (!remoteSID) return;
-
-        if (active && remoteSID !== localSessionId) {
-          console.warn("🚨 Sesión duplicada detectada (QA-SYNC)");
+        // Si la sesión activa cambió → cerramos automáticamente
+        if (active && remoteSID && remoteSID !== localSessionId) {
+          console.warn("🚨 Sesión duplicada detectada (auto-cierre)");
           localStorage.clear();
-          alert("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
+          alert(
+            "⚠️ Tu sesión fue cerrada automáticamente porque iniciaste en otro dispositivo."
+          );
           window.location.href = "../html/login.html";
         }
       }
@@ -148,7 +151,7 @@ export function startRealtimeMonitor(email, localSessionId) {
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD — Sesión previa
+   🧩 AUTOLOAD — Restaura sesión previa y mantiene monitor
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const email = localStorage.getItem("CFC_EMAIL");
