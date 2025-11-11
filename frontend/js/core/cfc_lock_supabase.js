@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V2 — Control de sesión Realtime
+   ✅ CFC_LOCK_SUPABASE_V3 — Control de sesión Realtime
    Sistema: Campus CFC LITE V41-DEMO (Cloudflare SAFE)
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
@@ -13,7 +13,7 @@ const SUPABASE_URL = "https://kcunrrmvmvdlkdigzpcy.supabase.co";
 const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtjdW5ycm12bXZkbGtkaWd6cGN5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI0NzU0MDQsImV4cCI6MjA3ODA1MTQwNH0.SluKoDu-Al8OeyHtSFQOcsRnTyYqKw3ZdXxdOBJ0h3g";
 
-export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 /* ==========================================================
    🧩 Utilidades
@@ -23,45 +23,56 @@ const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
 /* ==========================================================
-   🔐 LOGIN — Activa la sesión y guarda el session_id
+   🔐 LOGIN — Crea o actualiza la sesión
    ========================================================== */
 export async function CFC_login(email, licenseKey) {
   const sessionId = makeSessionId();
+  console.log("🔐 Intentando login Supabase para:", email);
 
-  const { data, error } = await supabase
+  // 1️⃣ Buscar la licencia
+  const { data: existing } = await supabase
+    .from("licenses")
+    .select("*")
+    .eq("email", email)
+    .eq("license_key", licenseKey)
+    .maybeSingle();
+
+  if (!existing) {
+    alert("❌ Licencia o email inválidos (no encontrado en la base)");
+    return;
+  }
+
+  // 2️⃣ Actualizar el registro con el nuevo session_id
+  const { error } = await supabase
     .from("licenses")
     .update({
       active_session: true,
       session_id: sessionId,
       updated_at: nowISO(),
     })
-    .eq("email", email)
-    .eq("license_key", licenseKey)
-    .select("*")
-    .single();
+    .eq("email", email);
 
-  if (error || !data) {
-    alert("❌ Licencia o email inválidos");
-    console.error(error);
+  if (error) {
+    console.error("❌ Error al actualizar sesión:", error);
     return;
   }
 
-  // ✅ Guardar localmente
+  // 3️⃣ Guardar localmente
   localStorage.setItem("CFC_EMAIL", email);
   localStorage.setItem("CFC_LICENSE", licenseKey);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
-  console.log("✅ Sesión iniciada:", sessionId);
+  console.log("✅ Sesión iniciada correctamente:", sessionId);
 
-  // ✅ Iniciar monitor Realtime
+  // 4️⃣ Activar monitor Realtime
   startRealtimeMonitor(email, sessionId);
 
-  // ✅ Redirigir al Dashboard
+  // 5️⃣ Redirigir
   window.location.href = "../index.html";
 }
 
 /* ==========================================================
-   🔒 LOGOUT — Cierra la sesión actual
+   🔒 LOGOUT — Finaliza sesión
    ========================================================== */
 export async function CFC_logout() {
   const email = localStorage.getItem("CFC_EMAIL");
@@ -82,13 +93,13 @@ export async function CFC_logout() {
 }
 
 /* ==========================================================
-   ⚡ MONITOR EN TIEMPO REAL
+   ⚡ MONITOR — Realtime detection de duplicado
    ========================================================== */
 export function startRealtimeMonitor(email, localSessionId) {
-  console.log("👁️ Monitor Supabase activo para:", email);
+  console.log("👁️ Monitor Realtime activo para:", email);
 
-  supabase
-    .channel("realtime:licenses")
+  const channel = supabase
+    .channel("licenses-changes")
     .on(
       "postgres_changes",
       {
@@ -98,28 +109,29 @@ export function startRealtimeMonitor(email, localSessionId) {
         filter: `email=eq.${email}`,
       },
       (payload) => {
-        const remote = payload.new.session_id;
+        const newSID = payload.new.session_id;
         const active = payload.new.active_session;
 
-        // 🚨 Detecta inicio desde otro dispositivo
-        if (remote !== localSessionId && active) {
-          console.warn("🚨 Sesión duplicada detectada");
+        if (active && newSID !== localSessionId) {
+          console.warn("🚨 Sesión duplicada detectada — cierre remoto");
           localStorage.clear();
           alert("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
           window.location.href = "../html/login.html";
         }
       }
     )
-    .subscribe((status) => {
-      console.log("🟢 Canal Realtime conectado:", status);
-    });
+    .subscribe((status) =>
+      console.log("🟢 Canal Realtime conectado:", status)
+    );
+
+  return channel;
 }
 
 /* ==========================================================
-   🧩 AUTOINICIO — si ya hay sesión local
+   🧩 AUTOLOAD — si hay sesión local
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const email = localStorage.getItem("CFC_EMAIL");
-  const sessionId = localStorage.getItem("CFC_SESSION_ID");
-  if (email && sessionId) startRealtimeMonitor(email, sessionId);
+  const sid = localStorage.getItem("CFC_SESSION_ID");
+  if (email && sid) startRealtimeMonitor(email, sid);
 });
