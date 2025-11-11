@@ -1,6 +1,7 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V57.1_REAL_FINAL — Sesión Única Cross-Device
+   ✅ CFC_LOCK_IDENTITY_V57.2_HEARTBEAT_MODE_FINAL
    Sistema: Campus CFC LITE V41-DEMO
+   Función: Sesión Única Cross-Device + Heartbeat SAFE
    Auditor: QA-SYNC — 2025-11-11
    ========================================================== */
 
@@ -25,12 +26,11 @@ const firebaseConfig = {
   projectId: "cfc-lock-firebase",
 };
 
-let app, db;
+let db;
 try {
-  if (!getApps().length) app = initializeApp(firebaseConfig);
-  else app = getApp();
+  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
   db = getFirestore(app);
-  console.log("🧩 Firebase inicializado correctamente (modo online)");
+  console.log("🧩 Firebase inicializado correctamente (modo Cloudflare SAFE)");
 } catch (err) {
   console.error("❌ Error inicializando Firebase:", err);
 }
@@ -43,7 +43,7 @@ const makeSessionId = () =>
 const nowISO = () => new Date().toISOString();
 
 /* ==========================================================
-   🔐 LOGIN — Crea o reemplaza sesión activa
+   🔐 LOGIN — Crea sesión única
    ========================================================== */
 export async function CFC_login(email, license) {
   try {
@@ -56,11 +56,10 @@ export async function CFC_login(email, license) {
     const data = snap.exists() ? snap.data() : null;
 
     if (data && data.license_key && data.license_key !== k) {
-      alert("❌ Licencia inválida para este email.");
+      alert("❌ Licencia inválida o email no coincide.");
       return;
     }
 
-    // 🔹 Marca de actualización forzada
     const force = Math.random().toString(36).substring(2, 12);
 
     await setDoc(
@@ -77,15 +76,17 @@ export async function CFC_login(email, license) {
       { merge: true }
     );
 
-    // Guardar en localStorage
     localStorage.setItem("CFC_EMAIL", e);
     localStorage.setItem("CFC_LICENSE", k);
     localStorage.setItem("CFC_SESSION_ID", sid);
-    localStorage.setItem("CFC_SESSION_LAST", nowISO());
+    localStorage.setItem("CFC_HEARTBEAT", Date.now().toString());
 
-    console.log(`✅ Nueva sesión creada: ${sid}`);
-    startRealtimeMonitor(); // 🔹 Activa el monitor inmediatamente
-    setTimeout(() => (window.location.href = "../index.html"), 600);
+    console.log(`✅ Sesión iniciada: ${sid}`);
+
+    startRealtimeMonitor();
+    startHeartbeat(e, sid);
+
+    setTimeout(() => (window.location.href = "../index.html"), 800);
   } catch (err) {
     console.error("❌ Error al iniciar sesión:", err);
     alert("Error al iniciar sesión: " + err.message);
@@ -118,7 +119,7 @@ export async function CFC_logout(manual = true) {
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Detecta cierres remotos en tiempo real
+   ⚡ MONITOR — Cierre remoto en vivo
    ========================================================== */
 function startRealtimeMonitor() {
   const e = localStorage.getItem("CFC_EMAIL");
@@ -130,7 +131,6 @@ function startRealtimeMonitor() {
 
   let lastForce = null;
 
-  // 🔴 Escucha cambios en Firestore en vivo
   onSnapshot(ref, (snap) => {
     if (!snap.exists()) return;
     const data = snap.data();
@@ -138,54 +138,57 @@ function startRealtimeMonitor() {
     const active = data.active_session;
     const force = data.force_update || null;
 
-    // Evita duplicar eventos
     if (force === lastForce) return;
     lastForce = force;
 
-    // 🚨 Cierre remoto detectado
     if (!active || (remoteSID && remoteSID !== sid)) {
       console.warn("🚨 Sesión duplicada detectada — cierre inmediato");
       localStorage.clear();
       CFC_showBlockOverlay(
-        "⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo."
+        "⚠️ Tu sesión fue cerrada automáticamente por actividad en otro dispositivo."
       );
       setTimeout(() => (window.location.href = "../html/login.html"), 1200);
     }
   });
-
-  // 🕐 Refuerzo adicional (polling cada 3s)
-  setInterval(async () => {
-    try {
-      const snap = await getDoc(ref);
-      if (!snap.exists()) return;
-      const data = snap.data();
-      if (!data.active_session || data.session_id !== sid) {
-        console.warn("🚨 Verificación periódica: cierre remoto detectado");
-        localStorage.clear();
-        CFC_showBlockOverlay(
-          "⚠️ Tu sesión fue cerrada automáticamente (verificación periódica)."
-        );
-        setTimeout(() => (window.location.href = "../html/login.html"), 1200);
-      }
-    } catch (err) {
-      console.error("⚠️ Error en polling:", err);
-    }
-  }, 3000);
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD — Reactiva monitor al cargar página
+   💓 HEARTBEAT — Refresca actividad cada 10s
+   ========================================================== */
+function startHeartbeat(email, sid) {
+  const ref = doc(db, "licenses", email);
+  setInterval(async () => {
+    try {
+      await updateDoc(ref, {
+        updated_at: serverTimestamp(),
+        heartbeat: nowISO(),
+      });
+      console.log("💓 Heartbeat enviado:", nowISO());
+    } catch (err) {
+      console.warn("⚠️ Error al enviar heartbeat:", err);
+    }
+  }, 10000);
+}
+
+/* ==========================================================
+   🧩 AUTOLOAD — Reanuda sesión y monitor
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-  startRealtimeMonitor();
+  const e = localStorage.getItem("CFC_EMAIL");
+  const sid = localStorage.getItem("CFC_SESSION_ID");
+  if (e && sid) {
+    console.log("♻️ Restaurando sesión previa:", sid);
+    startRealtimeMonitor();
+    startHeartbeat(e, sid);
+  }
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V57.1_REAL_FINAL
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V57.2_HEARTBEAT_MODE_FINAL
 -----------------------------------------
-🔹 Firestore live updates (sin Auth)
-🔹 Cierre inmediato cross-device
-🔹 Polling 3s + snapshot realtime
-🔹 Cloudflare Pages 100 % compatible
+🔹 Sesión única Firestore Realtime
+🔹 Detección inmediata cross-device
+🔹 Heartbeat 10s (actividad viva)
+🔹 100 % Cloudflare SAFE compatible
 -----------------------------------------
 `);
