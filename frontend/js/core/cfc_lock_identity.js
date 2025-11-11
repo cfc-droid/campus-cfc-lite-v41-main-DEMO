@@ -1,7 +1,7 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V53.0_FIRESTORE_SDK_FORCE_READ
+   ✅ CFC_LOCK_IDENTITY_V53.2_FORCE_BOOT_MONITOR
    Sistema: CFC-LOCK — Cloudflare SAFE (sin backend)
-   Auditor: CFC-SYNC QA FINAL — 2025-11-10
+   Auditor: CFC-SYNC QA FINAL — 2025-11-11
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
@@ -40,7 +40,7 @@ try {
   auth = getAuth(app);
   db = getFirestore(app);
   await setPersistence(auth, browserLocalPersistence);
-  console.log("🧩 Firebase init — FIRESTORE SDK FORCE READ");
+  console.log("🧩 Firebase init — FORCE BOOT MONITOR MODE");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
@@ -68,7 +68,7 @@ export async function CFC_login(email, pass) {
     await setDoc(doc(db, "sessions", uid), {
       sessionId: sid,
       updatedAt: serverTimestamp(),
-      updatedAtISO: nowISO(), // 🔹 campo clave legible
+      updatedAtISO: nowISO(),
     });
 
     console.log(`[QA-SYNC] ✅ Nueva sesión UID=${uid}, SID=${sid}`);
@@ -114,43 +114,50 @@ async function getRemoteSession(uid) {
 }
 
 /* ==========================================================
-   🔁 MONITOR activo — cierre remoto híbrido
+   🔁 MONITOR ACTIVO — “Force Boot Mode”
+   ========================================================== */
+async function startMonitor() {
+  const uid = localStorage.getItem("CFC_SESSION_UID");
+  const localSID = localStorage.getItem("CFC_SESSION_ID");
+  const localUpdate = localStorage.getItem("CFC_SESSION_LASTUPDATE");
+
+  if (!uid || !localSID) return;
+
+  console.log(`[QA-SYNC] 🚀 Force Boot Monitor activo para UID=${uid}`);
+
+  setInterval(async () => {
+    const remote = await getRemoteSession(uid);
+    if (!remote || !remote.sid) return;
+
+    const remoteSID = remote.sid;
+    const remoteTime = new Date(remote.updatedISO).getTime();
+    const localTime = new Date(localUpdate).getTime();
+    const diff = Math.abs(remoteTime - localTime);
+
+    if (remoteSID !== localSID && diff < 30000) {
+      console.warn("[QA-SYNC] 🚨 Sesión más reciente detectada — cierre forzado");
+      localStorage.clear();
+      await signOut(auth);
+      CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
+    }
+  }, 8000);
+}
+
+/* ==========================================================
+   🧩 INICIO AUTOMÁTICO DEL MONITOR
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-  onAuthStateChanged(auth, async (user) => {
-    if (!user) return;
-    const uid = user.uid;
-    console.log(`[QA-SYNC] 👁️ Firestore-SDK monitor activo para UID=${uid}`);
-
-    setInterval(async () => {
-      const localSID = localStorage.getItem("CFC_SESSION_ID");
-      const localUpdate = localStorage.getItem("CFC_SESSION_LASTUPDATE");
-
-      const remote = await getRemoteSession(uid);
-      if (!remote || !remote.sid) return;
-
-      const remoteSID = remote.sid;
-      const remoteTime = new Date(remote.updatedISO).getTime();
-      const localTime = new Date(localUpdate).getTime();
-      const diff = Math.abs(remoteTime - localTime);
-
-      // 🚨 Detección robusta de doble login
-      if (remoteSID !== localSID && diff < 30000) {
-        console.warn("[QA-SYNC] 🚨 Sesión más reciente detectada — cierre forzado");
-        localStorage.clear();
-        await signOut(auth);
-        CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
-      }
-    }, 8000);
+  startMonitor(); // 🔹 se ejecuta aunque el usuario ya esté autenticado
+  onAuthStateChanged(auth, (user) => {
+    if (user) console.log(`[QA-SYNC] 👁️ Usuario autenticado: ${user.email}`);
   });
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V53.0_FIRESTORE_SDK_FORCE_READ
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V53.2_FORCE_BOOT_MONITOR
 -----------------------------------------
-🔹 Usa SDK nativo (getDoc) sin cache REST
-🔹 Doble timestamp (server + ISO)
-🔹 Detección en 8s, sin backend
-🔹 Totalmente funcional en Cloudflare Pages
+🔹 Inicia monitor incluso si ya hay sesión activa
+🔹 Detección de doble login en 8 s
+🔹 100 % Cloudflare SAFE — sin backend
 -----------------------------------------
 `);
