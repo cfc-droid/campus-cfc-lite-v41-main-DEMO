@@ -1,139 +1,149 @@
-<!-- ✅ CFC_FUNC_47_1_LOGIN_UI_FIREBASE_V48.7_CLOUDFLARE_FINAL -->
+<!-- ✅ CFC_FUNC_47_1_LOGIN_UI_HÍBRIDO_V49.0_SUPABASE_FIREBASE -->
 <!DOCTYPE html>
 <html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Iniciar sesión — Campus CFC LITE</title>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar sesión — Campus CFC LITE</title>
 
-  <!-- Estilos globales -->
-  <link rel="stylesheet" href="../css/premium.min.css?v=20251109" />
-  <link rel="stylesheet" href="../css/variables.css?v=20251109" />
+    <!-- Estilos globales -->
+    <link rel="stylesheet" href="../css/premium.min.css?v=20251109" />
+    <link rel="stylesheet" href="../css/variables.css?v=20251109" />
 
-  <style>
-    body {
-      background: radial-gradient(circle at center, #000 85%, #111);
-      color: #ffd700;
-      font-family: Poppins, sans-serif;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
-    .login-box {
-      border: 1px solid rgba(255, 215, 0, 0.5);
-      border-radius: 20px;
-      padding: 40px 30px;
-      box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
-      text-align: center;
-      width: 320px;
-      background: rgba(255, 255, 255, 0.03);
-    }
-    h1 {
-      font-size: 22px;
-      margin-bottom: 5px;
-      color: #ffd700;
-    }
-    p {
-      font-size: 13px;
-      opacity: 0.85;
-      margin-bottom: 20px;
-    }
-    input {
-      width: 100%;
-      margin: 10px 0;
-      padding: 10px;
-      border-radius: 10px;
-      border: none;
-      background: rgba(255, 255, 255, 0.1);
-      color: #ffd700;
-      text-align: center;
-      font-size: 14px;
-      outline: none;
-    }
-    button {
-      background-color: #ffd700;
-      color: #000;
-      border: none;
-      padding: 10px;
-      border-radius: 10px;
-      cursor: pointer;
-      transition: 0.25s;
-      font-weight: bold;
-      width: 100%;
-      margin-top: 10px;
-    }
-    button:hover {
-      background-color: #fff;
-      color: #000;
-    }
-  </style>
-</head>
-
-<body>
-  <div class="login-box">
-    <h1>Bienvenido</h1>
-    <p>Acceso exclusivo al Campus CFC</p>
-    <form id="loginForm">
-      <input id="email" type="email" placeholder="Correo electrónico" autocomplete="username" required />
-      <input id="password" type="password" placeholder="Contraseña" autocomplete="current-password" required />
-      <button type="submit">Entrar</button>
-    </form>
-  </div>
-
-  <!-- ==========================================================
-       🔧 Parche Cloudflare SAFE MODE — Firebase AppCheck OFF
-       ========================================================== -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
-    import { initializeAppCheck, ReCaptchaV3Provider }
-      from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app-check.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-      authDomain: "cfc-lock-firebase.firebaseapp.com",
-      projectId: "cfc-lock-firebase",
-    };
-
-    const app = initializeApp(firebaseConfig);
-
-    // 🚫 Desactivar AppCheck (modo Cloudflare seguro)
-    initializeAppCheck(app, {
-      provider: new ReCaptchaV3Provider("dummy-key"),
-      isTokenAutoRefreshEnabled: false,
-    });
-
-    console.log("🧩 AppCheck deshabilitado correctamente (modo Cloudflare SAFE).");
-  </script>
-
-  <!-- ==========================================================
-       🔐 Script principal (cfc_lock_identity)
-       ========================================================== -->
-  <script type="module">
-    import { CFC_login } from "../js/core/cfc_lock_identity.js";
-
-    const form = document.getElementById("loginForm");
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      console.log("Intentando login con:", email);
-      try {
-        await CFC_login(email, password);
-      } catch (err) {
-        console.warn("⚠️ Error durante el login:", err.code || err.message);
+    <style>
+      body {
+        background: radial-gradient(circle at center, #000 85%, #111);
+        color: #ffd700;
+        font-family: Poppins, sans-serif;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
       }
-    });
-  </script>
+      .login-box {
+        border: 1px solid rgba(255, 215, 0, 0.5);
+        border-radius: 20px;
+        padding: 40px 30px;
+        box-shadow: 0 0 25px rgba(255, 215, 0, 0.15);
+        text-align: center;
+        width: 320px;
+        background: rgba(255, 255, 255, 0.03);
+      }
+      h1 {
+        font-size: 22px;
+        margin-bottom: 5px;
+        color: #ffd700;
+      }
+      p {
+        font-size: 13px;
+        opacity: 0.85;
+        margin-bottom: 20px;
+      }
+      input {
+        width: 100%;
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 10px;
+        border: none;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffd700;
+        text-align: center;
+        font-size: 14px;
+        outline: none;
+      }
+      button {
+        background-color: #ffd700;
+        color: #000;
+        border: none;
+        padding: 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: 0.25s;
+        font-weight: bold;
+        width: 100%;
+        margin-top: 10px;
+      }
+      button:hover {
+        background-color: #fff;
+        color: #000;
+      }
+    </style>
+  </head>
 
-  <script src="../js/overlay_block.js" type="module"></script>
+  <body>
+    <div class="login-box">
+      <h1>Bienvenido</h1>
+      <p>Acceso exclusivo al Campus CFC</p>
+      <form id="loginForm">
+        <input
+          id="email"
+          type="email"
+          placeholder="Correo electrónico"
+          autocomplete="username"
+          required
+        />
+        <input
+          id="license"
+          type="text"
+          placeholder="Clave de licencia"
+          required
+        />
+        <button type="submit">Entrar</button>
+      </form>
+    </div>
 
-  <!-- 🔖 CFC_LOCK línea de control -->
-  <script>
-    console.log("✅ CFC_FUNC_47_1_LOGIN_UI_FIREBASE_V48.7_CLOUDFLARE_FINAL activo");
-  </script>
-</body>
+    <!-- ==========================================================
+         🔧 Parche Cloudflare SAFE MODE — Firebase AppCheck OFF
+         ========================================================== -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+      import {
+        initializeAppCheck,
+        ReCaptchaV3Provider,
+      } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app-check.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+        authDomain: "cfc-lock-firebase.firebaseapp.com",
+        projectId: "cfc-lock-firebase",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider("dummy-key"),
+        isTokenAutoRefreshEnabled: false,
+      });
+
+      console.log("🧩 AppCheck deshabilitado (modo Cloudflare SAFE).");
+    </script>
+
+    <!-- ==========================================================
+         🔐 Script principal híbrido (Firebase + Supabase)
+         ========================================================== -->
+    <script type="module">
+      import { CFC_login } from "../js/core/cfc_lock_supabase.js";
+
+      const form = document.getElementById("loginForm");
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim();
+        const license = document.getElementById("license").value.trim();
+
+        console.log("Intentando login con:", email);
+        try {
+          await CFC_login(email, license);
+        } catch (err) {
+          console.warn("⚠️ Error durante el login:", err.code || err.message);
+        }
+      });
+    </script>
+
+    <script src="../js/overlay_block.js" type="module"></script>
+
+    <script>
+      console.log("✅ CFC_FUNC_47_1_LOGIN_UI_HÍBRIDO_V49.0_SUPABASE_FIREBASE activo");
+    </script>
+  </body>
 </html>
