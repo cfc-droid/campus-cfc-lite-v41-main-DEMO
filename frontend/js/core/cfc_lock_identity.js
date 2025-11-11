@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V53.2_FORCE_BOOT_MONITOR
+   ✅ CFC_LOCK_IDENTITY_V54.1_DISABLE_LOCAL_CACHE
    Sistema: CFC-LOCK — Cloudflare SAFE (sin backend)
    Auditor: CFC-SYNC QA FINAL — 2025-11-11
    ========================================================== */
@@ -20,7 +20,10 @@ import {
   setDoc,
   deleteDoc,
   getDoc,
-  serverTimestamp
+  serverTimestamp,
+  onSnapshot,
+  disableNetwork,
+  enableNetwork
 } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
 
 /* ==========================================================
@@ -40,7 +43,12 @@ try {
   auth = getAuth(app);
   db = getFirestore(app);
   await setPersistence(auth, browserLocalPersistence);
-  console.log("🧩 Firebase init — FORCE BOOT MONITOR MODE");
+
+  // 🔹 Fuerza modo “sin caché local” para asegurar lectura directa
+  await disableNetwork(db);
+  await enableNetwork(db);
+
+  console.log("🧩 Firebase init — NETWORK REFRESH MODE (no cache)");
 } catch (e) {
   console.error("❌ Error inicializando Firebase:", e);
 }
@@ -94,30 +102,8 @@ export async function CFC_logout() {
 }
 
 /* ==========================================================
-   🧠 MONITOR remoto — SDK directo (sin REST)
+   🔁 MONITOR ACTIVO — Realtime con onSnapshot() sin cache local
    ========================================================== */
-async function getRemoteSession(uid) {
-  try {
-    const ref = doc(db, "sessions", uid);
-    const snapshot = await getDoc(ref);
-    if (!snapshot.exists()) return null;
-
-    const data = snapshot.data();
-    return {
-      sid: data.sessionId || null,
-      updatedISO: data.updatedAtISO || null,
-    };
-  } catch (err) {
-    console.warn("⚠️ Error remoto SDK:", err);
-    return null;
-  }
-}
-
-/* ==========================================================
-   🔁 MONITOR ACTIVO — Realtime con onSnapshot()
-   ========================================================== */
-import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
-
 function startRealtimeMonitor() {
   const uid = localStorage.getItem("CFC_SESSION_UID");
   const localSID = localStorage.getItem("CFC_SESSION_ID");
@@ -125,7 +111,7 @@ function startRealtimeMonitor() {
 
   if (!uid || !localSID) return;
 
-  console.log(`[QA-SYNC] ⚡ Realtime Monitor activo para UID=${uid}`);
+  console.log(`[QA-SYNC] ⚡ Realtime Monitor activo (no cache) para UID=${uid}`);
 
   const ref = doc(db, "sessions", uid);
 
@@ -157,10 +143,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V54.0_ONSNAPSHOT_REALTIME_MODE
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V54.1_DISABLE_LOCAL_CACHE
 -----------------------------------------
-🔹 Listener Firestore onSnapshot()
-🔹 Cierre inmediato entre dispositivos
+🔹 Forzado disableNetwork()/enableNetwork()
+🔹 Sin caché local → lecturas frescas
+🔹 onSnapshot() con cierre inmediato
 🔹 100 % Cloudflare SAFE — sin backend
 -----------------------------------------
 `);
