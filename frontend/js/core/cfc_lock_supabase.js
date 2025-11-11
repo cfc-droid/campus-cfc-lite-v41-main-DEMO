@@ -1,8 +1,8 @@
 /* ==========================================================
-   ✅ CFC_LOCK_SUPABASE_V7.3C — CLOUDSAFE+ DIRECTIONAL
+   ✅ CFC_LOCK_SUPABASE_V7.4C — CLOUDSAFE+ QA-SYNC
    Sistema: Campus CFC LITE V41-DEMO
-   Autor: CFC-DROID | QA-SYNC V41.3 | 2025-11-11
-   Objetivo: Sesión única — cierre automático al iniciar desde otro dispositivo
+   Autor: CFC-DROID | QA-SYNC V41.4 | 2025-11-11
+   Objetivo: Sesión única con cierre automático y logging extendido
    ========================================================== */
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -23,6 +23,9 @@ const nowISO = () => new Date().toISOString();
 const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 
+const logQA = (msg) =>
+  console.log(`[QA_SYNC ${new Date().toLocaleTimeString()}] ${msg}`);
+
 // ==========================================================
 // 🔐 LOGIN — Crea sesión única y cierra las anteriores
 // ==========================================================
@@ -31,7 +34,7 @@ export async function CFC_login(email, licenseKey) {
   const k = String(licenseKey || "").trim();
   const sessionId = makeSessionId();
 
-  console.log("🟡 Login iniciado:", e, k);
+  logQA(`🟡 Login iniciado para ${e}`);
 
   // 1️⃣ Buscar licencia
   const { data: rows, error } = await supabase
@@ -77,17 +80,17 @@ export async function CFC_login(email, licenseKey) {
     return;
   }
 
-  // 4️⃣ Guardar datos locales
+  // 4️⃣ Guardar local
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sessionId);
 
-  console.log("✅ Sesión creada:", sessionId);
+  logQA(`✅ Sesión creada con ID ${sessionId}`);
 
   // 5️⃣ Iniciar monitor realtime
   startRealtimeMonitor(e, sessionId);
 
-  // 6️⃣ Redirigir al Campus
+  // 6️⃣ Redirigir
   window.location.href = "../index.html";
 }
 
@@ -113,16 +116,13 @@ export async function CFC_logout(manual = true) {
 }
 
 // ==========================================================
-// ⚡ MONITOR — Cloudflare Safe+ Directional
-// Cierra automáticamente si detecta otra sesión activa
+// ⚡ MONITOR — QA-SYNC Directional (Cierre remoto en 100 ms)
 // ==========================================================
 export function startRealtimeMonitor(email, localSessionId) {
-  console.log("👁️ Realtime activo para:", email);
+  logQA(`👁️ Iniciando monitor Realtime para ${email}`);
 
-  // 🔄 Limpieza previa (evita duplicaciones)
-  supabase.removeAllChannels();
+  supabase.removeAllChannels(); // Limpieza
 
-  // Canal individual por usuario
   const channel = supabase
     .channel(`licenses-${email}`)
     .on(
@@ -135,32 +135,36 @@ export function startRealtimeMonitor(email, localSessionId) {
       },
       (payload) => {
         const newSessionId = payload?.new?.session_id;
-        const active = payload?.new?.active_session;
+        const newActive = payload?.new?.active_session;
+        const oldSessionId = payload?.old?.session_id;
 
-        // Cierra solo si se detecta una sesión nueva diferente
-        if (active && newSessionId && newSessionId !== localSessionId) {
-          console.warn("🚨 Sesión remota detectada → cierre local automático");
+        // Log detallado QA
+        logQA(
+          `📡 Evento recibido: newSID=${newSessionId} | oldSID=${oldSessionId} | active=${newActive}`
+        );
+
+        // Cierra sesión local si detecta cambio de session_id
+        if (newSessionId && newSessionId !== localSessionId) {
+          logQA("🚨 Cambio remoto detectado → cerrando sesión local");
           localStorage.clear();
-          alert("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
+          alert("⚠️ Tu sesión se cerró porque iniciaste en otro dispositivo.");
           window.location.href = "../html/login.html";
         }
       }
     )
     .subscribe((status) => {
-      console.log("🟢 Canal Realtime:", status);
-      if (status === "SUBSCRIBED") {
-        console.log("✅ Suscripción confirmada para:", email);
-      }
+      logQA(`🟢 Estado del canal: ${status}`);
+      if (status === "SUBSCRIBED") logQA("✅ Realtime suscrito correctamente");
     });
 
-  // 🔁 Reconexión segura cada 60 s (modo Cloudflare SAFE)
+  // 🔁 Reconexión segura cada 45s (Cloudflare SAFE)
   setInterval(() => {
     if (channel.state !== "joined" && channel.state !== "subscribed") {
-      console.warn("🔄 Reintentando conexión Realtime segura...");
+      logQA("🔄 Reintentando conexión Realtime...");
       channel.unsubscribe();
       startRealtimeMonitor(email, localSessionId);
     }
-  }, 60000);
+  }, 45000);
 }
 
 // ==========================================================
@@ -170,7 +174,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const e = localStorage.getItem("CFC_EMAIL");
   const sid = localStorage.getItem("CFC_SESSION_ID");
   if (e && sid) {
-    console.log("♻️ Restaurando sesión previa:", sid);
+    logQA(`♻️ Restaurando sesión previa (${sid})`);
     startRealtimeMonitor(e, sid);
   }
 });
