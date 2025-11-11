@@ -1,7 +1,7 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V57.3_DEVICE_BIND_MODE_FINAL
+   ✅ CFC_LOCK_IDENTITY_V57.4_LAST_ACTIVE_COMPARATOR_FINAL
    Sistema: Campus CFC LITE V41-DEMO
-   Función: Sesión Única Cross-Device + DeviceID + Heartbeat
+   Función: Sesión Única Cross-Device + Comparador last_active
    Auditor: QA-SYNC — 2025-11-12
    ========================================================== */
 
@@ -41,6 +41,7 @@ try {
 const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 const nowISO = () => new Date().toISOString();
+const nowMillis = () => Date.now();
 const makeDeviceId = () => {
   let id = localStorage.getItem("CFC_DEVICE_ID");
   if (!id) {
@@ -52,7 +53,7 @@ const makeDeviceId = () => {
 };
 
 /* ==========================================================
-   🔐 LOGIN — Crea sesión única por dispositivo
+   🔐 LOGIN — Crea sesión única
    ========================================================== */
 export async function CFC_login(email, license) {
   try {
@@ -70,10 +71,8 @@ export async function CFC_login(email, license) {
       return;
     }
 
-    // Marca forzada
     const force = Math.random().toString(36).substring(2, 12);
 
-    // Registrar sesión con device_id y timestamp
     await setDoc(
       ref,
       {
@@ -92,7 +91,8 @@ export async function CFC_login(email, license) {
     localStorage.setItem("CFC_EMAIL", e);
     localStorage.setItem("CFC_LICENSE", k);
     localStorage.setItem("CFC_SESSION_ID", sid);
-    localStorage.setItem("CFC_HEARTBEAT", Date.now().toString());
+    localStorage.setItem("CFC_DEVICE_ID", did);
+    localStorage.setItem("CFC_LAST_ACTIVE", nowMillis().toString());
 
     console.log(`✅ Sesión iniciada: ${sid} | device_id=${did}`);
 
@@ -132,7 +132,7 @@ export async function CFC_logout(manual = true) {
 }
 
 /* ==========================================================
-   ⚡ MONITOR — Detecta cambio de device remoto
+   ⚡ MONITOR — Detecta cambio remoto o actividad más reciente
    ========================================================== */
 function startRealtimeMonitor() {
   const e = localStorage.getItem("CFC_EMAIL");
@@ -146,19 +146,32 @@ function startRealtimeMonitor() {
   onSnapshot(ref, (snap) => {
     if (!snap.exists()) return;
     const data = snap.data();
-    const remoteSID = data.session_id;
     const remoteDID = data.device_id;
-    const active = data.active_session;
+    const remoteActive = data.active_session;
+    const remoteLastActive = data.last_active?.toMillis?.() || 0;
 
-    if (!active) {
-      console.warn("🚨 Sesión desactivada remotamente.");
-      triggerLogout("⚠️ Tu sesión fue cerrada por otro inicio.");
-    }
+    const localLastActive = parseInt(localStorage.getItem("CFC_LAST_ACTIVE") || "0", 10);
 
+    // 🔸 Caso 1: Se detecta cambio directo de device
     if (remoteDID && remoteDID !== did) {
       console.warn("🚨 Nuevo dispositivo detectado. Cierre inmediato.");
       triggerLogout("⚠️ Tu sesión fue cerrada porque iniciaste en otro dispositivo.");
+      return;
     }
+
+    // 🔸 Caso 2: El otro dispositivo tiene actividad más reciente
+    if (remoteLastActive > localLastActive + 15000) {
+      console.warn("🚨 Actividad más reciente detectada en otro dispositivo.");
+      triggerLogout("⚠️ Tu sesión fue cerrada por actividad en otro dispositivo.");
+      return;
+    }
+
+    // Debug QA
+    console.log("📡 Monitor:", {
+      remoteLastActive,
+      localLastActive,
+      diff: remoteLastActive - localLastActive,
+    });
   });
 }
 
@@ -169,12 +182,15 @@ function startHeartbeat(email, sid, did) {
   const ref = doc(db, "licenses", email);
   setInterval(async () => {
     try {
+      const now = nowMillis();
+      localStorage.setItem("CFC_LAST_ACTIVE", now.toString());
+
       await updateDoc(ref, {
         last_active: serverTimestamp(),
         updated_at_iso: nowISO(),
         heartbeat: nowISO(),
       });
-      console.log("💓 Heartbeat enviado:", did);
+      console.log("💓 Heartbeat enviado:", did, "|", nowISO());
     } catch (err) {
       console.warn("⚠️ Error al enviar heartbeat:", err);
     }
@@ -205,11 +221,12 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V57.3_DEVICE_BIND_MODE_FINAL
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V57.4_LAST_ACTIVE_COMPARATOR_FINAL
 -----------------------------------------
 🔹 DeviceID persistente (localStorage)
-🔹 Cierre remoto por cambio de dispositivo
-🔹 Heartbeat 10s + last_active
+🔹 Comparador last_active + 15s diferencia
+🔹 Cierre remoto automático por actividad
+🔹 Heartbeat 10s + polling interno
 🔹 100 % Cloudflare SAFE compatible
 -----------------------------------------
 `);
