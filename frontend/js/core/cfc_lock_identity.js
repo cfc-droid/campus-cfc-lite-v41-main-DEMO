@@ -93,19 +93,23 @@ export async function CFC_logout() {
 }
 
 /* ==========================================================
-   🧠 MONITOR remoto — lectura garantizada
+   🧠 MONITOR remoto — SDK directo (sin REST)
    ========================================================== */
+import { getDoc } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-firestore.js";
+
 async function getRemoteSession(uid) {
-  const url = `https://firestore.googleapis.com/v1/projects/cfc-lock-firebase/databases/(default)/documents/sessions/${uid}?v=${Date.now()}`;
   try {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) return null;
-    const data = await res.json();
-    const sid = data?.fields?.sessionId?.stringValue || null;
-    const updatedISO = data?.fields?.updatedAtISO?.stringValue || null;
-    return { sid, updatedISO };
+    const ref = doc(db, "sessions", uid);
+    const snapshot = await getDoc(ref);
+    if (!snapshot.exists()) return null;
+
+    const data = snapshot.data();
+    return {
+      sid: data.sessionId || null,
+      updatedISO: data.updatedAtISO || null,
+    };
   } catch (err) {
-    console.warn("⚠️ Error remoto:", err);
+    console.warn("⚠️ Error remoto SDK:", err);
     return null;
   }
 }
@@ -117,12 +121,13 @@ document.addEventListener("DOMContentLoaded", () => {
   onAuthStateChanged(auth, async (user) => {
     if (!user) return;
     const uid = user.uid;
-    const localSID = localStorage.getItem("CFC_SESSION_ID");
-    const localUpdate = localStorage.getItem("CFC_SESSION_LASTUPDATE");
 
-    console.log(`[QA-SYNC] 👁️ Firestore-safe monitor activo para UID=${uid}`);
+    console.log(`[QA-SYNC] 👁️ Firestore-SDK monitor activo para UID=${uid}`);
 
     setInterval(async () => {
+      const localSID = localStorage.getItem("CFC_SESSION_ID");
+      const localUpdate = localStorage.getItem("CFC_SESSION_LASTUPDATE");
+
       const remote = await getRemoteSession(uid);
       if (!remote || !remote.sid) return;
 
@@ -132,13 +137,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const diff = Math.abs(remoteTime - localTime);
 
       // 🚨 Detección robusta de doble login
-      if (remoteSID !== localSID && diff < 20000) {
+      if (remoteSID !== localSID && diff < 30000) {
         console.warn("[QA-SYNC] 🚨 Sesión más reciente detectada — cierre forzado");
         localStorage.clear();
         await signOut(auth);
         CFC_showBlockOverlay("🚫 Sesión cerrada en otro dispositivo");
       }
-    }, 7000);
+    }, 8000);
   });
 });
 
