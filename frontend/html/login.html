@@ -1,14 +1,14 @@
-<!-- ✅ CFC_FUNC_47_1_LOGIN_UI_HÍBRIDO_V49.0_SUPABASE_FIREBASE -->
+<!-- ✅ CFC_FUNC_56_1_LOGIN_UI_FIREBASE_SAFE_FINAL -->
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Iniciar sesión — Campus CFC LITE</title>
+    <title>Iniciar sesión — Campus CFC LITE V41</title>
 
-    <!-- Estilos globales -->
-    <link rel="stylesheet" href="../css/premium.min.css?v=20251109" />
-    <link rel="stylesheet" href="../css/variables.css?v=20251109" />
+    <!-- ✅ Estilos premium -->
+    <link rel="stylesheet" href="../css/variables.css?v=20251111" />
+    <link rel="stylesheet" href="../css/premium.min.css?v=20251111" />
 
     <style>
       body {
@@ -22,6 +22,7 @@
         height: 100vh;
         margin: 0;
       }
+
       .login-box {
         border: 1px solid rgba(255, 215, 0, 0.5);
         border-radius: 20px;
@@ -31,16 +32,19 @@
         width: 320px;
         background: rgba(255, 255, 255, 0.03);
       }
+
       h1 {
         font-size: 22px;
         margin-bottom: 5px;
         color: #ffd700;
       }
+
       p {
         font-size: 13px;
         opacity: 0.85;
         margin-bottom: 20px;
       }
+
       input {
         width: 100%;
         margin: 10px 0;
@@ -53,6 +57,7 @@
         font-size: 14px;
         outline: none;
       }
+
       button {
         background-color: #ffd700;
         color: #000;
@@ -65,6 +70,7 @@
         width: 100%;
         margin-top: 10px;
       }
+
       button:hover {
         background-color: #fff;
         color: #000;
@@ -88,6 +94,7 @@
           id="license"
           type="text"
           placeholder="Clave de licencia"
+          autocomplete="off"
           required
         />
         <button type="submit">Entrar</button>
@@ -95,14 +102,14 @@
     </div>
 
     <!-- ==========================================================
-         🔧 Parche Cloudflare SAFE MODE — Firebase AppCheck OFF
+         🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
          ========================================================== -->
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app.js";
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
       import {
         initializeAppCheck,
         ReCaptchaV3Provider,
-      } from "https://www.gstatic.com/firebasejs/10.7.2/firebase-app-check.js";
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
@@ -120,10 +127,11 @@
     </script>
 
     <!-- ==========================================================
-         🔐 Script principal híbrido (Firebase + Supabase)
+         🔐 Login Firebase SAFE (CFC_LOCK_IDENTITY_V56.1_FINAL_FIX)
          ========================================================== -->
     <script type="module">
-      <script type="module" src="../js/core/cfc_lock_identity.js?v=56.1"></script>
+      import { CFC_login } from "../js/core/cfc_lock_identity.js";
+      import { CFC_showBlockOverlay } from "../js/overlay_block.js";
 
       const form = document.getElementById("loginForm");
       form.addEventListener("submit", async (e) => {
@@ -131,19 +139,21 @@
         const email = document.getElementById("email").value.trim();
         const license = document.getElementById("license").value.trim();
 
-        console.log("Intentando login con:", email);
+        console.log("🟡 Intentando login con:", email);
         try {
           await CFC_login(email, license);
         } catch (err) {
-          console.warn("⚠️ Error durante el login:", err.code || err.message);
+          console.error("❌ Error durante el login:", err.message || err);
+          CFC_showBlockOverlay("⚠️ Error durante el login (ver consola).");
         }
       });
     </script>
 
-    <script src="../js/overlay_block.js" type="module"></script>
+    <!-- Overlay premium -->
+    <script type="module" src="../js/overlay_block.js?v=47.3"></script>
 
     <script>
-      console.log("✅ CFC_FUNC_47_1_LOGIN_UI_HÍBRIDO_V49.0_SUPABASE_FIREBASE activo");
+      console.log("✅ CFC_FUNC_56_1_LOGIN_UI_FIREBASE_SAFE_FINAL activo");
     </script>
   </body>
 </html>
