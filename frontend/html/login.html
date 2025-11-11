@@ -1,4 +1,4 @@
-<!-- ✅ CFC_FUNC_56_1_LOGIN_UI_FIREBASE_SAFE_FINAL -->
+<!-- ✅ CFC_FUNC_57_1_LOGIN_UI_SUPABASE_FINAL_REVERSA -->
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
   <head>
@@ -127,10 +127,10 @@
     </script>
 
     <!-- ==========================================================
-         🔐 Login Firebase SAFE (CFC_LOCK_IDENTITY_V56.1_FINAL_FIX)
+         🔐 Login Supabase Realtime (CFC_LOCK_SUPABASE_V7.0_FINAL_REVERSE_CLOSE)
          ========================================================== -->
     <script type="module">
-      import { CFC_login } from "../js/core/cfc_lock_identity.js";
+      import { CFC_login } from "../js/core/cfc_lock_supabase.js";
       import { CFC_showBlockOverlay } from "../js/overlay_block.js";
 
       const form = document.getElementById("loginForm");
@@ -139,7 +139,7 @@
         const email = document.getElementById("email").value.trim();
         const license = document.getElementById("license").value.trim();
 
-        console.log("🟡 Intentando login con:", email);
+        console.log("🟡 Intentando login Supabase:", email);
         try {
           await CFC_login(email, license);
         } catch (err) {
@@ -149,11 +149,11 @@
       });
     </script>
 
-    <!-- Overlay premium -->
+    <!-- ✅ Overlay Premium -->
     <script type="module" src="../js/overlay_block.js?v=47.3"></script>
 
     <script>
-      console.log("✅ CFC_FUNC_56_1_LOGIN_UI_FIREBASE_SAFE_FINAL activo");
+      console.log("✅ CFC_FUNC_57_1_LOGIN_UI_SUPABASE_FINAL_REVERSA activo");
     </script>
   </body>
 </html>
