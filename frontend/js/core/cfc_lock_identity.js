@@ -1,12 +1,12 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V57.5_SERVER_SYNC_MODE_FINAL
+   ✅ CFC_LOCK_IDENTITY_V59.0_RENDER_UNIQUE_SESSION_FINAL
    Sistema: Campus CFC LITE V41-DEMO
-   Función: Sesión Única Cross-Device + Server Polling SAFE
+   Función: Sesión única cross-device con Render Proxy (Firebase + Node)
    Auditor: QA-SYNC — 2025-11-12
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
-import { checkSession, startHeartbeat } from "./cfc_api.js"; // 🔄 nombres unificados con cfc_api.js
+import { checkSession, startHeartbeat, registerLogin } from "./cfc_api.js";
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -37,7 +37,8 @@ try {
 /* ==========================================================
    🧩 Utilidades
    ========================================================== */
-const makeSessionId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+const makeSessionId = () =>
+  `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
 const nowISO = () => new Date().toISOString();
 const makeDeviceId = () => {
   let id = localStorage.getItem("CFC_DEVICE_ID");
@@ -49,7 +50,7 @@ const makeDeviceId = () => {
 };
 
 /* ==========================================================
-   🔐 LOGIN
+   🔐 LOGIN (Firebase + Render Proxy)
    ========================================================== */
 export async function CFC_login(email, license) {
   const e = email.trim().toLowerCase();
@@ -58,6 +59,7 @@ export async function CFC_login(email, license) {
   const did = makeDeviceId();
   const ref = doc(db, "licenses", e);
 
+  // 1️⃣ Registrar en Firebase (modo seguro)
   await setDoc(
     ref,
     {
@@ -72,29 +74,46 @@ export async function CFC_login(email, license) {
     { merge: true }
   );
 
+  // 2️⃣ Guardar en localStorage
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sid);
   localStorage.setItem("CFC_DEVICE_ID", did);
 
-  console.log(`✅ Login OK | device_id=${did}`);
+  console.log(`✅ Login Firebase OK | device_id=${did}`);
 
-  startHeartbeat(e, did); // 💓 inicia heartbeats automáticos (Render)
-  startServerPolling(e, did); // 🔍 verifica duplicados en backend
+  // 3️⃣ Registrar login en Render (invalida sesión anterior)
+  const registered = await registerLogin(e, did);
+  if (!registered) {
+    CFC_showBlockOverlay("⚠️ No se pudo registrar el login en el servidor Render.");
+    return;
+  }
 
+  // 4️⃣ Verificar validez con Render Proxy
+  const valid = await checkSession(e, did);
+  if (!valid) {
+    CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa en otro dispositivo.");
+    return;
+  }
+
+  // 5️⃣ Iniciar Heartbeat + Monitoreo remoto
+  startHeartbeat(e, did);
+  startServerPolling(e, did);
+
+  // 6️⃣ Redirigir al Campus
   setTimeout(() => (window.location.href = "../index.html"), 800);
 }
 
 /* ==========================================================
-   🔍 POLLING SERVIDOR — Verifica estado cada 10 s
+   🔍 POLLING SERVIDOR — Validación periódica
    ========================================================== */
 function startServerPolling(email, did) {
   setInterval(async () => {
     try {
       const isValid = await checkSession(email, did);
       if (!isValid) {
-        console.warn("🚨 Sesión invalidada por servidor.");
-        triggerLogout("⚠️ Tu sesión fue cerrada por otro dispositivo (server).");
+        console.warn("🚨 Sesión invalidada por el servidor (otro dispositivo activo).");
+        triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
       }
     } catch (err) {
       console.warn("⚠️ Error en polling servidor:", err.message);
@@ -103,16 +122,21 @@ function startServerPolling(email, did) {
 }
 
 /* ==========================================================
-   🔁 Logout visual
+   🔁 Logout visual remoto
    ========================================================== */
 function triggerLogout(msg) {
-  localStorage.clear();
-  CFC_showBlockOverlay(msg);
-  setTimeout(() => (window.location.href = "../html/login.html"), 1500);
+  try {
+    localStorage.clear();
+    CFC_showBlockOverlay(msg);
+    setTimeout(() => (window.location.href = "../html/login.html"), 2000);
+  } catch (e) {
+    console.error("⚠️ Error durante logout remoto:", e);
+    window.location.href = "../html/login.html";
+  }
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD
+   🧩 AUTOLOAD — Reanudar sesión previa
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const e = localStorage.getItem("CFC_EMAIL");
@@ -125,11 +149,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V57.5_SERVER_SYNC_MODE_FINAL
------------------------------------------
-🔹 Polling seguro hacia micro backend Render
-🔹 Heartbeat sincronizado (10s)
-🔹 Cierre inmediato si el servidor detecta duplicado
-🔹 100% Cloudflare SAFE compatible
------------------------------------------
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V59.0_RENDER_UNIQUE_SESSION_FINAL
+────────────────────────────────────────────
+🔹 Firebase + Render Proxy sincronizados
+🔹 Sesión única (expulsa duplicados)
+🔹 Polling + Heartbeat con detección “expired”
+🔹 Logout remoto visual + overlay dorado
+────────────────────────────────────────────
 `);
