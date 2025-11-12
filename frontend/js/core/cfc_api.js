@@ -1,4 +1,4 @@
-// ✅ CFC_LOCK_SERVER_SYNC_MODE_V58.2_RENDER_STABLE
+// ✅ CFC_LOCK_SERVER_SYNC_MODE_V58.3_RENDER_STABLE
 // 🌐 Comunicación segura Campus ↔ Render (Express + Firebase)
 // Última revisión QA-SYNC — 2025-11-12 — Validado con backend V57.8
 
