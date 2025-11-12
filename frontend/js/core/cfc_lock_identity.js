@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V60.2_FRONTEND_AUTO_LOGOUT_FIX
+   ✅ CFC_LOCK_IDENTITY_V61.0_FIRESTORE_RENDER_SYNC
    Sistema: Campus CFC LITE V41-DEMO
    ========================================================== */
 
@@ -7,7 +7,7 @@ import { CFC_showBlockOverlay } from "../overlay_block.js";
 import { checkSession, startHeartbeat, registerLogin, triggerLogout } from "./cfc_api.js";
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* ==========================================================
    🔹 Firebase SAFE Config
@@ -83,6 +83,7 @@ export async function CFC_login(email, license) {
 
   startHeartbeat(e, did);
   startServerPolling(e, did);
+  listenRemoteLogout(e, ref, did);
   setTimeout(() => (window.location.href = "../index.html"), 800);
 }
 
@@ -94,13 +95,30 @@ function startServerPolling(email, did) {
     try {
       const valid = await checkSession(email, did);
       if (!valid) {
-        console.warn("🚨 Sesión invalidada por el servidor.");
+        console.warn("🚨 Sesión invalidada por el servidor Render.");
         triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
       }
     } catch (err) {
       console.warn("⚠️ Error en polling servidor:", err.message);
     }
   }, 10000);
+}
+
+/* ==========================================================
+   🔔 LISTENER FIRESTORE — Detección remota en tiempo real
+   ========================================================== */
+function listenRemoteLogout(email, ref, did) {
+  onSnapshot(ref, (docSnap) => {
+    if (!docSnap.exists()) return;
+    const data = docSnap.data();
+    const active = data.active_session ?? true;
+    const storedDid = localStorage.getItem("CFC_DEVICE_ID");
+
+    if (!active && storedDid === did) {
+      console.warn("🚨 Firestore detectó cierre remoto → logout inmediato");
+      triggerLogout("⚠️ Tu sesión fue cerrada desde otro dispositivo.");
+    }
+  });
 }
 
 /* ==========================================================
@@ -113,13 +131,16 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("♻️ Restaurando sesión previa:", e);
     startHeartbeat(e, did);
     startServerPolling(e, did);
+    const ref = doc(db, "licenses", e);
+    listenRemoteLogout(e, ref, did);
   }
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V60.2_FRONTEND_AUTO_LOGOUT_FIX
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V61.0_FIRESTORE_RENDER_SYNC
 ────────────────────────────────────────────
-🔹 Unificación de triggerLogout()
-🔹 Polling con cierre remoto automático
+🔹 Listener Firestore activo
+🔹 Logout inmediato al detectar active_session=false
+🔹 Mantiene Render heartbeat
 ────────────────────────────────────────────
 `);
