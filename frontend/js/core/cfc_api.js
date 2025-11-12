@@ -1,7 +1,7 @@
-// ✅ CFC_LOCK_SERVER_SYNC_MODE_V59.0_RENDER_UNIQUE_SESSION_FINAL
+// ✅ CFC_LOCK_SERVER_SYNC_MODE_V60.1_RENDER_AUTO_LOGOUT
 // 🌐 Comunicación segura Campus ↔ Render (Express + Firebase)
 // 🔒 Maneja sesiones únicas y cierre remoto en caso de duplicado
-// QA-SYNC — 2025-11-12 — Validado con backend V59.0
+// QA-SYNC — 2025-11-12 — Validado con backend V60.0
 
 const SERVER_URL = "https://cfc-lock-proxy.onrender.com"; // ✅ Proxy activo en Render
 
@@ -46,6 +46,7 @@ export async function checkSession(email, device_id) {
       return true;
     } else {
       console.warn("🔴 Sesión inválida:", data.reason || "sin motivo");
+      triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
       return false;
     }
   } catch (err) {
@@ -68,14 +69,15 @@ export async function sendHeartbeat(email, device_id) {
     });
 
     const data = await res.json();
+
     if (data.status === "expired") {
       console.warn("🚨 Sesión expirada por otro dispositivo.");
-      triggerLogout("⚠️ Otro dispositivo inició sesión con tu cuenta.");
+      triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
       return;
     }
 
     if (!res.ok) throw new Error(`Código HTTP ${res.status}`);
-    console.log("💓 Heartbeat enviado correctamente");
+    console.log("💓 Heartbeat válido para", device_id);
   } catch (err) {
     console.warn("⚠️ Error al enviar heartbeat:", err.message);
   }
@@ -100,7 +102,7 @@ function triggerLogout(msg) {
       CFC_showBlockOverlay(msg);
       setTimeout(() => {
         window.location.href = "../html/login.html";
-      }, 2000);
+      }, 2500);
     });
   } catch (e) {
     console.error("⚠️ Error al ejecutar logout remoto:", e);
@@ -109,11 +111,10 @@ function triggerLogout(msg) {
 }
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_SERVER_SYNC_MODE_V59.0_RENDER_UNIQUE_SESSION_FINAL
+🧩 QA-SYNC | CFC_LOCK_SERVER_SYNC_MODE_V60.1_RENDER_AUTO_LOGOUT
 ────────────────────────────────────────────
-🔹 Comunicación segura Campus ↔ Render
-🔹 Sesión única: invalida anteriores automáticamente
-🔹 Heartbeat con detección “expired”
-🔹 Cierre remoto inmediato con overlay dorado
+🔹 Comunicación Campus ↔ Render establecida
+🔹 Detección remota “expired” con cierre automático
+🔹 Overlay dorado + redirección segura a login.html
 ────────────────────────────────────────────
 `);
