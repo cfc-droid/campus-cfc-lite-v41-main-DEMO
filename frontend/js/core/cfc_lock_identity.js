@@ -6,7 +6,7 @@
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
-import { checkSessionStatus, notifyHeartbeat } from "./cfc_api.js";
+import { checkSession, startHeartbeat } from "./cfc_api.js"; // 🔄 nombres unificados con cfc_api.js
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import {
@@ -79,17 +79,10 @@ export async function CFC_login(email, license) {
 
   console.log(`✅ Login OK | device_id=${did}`);
 
-  startHeartbeat(e, did);
-  startServerPolling(e, did);
+  startHeartbeat(e, did); // 💓 inicia heartbeats automáticos (Render)
+  startServerPolling(e, did); // 🔍 verifica duplicados en backend
 
   setTimeout(() => (window.location.href = "../index.html"), 800);
-}
-
-/* ==========================================================
-   💓 HEARTBEAT — Notifica actividad
-   ========================================================== */
-function startHeartbeat(email, did) {
-  setInterval(() => notifyHeartbeat(email, did), 10000);
 }
 
 /* ==========================================================
@@ -98,8 +91,8 @@ function startHeartbeat(email, did) {
 function startServerPolling(email, did) {
   setInterval(async () => {
     try {
-      const status = await checkSessionStatus(email, did);
-      if (status === "invalid") {
+      const isValid = await checkSession(email, did);
+      if (!isValid) {
         console.warn("🚨 Sesión invalidada por servidor.");
         triggerLogout("⚠️ Tu sesión fue cerrada por otro dispositivo (server).");
       }
@@ -134,8 +127,9 @@ document.addEventListener("DOMContentLoaded", () => {
 console.log(`
 🧩 QA-SYNC | CFC_LOCK_IDENTITY_V57.5_SERVER_SYNC_MODE_FINAL
 -----------------------------------------
-🔹 Polling seguro hacia micro backend
-🔹 Heartbeat sincronizado con servidor
-🔹 Cierre inmediato si server detecta duplicado
+🔹 Polling seguro hacia micro backend Render
+🔹 Heartbeat sincronizado (10s)
+🔹 Cierre inmediato si el servidor detecta duplicado
+🔹 100% Cloudflare SAFE compatible
 -----------------------------------------
 `);
