@@ -1,98 +1,22 @@
 // ===============================================================
-// ✅ CFC-SYNC CORE LITE — V71.2 VISUAL + AUDIO
+// ✅ CFC-SYNC MINI LITE — V71.3 CLEAN MODE
 // ---------------------------------------------------------------
-// Verificador visual y auditivo de sincronía multinube
-// Plataformas: Cloudflare Pages + Workers + Render + Firebase
-// Registro QA-SYNC + overlay dorado + ping/alert sonidos
+// Versión mínima y silenciosa del sistema de verificación multinube.
+// No muestra overlay, no emite sonidos, ni afecta al Campus.
+// Guarda un log técnico interno en localStorage (solo QA-SYNC).
 // ===============================================================
 
-const CFC_VERSION = "CFC-LOCK-V71.2";
-const CHECK_INTERVAL_MS = 60000; // 1 min
-const MAX_LOGS = 10;
+const CFC_VERSION = "CFC-SYNC-MINI-V71.3";
+const CHECK_INTERVAL_MS = 120000; // 2 minutos
 
 const ENDPOINTS = {
   meta: "/meta.json",
   worker: "/api/domain-guard",
-  render: "https://cfc-lock-proxy.onrender.com/ping",
-  firebase:
-    "https://firestore.googleapis.com/v1/projects/TU_PROYECTO/databases/(default)/documents/sessions/test"
+  render: "https://cfc-lock-proxy.onrender.com/ping"
 };
 
-// 🟡 Sonidos en Base64 (sin archivos externos)
-const soundOK = new Audio(
-  "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA..."
-);
-const soundERR = new Audio(
-  "data:audio/mp3;base64,//uQxAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAACcQCA..."
-);
-
 // ===============================================================
-// 🧩 Crear overlay visual (una sola vez)
-// ===============================================================
-function CFC_createOverlay() {
-  if (document.getElementById("cfcSyncOverlay")) return;
-
-  const div = document.createElement("div");
-  div.id = "cfcSyncOverlay";
-  div.innerHTML = `
-    <div id="cfcOverlayBody">
-      <div id="cfcStatus" class="ok">🟢 Todo sincronizado</div>
-      <div id="cfcLatency">-- ms</div>
-      <div id="cfcTimeline"></div>
-      <button id="cfcMuteBtn">🔊</button>
-    </div>
-  `;
-  document.body.appendChild(div);
-
-  // Estilos
-  const style = document.createElement("style");
-  style.textContent = `
-    #cfcSyncOverlay {
-      position: fixed;
-      bottom: 12px; right: 14px;
-      background: rgba(0,0,0,0.75);
-      border: 2px solid #d4af37;
-      color: #ffd700;
-      font-family: 'Poppins', sans-serif;
-      border-radius: 10px;
-      padding: 8px 12px;
-      z-index: 99999;
-      box-shadow: 0 0 12px rgba(255,215,0,0.5);
-      width: 240px;
-      font-size: 0.85rem;
-      transition: all 0.4s ease;
-    }
-    #cfcOverlayBody { display: flex; flex-direction: column; gap: 4px; align-items: center; }
-    #cfcStatus.ok { color: #00ff7f; }
-    #cfcStatus.warn { color: #ff4500; }
-    #cfcLatency { font-size: 0.8rem; opacity: 0.8; }
-    #cfcTimeline { width: 100%; max-height: 70px; overflow-y: auto; font-size: 0.7rem; text-align: left; }
-    #cfcMuteBtn {
-      background: none;
-      border: none;
-      color: #ffd700;
-      cursor: pointer;
-      margin-top: 2px;
-      font-size: 1.1rem;
-      transition: transform 0.2s ease;
-    }
-    #cfcMuteBtn:hover { transform: scale(1.1); }
-  `;
-  document.head.appendChild(style);
-
-  // Botón de mute
-  const muteBtn = div.querySelector("#cfcMuteBtn");
-  const isMuted = localStorage.getItem("CFC_SYNC_MUTED") === "1";
-  muteBtn.textContent = isMuted ? "🔇" : "🔊";
-  muteBtn.addEventListener("click", () => {
-    const newVal = localStorage.getItem("CFC_SYNC_MUTED") === "1" ? "0" : "1";
-    localStorage.setItem("CFC_SYNC_MUTED", newVal);
-    muteBtn.textContent = newVal === "1" ? "🔇" : "🔊";
-  });
-}
-
-// ===============================================================
-// 🧠 Funciones principales
+// 🔍 Chequeo de conexión simple
 // ===============================================================
 async function CFC_check(name, url) {
   const start = performance.now();
@@ -104,17 +28,18 @@ async function CFC_check(name, url) {
     return { name, ok: true, ms };
   } catch (e) {
     console.warn(`🟥 [${name}] Falló → ${e.message}`);
-    return { name, ok: false, ms: null, error: e.message };
+    return { name, ok: false, ms: null };
   }
 }
 
-async function CFC_syncRun() {
-  console.log(`\n🔁 [CFC-SYNC CORE] Verificando sincronía — ${new Date().toLocaleTimeString()}`);
+// ===============================================================
+// 🧠 Ejecutor principal silencioso
+// ===============================================================
+async function CFC_syncRunSilent() {
   const results = await Promise.all([
     CFC_check("Cloudflare meta.json", ENDPOINTS.meta),
     CFC_check("Cloudflare Worker", ENDPOINTS.worker),
-    CFC_check("Render Heartcore", ENDPOINTS.render),
-    CFC_check("Firebase sessions", ENDPOINTS.firebase)
+    CFC_check("Render Heartcore", ENDPOINTS.render)
   ]);
 
   const okAll = results.every(r => r.ok);
@@ -126,39 +51,16 @@ async function CFC_syncRun() {
   const summary = {
     version: CFC_VERSION,
     ok: okAll,
-    latencyAvg,
-    timestamp: new Date().toLocaleTimeString()
+    latencyAvg: isNaN(latencyAvg) ? null : latencyAvg,
+    timestamp: new Date().toISOString()
   };
 
-  // QA Log
-  const logs = JSON.parse(localStorage.getItem("CFC_SYNC_LOGS") || "[]");
-  logs.unshift(summary);
-  if (logs.length > MAX_LOGS) logs.pop();
-  localStorage.setItem("CFC_SYNC_LOGS", JSON.stringify(logs));
-
-  // Overlay update
-  const overlay = document.getElementById("cfcSyncOverlay");
-  if (overlay) {
-    const statusEl = overlay.querySelector("#cfcStatus");
-    const latencyEl = overlay.querySelector("#cfcLatency");
-    const timelineEl = overlay.querySelector("#cfcTimeline");
-
-    statusEl.textContent = okAll ? "🟢 Todo sincronizado" : "⚠️ Desincronía detectada";
-    statusEl.className = okAll ? "ok" : "warn";
-    latencyEl.textContent = `Promedio: ${latencyAvg} ms`;
-
-    timelineEl.innerHTML = logs
-      .map(l => `<div>${l.timestamp} — ${l.ok ? "✅ OK" : "❌ FAIL"} (${l.latencyAvg} ms)</div>`)
-      .join("");
-
-    const muted = localStorage.getItem("CFC_SYNC_MUTED") === "1";
-    if (!muted) (okAll ? soundOK : soundERR).play();
-  }
+  localStorage.setItem("CFC_SYNC_LAST", JSON.stringify(summary));
 
   console.log(
     okAll
-      ? `✅ [SYNC OK] Todas las plataformas online (avg ${latencyAvg} ms)`
-      : `⚠️ [SYNC WARN] Desincronía detectada`
+      ? `✅ [SYNC MINI] OK (${summary.latencyAvg} ms)`
+      : `⚠️ [SYNC MINI] Desincronía (ver detalles consola)`
   );
 }
 
@@ -166,7 +68,6 @@ async function CFC_syncRun() {
 // 🚀 Inicialización
 // ===============================================================
 window.addEventListener("load", () => {
-  CFC_createOverlay();
-  setTimeout(CFC_syncRun, 1500);
-  setInterval(CFC_syncRun, CHECK_INTERVAL_MS);
+  setTimeout(CFC_syncRunSilent, 2000);
+  setInterval(CFC_syncRunSilent, CHECK_INTERVAL_MS);
 });
