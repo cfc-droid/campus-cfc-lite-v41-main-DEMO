@@ -1,4 +1,4 @@
-<!-- ✅ CFC_FUNC_57_2_LOGIN_UI_FIREBASE_HEARTBEAT_FINAL -->
+<!-- ✅ CFC_FUNC_58_3_LOGIN_UI_FIREBASE_RENDER_SYNC_FINAL -->
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
   <head>
@@ -127,21 +127,49 @@
     </script>
 
     <!-- ==========================================================
-         🔐 Login Firebase Firestore (CFC_LOCK_IDENTITY_V57.2_HEARTBEAT_MODE)
+         🔐 Login Firebase + Render Proxy (CFC_LOCK_IDENTITY_V58.3_SYNC_RENDER)
          ========================================================== -->
     <script type="module">
       import { CFC_login } from "../js/core/cfc_lock_identity.js";
       import { CFC_showBlockOverlay } from "../js/overlay_block.js";
+      import { checkSession, startHeartbeat } from "../js/core/cfc_api.js";
+
+      // 🧠 Generador persistente de Device ID
+      function getDeviceId() {
+        const key = "CFC_DEVICE_ID";
+        let id = localStorage.getItem(key);
+        if (!id) {
+          id = crypto.randomUUID ? crypto.randomUUID() : "device-" + Date.now();
+          localStorage.setItem(key, id);
+        }
+        return id;
+      }
 
       const form = document.getElementById("loginForm");
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const email = document.getElementById("email").value.trim();
         const license = document.getElementById("license").value.trim();
+        const device_id = getDeviceId();
 
         console.log("🟡 Intentando login Firebase:", email);
+
         try {
+          // 1️⃣ Autenticación Firebase
           await CFC_login(email, license);
+
+          // 2️⃣ Verificación Render Proxy
+          const valid = await checkSession(email, device_id);
+          if (!valid) {
+            console.warn("🔴 Licencia no válida en Render Proxy");
+            CFC_showBlockOverlay("⚠️ Licencia no válida o dispositivo no autorizado.");
+            return;
+          }
+
+          // 3️⃣ Iniciar heartbeats automáticos
+          startHeartbeat(email, device_id);
+          console.log("🟢 Autenticación completa. Redirigiendo al Campus...");
+          window.location.href = "../index.html";
         } catch (err) {
           console.error("❌ Error durante el login:", err.message || err);
           CFC_showBlockOverlay("⚠️ Error durante el login (ver consola).");
@@ -153,7 +181,7 @@
     <script type="module" src="../js/overlay_block.js?v=47.3"></script>
 
     <script>
-      console.log("✅ CFC_FUNC_57_2_LOGIN_UI_FIREBASE_HEARTBEAT_FINAL activo");
+      console.log("✅ CFC_FUNC_58_3_LOGIN_UI_FIREBASE_RENDER_SYNC_FINAL activo");
     </script>
   </body>
 </html>
