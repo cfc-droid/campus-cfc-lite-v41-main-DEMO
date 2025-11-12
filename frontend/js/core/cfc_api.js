@@ -1,36 +1,59 @@
-// ✅ CFC_LOCK_SERVER_SYNC_MODE V57.5_FINAL
-// 🌐 Comunicación segura con servidor Render (Express + Firebase)
+// ✅ CFC_LOCK_SERVER_SYNC_MODE_V58.2_RENDER_STABLE
+// 🌐 Comunicación segura Campus ↔ Render (Express + Firebase)
+// Última revisión QA-SYNC — 2025-11-12 — Validado con backend V57.8
 
-const SERVER_URL = "https://cfc-lock-proxy.onrender.com"; // ← tu URL real de Render
+const SERVER_URL = "https://cfc-lock-proxy.onrender.com"; // ✅ Proxy activo en Render
 
-// 🧠 Función: verificar si el dispositivo actual sigue autorizado
+// 🧠 Verifica si la sesión del usuario sigue siendo válida
 export async function checkSession(email, device_id) {
   try {
-    const res = await fetch(`${SERVER_URL}/check-session?email=${email}&device_id=${device_id}`);
+    const endpoint = `${SERVER_URL}/check-session?email=${encodeURIComponent(email)}&device_id=${encodeURIComponent(device_id)}`;
+    const res = await fetch(endpoint, { method: "GET", cache: "no-store" });
+
+    if (!res.ok) {
+      console.warn("⚠️ Respuesta inesperada del servidor:", res.status);
+      return false;
+    }
+
     const data = await res.json();
-    return data.status === "valid";
+
+    if (data.status === "valid") {
+      console.log("🟢 Sesión válida para:", email);
+      return true;
+    } else {
+      console.log("🔴 Sesión inválida:", data.reason || "sin motivo");
+      return false;
+    }
   } catch (err) {
     console.error("❌ Error al verificar sesión:", err);
     return false;
   }
 }
 
-// 💓 Función: enviar heartbeat (actualiza el last_active)
+// 💓 Envía un “heartbeat” al servidor (mantiene la sesión viva)
 export async function sendHeartbeat(email, device_id) {
   try {
-    await fetch(`${SERVER_URL}/heartbeat`, {
+    const payload = { email, device_id };
+    const res = await fetch(`${SERVER_URL}/heartbeat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, device_id })
+      body: JSON.stringify(payload),
     });
+
+    if (!res.ok) throw new Error(`Código HTTP ${res.status}`);
+    console.log("💓 Heartbeat enviado correctamente");
   } catch (err) {
-    console.warn("⚠️ Error al enviar heartbeat:", err);
+    console.warn("⚠️ Error al enviar heartbeat:", err.message);
   }
 }
 
-// ⏱️ Función: iniciar bucle automático de heartbeats
-export function startHeartbeat(email, device_id) {
+// ⏱️ Inicia el bucle de heartbeats automáticos
+export function startHeartbeat(email, device_id, intervalMs = 15000) {
+  // Envia uno inmediato al cargar
   sendHeartbeat(email, device_id);
-  setInterval(() => sendHeartbeat(email, device_id), 10000);
-  console.log("💓 Heartbeat iniciado cada 10s para", device_id);
+
+  // Repite cada X segundos (por defecto 15 s)
+  setInterval(() => sendHeartbeat(email, device_id), intervalMs);
+
+  console.log(`💓 Heartbeat iniciado cada ${intervalMs / 1000}s para ${device_id}`);
 }
