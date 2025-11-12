@@ -1,4 +1,4 @@
-<!-- ✅ CFC_FUNC_58_3_LOGIN_UI_FIREBASE_RENDER_SYNC_FINAL -->
+<!-- ✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL -->
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
   <head>
@@ -7,8 +7,8 @@
     <title>Iniciar sesión — Campus CFC LITE V41</title>
 
     <!-- ✅ Estilos premium -->
-    <link rel="stylesheet" href="../css/variables.css?v=20251111" />
-    <link rel="stylesheet" href="../css/premium.min.css?v=20251111" />
+    <link rel="stylesheet" href="../css/variables.css?v=20251112" />
+    <link rel="stylesheet" href="../css/premium.min.css?v=20251112" />
 
     <style>
       body {
@@ -127,12 +127,12 @@
     </script>
 
     <!-- ==========================================================
-         🔐 Login Firebase + Render Proxy (CFC_LOCK_IDENTITY_V58.3_SYNC_RENDER)
+         🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
          ========================================================== -->
     <script type="module">
       import { CFC_login } from "../js/core/cfc_lock_identity.js";
       import { CFC_showBlockOverlay } from "../js/overlay_block.js";
-      import { checkSession, startHeartbeat } from "../js/core/cfc_api.js";
+      import { checkSession, startHeartbeat, registerLogin } from "../js/core/cfc_api.js";
 
       // 🧠 Generador persistente de Device ID
       function getDeviceId() {
@@ -158,15 +158,21 @@
           // 1️⃣ Autenticación Firebase
           await CFC_login(email, license);
 
-          // 2️⃣ Verificación Render Proxy
-          const valid = await checkSession(email, device_id);
-          if (!valid) {
-            console.warn("🔴 Licencia no válida en Render Proxy");
-            CFC_showBlockOverlay("⚠️ Licencia no válida o dispositivo no autorizado.");
+          // 2️⃣ Registrar login en Render (marca el nuevo dispositivo)
+          const registered = await registerLogin(email, device_id);
+          if (!registered) {
+            CFC_showBlockOverlay("⚠️ No se pudo registrar la sesión.");
             return;
           }
 
-          // 3️⃣ Iniciar heartbeats automáticos
+          // 3️⃣ Verificar que la sesión sea válida (única)
+          const valid = await checkSession(email, device_id);
+          if (!valid) {
+            CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa en otro dispositivo.");
+            return;
+          }
+
+          // 4️⃣ Iniciar heartbeats automáticos
           startHeartbeat(email, device_id);
           console.log("🟢 Autenticación completa. Redirigiendo al Campus...");
           window.location.href = "../index.html";
@@ -181,7 +187,7 @@
     <script type="module" src="../js/overlay_block.js?v=47.3"></script>
 
     <script>
-      console.log("✅ CFC_FUNC_58_3_LOGIN_UI_FIREBASE_RENDER_SYNC_FINAL activo");
+      console.log("✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL activo");
     </script>
   </body>
 </html>
