@@ -1,12 +1,11 @@
-// ✅ CFC_LOCK_SERVER_SYNC_MODE_V60.1_RENDER_AUTO_LOGOUT
-// 🌐 Comunicación segura Campus ↔ Render (Express + Firebase)
-// 🔒 Maneja sesiones únicas y cierre remoto en caso de duplicado
-// QA-SYNC — 2025-11-12 — Validado con backend V60.0
+// ✅ CFC_LOCK_SERVER_SYNC_MODE_V60.2_FRONTEND_AUTO_LOGOUT_FIX
+// 🌐 Comunicación Campus ↔ Render Proxy (Express + Firebase)
+// 🔒 Maneja sesiones únicas y cierre remoto automático (overlay dorado)
 
-const SERVER_URL = "https://cfc-lock-proxy.onrender.com"; // ✅ Proxy activo en Render
+const SERVER_URL = "https://cfc-lock-proxy.onrender.com";
 
 /* ==========================================================
-   🔹 Registrar login: marca el dispositivo activo en backend
+   🔹 Registrar login en Render
    ========================================================== */
 export async function registerLogin(email, device_id) {
   try {
@@ -29,24 +28,21 @@ export async function registerLogin(email, device_id) {
    ========================================================== */
 export async function checkSession(email, device_id) {
   try {
-    const endpoint = `${SERVER_URL}/check-session?email=${encodeURIComponent(
-      email
-    )}&device_id=${encodeURIComponent(device_id)}`;
-    const res = await fetch(endpoint, { method: "GET", cache: "no-store" });
-
-    if (!res.ok) {
-      console.warn("⚠️ Respuesta inesperada del servidor:", res.status);
-      return false;
-    }
+    const res = await fetch(
+      `${SERVER_URL}/check-session?email=${encodeURIComponent(email)}&device_id=${encodeURIComponent(device_id)}`,
+      { method: "GET", cache: "no-store" }
+    );
 
     const data = await res.json();
-
     if (data.status === "valid") {
       console.log("🟢 Sesión válida para:", email);
       return true;
+    } else if (data.status === "expired" || data.status === "invalid") {
+      console.warn("🚨 Sesión inválida/expirada:", data.reason);
+      triggerLogout("⚠️ Tu sesión fue cerrada por otro dispositivo.");
+      return false;
     } else {
-      console.warn("🔴 Sesión inválida:", data.reason || "sin motivo");
-      triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
+      console.warn("⚠️ Respuesta desconocida:", data);
       return false;
     }
   } catch (err) {
@@ -56,46 +52,43 @@ export async function checkSession(email, device_id) {
 }
 
 /* ==========================================================
-   💓 Envía un “heartbeat” (mantiene viva la sesión)
+   💓 Heartbeat (mantiene viva la sesión)
    ========================================================== */
 export async function sendHeartbeat(email, device_id) {
   try {
-    const payload = { email, device_id };
     const res = await fetch(`${SERVER_URL}/heartbeat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ email, device_id }),
       cache: "no-store",
     });
 
     const data = await res.json();
-
     if (data.status === "expired") {
       console.warn("🚨 Sesión expirada por otro dispositivo.");
       triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
       return;
     }
 
-    if (!res.ok) throw new Error(`Código HTTP ${res.status}`);
-    console.log("💓 Heartbeat válido para", device_id);
+    console.log("💓 Heartbeat OK:", data.status);
   } catch (err) {
     console.warn("⚠️ Error al enviar heartbeat:", err.message);
   }
 }
 
 /* ==========================================================
-   ⏱️ Inicia el bucle de heartbeats automáticos
+   ⏱️ Bucle automático
    ========================================================== */
 export function startHeartbeat(email, device_id, intervalMs = 15000) {
-  sendHeartbeat(email, device_id); // primer pulso inmediato
+  sendHeartbeat(email, device_id);
   setInterval(() => sendHeartbeat(email, device_id), intervalMs);
   console.log(`💓 Heartbeat activo cada ${intervalMs / 1000}s para ${device_id}`);
 }
 
 /* ==========================================================
-   🚪 Logout remoto visual (expulsión)
+   🚪 Logout remoto unificado (exportable)
    ========================================================== */
-function triggerLogout(msg) {
+export function triggerLogout(msg = "⚠️ Tu sesión fue cerrada por otro dispositivo.") {
   try {
     localStorage.clear();
     import("../overlay_block.js").then(({ CFC_showBlockOverlay }) => {
@@ -104,17 +97,17 @@ function triggerLogout(msg) {
         window.location.href = "../html/login.html";
       }, 2500);
     });
-  } catch (e) {
-    console.error("⚠️ Error al ejecutar logout remoto:", e);
+  } catch (err) {
+    console.error("⚠️ Error durante logout remoto:", err);
     window.location.href = "../html/login.html";
   }
 }
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_SERVER_SYNC_MODE_V60.1_RENDER_AUTO_LOGOUT
+🧩 QA-SYNC | CFC_LOCK_SERVER_SYNC_MODE_V60.2_FRONTEND_AUTO_LOGOUT_FIX
 ────────────────────────────────────────────
-🔹 Comunicación Campus ↔ Render establecida
-🔹 Detección remota “expired” con cierre automático
-🔹 Overlay dorado + redirección segura a login.html
+🔹 Exporta triggerLogout()
+🔹 Sincroniza polling + heartbeat
+🔹 Overlay dorado + redirección inmediata
 ────────────────────────────────────────────
 `);
