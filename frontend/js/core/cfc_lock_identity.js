@@ -1,12 +1,10 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V60.1_RENDER_AUTO_LOGOUT
+   ✅ CFC_LOCK_IDENTITY_V60.2_FRONTEND_AUTO_LOGOUT_FIX
    Sistema: Campus CFC LITE V41-DEMO
-   Función: Sesión única cross-device con Render Proxy (Firebase + Node)
-   Auditor: QA-SYNC — 2025-11-12
    ========================================================== */
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
-import { checkSession, startHeartbeat, registerLogin } from "./cfc_api.js";
+import { checkSession, startHeartbeat, registerLogin, triggerLogout } from "./cfc_api.js";
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -44,7 +42,7 @@ const makeDeviceId = () => {
 };
 
 /* ==========================================================
-   🔐 LOGIN
+   🔐 LOGIN (Firebase + Render Proxy)
    ========================================================== */
 export async function CFC_login(email, license) {
   const e = email.trim().toLowerCase();
@@ -53,15 +51,19 @@ export async function CFC_login(email, license) {
   const did = makeDeviceId();
   const ref = doc(db, "licenses", e);
 
-  await setDoc(ref, {
-    email: e,
-    license_key: k,
-    session_id: sid,
-    device_id: did,
-    active_session: true,
-    last_active: serverTimestamp(),
-    updated_at_iso: nowISO(),
-  }, { merge: true });
+  await setDoc(
+    ref,
+    {
+      email: e,
+      license_key: k,
+      session_id: sid,
+      device_id: did,
+      active_session: true,
+      last_active: serverTimestamp(),
+      updated_at_iso: nowISO(),
+    },
+    { merge: true }
+  );
 
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
@@ -90,8 +92,9 @@ export async function CFC_login(email, license) {
 function startServerPolling(email, did) {
   setInterval(async () => {
     try {
-      const isValid = await checkSession(email, did);
-      if (!isValid) {
+      const valid = await checkSession(email, did);
+      if (!valid) {
+        console.warn("🚨 Sesión invalidada por el servidor.");
         triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
       }
     } catch (err) {
@@ -101,21 +104,7 @@ function startServerPolling(email, did) {
 }
 
 /* ==========================================================
-   🔁 Logout remoto visual
-   ========================================================== */
-function triggerLogout(msg) {
-  try {
-    localStorage.clear();
-    CFC_showBlockOverlay(msg);
-    setTimeout(() => (window.location.href = "../html/login.html"), 2500);
-  } catch (e) {
-    console.error("⚠️ Error durante logout remoto:", e);
-    window.location.href = "../html/login.html";
-  }
-}
-
-/* ==========================================================
-   🧩 AUTOLOAD
+   🧩 AUTOLOAD — Reanudar sesión previa
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const e = localStorage.getItem("CFC_EMAIL");
@@ -128,10 +117,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V60.1_RENDER_AUTO_LOGOUT
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V60.2_FRONTEND_AUTO_LOGOUT_FIX
 ────────────────────────────────────────────
-🔹 Firebase + Render sincronizados
-🔹 Detección remota “expired” con cierre automático
-🔹 Overlay dorado y redirección segura
+🔹 Unificación de triggerLogout()
+🔹 Polling con cierre remoto automático
 ────────────────────────────────────────────
 `);
