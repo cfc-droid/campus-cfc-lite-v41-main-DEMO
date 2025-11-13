@@ -4,6 +4,27 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Campus CFC — Intro</title>
+
+  <!-- =============================================================
+       🔒 CFC_DOMAIN_LOCK — V41.5_PRE-RENDER_FULL
+       Archivo: /frontend/pages/intro.html
+       Bloqueo inmediato del contexto para dominios no autorizados
+       ============================================================= -->
+  <script>
+    (function(){
+      const allowed = [
+        "campus-cfc-lite-v41-main-demo.pages.dev",
+        "localhost",
+        "127.0.0.1"
+      ];
+      const current = location.hostname.toLowerCase();
+      if (!allowed.includes(current)) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    })();
+  </script>
+  <!-- 🔒 FIN CFC_DOMAIN_LOCK -->
+
   <link rel="stylesheet" href="../css/premium.min.css?v=20251103">
   <style>
     body {
