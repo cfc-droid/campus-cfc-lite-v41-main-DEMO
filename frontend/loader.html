@@ -25,7 +25,6 @@
       transition: background-color 0.5s ease, color 0.5s ease;
     }
 
-    /* 🔹 SVG del logo CFC */
     svg {
       width: 100px;
       height: 100px;
@@ -34,7 +33,6 @@
       transition: filter 0.5s ease;
     }
 
-    /* 🔸 Frase motivacional */
     p {
       font-size: 15px;
       font-style: italic;
@@ -48,7 +46,6 @@
       to { opacity: 1; }
     }
 
-    /* 🔹 Botones principales */
     .btn-main, .btn-demo {
       padding: 10px 22px;
       border: 1px solid var(--color-accent, #d4af37);
@@ -73,7 +70,6 @@
       color: #ffffff66;
     }
 
-    /* 🌙 Botón global tema claro/oscuro */
     #themeToggle {
       position: fixed;
       top: 18px;
@@ -99,8 +95,39 @@
 </head>
 
 <body>
+
+  <!-- =====================================================
+       🔒 CFC_DOMAIN_LOCK v1.0 — Protección de dominio
+       ===================================================== -->
+  <script>
+    (function () {
+      const allowed = [
+        "campus-cfc-lite-v41-main-demo.pages.dev",
+        "campuscfc.pages.dev",
+        "campuscfc.com",
+        "localhost",
+        "127.0.0.1"
+      ];
+
+      const current = window.location.hostname.toLowerCase();
+      window.CFC_DOMAIN_OK = allowed.includes(current);
+
+      if (!window.CFC_DOMAIN_OK) {
+        document.body.innerHTML = `
+          <div style="
+            font-family:Poppins,sans-serif;text-align:center;
+            padding:40px;color:#ffd700;background:#000;height:100vh;
+            display:flex;flex-direction:column;justify-content:center;
+            align-items:center;">
+            <h2>🔒 Acceso bloqueado</h2>
+            <p>Dominio no autorizado.</p>
+          </div>`;
+        throw new Error("CFC_DOMAIN_LOCK: bloqueo ejecutado");
+      }
+    })();
+  </script>
+
   <div id="loader">
-    <!-- ✅ Logo reducido a 100px -->
     <svg viewBox="0 0 100 100">
       <circle cx="50" cy="50" r="48" stroke="#d4af37" stroke-width="2" fill="none" />
       <text x="50%" y="54%" text-anchor="middle" fill="#d4af37" font-size="22" font-family="Poppins, sans-serif">
@@ -108,7 +135,6 @@
       </text>
     </svg>
 
-    <!-- ✅ Frase visible sin scroll -->
     <p>El control es la verdadera libertad 🧠</p>
 
     <button class="btn-main" onclick="window.location.href='/frontend/modules/index.html'">
@@ -118,21 +144,14 @@
     <button class="btn-demo" id="btnDemoPublica">Ver demo pública</button>
   </div>
 
-  <!-- 🌗 Botón de alternancia modo claro/oscuro -->
   <button id="themeToggle" title="Cambiar tema">🌙</button>
 
   <footer>© 2025 Campus CFC Trading — V41</footer>
 
   <script>
-    // =====================================================
-    // ✅ CFC_FUNC_5_1C_VISUAL_GLOBAL_20251101
-    // Botón modo oscuro visible en todo el Campus (Loader + interior)
-    // =====================================================
-
     document.addEventListener("DOMContentLoaded", () => {
       const btn = document.getElementById("themeToggle");
 
-      // Aplicar tema guardado o por defecto
       let tema = localStorage.getItem("tema") || "dark";
       aplicarTema(tema);
 
@@ -146,7 +165,6 @@
         document.documentElement.setAttribute("data-theme", t);
         btn.textContent = t === "dark" ? "☀️" : "🌙";
 
-        // Cambiar colores base del loader dinámicamente
         const root = document.documentElement;
         if (t === "dark") {
           root.style.setProperty("--color-bg", "#000");
@@ -162,5 +180,6 @@
       console.log("🧩 CFC_SYNC checkpoint:", "loader.html", "Modo oscuro activado", new Date().toLocaleString());
     });
   </script>
+
 </body>
 </html>
