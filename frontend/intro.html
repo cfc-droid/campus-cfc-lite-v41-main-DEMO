@@ -124,6 +124,36 @@
 </head>
 
 <body>
+
+  <!-- 🔒 CFC_DOMAIN_LOCK - Protección de dominio -->
+  <script>
+    (function () {
+      const allowed = [
+        "campus-cfc-lite-v41-main-demo.pages.dev",
+        "campuscfc.pages.dev",
+        "campuscfc.com",
+        "localhost",
+        "127.0.0.1"
+      ];
+
+      const current = window.location.hostname.toLowerCase();
+      window.CFC_DOMAIN_OK = allowed.includes(current);
+
+      if (!window.CFC_DOMAIN_OK) {
+        document.body.innerHTML = `
+          <div style="
+            font-family:Poppins,sans-serif;text-align:center;
+            padding:40px;color:#ffd700;background:#000;height:100vh;
+            display:flex;flex-direction:column;justify-content:center;
+            align-items:center;">
+            <h2>🔒 Acceso bloqueado</h2>
+            <p>Dominio no autorizado.</p>
+          </div>`;
+        throw new Error("CFC_DOMAIN_LOCK: bloqueo ejecutado");
+      }
+    })();
+  </script>
+
   <!-- 🎬 Overlay -->
   <div id="videoOverlay" class="video-overlay">
     <div class="video-box">
