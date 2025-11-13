@@ -138,6 +138,16 @@
       to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
     }
   </style>
+
+  <!-- BLOQUE A — DOMAIN LOCK -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- BLOQUE C — cfc_lock_identity.js -->
+  <script src="js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- BLOQUE E — JS BUNDLE -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
 </head>
 
 <body>
@@ -229,7 +239,6 @@
   <!-- Scripts -->
   <script src="js/loader.js?v=20251105" defer></script>
   <script src="js/footer.js?v=20251103" defer></script>
-  <!-- <script src="js/theme.js?v=20251103" defer></script> -->
 
 <!-- ✅ CFC_FUNC_5_3_FIX_V41.21 — Sistema unificado de tema global -->
 <script src="js/theme_chapter_v2.js?v=20251106" defer></script>
@@ -288,7 +297,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const btn = document.createElement("button");
     btn.id = "theme-toggle";
     btn.textContent = "☀️";
-    document.body.appendChild(btn);
+      document.body.appendChild(btn);
 
     // Cargar estado previo
     const currentTheme = localStorage.getItem("theme") || "dark";
