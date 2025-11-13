@@ -68,6 +68,46 @@ function updateProgressDisplay() {
 }
 
 /* =====================================================
+   🔒 CFC_DOMAIN_LOCK v1.0 — Protección de dominio
+   ===================================================== */
+(function () {
+  const allowed = [
+    "campus-cfc-lite-v41-main-demo.pages.dev",
+    "localhost",
+    "127.0.0.1"
+  ];
+
+  const current = window.location.hostname;
+
+  // Exponer variable global
+  window.CFC_DOMAIN_OK = allowed.includes(current);
+
+  if (!window.CFC_DOMAIN_OK) {
+    console.warn("❌ CFC_DOMAIN_LOCK: Dominio NO autorizado →", current);
+    document.body.innerHTML = `
+      <div style="
+        font-family: Poppins, sans-serif;
+        text-align:center;
+        padding:40px;
+        color:#ffd700;
+        background:#000;
+        height:100vh;
+        display:flex;
+        flex-direction:column;
+        justify-content:center;
+        align-items:center;
+      ">
+        <h2>🔒 Acceso bloqueado</h2>
+        <p>Este campus solo funciona en dominios autorizados.</p>
+      </div>
+    `;
+    throw new Error("CFC_DOMAIN_LOCK: Deteniendo ejecución.");
+  } else {
+    console.log("🔓 CFC_DOMAIN_LOCK: Dominio autorizado:", current);
+  }
+})();
+
+/* =====================================================
    BLOQUE B4 — Botón “Continuar último módulo” + Reinicio global
    ===================================================== */
 window.addEventListener("DOMContentLoaded", () => {
