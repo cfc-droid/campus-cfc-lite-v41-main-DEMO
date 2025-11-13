@@ -5,6 +5,9 @@
   <title>Video Guía — Campus CFC Trading</title>
   <link rel="stylesheet" href="../css/premium.min.css?v=20251103">
 
+  <!-- CFC-SYNC — CSS MINIFICADO (D) -->
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
+
   <!-- ✅ CFC_FUNC_7_3E_V43_PREMIUM_REDIRECT — Overlay + Flash + Loader dorado -->
   <style>
     body {
@@ -154,6 +157,9 @@
     })();
   </script>
 
+  <!-- CFC-SYNC — DOMAIN LOCK (A) -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
   <!-- 🎬 Overlay -->
   <div id="videoOverlay" class="video-overlay">
     <div class="video-box">
@@ -168,6 +174,24 @@
   <div id="goldenFlash"></div>
 
   <script src="../js/intro.js?v=20251103"></script>
+
+  <!-- CFC-SYNC — ROOT GUARD + IDENTITY (C)(F) -->
+  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- CFC-SYNC — JS BUNDLE (E) -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- CFC-SYNC — HEARTCORE MONITOR (G) -->
+  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
+
+  <!-- CFC-SYNC — HEARTBEAT DE DOMINIO (B) -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
 
   <!-- 🔒 CFC-SYNC -->
   <script>
