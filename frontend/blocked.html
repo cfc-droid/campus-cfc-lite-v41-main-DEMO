@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Acceso no autorizado — CFC-LOCK ONLINE V72-FINAL</title>
+
+  <style>
+    /* ============================================================
+       CFC-LOCK ONLINE — BLOQUEO DE DOMINIO / CONTEXTO
+       Archivo: /frontend/blocked.html
+       Auditor: CFC-SYNC V72-FINAL
+       ============================================================ */
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: #000;
+      color: #d4af37;
+      font-family: 'Poppins', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      text-align: center;
+    }
+
+    .box {
+      background: rgba(30, 30, 30, 0.65);
+      padding: 40px;
+      border: 2px solid #d4af37;
+      border-radius: 12px;
+      max-width: 420px;
+      box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+    }
+
+    h1 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #d4af37;
+    }
+
+    p {
+      font-size: 14px;
+      opacity: 0.85;
+      line-height: 1.5;
+      color: #f5f5f5;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px 25px;
+      background: #d4af37;
+      border: none;
+      border-radius: 8px;
+      color: #000;
+      font-size: 14px;
+      cursor: pointer;
+      transition: 0.25s ease;
+    }
+
+    button:hover {
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="box">
+    <h1>🚫 Acceso no autorizado</h1>
+
+    <p>
+      El acceso a este recurso fue bloqueado por<br>
+      <strong>CFC-LOCK ONLINE V72-FINAL</strong><br><br>
+      Dominio o contexto inválido.<br>
+      Solo se permite el acceso desde los dominios oficiales autorizados.
+    </p>
+
+    <button onclick="window.location.href='/'">
+      Volver al inicio
+    </button>
+  </div>
+</body>
+</html>
