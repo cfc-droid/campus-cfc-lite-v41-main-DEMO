@@ -141,6 +141,36 @@
 </head>
 
 <body>
+
+<!-- 🔒 CFC_DOMAIN_LOCK -->
+<script>
+(function () {
+  const allowed = [
+    "campus-cfc-lite-v41-main-demo.pages.dev",
+    "campuscfc.pages.dev",
+    "campuscfc.com",
+    "localhost",
+    "127.0.0.1"
+  ];
+
+  const current = window.location.hostname.toLowerCase();
+  window.CFC_DOMAIN_OK = allowed.includes(current);
+
+  if (!window.CFC_DOMAIN_OK) {
+    document.body.innerHTML = `
+      <div style="
+        font-family:Poppins,sans-serif;text-align:center;
+        padding:40px;color:#ffd700;background:#000;height:100vh;
+        display:flex;flex-direction:column;justify-content:center;
+        align-items:center;">
+        <h2>🔒 Acceso bloqueado</h2>
+        <p>Dominio no autorizado.</p>
+      </div>`;
+    throw new Error("CFC_DOMAIN_LOCK: bloqueo ejecutado");
+  }
+})();
+</script>
+
   <!-- ✨ Intro Premium Splash -->
   <div id="intro-splash">
     <img id="logoCFC" src="img/logo.png" alt="Logo CFC" />
@@ -182,6 +212,7 @@
       <button class="btn-main" onclick="location.href='pages/profile.html'">👤 Perfil</button>
       <button class="btn-main" onclick="toggleThemeSafe()">🌗 Cambiar fondo</button>
     </div>
+
 <!-- ✅ CFC_FUNC_9_1_20251105 — CFC-PACK PLUS V1 -->
 <a href="/assets/CFC_Pack_2025.zip" download class="btn-premium">
   📘 Contenido adicional (CFC Pack 2025)
