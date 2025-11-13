@@ -15,7 +15,8 @@
     // ---------------------------------------------------------------
     const allowedHosts = [
       "campuscfc.pages.dev",
-      "campuscfc.com"
+      "campuscfc.com",
+      "www.campuscfc.com"
     ];
 
     const host = (location.hostname || "").toLowerCase();
@@ -50,6 +51,9 @@
     // ---------------------------------------------------------------
     if (!isAllowed || isFile || isLocal || inIframe || isWebView) {
       console.warn("CFC_DOMAIN_LOCK_V72: entorno no autorizado → bloqueado.");
+
+      // 🔥 FIX OBLIGATORIO: Cloudflare Pages SIEMPRE sirve desde raíz
+      // Por eso usamos ruta absoluta EXPLÍCITA
       window.location.href = "/frontend/blocked.html";
       return;
     }
@@ -58,6 +62,16 @@
     // 6. SI TODO ES VÁLIDO → DOMINIO OK
     // ---------------------------------------------------------------
     window.CFC_DOMAIN_OK = true;
+
+    // ---------------------------------------------------------------
+    // 7. LOG FINAL OBLIGATORIO (Auditoría)
+    // ---------------------------------------------------------------
+    console.log(
+      "🛡️ CFC_DOMAIN_LOCK_V72 — Dominio VALIDADO:",
+      host,
+      "Timestamp:",
+      new Date().toLocaleString()
+    );
 
   } catch (e) {
     console.error("CFC_DOMAIN_LOCK_V72: ERROR CRÍTICO", e);
