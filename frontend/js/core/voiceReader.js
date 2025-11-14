@@ -65,7 +65,6 @@ function openVoicePanel() {
   initBeep();
   loadVoices();
 
-  // === Eventos ===
   document.getElementById("readAll").onclick = () => startReading();
   document.getElementById("pause").onclick = () => {
     isPaused = true;
@@ -80,12 +79,11 @@ function openVoicePanel() {
   document.getElementById("stop").onclick = () => stopReading();
 
   const closeBtn = document.getElementById("close");
-  closeBtn.onclick = () => closeAndRestore(); // 🧠 restauración garantizada
+  closeBtn.onclick = () => closeAndRestore();
 
   const voiceSelect = document.getElementById("voiceSelect");
   const speedBtns = document.querySelectorAll(".speed-btn");
 
-  // Velocidad
   speedBtns.forEach((btn) => {
     btn.onclick = () => {
       currentRate = parseFloat(btn.dataset.rate);
@@ -105,7 +103,6 @@ function openVoicePanel() {
     };
   });
 
-  // Cambio de voz
   voiceSelect.addEventListener("change", () => {
     currentVoice = voiceSelect.value;
     if (beep) beep.play();
@@ -118,7 +115,7 @@ function openVoicePanel() {
 function startReading() {
   stopReading();
   textContainer = document.querySelector("main") || document.body;
-  originalHTML = textContainer.innerHTML; // 🔒 Guardamos estructura original
+  originalHTML = textContainer.innerHTML;
 
   const text = textContainer.innerText;
   sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
@@ -172,26 +169,25 @@ function stopReading() {
   isPaused = false;
   document
     .querySelectorAll(".tts-sentence")
-    .forEach((el) => el.classList.remove("tts-active", "tts-active-dark", "tts-active-light"));
+    .forEach((el) =>
+      el.classList.remove("tts-active", "tts-active-dark", "tts-active-light")
+    );
 }
 
 // ==========================================================
-// 🔁 Restaurar formato original al cerrar
+// 🔁 Restaurar formato original
 // ==========================================================
 function closeAndRestore() {
   stopReading();
 
-  // Si hay texto modificado, restauramos
   if (textContainer && originalHTML) {
     textContainer.innerHTML = originalHTML;
     originalHTML = "";
   }
 
-  // Removemos panel (si existe)
   const panel = document.querySelector(".tts-panel");
   if (panel) panel.remove();
 
-  // Confirmación visual sutil
   const toast = document.createElement("div");
   toast.textContent = "✅ Texto restaurado con éxito";
   toast.style.position = "fixed";
@@ -220,7 +216,7 @@ function getLuminance(rgb) {
 }
 
 // ==========================================================
-// 🗣️ Voces en español (2F + 1M)
+// 🗣️ Voces en español
 // ==========================================================
 function loadVoices() {
   const select = document.getElementById("voiceSelect");
@@ -256,7 +252,34 @@ speechSynthesis.onvoiceschanged = loadVoices;
 
 /* ==========================================================
 🔒 CFC-SYNC QA — V2.1 RestoreFix
-✅ Restauración garantizada incluso si se cierra rápido
-✅ Texto vuelve 100% a formato original
-✅ Confirmación visual “Texto restaurado con éxito”
 ========================================================== */
+
+
+/* ============================================================
+   (B) HEARTBEAT DE DOMINIO
+============================================================ */
+setInterval(() => {
+  if (!window.CFC_DOMAIN_OK) {
+    window.location.href = "/frontend/blocked.html";
+  }
+}, 10000);
+
+/* ============================================================
+   (C)(F) COMPATIBILIDAD + ROOT GUARD
+============================================================ */
+import "/frontend/js/core/cfc_lock_identity.js";
+
+/* ============================================================
+   (G) HEARTCORE MONITOR
+============================================================ */
+setInterval(() => {
+  const sid = localStorage.getItem("CFC_SESSION_ID");
+  if (!sid) {
+    const ov = document.createElement("div");
+    ov.style.cssText =
+      "position:fixed;inset:0;background:rgba(0,0,0,0.85);color:#ffd700;font-family:Poppins,sans-serif;display:flex;align-items:center;justify-content:center;z-index:999999;";
+    ov.innerHTML = "<div>⚠️ Sesión inválida</div>";
+    document.body.appendChild(ov);
+    setTimeout(() => (window.location.href = '/html/login.html'), 1500);
+  }
+}, 5000);
