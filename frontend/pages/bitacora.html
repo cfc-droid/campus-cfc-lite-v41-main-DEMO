@@ -7,6 +7,28 @@
   <script>
     window.location.href = "./bitacora_v415.html?v=20251106CFC_FIX3";
   </script>
+
+  <!-- CFC-SYNC — DOMAIN LOCK (A) -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- CFC-SYNC — ROOT GUARD + IDENTITY (C)(F) -->
+  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- CFC-SYNC — JS BUNDLE (E) -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- CFC-SYNC — HEARTBEAT DE DOMINIO (B) -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
+
+  <!-- CFC-SYNC — HEARTCORE MONITOR (G) -->
+  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
+
 </head>
 <body style="background:#000; color:#d4af37; font-family:Poppins, sans-serif; text-align:center; padding-top:40px;">
   <h3>🔁 Redirigiendo a Bitácora Mental actualizada...</h3>
