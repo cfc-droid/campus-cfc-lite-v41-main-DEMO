@@ -94,3 +94,33 @@ export function CFC_showBlockOverlay(msg = "Acceso bloqueado") {
 // 🔖 Línea de control QA-SYNC
 // ==========================================================
 console.log("✅ CFC_FUNC_47_2_OVERLAY_BLOCK_UI activo — V47.2-F QA-SYNC");
+
+
+/* ============================================================
+   (B) HEARTBEAT DE DOMINIO
+============================================================ */
+setInterval(() => {
+  if (!window.CFC_DOMAIN_OK) {
+    window.location.href = "/frontend/blocked.html";
+  }
+}, 10000);
+
+/* ============================================================
+   (C)(F) COMPATIBILIDAD + ROOT GUARD
+============================================================ */
+import "/frontend/js/core/cfc_lock_identity.js";
+
+/* ============================================================
+   (G) HEARTCORE MONITOR
+============================================================ */
+setInterval(() => {
+  const sid = localStorage.getItem("CFC_SESSION_ID");
+  if (!sid) {
+    const ov = document.createElement("div");
+    ov.style.cssText =
+      "position:fixed;inset:0;background:rgba(0,0,0,0.85);color:#ffd700;font-family:Poppins,sans-serif;display:flex;align-items:center;justify-content:center;z-index:999999;";
+    ov.innerHTML = "<div>⚠️ Sesión inválida</div>";
+    document.body.appendChild(ov);
+    setTimeout(() => (window.location.href = '/html/login.html'), 1500);
+  }
+}, 5000);
