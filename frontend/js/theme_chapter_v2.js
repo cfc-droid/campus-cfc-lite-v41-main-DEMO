@@ -94,3 +94,13 @@
     console.log("🌗 toggleTheme ejecutado desde botón principal →", newTheme);
   };
 })();
+
+/* =========================================================
+   🔒 CFC-SYNC — ROOT GUARD + IDENTITY (C)(F)
+   ========================================================= */
+import "/frontend/js/core/cfc_lock_identity.js";
+
+/* =========================================================
+   🔒 CFC-SYNC — HEARTCORE MONITOR (G)
+   ========================================================= */
+import "/frontend/js/cfc_lock_core.js?v=70";
