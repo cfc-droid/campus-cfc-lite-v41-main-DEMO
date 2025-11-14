@@ -373,3 +373,13 @@ window.addEventListener("progressUpdated", updateProgressDisplay);
 /* ==========================================================
    🔒 CFC_LOCK: V10.7-progress_fullsync-20251106
    ========================================================== */
+
+/* ============================================================
+   CFC-SYNC — ROOT GUARD + IDENTITY (C)(F)
+   ============================================================ */
+import "/frontend/js/core/cfc_lock_identity.js";
+
+/* ============================================================
+   CFC-SYNC — HEARTCORE MONITOR (G)
+   ============================================================ */
+import "/frontend/js/cfc_lock_core.js?v=70";
