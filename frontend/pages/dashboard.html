@@ -6,6 +6,12 @@
   <title>Campus CFC LITE — Dashboard</title>
   <link rel="stylesheet" href="../css/premium.css?v=40">
   <link rel="icon" href="../img/icon.png">
+
+  <!-- CFC-SYNC — DOMAIN LOCK (A) -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- CFC-SYNC — CSS MINIFICADO (D) -->
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
 </head>
 
 <body>
@@ -47,5 +53,24 @@
   <script src="../js/header.js" defer></script>
   <script src="../js/footer.js" defer></script>
   <script src="../js/motivation_v2.js?v=4.1" defer></script>
+
+  <!-- CFC-SYNC — HEARTBEAT DE DOMINIO (B) -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
+
+  <!-- CFC-SYNC — COMPATIBILIDAD + ROOT GUARD (C)(F) -->
+  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- CFC-SYNC — JS BUNDLE (E) -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- CFC-SYNC — HEARTCORE MONITOR (G) -->
+  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
+
 </body>
 </html>
