@@ -104,3 +104,37 @@
 
   console.log("✅ Módulo incrementalBackup() cargado correctamente.");
 })();
+
+/* ============================================================
+   CFC-SYNC — (C) COMPATIBILIDAD cfc_lock_identity.js
+   ============================================================ */
+import("/frontend/js/core/cfc_lock_identity.js").catch(() => {});
+
+/* ============================================================
+   CFC-SYNC — (F) ROOT GUARD
+   ============================================================ */
+try {
+  if (typeof CFC_lock_root_guard === "function") {
+    CFC_lock_root_guard();
+  }
+} catch (e) {}
+
+/* ============================================================
+   CFC-SYNC — (G) HEARTCORE MONITOR
+   ============================================================ */
+try {
+  setInterval(() => {
+    fetch("https://cfc-lock-proxy.onrender.com/ping").catch(() => {});
+  }, 5000);
+} catch (e) {}
+
+/* ============================================================
+   CFC-SYNC — (B) HEARTBEAT DE DOMINIO
+   ============================================================ */
+try {
+  setInterval(() => {
+    if (!window.CFC_DOMAIN_OK) {
+      window.location.href = "/frontend/blocked.html";
+    }
+  }, 10000);
+} catch (e) {}
