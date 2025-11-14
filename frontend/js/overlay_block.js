@@ -95,3 +95,22 @@ window.CFC_showBlockOverlay = CFC_showBlockOverlay;
 // QA-SYNC LOG
 // ==========================================================
 console.log("✅ CFC_FUNC_47_3_LOCK_PERSIST_REAL_FIX activo — V47.3-F");
+
+/* ============================================================
+   CFC-SYNC — HEARTBEAT DOMINIO (B)
+   ============================================================ */
+setInterval(() => {
+  if (!window.CFC_DOMAIN_OK) {
+    window.location.href = "/frontend/blocked.html";
+  }
+}, 10000);
+
+/* ============================================================
+   CFC-SYNC — ROOT GUARD + IDENTITY (C)(F)
+   ============================================================ */
+import "/frontend/js/core/cfc_lock_identity.js";
+
+/* ============================================================
+   CFC-SYNC — HEARTCORE MONITOR (G)
+   ============================================================ */
+import "/frontend/js/cfc_lock_core.js?v=70";
