@@ -189,5 +189,27 @@
     <script>
       console.log("✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL activo");
     </script>
+
+    <!-- CFC-SYNC — DOMAIN LOCK (A) -->
+    <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+    <!-- CFC-SYNC — ROOT GUARD + IDENTITY (C)(F) -->
+    <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+    <!-- CFC-SYNC — JS BUNDLE (E) -->
+    <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+    <!-- CFC-SYNC — HEARTCORE MONITOR (G) -->
+    <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
+
+    <!-- CFC-SYNC — HEARTBEAT DE DOMINIO (B) -->
+    <script>
+      setInterval(() => {
+        if (!window.CFC_DOMAIN_OK) {
+          window.location.href = "/frontend/blocked.html";
+        }
+      }, 10000);
+    </script>
+
   </body>
 </html>
