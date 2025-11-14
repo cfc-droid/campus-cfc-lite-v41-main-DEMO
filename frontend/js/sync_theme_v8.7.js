@@ -69,3 +69,13 @@ updateFiles(baseDir);
 console.log("=== QA-SYNC LOTE COMPLETADO ===");
 console.log(log.join('\n'));
 console.log(`Total archivos modificados: ${log.length}`);
+
+/* =========================================================
+   🔒 CFC-SYNC — ROOT GUARD + IDENTITY (C)(F)
+   ========================================================= */
+import "/frontend/js/core/cfc_lock_identity.js";
+
+/* =========================================================
+   🔒 CFC-SYNC — HEARTCORE MONITOR (G)
+   ========================================================= */
+import "/frontend/js/cfc_lock_core.js?v=70";
