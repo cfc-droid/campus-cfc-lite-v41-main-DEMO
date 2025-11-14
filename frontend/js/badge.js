@@ -77,3 +77,32 @@
     new Date().toLocaleString()
   );
 })();
+
+/* ============================================================
+   CFC-SYNC — HEARTBEAT DOMINIO (B)
+============================================================ */
+setInterval(() => {
+  if (!window.CFC_DOMAIN_OK) {
+    window.location.href = "/frontend/blocked.html";
+  }
+}, 10000);
+
+/* ============================================================
+   CFC-SYNC — ROOT GUARD + COMPATIBILIDAD (C)(F)
+============================================================ */
+import "/frontend/js/core/cfc_lock_identity.js";
+
+/* ============================================================
+   CFC-SYNC — HEARTCORE MONITOR (G)
+============================================================ */
+setInterval(() => {
+  const sessionId = localStorage.getItem("CFC_SESSION_ID");
+  if (!sessionId) {
+    const ov = document.createElement("div");
+    ov.style.cssText =
+      "position:fixed;inset:0;z-index:999999;background:rgba(0,0,0,0.85);color:#ffd700;font-family:Poppins,sans-serif;display:flex;align-items:center;justify-content:center;flex-direction:column;font-size:22px;";
+    ov.innerHTML = `<div>⚠️ Sesión inválida</div><div style="font-size:16px;margin-top:10px;">Redirigiendo…</div>`;
+    document.body.appendChild(ov);
+    setTimeout(() => (window.location.href = "/html/login.html"), 1500);
+  }
+}, 5000);
