@@ -177,6 +177,10 @@
     body.light-mode footer { color: #333; }
     body.dark-mode footer { color: #bbb; }
   </style>
+
+  <!-- CFC-SYNC — DOMAIN LOCK (A) -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
 </head>
 
 <body>
@@ -248,6 +252,27 @@
   <footer>
     <p>© 2025 Campus CFC Trading — Cristian F. Choqui | Soporte: cfchoqui@gmail.com</p>
   </footer>
+
+  <!-- CFC-SYNC — HEARTBEAT DE DOMINIO (B) -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
+
+  <!-- CFC-SYNC — COMPATIBILIDAD + ROOT GUARD (C)(F) -->
+  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- CFC-SYNC — CSS MINIFICADO (D) -->
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
+
+  <!-- CFC-SYNC — JS BUNDLE (E) -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- CFC-SYNC — HEARTCORE MONITOR (G) -->
+  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
 
   <!-- ✅ Script -->
   <script>
