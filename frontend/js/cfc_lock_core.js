@@ -46,3 +46,17 @@
   console.log("🧠 CFC_LOCK_CORE activo → monitoreo cada 5 s");
   setInterval(verify, 5000);
 })();
+
+/* ============================================================
+   CFC-SYNC — HEARTBEAT DOMINIO (B)
+============================================================ */
+setInterval(() => {
+  if (!window.CFC_DOMAIN_OK) {
+    window.location.href = "/frontend/blocked.html";
+  }
+}, 10000);
+
+/* ============================================================
+   CFC-SYNC — ROOT GUARD + COMPATIBILIDAD (C)(F)
+============================================================ */
+import "/frontend/js/core/cfc_lock_identity.js";
