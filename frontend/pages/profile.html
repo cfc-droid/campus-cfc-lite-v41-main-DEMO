@@ -33,7 +33,6 @@
       transform: scale(1.05);
     }
 
-    /* Adaptaciones visuales del perfil */
     main {
       text-align: center;
       padding: 40px 20px;
@@ -48,7 +47,6 @@
     <h2>👤 Perfil del Usuario</h2>
   </header>
 
-  <!-- 🌗 Botón modo claro/oscuro -->
   <button id="theme-toggle" title="Cambiar tema">🌙</button>
 
   <main>
@@ -81,9 +79,6 @@
   <script src="../js/stats_v1.js" defer></script>
   <script src="../js/activity_tracker.js?v=20251106" defer></script>
 
-  <!-- =========================================================
-       ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración independiente modo claro/oscuro
-       ========================================================= -->
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("theme-toggle");
@@ -100,9 +95,6 @@
   });
   </script>
 
-  <!-- =========================================================
-       ✅ CFC_FUNC_10_4_V41.16 — Estado emocional
-       ========================================================= -->
   <script>
   const scoreRaw = localStorage.getItem("emotionScore");
   const box = document.getElementById("emotionScore");
@@ -122,9 +114,6 @@
   }
   </script>
 
-  <!-- =========================================================
-       ✅ CFC_PROFILE_V9.8_EXAM_RELINK_REAL — Último examen completado
-       ========================================================= -->
   <script>
   function mostrarUltimoExamen() {
     try {
@@ -158,9 +147,6 @@
   document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
   </script>
 
-  <!-- =========================================================
-       ✅ CFC_FUNC_11_3_V41.34 — Panel “Mi progreso” unificado
-       ========================================================= -->
   <script>
   document.getElementById("btnStats").addEventListener("click", () => {
     const prev = document.querySelector("#miProgresoOverlay");
@@ -224,6 +210,35 @@
     });
   });
   </script>
+
+  <!-- BLOQUES AÑADIDOS SEGÚN CFC-SYNC -->
+
+  <!-- A) DOMAIN LOCK -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- B) HEARTBEAT DE DOMINIO -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
+
+  <!-- C) COMPATIBILIDAD -->
+  <script src="/frontend/js/cfc_lock_identity.js" defer></script>
+
+  <!-- D) CSS MINIFICADO -->
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
+
+  <!-- E) JS BUNDLE -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- F) ROOT GUARD -->
+  <script src="/frontend/js/cfc_lock_identity.js" defer></script>
+
+  <!-- G) HEARTCORE MONITOR -->
+  <script src="/frontend/js/heartcore_monitor.js" defer></script>
 
   <!-- 🔒 CFC_LOCK: V41.34-profile_fixThemeIndep-20251108 -->
 </body>
