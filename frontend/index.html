@@ -323,6 +323,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <!-- ✅ CFC_FUNC_9_10_V71.3 — Verificador silencioso de sincronía multinube -->
 <script src="js/core/cfc_sync_core_lite.js?v=71.3" defer></script>
-  
+
+<!-- CFC-SYNC — HEARTBEAT DE DOMINIO (B) -->
+<script>
+setInterval(() => {
+  if (!window.CFC_DOMAIN_OK) {
+    window.location.href = "/frontend/blocked.html";
+  }
+}, 10000);
+</script>
+
 </body>
 </html>
