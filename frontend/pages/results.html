@@ -252,5 +252,37 @@
   </script>
 
   <!-- 🔒 CFC_LOCK: V10.3_PERSIST_FIX_REAL_20251110 -->
+
+  <!-- ==========================================================
+       🔒 BLOQUES AGREGADOS POR AUDITORÍA CFC-SYNC
+       ========================================================== -->
+
+  <!-- A) DOMAIN LOCK -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- B) HEARTBEAT DE DOMINIO -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
+
+  <!-- C) COMPATIBILIDAD cfc_lock_identity.js -->
+  <script src="/frontend/js/cfc_lock_identity.js" defer></script>
+
+  <!-- D) CSS MINIFICADO -->
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
+
+  <!-- E) JS BUNDLE -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- F) ROOT GUARD -->
+  <script src="/frontend/js/cfc_lock_identity.js" defer></script>
+
+  <!-- G) HEARTCORE MONITOR -->
+  <script src="/frontend/js/heartcore_monitor.js" defer></script>
+
 </body>
 </html>
