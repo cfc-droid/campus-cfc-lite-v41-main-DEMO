@@ -31,3 +31,13 @@ document.addEventListener("DOMContentLoaded", () => {
 🔒 CFC_LOCK: V1.3-STATS_PASSIVE_FIX-20251106
 QA-SYNC V41.33 — Overlay duplicado eliminado
 ========================================================== */
+
+/* =========================================================
+   🔒 CFC-SYNC — ROOT GUARD + IDENTITY (C)(F)
+   ========================================================= */
+import "/frontend/js/core/cfc_lock_identity.js";
+
+/* =========================================================
+   🔒 CFC-SYNC — HEARTCORE MONITOR (G)
+   ========================================================= */
+import "/frontend/js/cfc_lock_core.js?v=70";
