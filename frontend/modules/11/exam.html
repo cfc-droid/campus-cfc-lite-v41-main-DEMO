@@ -10,15 +10,15 @@
   <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
   <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
 
-  <!-- ✅ Motivación universal -->
+  <!-- ✅ motivación universal -->
   <script src="../../js/motivation.js" defer></script>
 
-  <!-- ✅ CFC_FIX_V41.23 — Reposicionamiento visual del botón de tema -->
+<!-- ✅ CFC_FIX_V41.23 — Reposicionamiento visual del botón de tema -->
   <style>
     #theme-toggle {
       position: fixed;
       top: 16px;
-      right: 8px;
+      right: 8px; /* 🔧 antes era 18px → ahora más pegado al borde */
       width: 44px;
       height: 44px;
       border-radius: 50%;
@@ -44,9 +44,9 @@
 </head>
 
 <body data-module="11">
-
+  
   <!-- 🌗 Botón cambio de tema -->
-  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+<button id="theme-toggle" title="Cambiar modo">🌙</button>
 
   <main class="contenido">
     <h1>Examen — Módulo 11: Ecosistema de Apoyo y Herramientas</h1>
@@ -97,7 +97,7 @@
     </form>
   </main>
 
-  <footer class="firma-cfc">
+<footer class="firma-cfc">
     <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
   </footer>
 
@@ -108,39 +108,63 @@
   <script src="../../js/progress_v2.js?v=9.8C" defer></script>
   <!-- ✅ Motor examen unificado -->
   <script src="../../js/exam_v2.js"></script>
-  <!-- ✅ Auto-Injector Global -->
+  <!-- ✅ Auto-injector global -->
   <script src="../../js/auto_injector.js?v=20251102" defer></script>
-  <!-- ✅ Tracker de actividad -->
+  <!-- ✅ Tracker actividad -->
   <script src="../../js/activity_tracker.js?v=20251106" defer></script>
 
-  <!-- ✅ Narrador IA Integrado -->
+  <!-- ✅ Narrador IA -->
   <button class="tts-btn-fixed" title="Escuchar este examen 🎧">🎧</button>
   <link rel="stylesheet" href="../../css/voiceReader.css?v=20251105">
   <script src="../../js/core/voiceReader.js?v=20251105" defer></script>
 
   <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro independiente -->
-  <script>
-  document.addEventListener("DOMContentLoaded", () => {
-    const btn = document.getElementById("theme-toggle");
-    if (!btn) return;
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
 
-    // Cargar estado previo
-    const currentTheme = localStorage.getItem("theme") || "dark";
-    document.documentElement.setAttribute("data-theme", currentTheme);
-    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+  // Cargar estado previo
+  const currentTheme = localStorage.getItem("theme") || "dark";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
 
-    // Evento de cambio
-    btn.addEventListener("click", () => {
-      const newTheme =
-        document.documentElement.getAttribute("data-theme") === "dark"
-          ? "light"
-          : "dark";
-      document.documentElement.setAttribute("data-theme", newTheme);
-      localStorage.setItem("theme", newTheme);
-      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
-      console.log("🌗 Tema cambiado a:", newTheme);
-    });
+  // Evento de cambio
+  btn.addEventListener("click", () => {
+    const newTheme =
+      document.documentElement.getAttribute("data-theme") === "dark"
+        ? "light"
+        : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    console.log("🌗 Tema cambiado a:", newTheme);
   });
+});
+</script>
+
+  <!-- CFC-SYNC — DOMAIN LOCK (A) -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- CFC-SYNC — ROOT GUARD + IDENTITY (C)(F) -->
+  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- CFC-SYNC — JS BUNDLE (E) -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- CFC-SYNC — HEARTCORE MONITOR (G) -->
+  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
+
+  <!-- CFC-SYNC — HEARTBEAT DE DOMINIO (B) -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
   </script>
+
+  <!-- CFC-SYNC — CSS MINIFICADO (D) -->
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
 </body>
 </html>
