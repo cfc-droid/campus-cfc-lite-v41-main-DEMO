@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen — Módulo 5 — Herramientas Avanzadas de Regulación Emocional</title>
+
+  <!-- ✅ CFC_FUNC_1_01_FIXRUTAS_2025-10-30 -->
+  <link rel="stylesheet" href="../../css/premium.css">
+  <link rel="stylesheet" href="../../css/exam-extra.css">
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
+
+  <!-- ✅ Motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Reposicionamiento visual del botón de tema -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px; /* 🔧 más pegado al borde */
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+
+<body data-module="5">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Examen — Módulo 5: Herramientas Avanzadas de Regulación Emocional</h1>
+    <p><em>Reflexioná antes de responder. Este examen evalúa tu dominio sobre la autorregulación emocional, la conciencia corporal y las rutinas mentales que estabilizan tu rendimiento operativo.</em></p>
+
+    <form id="exam5">
+      <!-- Pregunta 1 -->
+      <fieldset>
+        <legend>1) Según el Capítulo 1, ¿cuál es la diferencia clave entre un trader reactivo y un trader emocionalmente inteligente?</legend>
+        <!-- Correcta: C -->
+        <label><input name="q1" type="radio" value="A"> A) El trader reactivo analiza más datos técnicos que el emocionalmente inteligente.</label><br>
+        <label><input name="q1" type="radio" value="B"> B) El trader emocionalmente inteligente opera con impulsividad controlada.</label><br>
+        <label><input name="q1" type="radio" value="C"> C) El trader emocionalmente inteligente reconoce sus emociones y las regula antes de actuar.</label><br>
+        <label><input name="q1" type="radio" value="D"> D) El trader reactivo se basa en su intuición y no en emociones.</label>
+      </fieldset>
+
+      <!-- Pregunta 2 -->
+      <fieldset>
+        <legend>2) En el Capítulo 2 se presenta el protocolo “Break-Reset-Refocus”. ¿Cuál es su propósito principal?</legend>
+        <!-- Correcta: A -->
+        <label><input name="q2" type="radio" value="A"> A) Restaurar la claridad mental y reducir el estrés operativo mediante pausas conscientes.</label><br>
+        <label><input name="q2" type="radio" value="B"> B) Aumentar la velocidad de ejecución frente a mercados volátiles.</label><br>
+        <label><input name="q2" type="radio" value="C"> C) Mejorar la memoria visual de los gráficos y patrones técnicos.</label><br>
+        <label><input name="q2" type="radio" value="D"> D) Desconectarse completamente del trading durante el día.</label>
+      </fieldset>
+
+      <!-- Pregunta 3 -->
+      <fieldset>
+        <legend>3) Según el Capítulo 3, ¿qué define el estado alfa en el trader consciente?</legend>
+        <!-- Correcta: D -->
+        <label><input name="q3" type="radio" value="A"> A) Un estado de hiperalerta constante para aprovechar cada oportunidad del mercado.</label><br>
+        <label><input name="q3" type="radio" value="B"> B) Un nivel de cansancio mental donde la mente se desconecta de la pantalla.</label><br>
+        <label><input name="q3" type="radio" value="C"> C) Un estado de baja energía en el que las emociones se suprimen.</label><br>
+        <label><input name="q3" type="radio" value="D"> D) Un equilibrio entre relajación y atención plena que permite operar con calma y precisión.</label>
+      </fieldset>
+
+      <!-- Pregunta 4 -->
+      <fieldset>
+        <legend>4) En el Capítulo 4, ¿cuál es la función principal del Diario Psicológico del Trader?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q4" type="radio" value="A"> A) Llevar un registro técnico de las operaciones ganadoras.</label><br>
+        <label><input name="q4" type="radio" value="B"> B) Desarrollar autoconciencia y detectar patrones emocionales que influyen en las decisiones.</label><br>
+        <label><input name="q4" type="radio" value="C"> C) Registrar únicamente datos cuantitativos para análisis estadístico.</label><br>
+        <label><input name="q4" type="radio" value="D"> D) Repetir afirmaciones positivas sin análisis posterior.</label>
+      </fieldset>
+
+      <button type="button" onclick="enviarExamen()">Enviar respuestas</button>
+    </form>
+  </main>
+
+  <footer class="firma-cfc">
+    <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
+  </footer>
+
+  <!-- 🔙 Botón volver -->
+  <script src="../../js/backButton.js"></script>
+
+  <!-- ✅ Progress global -->
+  <script src="../../js/progress_v2.js?v=9.8C" defer></script>
+  <!-- ✅ Motor examen unificado -->
+  <script src="../../js/exam_v2.js"></script>
+  <!-- ✅ Auto-Injector Global -->
+  <script src="../../js/auto_injector.js?v=20251102" defer></script>
+  <!-- ✅ Tracker de actividad -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+
+  <!-- ✅ Narrador IA Integrado -->
+  <button class="tts-btn-fixed" title="Escuchar este examen 🎧">🎧</button>
+  <link rel="stylesheet" href="../../css/voiceReader.css?v=20251105">
+  <script src="../../js/core/voiceReader.js?v=20251105" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro independiente -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    // Cargar estado previo
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    // Evento de cambio
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      console.log("🌗 Tema cambiado a:", newTheme);
+    });
+  });
+  </script>
+</body>
+</html>
