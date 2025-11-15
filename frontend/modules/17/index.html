@@ -4,39 +4,18 @@
   <meta charset="UTF-8">
   <title>Módulo 17 — Campus CFC</title>
 
-  <!-- 🔒 PASO 2/5 — DOMAIN LOCK -->
-  <script src="/frontend/js/domain_lock_v72.js" defer></script>
-
-  <!-- 🔒 PASO 2/5 — COMPATIBILIDAD IDENTITY -->
-  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
-
-  <!-- 🔒 PASO 3/5 — JS BUNDLE -->
-  <script src="/frontend/js/bundle_core.min.js" defer></script>
-
-  <!-- 🔒 PASO 5/5 — HEARTCORE MONITOR -->
-  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
-
-  <!-- 🔒 PASO 2/5 — HEARTBEAT -->
-  <script>
-    setInterval(() => {
-      if (!window.CFC_DOMAIN_OK) {
-        window.location.href = "/frontend/blocked.html";
-      }
-    }, 10000);
-  </script>
-
-  <!-- 🔒 PASO 3/5 — CSS MINIFICADO -->
-  <link rel="stylesheet" href="/frontend/css/premium.min.css">
-
-  <!-- ORIGINAL -->
+  <!-- ✅ CFC_FUNC_2.5_FIXRUTAS_2025-10-30 — rutas relativas corregidas -->
   <link rel="stylesheet" href="../../css/variables.css?v=20251102">
   <link rel="stylesheet" href="../../css/premium.css?v=20251104">
   <link rel="stylesheet" href="../../css/exam-extra.css?v=20251104">
 
-  <!-- motivación universal -->
+  <!-- CSS MINIFICADO (D) -->
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
+
+  <!-- ✅ motivación universal -->
   <script src="../../js/motivation.js" defer></script>
 
-  <!-- Sistema unificado de tema global -->
+  <!-- ✅ CFC_FUNC_5_3_FIX_V41.21 — Sistema unificado de tema global -->
   <script src="../../js/theme_chapter_v2.js?v=20251106" defer></script>
 </head>
 
@@ -61,16 +40,20 @@
   </main>
 
   <!-- 🧩 [CFC-SYNC INSERT BEGIN] -->
+  <!-- ✅ CFC_FUNC_2.5_CHECKPOINT_2025-10-30 — módulo cargado correctamente -->
   <script>
     console.log("🧩 CFC_SYNC checkpoint: modules/1/index.html cargado — QA-SYNC V7.7", new Date().toLocaleString());
   </script>
 
+  <!-- ✅ CFC_FUNC_8_3_FIX_V1.7_REALTIME_QA_SAFE_20251106 -->
   <script src="../../js/activity_tracker.js?v=20251106" defer></script>
 
+  <!-- ✅ QA-SYNC CHECK — Verificación tema global + contraste -->
   <script>
     console.log("🧩 QA-SYNC CHECK:", "modules/1/index.html — Tema global y contraste activos");
   </script>
 
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro independiente -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("theme-toggle");
@@ -92,5 +75,32 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+
+
+  <!-- ======================================================
+       BLOQUES CFC-SYNC UNIVERSALES A–G (NO TOCAR)
+       ====================================================== -->
+
+  <!-- (A) DOMAIN LOCK -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- (C)(F) ROOT GUARD + IDENTITY -->
+  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- (E) JS BUNDLE -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- (G) HEARTCORE MONITOR -->
+  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
+
+  <!-- (B) HEARTBEAT DE DOMINIO -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
+
 </body>
 </html>
