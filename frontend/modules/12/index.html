@@ -4,9 +4,30 @@
   <meta charset="UTF-8">
   <title>Módulo 12 — Campus CFC</title>
 
+  <!-- 🔒 PASO 2/5 — DOMAIN LOCK -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- 🔒 PASO 2/5 — COMPATIBILIDAD IDENTITY -->
+  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- 🔒 PASO 3/5 — JS BUNDLE -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- 🔒 PASO 5/5 — HEARTCORE MONITOR -->
+  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
+
+  <!-- 🔒 PASO 2/5 — HEARTBEAT -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
+
   <!-- ✅ CFC_FUNC_2.5_FIXRUTAS_2025-10-30 — rutas relativas corregidas -->
   <link rel="stylesheet" href="../../css/variables.css?v=20251102">
-  <link rel="stylesheet" href="../../css/premium.css?v=20251104">
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
   <link rel="stylesheet" href="../../css/exam-extra.css?v=20251104">
 
   <!-- ✅ motivación universal -->
