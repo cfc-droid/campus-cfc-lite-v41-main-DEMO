@@ -4,31 +4,13 @@
   <meta charset="UTF-8">
   <title>Módulo 9 — Campus CFC</title>
 
-  <!-- 🔒 PASO 2/5 — DOMAIN LOCK -->
-  <script src="/frontend/js/domain_lock_v72.js" defer></script>
-
-  <!-- 🔒 PASO 2/5 — COMPATIBILIDAD IDENTITY -->
-  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
-
-  <!-- 🔒 PASO 3/5 — JS BUNDLE -->
-  <script src="/frontend/js/bundle_core.min.js" defer></script>
-
-  <!-- 🔒 PASO 5/5 — HEARTCORE MONITOR -->
-  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
-
-  <!-- 🔒 PASO 2/5 — HEARTBEAT DE DOMINIO -->
-  <script>
-    setInterval(() => {
-      if (!window.CFC_DOMAIN_OK) {
-        window.location.href = "/frontend/blocked.html";
-      }
-    }, 10000);
-  </script>
-
   <!-- ✅ CFC_FUNC_2.5_FIXRUTAS_2025-10-30 — rutas relativas corregidas -->
   <link rel="stylesheet" href="../../css/variables.css?v=20251102">
-  <link rel="stylesheet" href="/frontend/css/premium.min.css">
+  <link rel="stylesheet" href="../../css/premium.css?v=20251104">
   <link rel="stylesheet" href="../../css/exam-extra.css?v=20251104">
+
+  <!-- CSS MINIFICADO (D) -->
+  <link rel="stylesheet" href="/frontend/css/premium.min.css">
 
   <!-- ✅ motivación universal -->
   <script src="../../js/motivation.js" defer></script>
@@ -77,12 +59,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("theme-toggle");
   if (!btn) return;
 
-  // Cargar estado previo
   const currentTheme = localStorage.getItem("theme") || "dark";
   document.documentElement.setAttribute("data-theme", currentTheme);
   btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
 
-  // Evento de cambio
   btn.addEventListener("click", () => {
     const newTheme =
       document.documentElement.getAttribute("data-theme") === "dark"
@@ -95,5 +75,32 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 });
 </script>
+
+
+  <!-- ======================================================
+       BLOQUES CFC-SYNC UNIVERSALES A–G (NO TOCAR)
+       ====================================================== -->
+
+  <!-- (A) DOMAIN LOCK -->
+  <script src="/frontend/js/domain_lock_v72.js" defer></script>
+
+  <!-- (C)(F) ROOT GUARD + IDENTITY -->
+  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
+
+  <!-- (E) JS BUNDLE -->
+  <script src="/frontend/js/bundle_core.min.js" defer></script>
+
+  <!-- (G) HEARTCORE MONITOR -->
+  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
+
+  <!-- (B) HEARTBEAT DE DOMINIO -->
+  <script>
+    setInterval(() => {
+      if (!window.CFC_DOMAIN_OK) {
+        window.location.href = "/frontend/blocked.html";
+      }
+    }, 10000);
+  </script>
+
 </body>
 </html>
