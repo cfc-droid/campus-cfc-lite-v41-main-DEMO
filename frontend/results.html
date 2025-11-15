@@ -9,7 +9,6 @@ Historial de exámenes (Módulo, Fecha, Nota, Estado)
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Historial de Exámenes — Campus CFC LITE</title>
   <link rel="stylesheet" href="../css/premium.css?v=20251103" />
-  <link rel="stylesheet" href="/frontend/css/premium.min.css">
 </head>
 <body>
   <header class="header">
@@ -31,53 +30,6 @@ Historial de exámenes (Módulo, Fecha, Nota, Estado)
     <button onclick="window.location.href='../index.html'">🏠 Volver al inicio</button>
   </footer>
 
-<script>
-  (function () {
-    const allowed = [
-      "campus-cfc-lite-v41-main-demo.pages.dev",
-      "campuscfc.pages.dev",
-      "campuscfc.com"
-    ];
-
-    const current = window.location.hostname.toLowerCase();
-    window.CFC_DOMAIN_OK = allowed.includes(current);
-
-    if (!window.CFC_DOMAIN_OK) {
-      document.body.innerHTML = `
-        <div style="font-family:Poppins,sans-serif;text-align:center;
-          padding:40px;color:#ffd700;background:#000;height:100vh;
-          display:flex;flex-direction:column;justify-content:center;
-          align-items:center;">
-          <h2>🔒 Acceso bloqueado</h2>
-          <p>Dominio no autorizado.</p>
-        </div>`;
-      throw new Error("CFC_DOMAIN_LOCK: bloqueo ejecutado");
-    }
-  })();
-</script>
-
-<!-- CFC-SYNC — DOMAIN LOCK (A) -->
-<script src="/frontend/js/domain_lock_v72.js" defer></script>
-
-<script src="../js/results.js?v=20251103"></script>
-
-<!-- CFC-SYNC — ROOT GUARD + IDENTITY (C)(F) -->
-<script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
-
-<!-- CFC-SYNC — JS BUNDLE (E) -->
-<script src="/frontend/js/bundle_core.min.js" defer></script>
-
-<!-- CFC-SYNC — HEARTCORE MONITOR (G) -->
-<script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
-
-<!-- CFC-SYNC — HEARTBEAT DE DOMINIO (B) -->
-<script>
-  setInterval(() => {
-    if (!window.CFC_DOMAIN_OK) {
-      window.location.href = "/frontend/blocked.html";
-    }
-  }, 10000);
-</script>
-
+  <script src="../js/results.js?v=20251103"></script>
 </body>
 </html>
