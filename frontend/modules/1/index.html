@@ -59,12 +59,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("theme-toggle");
   if (!btn) return;
 
-  // Cargar estado previo
   const currentTheme = localStorage.getItem("theme") || "dark";
   document.documentElement.setAttribute("data-theme", currentTheme);
   btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
 
-  // Evento de cambio
   btn.addEventListener("click", () => {
     const newTheme =
       document.documentElement.getAttribute("data-theme") === "dark"
@@ -78,8 +76,9 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script>
 
+
   <!-- ======================================================
-       BLOQUES CFC-SYNC A–G INSERTADOS (SIN ALTERAR NADA)
+       BLOQUES CFC-SYNC UNIVERSALES A–G (NO TOCAR)
        ====================================================== -->
 
   <!-- (A) DOMAIN LOCK -->
