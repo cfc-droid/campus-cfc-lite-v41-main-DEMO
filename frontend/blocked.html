@@ -7,9 +7,10 @@
 
   <style>
     /* ============================================================
-       CFC-LOCK ONLINE — BLOQUEO DE DOMINIO / CONTEXTO
+       CFC-LOCK ONLINE — BLOQUEO DE DOMINIO / CONTEXTO (V72-FINAL)
        Archivo: /frontend/blocked.html
-       Auditor: CFC-SYNC V72-FINAL
+       NOTA: Esta pantalla es 100% independiente del Campus.
+       NO debe cargar A–G, NO domain lock, NO heartcore, NO bundle.
        ============================================================ */
 
     body {
@@ -70,10 +71,10 @@
     <h1>🚫 Acceso no autorizado</h1>
 
     <p>
-      El acceso a este recurso fue bloqueado por<br>
+      Este acceso fue bloqueado por<br>
       <strong>CFC-LOCK ONLINE V72-FINAL</strong><br><br>
       Dominio o contexto inválido.<br>
-      Solo se permite el acceso desde los dominios oficiales autorizados.
+      Acceso permitido solo desde los dominios oficiales.
     </p>
 
     <button onclick="window.location.href='/'">
@@ -81,45 +82,13 @@
     </button>
   </div>
 
-  <!-- ==========================================================
-       CFC-SYNC — DOMAIN LOCK (A)
-       ========================================================== -->
-  <script src="/frontend/js/domain_lock_v72.js" defer></script>
-
-  <!-- ==========================================================
-       CFC-SYNC — COMPATIBILIDAD cfc_lock_identity.js (C)
-       ========================================================== -->
-  <script src="/frontend/js/core/cfc_lock_identity.js" defer></script>
-
-  <!-- ==========================================================
-       CFC-SYNC — JS BUNDLE (E)
-       ========================================================== -->
-  <script src="/frontend/js/bundle_core.min.js" defer></script>
-
-  <!-- ==========================================================
-       CFC-SYNC — ROOT GUARD (F)
-       ========================================================== -->
-  <script>
-    if (!window.CFC_IDENTITY_OK) {
-      console.warn("⚠️ ROOT GUARD: Identidad no validada.");
-    }
-  </script>
-
-  <!-- ==========================================================
-       CFC-SYNC — HEARTCORE MONITOR (G)
-       ========================================================== -->
-  <script src="/frontend/js/cfc_lock_core.js?v=70" defer></script>
-
-  <!-- ==========================================================
-       CFC-SYNC — HEARTBEAT DE DOMINIO (B)
-       ========================================================== -->
-  <script>
-    setInterval(() => {
-      if (!window.CFC_DOMAIN_OK) {
-        window.location.href = "/frontend/blocked.html";
-      }
-    }, 10000);
-  </script>
+  <!--
+    ============================================================
+    CFC-LOCK NOTE:
+    No agregar scripts A–G en blocked.html.
+    Esta página debe ser estática y aislada.
+    ============================================================
+  -->
 
 </body>
 </html>
