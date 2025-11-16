@@ -1,61 +1,90 @@
 /* ===========================================================
-   CFC-SYNC V72 — bundle_core.js (Versión de build no minificada)
-   Proyecto: Campus CFC LITE V41
-   Autores: Cristian F. Choqui + CFC-Droid
+   CFC-SYNC V72 — bundle_core.js (Loader oficial de Campus CFC LITE V41)
+   Modo: LOADER (no compila, no mezcla código, solo ordena carga dinámica)
+   Arquitectura: 100% estático — JS independientes como islas controladas
+   Autor: Cristian F. Choqui
    Fecha build: 2025-11-16
    =========================================================== */
 
-/* ====== 1) CORE GLOBAL ====== */
-(function(){ /* cfc_api.js */
-  // contenido real de /frontend/js/core/cfc_api.js
+(function(){
+
+  console.log("CFC-SYNC V72 — bundle_core.js iniciado");
+
+  /* ========= UTILIDAD PRINCIPAL PARA CARGAR ARCHIVOS ========= */
+  function loadScript(src){
+    return new Promise((resolve, reject)=>{
+      const s = document.createElement("script");
+      s.src = src + "?v=20251116";  // evita cache simple
+      s.defer = true;
+      s.onload = ()=> resolve(src);
+      s.onerror = ()=> reject(src);
+      document.head.appendChild(s);
+    });
+  }
+
+  /* ========= LISTA DE JS A CARGAR (EXCLUYENDO LOCKS) ========= */
+
+  const scripts = [
+
+    /* ===== CORE ===== */
+    "/frontend/js/core/cfc_api.js",
+    "/frontend/js/core/voiceReader.js",
+
+    /* ===== ESTRUCTURA ==== */
+    "/frontend/js/header.js",
+    "/frontend/js/footer.js",
+    "/frontend/js/menu.js",
+    "/frontend/js/preload.js",
+    "/frontend/js/intro.js",
+    "/frontend/js/chapter_nav.js",
+
+    /* ===== PROGRESO Y TRACKERS ===== */
+    "/frontend/js/progress_v2.js",
+    "/frontend/js/activity_tracker.js",
+    "/frontend/js/admin-progress.js",
+    "/frontend/js/admin.js",
+    "/frontend/js/stats_v1.js",
+
+    /* ===== UX / UI / EXPERIENCIA ===== */
+    "/frontend/js/badge.js",
+    "/frontend/js/motivation.js",
+    "/frontend/js/motivation_v2.js",
+    "/frontend/js/profile.js",
+    "/frontend/js/theme_chapter_v2.js",
+    "/frontend/js/sync_theme_v8.7.js",
+    "/frontend/js/guide.js",
+
+    /* ===== MÓDULOS, EXÁMENES Y BITÁCORA ===== */
+    "/frontend/js/exam.js",
+    "/frontend/js/exam_v2.js",
+    "/frontend/js/exam-logic_v2.js",
+    "/frontend/js/backExamButton.js",
+    "/frontend/js/daily-review.js",
+    "/frontend/js/bitacora.js",
+    "/frontend/js/role.js",
+
+    /* ===== SERVICIOS INTERNOS ===== */
+    "/frontend/js/faqBot.js",
+    "/frontend/js/frases.js",
+    "/frontend/js/loader.js",
+
+    /* ===== DEMO / MISC ===== */
+    "/frontend/js/demo.js",
+    "/frontend/js/backButton.js"
+  ];
+
+  /* ========= EJECUCIÓN SECUENCIAL ========= */
+
+  (async ()=>{
+    for(const file of scripts){
+      try{
+        await loadScript(file);
+        console.log("CFC-LOADER OK:", file);
+      }catch(err){
+        console.warn("CFC-LOADER ERROR:", err);
+      }
+    }
+    console.log("CFC-SYNC V72 — bundle_core.js completado");
+  })();
+
 })();
-(function(){ /* voiceReader.js */
-  // contenido real de /frontend/js/core/voiceReader.js
-})();
-
-/* ====== 2) NAVEGACIÓN / ESTRUCTURA ====== */
-(function(){ /* header.js */ })();
-(function(){ /* footer.js */ })();
-(function(){ /* menu.js */ })();
-(function(){ /* preload.js */ })();
-(function(){ /* intro.js */ })();
-(function(){ /* chapter_nav.js */ })();
-
-/* ====== 3) PROGRESO / ESTADO / TRACKERS ====== */
-(function(){ /* progress_v2.js */ })();
-(function(){ /* activity_tracker.js */ })();
-(function(){ /* admin-progress.js */ })();
-(function(){ /* admin.js */ })();
-(function(){ /* stats_v1.js */ })();
-
-/* ====== 4) UX / UI / EXPERIENCIA ====== */
-(function(){ /* badge.js */ })();
-(function(){ /* motivation.js */ })();
-(function(){ /* motivation_v2.js */ })();
-(function(){ /* profile.js */ })();
-(function(){ /* theme_chapter_v2.js */ })();
-(function(){ /* sync_theme_v8.7.js */ })();
-(function(){ /* guide.js */ })();
-
-/* ====== 5) MÓDULOS / EXÁMENES / BITÁCORA ====== */
-(function(){ /* exam.js */ })();
-(function(){ /* exam_v2.js */ })();
-(function(){ /* exam-logic_v2.js */ })();
-(function(){ /* backExamButton.js */ })();
-(function(){ /* daily-review.js */ })();
-(function(){ /* bitacora.js */ })();
-(function(){ /* role.js */ })();
-
-/* ====== 6) SERVICIOS INTERNOS ====== */
-(function(){ /* faqBot.js */ })();
-(function(){ /* frases.js */ })();
-(function(){ /* loader.js */ })();
-(function(){ /* overlay_block.js (NO SE INCLUYE - CARGA TEMPRANA) */ })();
-(function(){ /* guide.js */ })();
-
-/* ====== 7) DEMO / MISC ====== */
-(function(){ /* demo.js */ })();
-(function(){ /* backButton.js */ })();
-
-/* ====== FINAL DEL BUNDLE ====== */
-console.log("CFC-SYNC V72 — bundle_core.js cargado correctamente.");
