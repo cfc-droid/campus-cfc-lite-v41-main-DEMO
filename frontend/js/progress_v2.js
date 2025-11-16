@@ -333,3 +333,13 @@ window.addEventListener("progressUpdated", updateProgressDisplay);
 /* ==========================================================
    🔒 CFC_LOCK: V10.7-progress_fullsync-20251106
    ========================================================== */
+
+// ======================================================
+// 🛡 CFC-LOCK V72 — Verificación de dominio cada 10 s
+// ======================================================
+setInterval(() => {
+  if (!window.CFC_DOMAIN_OK) {
+    console.warn("CFC-LOCK V72 → Dominio no válido, forzando salida.");
+    window.location.href = "/frontend/blocked.html";
+  }
+}, 10000);
