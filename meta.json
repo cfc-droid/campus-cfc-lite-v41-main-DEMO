@@ -1,0 +1,10 @@
+{
+  "version": "CFC-LOCK ONLINE V72-FINAL",
+  "build": "2025-11-16-1600",
+  "environment": "Cloudflare Pages + Firebase + Render + GitHub",
+  "author": "Cristian F. Choqui",
+  "hash": "sha256-PENDIENTE-DE-GENERAR",
+  "integrity": true,
+  "rootEnforced": true,
+  "domainEnforced": true
+}
