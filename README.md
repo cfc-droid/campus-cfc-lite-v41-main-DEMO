@@ -36,6 +36,7 @@ CFC_DEPLOY_CLEAN_BASE/
 # 🔒 Build Integrity — CFC-LOCK V72-FINAL
 
 **SHA-256 del build final (ZIP):**
+
 cf4d94d81abcbd3fa2ea170002b30a5da28923ae3186c2e27b7db94f13eba0e6
 
 
