@@ -81,6 +81,6 @@
 
   } catch (err) {
     console.error("❌ CFC-LOCK V72 → Error inesperado:", err);
-    window.location.href = "/blocked.html";
+    window.location.href = "/frontend/blocked.html";
   }
 })();
