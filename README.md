@@ -7,7 +7,7 @@ Esta versión no requiere backend activo, todo funciona 100 % desde el **fronten
 ---
 
 ## 📂 Estructura general
-CFC_DEPLOY_CLEAN_BASE/
+CFC_DEPLOY_CLEAN_BASE/  
 ┣ backend/         → scripts de prueba y conexión (solo referencia)  
 ┣ docs/ops/        → documentación operativa (estructura, QA, etc.)  
 ┣ frontend/        → UI, módulos, estilos, scripts y salida /out  
@@ -39,7 +39,6 @@ CFC_DEPLOY_CLEAN_BASE/
 
 cf4d94d81abcbd3fa2ea170002b30a5da28923ae3186c2e27b7db94f13eba0e6
 
-
 **Fuente:** ZIP final descargado del repositorio (GitHub)  
 **Fecha:** 2025-11-16  
 **Estado de verificación:** ✔ Integridad confirmada  
@@ -47,4 +46,4 @@ cf4d94d81abcbd3fa2ea170002b30a5da28923ae3186c2e27b7db94f13eba0e6
 **Notas:**  
 - Hash registrado también en `meta.json`  
 - Verificado con sistema CFC-LOCK  
-- Usado para trazabilidad y auditoría del build LITE V41  
+- Usado para trazabilidad y auditoría del build LITE V41
