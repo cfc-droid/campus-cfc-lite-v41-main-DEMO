@@ -69,7 +69,7 @@
         ref
       });
 
-      window.location.href = "/frontend/blocked.html";
+      window.location.href = "/frontend/js/blocked.html";
       return;
     }
 
