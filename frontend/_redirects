@@ -2,9 +2,6 @@
 # ✅ CFC-SYNC V8.4 — Login.html route FIX (Cloudflare root=frontend)
 # =========================================================
 
-# 🔒 ROOT-GUARD: fuerza login cuando entran a la raíz
-/      /html/login.html     200
-
 # Rutas específicas HTML
 /html/*                /html/:splat              200
 /html/login.html       /html/login.html          200
