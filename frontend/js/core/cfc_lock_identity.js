@@ -174,3 +174,38 @@ console.log(`
 🔹 Sincronización en tiempo real entre Firestore y Proxy
 ────────────────────────────────────────────
 `);
+
+/* ==========================================================
+   🔒 CFC_LOCK V72 — ENFORCEMENT DE SESIÓN
+   Evita ingreso al Campus sin login válido
+   ========================================================== */
+
+function CFC_ENFORCE_SESSION_ON_LOAD() {
+  const active = localStorage.getItem("CFC_SESSION_ACTIVE") === "true";
+
+  // Ruta actual
+  const path = window.location.pathname || "";
+
+  // Detectar si estamos en login.html
+  const isLogin =
+    path.endsWith("/html/login.html") ||
+    path.includes("/frontend/html/login.html");
+
+  // Si NO hay sesión activa y NO estoy en login → FORZAR login
+  if (!active && !isLogin) {
+    console.warn("🚨 Sesión no activa → redirigiendo a login.html");
+    window.location.href = "/frontend/html/login.html";
+  }
+}
+
+// Ejecutar chequeo una vez cargado el DOM
+document.addEventListener("DOMContentLoaded", CFC_ENFORCE_SESSION_ON_LOAD);
+
+/* ==========================================================
+   LOG
+   ========================================================== */
+console.log(`
+🔐 CFC_LOCK V72 — ROOT-GUARD ACTIVADO
+✔ Protección activa en rutas internas
+✔ Acceso solo con sesión válida
+`);
