@@ -101,76 +101,50 @@
       </form>
     </div>
 
-<!-- ==========================================================
-     🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
-     ========================================================== -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js?v=1";
+    <!-- ==========================================================
+         🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
+         Solo inicializa Firebase. NADA de AppCheck.
+         ========================================================== -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js?v=1";
 
-  // 🚫 AppCheck completamente deshabilitado (Cloudflare SAFE)
-  const firebaseConfig = {
-    apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-    authDomain: "cfc-lock-firebase.firebaseapp.com",
-    projectId: "cfc-lock-firebase",
-  };
+      const firebaseConfig = {
+        apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+        authDomain: "cfc-lock-firebase.firebaseapp.com",
+        projectId: "cfc-lock-firebase",
+      };
 
-  const app = initializeApp(firebaseConfig);
-
-  console.warn("🧩 Firebase AppCheck deshabilitado TOTALMENTE para Cloudflare Pages.");
-</script>
+      initializeApp(firebaseConfig);
+      console.log("🧩 Firebase inicializado en modo SAFE (sin AppCheck).");
+    </script>
 
     <!-- ==========================================================
-         🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
+         🔐 Login Firebase + Render Proxy (usa SOLO CFC_login)
+         Toda la lógica de seguridad está en cfc_lock_identity.js
          ========================================================== -->
     <script type="module">
       import { CFC_login } from "../js/core/cfc_lock_identity.js";
       import { CFC_showBlockOverlay } from "../js/overlay_block.js";
-      import { checkSession, startHeartbeat, registerLogin } from "../js/core/cfc_api.js";
-
-      // 🧠 Generador persistente de Device ID
-      function getDeviceId() {
-        const key = "CFC_DEVICE_ID";
-        let id = localStorage.getItem(key);
-        if (!id) {
-          id = crypto.randomUUID ? crypto.randomUUID() : "device-" + Date.now();
-          localStorage.setItem(key, id);
-        }
-        return id;
-      }
 
       const form = document.getElementById("loginForm");
+
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
         const email = document.getElementById("email").value.trim();
         const license = document.getElementById("license").value.trim();
-        const device_id = getDeviceId();
 
-        console.log("🟡 Intentando login Firebase:", email);
+        console.log("🟡 Intentando login Firebase + Render con CFC_login:", email);
 
         try {
-          // 1️⃣ Autenticación Firebase
+          // 🔐 Esto ya hace:
+          // - escribir en Firestore
+          // - registrar login en Render
+          // - checkSession
+          // - startHeartbeat / polling / sync
+          // - redirigir a ../index.html
           await CFC_login(email, license);
-
-          // 2️⃣ Registrar login en Render (marca el nuevo dispositivo)
-          const registered = await registerLogin(email, device_id);
-          if (!registered) {
-            CFC_showBlockOverlay("⚠️ No se pudo registrar la sesión.");
-            return;
-          }
-
-          // 3️⃣ Verificar que la sesión sea válida (única)
-          const valid = await checkSession(email, device_id);
-          if (!valid) {
-            CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa en otro dispositivo.");
-            return;
-          }
-
-          // 4️⃣ Iniciar heartbeats automáticos
-          startHeartbeat(email, device_id);
-          console.log("🟢 Autenticación completa. Redirigiendo al Campus...");
-          window.location.href = "../index.html";
         } catch (err) {
-          console.error("❌ Error durante el login:", err.message || err);
+          console.error("❌ Error durante el login:", err?.message || err);
           CFC_showBlockOverlay("⚠️ Error durante el login (ver consola).");
         }
       });
@@ -180,13 +154,15 @@
     <script type="module" src="../js/overlay_block.js?v=47.3"></script>
 
     <script>
-      console.log("✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL activo");
+      console.log(
+        "✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL activo"
+      );
     </script>
 
     <!-- 🔒 CFC-LOCK V72 -->
-<script src="../js/domain_lock_v72.js" defer></script> 
+    <script src="../js/domain_lock_v72.js" defer></script>
 
-<!-- 🔥 CFC-BUNDLE -->
-<script src="../js/bundle_core.min.js" defer></script> 
-</body>
+    <!-- 🔥 CFC-BUNDLE -->
+    <script src="../js/bundle_core.min.js" defer></script>
+  </body>
 </html>
