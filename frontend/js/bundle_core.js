@@ -6,18 +6,17 @@
    Fecha build: 2025-11-16
    =========================================================== */
 
-(function(){
-
+(function () {
   console.log("CFC-SYNC V72 — bundle_core.js iniciado");
 
   /* ========= UTILIDAD PRINCIPAL PARA CARGAR ARCHIVOS ========= */
-  function loadScript(src){
-    return new Promise((resolve, reject)=>{
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
       const s = document.createElement("script");
-      s.src = src + "?v=20251116";  // evita cache simple
+      s.src = src + "?v=20251116"; // evita cache simple
       s.defer = true;
-      s.onload = ()=> resolve(src);
-      s.onerror = ()=> reject(src);
+      s.onload = () => resolve(src);
+      s.onerror = () => reject(src);
       document.head.appendChild(s);
     });
   }
@@ -25,9 +24,7 @@
   /* ========= LISTA DE JS A CARGAR (EXCLUYENDO LOCKS) ========= */
 
   const scripts = [
-
     /* ===== CORE ===== */
-    "/frontend/js/core/cfc_api.js",
     "/frontend/js/core/voiceReader.js",
 
     /* ===== ESTRUCTURA ==== */
@@ -69,21 +66,20 @@
 
     /* ===== DEMO / MISC ===== */
     "/frontend/js/demo.js",
-    "/frontend/js/backButton.js"
+    "/frontend/js/backButton.js",
   ];
 
   /* ========= EJECUCIÓN SECUENCIAL ========= */
 
-  (async ()=>{
-    for(const file of scripts){
-      try{
+  (async () => {
+    for (const file of scripts) {
+      try {
         await loadScript(file);
         console.log("CFC-LOADER OK:", file);
-      }catch(err){
+      } catch (err) {
         console.warn("CFC-LOADER ERROR:", err);
       }
     }
     console.log("CFC-SYNC V72 — bundle_core.js completado");
   })();
-
 })();
