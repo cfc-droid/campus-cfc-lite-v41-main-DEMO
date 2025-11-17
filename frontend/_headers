@@ -1,20 +1,16 @@
-/js/*
+/*
+  Cache-Control: no-cache, no-store, must-revalidate
+  Pragma: no-cache
+  Expires: 0
+
+/*.js
   Content-Type: application/javascript; charset=utf-8
 
-/css/*
+/*.css
   Content-Type: text/css; charset=utf-8
 
-/assets/*
-  Content-Type: application/octet-stream
+/*.json
+  Content-Type: application/json; charset=utf-8
 
-/sounds/*
-  Content-Type: audio/mpeg
-
-/img/*
-  Content-Type: image/*
-
-/html/*
+/*.html
   Content-Type: text/html; charset=utf-8
-
-/*
-  X-Content-Type-Options: nosniff
