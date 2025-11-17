@@ -1,2 +1,23 @@
-/              /frontend/html/login.html   200
-/index.html    /frontend/html/login.html   200
+# ================================
+# CFC-SYNC — Redirects oficiales
+# Cloudflare Pages compatible
+# ================================
+
+# Rutas HTML
+/html/*                /html/:splat          200
+/html/login.html       /html/login.html      200
+
+# Rutas de módulos
+/modules/*             /modules/:splat       200
+
+# Archivos estáticos
+/js/*                  /js/:splat            200
+/css/*                 /css/:splat           200
+/img/*                 /img/:splat           200
+
+# Archivos raíz
+/sw.js                 /sw.js                200
+/manifest.json         /manifest.json        200
+
+# SPA — Catch-all obligatorio
+/*                    /index.html            200
