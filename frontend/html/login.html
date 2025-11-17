@@ -129,10 +129,40 @@
     <!-- ==========================================================
          🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
          ========================================================== -->
+
+        <!-- ==========================================================
+         🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
+         ✅ Versión simplificada: toda la lógica vive en CFC_login
+         ========================================================== -->
     <script type="module">
       import { CFC_login } from "../js/core/cfc_lock_identity.js";
       import { CFC_showBlockOverlay } from "../js/overlay_block.js";
-      import { checkSession, startHeartbeat, registerLogin } from "../js/core/cfc_api.js";
+
+      const form = document.getElementById("loginForm");
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        const email = document.getElementById("email").value.trim();
+        const license = document.getElementById("license").value.trim();
+
+        console.log("🟡 Intentando login completo:", email);
+
+        try {
+          await CFC_login(email, license);
+          // 👉 NO hacemos nada más acá:
+          // CFC_login ya:
+          //  - registra en Firestore
+          //  - registra en Render
+          //  - verifica /check-session
+          //  - marca CFC_SESSION_ACTIVE
+          //  - inicia heartbeats + listeners
+          //  - redirige a ../index.html
+        } catch (err) {
+          console.error("❌ Error durante el login:", err?.message || err);
+          CFC_showBlockOverlay("⚠️ Error durante el login (ver consola).");
+        }
+      });
+    </script>
 
       // 🧠 Generador persistente de Device ID
       function getDeviceId() {
