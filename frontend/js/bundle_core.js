@@ -51,7 +51,6 @@
     "/frontend/js/motivation_v2.js",
     "/frontend/js/profile.js",
     "/frontend/js/theme_chapter_v2.js",
-    "/frontend/js/sync_theme_v8.7.js",
     "/frontend/js/guide.js",
 
     /* ===== MÓDULOS, EXÁMENES Y BITÁCORA ===== */
