@@ -635,3 +635,18 @@ echo "🧩 CFC_SYNC checkpoint: modal animado y compatible con modo claro/oscuro
 # ✅ CFC_FUNC_9_1_20251105 — CFC-PACK PLUS V1 integrado
 echo "🧩 CFC_SYNC checkpoint: Contenido adicional descargable — P8 actualizado"
 ========================================================== */
+
+/* ============================
+   🔒 CFC_VISUAL_LOCK_V72 — Firma Invisible
+   ============================ */
+body::after{
+  content:"Campus CFC LITE 2025 © Cristian F. Choqui";
+  opacity:0.01;
+  position:fixed;
+  bottom:0;
+  right:0;
+  font-size:8px;
+  pointer-events:none;
+  user-select:none;
+  z-index:-1;
+}
