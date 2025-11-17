@@ -26,5 +26,5 @@
 /                             /html/login.html             200
 /index.html                   /html/login.html             200
 
-# 6. Catch-all SPA (último siempre)
+# 6. CATCH-ALL (último siempre)
 /*                            /index.html                  200
