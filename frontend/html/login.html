@@ -101,7 +101,34 @@
       </form>
     </div>
 
-    <!-- 🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos) -->
+    <!-- ==========================================================
+         🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
+         ========================================================== -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        initializeAppCheck,
+        ReCaptchaV3Provider,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+        authDomain: "cfc-lock-firebase.firebaseapp.com",
+        projectId: "cfc-lock-firebase",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      initializeAppCheck(app, {
+        provider: new ReCaptchaV3Provider("dummy-key"),
+        isTokenAutoRefreshEnabled: false,
+      });
+
+      console.log("🧩 AppCheck deshabilitado (modo Cloudflare SAFE).");
+    </script>
+
+    <!-- ==========================================================
+         🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
+         ========================================================== -->
     <script type="module">
       import { CFC_login } from "../js/core/cfc_lock_identity.js";
       import { CFC_showBlockOverlay } from "../js/overlay_block.js";
@@ -128,7 +155,7 @@
         console.log("🟡 Intentando login Firebase:", email);
 
         try {
-          // 1️⃣ Autenticación Firebase + Firestore + Render
+          // 1️⃣ Autenticación Firebase
           await CFC_login(email, license);
 
           // 2️⃣ Registrar login en Render (marca el nuevo dispositivo)
@@ -141,9 +168,7 @@
           // 3️⃣ Verificar que la sesión sea válida (única)
           const valid = await checkSession(email, device_id);
           if (!valid) {
-            CFC_showBlockOverlay(
-              "⚠️ Este usuario ya tiene una sesión activa en otro dispositivo."
-            );
+            CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa en otro dispositivo.");
             return;
           }
 
@@ -152,7 +177,7 @@
           console.log("🟢 Autenticación completa. Redirigiendo al Campus...");
           window.location.href = "../index.html";
         } catch (err) {
-          console.error("❌ Error durante el login:", err?.message || err);
+          console.error("❌ Error durante el login:", err.message || err);
           CFC_showBlockOverlay("⚠️ Error durante el login (ver consola).");
         }
       });
@@ -162,15 +187,13 @@
     <script type="module" src="../js/overlay_block.js?v=47.3"></script>
 
     <script>
-      console.log(
-        "✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL activo"
-      );
+      console.log("✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL activo");
     </script>
 
     <!-- 🔒 CFC-LOCK V72 -->
-    <script src="../js/domain_lock_v72.js" defer></script>
+<script src="../js/domain_lock_v72.js" defer></script> 
 
-    <!-- 🔥 CFC-BUNDLE -->
-    <script src="../js/bundle_core.min.js" defer></script>
-  </body>
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../js/bundle_core.min.js" defer></script> 
+</body>
 </html>
