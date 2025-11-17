@@ -17,6 +17,15 @@
 /assets/*                     /assets/:splat               200
 /sounds/*                     /sounds/:splat               200
 
+# 3.b Compatibilidad rutas antiguas /frontend/*  (NO toca seguridad)
+/frontend/js/*                /js/:splat                   200
+/frontend/css/*               /css/:splat                  200
+/frontend/img/*               /img/:splat                  200
+/frontend/assets/*            /assets/:splat               200
+/frontend/sounds/*            /sounds/:splat               200
+/frontend/modules/*           /modules/:splat              200
+/frontend/html/*              /html/:splat                 200
+
 # 4. Archivos raíz
 /sw.js                        /sw.js                       200
 /manifest.json                /manifest.json               200
