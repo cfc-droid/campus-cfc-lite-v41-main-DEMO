@@ -101,12 +101,11 @@
       </form>
     </div>
 
-    <!-- ==========================================================
-         🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
-         ========================================================== -->
+<!-- ==========================================================
+     🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
+     ========================================================== -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js?v=1";
-</script>
 
   // 🚫 AppCheck completamente deshabilitado (Cloudflare SAFE)
   const firebaseConfig = {
@@ -117,7 +116,6 @@
 
   const app = initializeApp(firebaseConfig);
 
-  // IMPORTANTE: quitar completamente AppCheck (no usar dummy-key)
   console.warn("🧩 Firebase AppCheck deshabilitado TOTALMENTE para Cloudflare Pages.");
 </script>
 
