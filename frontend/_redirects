@@ -1,39 +1,22 @@
-# ===============================================
-# CFC-LOCK ROOT-GUARD V72 — Cloudflare Pages
-# Dominio Raíz → FORZAR login.html SIEMPRE
-# ===============================================
+# =========================================================
+# ✅ CFC-SYNC V8.4 — Login.html route FIX (Cloudflare root=frontend)
+# =========================================================
 
-# 1. Rutas HTML internas
-/html/*                       /html/:splat                 200
-/html/login.html              /html/login.html             200
+# Rutas específicas HTML
+/html/*                /html/:splat              200
+/html/login.html       /html/login.html          200
 
-# 2. Módulos del Campus
-/modules/*                    /modules/:splat              200
+# Rutas de módulos
+/modules/*             /modules/:splat           200
 
-# 3. Archivos estáticos
-/js/*                         /js/:splat                   200
-/css/*                        /css/:splat                  200
-/img/*                        /img/:splat                  200
-/assets/*                     /assets/:splat               200
-/sounds/*                     /sounds/:splat               200
+# Archivos estáticos
+/js/*                  /js/:splat                200
+/css/*                 /css/:splat               200
+/img/*                 /img/:splat               200
 
-# 3.b Compatibilidad rutas antiguas /frontend/*  (NO toca seguridad)
-/frontend/js/*                /js/:splat                   200
-/frontend/css/*               /css/:splat                  200
-/frontend/img/*               /img/:splat                  200
-/frontend/assets/*            /assets/:splat               200
-/frontend/sounds/*            /sounds/:splat               200
-/frontend/modules/*           /modules/:splat              200
-/frontend/html/*              /html/:splat                 200
+# Archivos raíz
+/sw.js                 /sw.js                    200
+/manifest.json         /manifest.json            200
 
-# 4. Archivos raíz
-/sw.js                        /sw.js                       200
-/manifest.json                /manifest.json               200
-/favicon.ico                  /favicon.ico                 200
-
-# 5. ROOT-GUARD — BLOQUEO DE DOMINIO RAÍZ
-/                             /html/login.html             200
-/index.html                   /html/login.html             200
-
-# 6. CATCH-ALL (último siempre)
-/*                            /index.html                  200
+# SPA principal (catch-all al final)
+ /*                    /index.html               200
