@@ -153,7 +153,6 @@ function startRealtimeSync(email, did) {
 /* ==========================================================
    🧩 AUTOLOAD — Reanudar sesión previa
    ========================================================== */
-
 document.addEventListener("DOMContentLoaded", () => {
   const e = localStorage.getItem("CFC_EMAIL");
   const did = localStorage.getItem("CFC_DEVICE_ID");
