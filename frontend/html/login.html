@@ -104,27 +104,21 @@
     <!-- ==========================================================
          🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
          ========================================================== -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-      import {
-        initializeAppCheck,
-        ReCaptchaV3Provider,
-      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-        authDomain: "cfc-lock-firebase.firebaseapp.com",
-        projectId: "cfc-lock-firebase",
-      };
+  // 🚫 AppCheck completamente deshabilitado (Cloudflare SAFE)
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+    authDomain: "cfc-lock-firebase.firebaseapp.com",
+    projectId: "cfc-lock-firebase",
+  };
 
-      const app = initializeApp(firebaseConfig);
-      initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider("dummy-key"),
-        isTokenAutoRefreshEnabled: false,
-      });
+  const app = initializeApp(firebaseConfig);
 
-      console.log("🧩 AppCheck deshabilitado (modo Cloudflare SAFE).");
-    </script>
+  // IMPORTANTE: quitar completamente AppCheck (no usar dummy-key)
+  console.warn("🧩 Firebase AppCheck deshabilitado TOTALMENTE para Cloudflare Pages.");
+</script>
 
     <!-- ==========================================================
          🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
