@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Campus CFC LITE — Inicio</title>
 
-  <script>
-    (function() {
-      const isCloudflare = window.location.hostname.includes("pages.dev");
-      const base = isCloudflare ? "/" : "/frontend/";
-      document.write(`<base href="${base}">`);
-    })();
-  </script>
+<base href="/" />
+<script>
+  // 🛡 FIX BASE-HREF — Cloudflare Safe Mode
+  // Ya no reescribe el DOM, solo ajusta rutas si fuera necesario.
+  const baseTag = document.querySelector("base");
+  const isCloudflare = window.location.hostname.includes("pages.dev");
+  baseTag.setAttribute("href", isCloudflare ? "/" : "/frontend/");
+  console.log("CFC-SAFEBASE aplicado:", baseTag.href);
+</script>
 
   <!-- Estilos -->
   <link rel="stylesheet" href="css/variables.css?v=20251102" />
