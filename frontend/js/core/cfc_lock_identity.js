@@ -1,5 +1,5 @@
 /* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V68.0_FIRESTORE_RENDER_REALTIME
+   ✅ CFC_LOCK_IDENTITY_V74.0_FIRESTORE_RENDER_REALTIME
    Sistema: Campus CFC LITE V41-DEMO
    ========================================================== */
 
@@ -35,14 +35,23 @@ const nowISO = () => new Date().toISOString();
 const makeDeviceId = () => {
   let id = localStorage.getItem("CFC_DEVICE_ID");
   if (!id) {
-    id = crypto.randomUUID();
+    id = crypto.randomUUID ? crypto.randomUUID() : `device-${Date.now()}`;
     localStorage.setItem("CFC_DEVICE_ID", id);
   }
   return id;
 };
 
+function markSessionActive(email, did, sid) {
+  localStorage.setItem("CFC_EMAIL", email);
+  localStorage.setItem("CFC_DEVICE_ID", did);
+  localStorage.setItem("CFC_SESSION_ID", sid);
+  localStorage.setItem("CFC_SESSION_ACTIVE", "true");
+  console.log("✅ CFC_LOCK V74 — Sesión marcada como ACTIVA");
+}
+
 /* ==========================================================
    🔐 LOGIN (Firebase + Render Proxy)
+   👉 ESTA ES AHORA LA ÚNICA FUENTE DE VERDAD DEL LOGIN
    ========================================================== */
 export async function CFC_login(email, license) {
   const e = email.trim().toLowerCase();
@@ -67,31 +76,31 @@ export async function CFC_login(email, license) {
     { merge: true }
   );
 
-  // 2️⃣ Guardar en localStorage
-  localStorage.setItem("CFC_EMAIL", e);
-  localStorage.setItem("CFC_LICENSE", k);
-  localStorage.setItem("CFC_SESSION_ID", sid);
-  localStorage.setItem("CFC_DEVICE_ID", did);
-
-  console.log(`✅ Login Firebase OK | device_id=${did}`);
-
-  // 3️⃣ Registrar en servidor Render
+  // 2️⃣ Registrar en servidor Render (sesión única)
   const registered = await registerLogin(e, did);
   if (!registered) {
     CFC_showBlockOverlay("⚠️ No se pudo registrar el login en el servidor Render.");
     return;
   }
 
-  // 4️⃣ Verificar validez inmediata
+  // 3️⃣ Verificar validez inmediata contra Render
   const valid = await checkSession(e, did);
-  if (!valid) return;
+  if (!valid) {
+    CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa en otro dispositivo.");
+    return;
+  }
 
-  // 5️⃣ Activar latidos + monitoreo
+  // 4️⃣ Guardar en localStorage (marca sesión como válida)
+  markSessionActive(e, did, sid);
+
+  // 5️⃣ Activar latidos + monitoreo remoto
   startHeartbeat(e, did);
   startServerPolling(e, did);
-  startRealtimeSync(e, did); // NUEVO ✅ sincroniza Render + Firestore en tiempo real
+  startRealtimeSync(e, did); // ✅ sincroniza Render + Firestore en tiempo real
 
-  // 6️⃣ Redirigir
+  console.log(`✅ Login COMPLETO | email=${e} | device_id=${did}`);
+
+  // 6️⃣ Redirigir al Campus
   setTimeout(() => (window.location.href = "../index.html"), 800);
 }
 
@@ -151,61 +160,78 @@ function startRealtimeSync(email, did) {
 }
 
 /* ==========================================================
-   🧩 AUTOLOAD — Reanudar sesión previa
+   🧩 AUTOLOAD — Reanudar sesión previa (SOLO FUERA DE LOGIN)
    ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
+  const path = window.location.pathname || "";
+  const isLogin =
+    path.endsWith("/html/login.html") ||
+    path.includes("/frontend/html/login.html") ||
+    path === "/html/login.html";
+
+  // En login.html JAMÁS auto-logueamos
+  if (isLogin) {
+    console.log("🟡 CFC_LOCK V74 — Autoload deshabilitado en login.html");
+    return;
+  }
+
   const e = localStorage.getItem("CFC_EMAIL");
   const did = localStorage.getItem("CFC_DEVICE_ID");
-  if (e && did) {
+  const sid = localStorage.getItem("CFC_SESSION_ID");
+  const active = localStorage.getItem("CFC_SESSION_ACTIVE") === "true";
+
+  if (e && did && sid && active) {
     console.log("♻️ Restaurando sesión previa:", e);
     startHeartbeat(e, did);
     startServerPolling(e, did);
     startRealtimeSync(e, did);
     const ref = doc(db, "licenses", e);
     listenRemoteLogout(e, ref, did);
+  } else {
+    console.log("ℹ️ No hay sesión previa válida para restaurar.");
   }
 });
 
-console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V68.0_FIRESTORE_RENDER_REALTIME
-────────────────────────────────────────────
-🔹 Listener Firestore activo + cierre remoto inmediato
-🔹 Polling + Render Sync combinados
-🔹 Sincronización en tiempo real entre Firestore y Proxy
-────────────────────────────────────────────
-`);
-
 /* ==========================================================
-   🔒 CFC_LOCK V72 — ENFORCEMENT DE SESIÓN
+   🔒 CFC_LOCK V74 — ENFORCEMENT DE SESIÓN
    Evita ingreso al Campus sin login válido
    ========================================================== */
 
 function CFC_ENFORCE_SESSION_ON_LOAD() {
-  const active = localStorage.getItem("CFC_SESSION_ACTIVE") === "true";
-
-  // Ruta actual
   const path = window.location.pathname || "";
 
-  // Detectar si estamos en login.html
   const isLogin =
     path.endsWith("/html/login.html") ||
-    path.includes("/frontend/html/login.html");
+    path.includes("/frontend/html/login.html") ||
+    path === "/html/login.html";
+
+  const active = localStorage.getItem("CFC_SESSION_ACTIVE") === "true";
 
   // Si NO hay sesión activa y NO estoy en login → FORZAR login
   if (!active && !isLogin) {
     console.warn("🚨 Sesión no activa → redirigiendo a login.html");
+    try {
+      localStorage.removeItem("CFC_SESSION_ACTIVE");
+      localStorage.removeItem("CFC_EMAIL");
+      localStorage.removeItem("CFC_DEVICE_ID");
+      localStorage.removeItem("CFC_SESSION_ID");
+    } catch (_) {}
     window.location.href = "/frontend/html/login.html";
   }
 }
 
-// Ejecutar chequeo una vez cargado el DOM
+// Ejecutar chequeo una vez cargado el DOM (todas las páginas)
 document.addEventListener("DOMContentLoaded", CFC_ENFORCE_SESSION_ON_LOAD);
 
 /* ==========================================================
    LOG
    ========================================================== */
 console.log(`
-🔐 CFC_LOCK V72 — ROOT-GUARD ACTIVADO
-✔ Protección activa en rutas internas
-✔ Acceso solo con sesión válida
+🧩 QA-SYNC | CFC_LOCK_IDENTITY_V74.0_FIRESTORE_RENDER_REALTIME
+────────────────────────────────────────────
+🔹 Listener Firestore activo + cierre remoto inmediato
+🔹 Polling + Render Sync combinados
+🔹 Sincronización en tiempo real entre Firestore y Proxy
+🔹 Enforcement ROOT-GUARD + SESSION_ACTIVE
+────────────────────────────────────────────
 `);
