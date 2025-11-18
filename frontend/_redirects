@@ -1,22 +1,36 @@
 # =========================================================
-# ✅ CFC-SYNC V8.4 — Login.html route FIX (Cloudflare root=frontend)
+# 🔐 CFC-ROOT-GUARD V44 — Cloudflare Pages (frontend root)
+# Protección total de dominio + acceso interno + anti-reventa
 # =========================================================
 
-# Rutas específicas HTML
-/html/*                /html/:splat              200
-/html/login.html       /html/login.html          200
+# 1) Login (única página pública)
+# ---------------------------------------------------------
+/html/login.html            /html/login.html       200
+/html/login                 /html/login.html       200
 
-# Rutas de módulos
-/modules/*             /modules/:splat           200
+# 2) Permitir carga de recursos esenciales (no bloquear CSS/JS)
+# ---------------------------------------------------------
+/js/*                       /js/:splat             200
+/css/*                      /css/:splat            200
+/img/*                      /img/:splat            200
+/assets/*                   /assets/:splat         200
+/sounds/*                   /sounds/:splat         200
+/media/*                    /media/:splat          200
 
-# Archivos estáticos
-/js/*                  /js/:splat                200
-/css/*                 /css/:splat               200
-/img/*                 /img/:splat               200
+# 3) Permitir archivos raíz necesarios para el Campus
+# ---------------------------------------------------------
+/sw.js                      /sw.js                 200
+/manifest.json              /manifest.json         200
 
-# Archivos raíz
-/sw.js                 /sw.js                    200
-/manifest.json         /manifest.json            200
+# 4) Bloquear acceso directo a TODAS las páginas internas
+# ---------------------------------------------------------
+/index.html                 /html/login.html       302
+/html/*                     /html/login.html       302
+/modules/*                  /html/login.html       302
+/backend/*                  /html/login.html       302
+/pages/*                    /html/login.html       302
+/out/*                      /html/login.html       302
 
-# SPA principal (catch-all al final)
- /*                    /index.html               200
+# 5) Catch-all FINAL (todo lo que no coincide va a login)
+# ---------------------------------------------------------
+/*                          /html/login.html       302
