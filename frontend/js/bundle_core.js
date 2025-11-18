@@ -1,25 +1,20 @@
 /* ===========================================================
-   CFC-SYNC V72.1 — bundle_core.js (Loader reparado)
-   -----------------------------------------------------------
-   🔥 ESTA VERSIÓN ELIMINA SCRIPTS PROHIBIDOS:
-   - progress_v2.js
-   - exam.js
-   - exam_v2.js
-   - exam-logic_v2.js
-   - activity_tracker.js
-   - backExamButton.js
-   (ya se cargan por HTML o por auto_injector.js)
-   -----------------------------------------------------------
-*/
+   CFC-SYNC V72 — bundle_core.js (Loader oficial de Campus CFC LITE V41)
+   Modo: LOADER (no compila, no mezcla código, solo ordena carga dinámica)
+   Arquitectura: 100% estático — JS independientes como islas controladas
+   Autor: Cristian F. Choqui
+   Fecha build: 2025-11-16
+   =========================================================== */
 
 (function(){
 
-  console.log("CFC-SYNC V72.1 — bundle_core.js REPARADO iniciado");
+  console.log("CFC-SYNC V72 — bundle_core.js iniciado");
 
+  /* ========= UTILIDAD PRINCIPAL PARA CARGAR ARCHIVOS ========= */
   function loadScript(src){
     return new Promise((resolve, reject)=>{
       const s = document.createElement("script");
-      s.src = src + "?v=20251116";
+      s.src = src + "?v=20251116";  // evita cache simple
       s.defer = true;
       s.onload = ()=> resolve(src);
       s.onerror = ()=> reject(src);
@@ -27,9 +22,7 @@
     });
   }
 
-  // ==========================================================
-  // 🚫 LISTA DEPURADA — SIN scripts que rompen examen/progreso
-  // ==========================================================
+  /* ========= LISTA DE JS A CARGAR (EXCLUYENDO LOCKS) ========= */
 
   const scripts = [
 
@@ -37,7 +30,7 @@
     "/frontend/js/core/cfc_api.js",
     "/frontend/js/core/voiceReader.js",
 
-    /* ===== ESTRUCTURA ===== */
+    /* ===== ESTRUCTURA ==== */
     "/frontend/js/header.js",
     "/frontend/js/footer.js",
     "/frontend/js/menu.js",
@@ -45,12 +38,14 @@
     "/frontend/js/intro.js",
     "/frontend/js/chapter_nav.js",
 
-    /* ===== PROGRESO / ADMIN ===== */
+    /* ===== PROGRESO Y TRACKERS ===== */
+    "/frontend/js/progress_v2.js",
+    "/frontend/js/activity_tracker.js",
     "/frontend/js/admin-progress.js",
     "/frontend/js/admin.js",
     "/frontend/js/stats_v1.js",
 
-    /* ===== UX / UI ===== */
+    /* ===== UX / UI / EXPERIENCIA ===== */
     "/frontend/js/badge.js",
     "/frontend/js/motivation.js",
     "/frontend/js/motivation_v2.js",
@@ -59,12 +54,16 @@
     "/frontend/js/sync_theme_v8.7.js",
     "/frontend/js/guide.js",
 
-    /* ===== OTRAS FUNCIONALIDADES ===== */
+    /* ===== MÓDULOS, EXÁMENES Y BITÁCORA ===== */
+    "/frontend/js/exam.js",
+    "/frontend/js/exam_v2.js",
+    "/frontend/js/exam-logic_v2.js",
+    "/frontend/js/backExamButton.js",
     "/frontend/js/daily-review.js",
     "/frontend/js/bitacora.js",
     "/frontend/js/role.js",
 
-    /* ===== SERVICIOS ===== */
+    /* ===== SERVICIOS INTERNOS ===== */
     "/frontend/js/faqBot.js",
     "/frontend/js/frases.js",
     "/frontend/js/loader.js",
@@ -74,9 +73,8 @@
     "/frontend/js/backButton.js"
   ];
 
-  // ==========================================================
-  // EJECUCIÓN
-  // ==========================================================
+  /* ========= EJECUCIÓN SECUENCIAL ========= */
+
   (async ()=>{
     for(const file of scripts){
       try{
@@ -86,7 +84,7 @@
         console.warn("CFC-LOADER ERROR:", err);
       }
     }
-    console.log("CFC-SYNC V72.1 — bundle_core.js REPARADO completado");
+    console.log("CFC-SYNC V72 — bundle_core.js completado");
   })();
 
 })();
