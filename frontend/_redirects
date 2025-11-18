@@ -1,36 +1,39 @@
 # =========================================================
-# 🔐 CFC-ROOT-GUARD V44 — Cloudflare Pages (frontend root)
-# Protección total de dominio + acceso interno + anti-reventa
+# 🔐 CFC-ROOT-GUARD V45 — FIX loops Cloudflare Pages + frontend/
 # =========================================================
 
-# 1) Login (única página pública)
+# 0) Permitir acceso a login y a cualquier archivo dentro de /html/
+#    (Cloudflare necesita esto para NO capturar login.html con el catch-all)
 # ---------------------------------------------------------
-/html/login.html            /html/login.html       200
-/html/login                 /html/login.html       200
+/html/*                     /html/:splat            200
 
-# 2) Permitir carga de recursos esenciales (no bloquear CSS/JS)
+# 1) Permitir login explícito
 # ---------------------------------------------------------
-/js/*                       /js/:splat             200
-/css/*                      /css/:splat            200
-/img/*                      /img/:splat            200
-/assets/*                   /assets/:splat         200
-/sounds/*                   /sounds/:splat         200
-/media/*                    /media/:splat          200
+/html/login.html            /html/login.html        200
+/html/login                 /html/login.html        200
 
-# 3) Permitir archivos raíz necesarios para el Campus
+# 2) Permitir recursos estáticos
+# ---------------------------------------------------------
+/js/*                       /js/:splat              200
+/css/*                      /css/:splat             200
+/img/*                      /img/:splat             200
+/assets/*                   /assets/:splat          200
+/sounds/*                   /sounds/:splat          200
+/media/*                    /media/:splat           200
+
+# 3) Permitir archivos raíz
 # ---------------------------------------------------------
 /sw.js                      /sw.js                 200
 /manifest.json              /manifest.json         200
 
-# 4) Bloquear acceso directo a TODAS las páginas internas
+# 4) Bloquear TODAS las páginas internas (redirigir a login)
 # ---------------------------------------------------------
-/index.html                 /html/login.html       302
-/html/*                     /html/login.html       302
-/modules/*                  /html/login.html       302
-/backend/*                  /html/login.html       302
-/pages/*                    /html/login.html       302
-/out/*                      /html/login.html       302
+/index.html                 /html/login.html        302
+/modules/*                  /html/login.html        302
+/backend/*                  /html/login.html        302
+/pages/*                    /html/login.html        302
+/out/*                      /html/login.html        302
 
-# 5) Catch-all FINAL (todo lo que no coincide va a login)
+# 5) Catch-all FINAL (solo rutas no coincidentes)
 # ---------------------------------------------------------
-/*                          /html/login.html       302
+/*                          /html/login.html        302
