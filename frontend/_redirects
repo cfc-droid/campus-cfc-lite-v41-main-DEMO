@@ -1,0 +1,22 @@
+# =========================================================
+# ✅ CFC-SYNC V8.4 — Login.html route FIX (Cloudflare root=frontend)
+# =========================================================
+
+# Rutas específicas HTML
+/html/*                /html/:splat              200
+/html/login.html       /html/login.html          200
+
+# Rutas de módulos
+/modules/*             /modules/:splat           200
+
+# Archivos estáticos
+/js/*                  /js/:splat                200
+/css/*                 /css/:splat               200
+/img/*                 /img/:splat               200
+
+# Archivos raíz
+/sw.js                 /sw.js                    200
+/manifest.json         /manifest.json            200
+
+# SPA principal (catch-all al final)
+ /*                    /index.html               200
