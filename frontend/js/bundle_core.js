@@ -1,20 +1,18 @@
 /* ===========================================================
    CFC-SYNC V72 — bundle_core.js (Loader oficial de Campus CFC LITE V41)
-   Modo: LOADER (no compila, no mezcla código, solo ordena carga dinámica)
-   Arquitectura: 100% estático — JS independientes como islas controladas
-   Autor: Cristian F. Choqui
-   Fecha build: 2025-11-16
+   FIX 2025-11-18 — Removido activity_tracker.js + progress_v2.js 
+   para evitar duplicación de temporizador, loops y listeners.
    =========================================================== */
 
 (function(){
 
-  console.log("CFC-SYNC V72 — bundle_core.js iniciado");
+  console.log("CFC-SYNC V72 — bundle_core.js iniciado (FIX 2025-11-18)");
 
   /* ========= UTILIDAD PRINCIPAL PARA CARGAR ARCHIVOS ========= */
   function loadScript(src){
     return new Promise((resolve, reject)=>{
       const s = document.createElement("script");
-      s.src = src + "?v=20251116";  // evita cache simple
+      s.src = src + "?v=20251116";
       s.defer = true;
       s.onload = ()=> resolve(src);
       s.onerror = ()=> reject(src);
@@ -22,7 +20,7 @@
     });
   }
 
-  /* ========= LISTA DE JS A CARGAR (EXCLUYENDO LOCKS) ========= */
+  /* ========= LISTA DE JS A CARGAR (SIN TRACKER NI PROGRESS) ========= */
 
   const scripts = [
 
@@ -30,7 +28,7 @@
     "/frontend/js/core/cfc_api.js",
     "/frontend/js/core/voiceReader.js",
 
-    /* ===== ESTRUCTURA ==== */
+    /* ===== ESTRUCTURA ===== */
     "/frontend/js/header.js",
     "/frontend/js/footer.js",
     "/frontend/js/menu.js",
@@ -38,14 +36,14 @@
     "/frontend/js/intro.js",
     "/frontend/js/chapter_nav.js",
 
-    /* ===== PROGRESO Y TRACKERS ===== */
-    "/frontend/js/progress_v2.js",
-    "/frontend/js/activity_tracker.js",
+    /* ===== PROGRESO / TRACKERS (REMOVIDOS) ===== */
+    // "/frontend/js/progress_v2.js",
+    // "/frontend/js/activity_tracker.js",
     "/frontend/js/admin-progress.js",
     "/frontend/js/admin.js",
     "/frontend/js/stats_v1.js",
 
-    /* ===== UX / UI / EXPERIENCIA ===== */
+    /* ===== UX / UI ===== */
     "/frontend/js/badge.js",
     "/frontend/js/motivation.js",
     "/frontend/js/motivation_v2.js",
@@ -68,7 +66,7 @@
     "/frontend/js/frases.js",
     "/frontend/js/loader.js",
 
-    /* ===== DEMO / MISC ===== */
+    /* ===== DEMO ===== */
     "/frontend/js/demo.js",
     "/frontend/js/backButton.js"
   ];
@@ -84,7 +82,7 @@
         console.warn("CFC-LOADER ERROR:", err);
       }
     }
-    console.log("CFC-SYNC V72 — bundle_core.js completado");
+    console.log("CFC-SYNC V72 — bundle_core.js completado (FIX aplicado)");
   })();
 
 })();
