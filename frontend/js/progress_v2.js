@@ -330,6 +330,16 @@ function launchGoldenTransition(targetPath) {
    ===================================================== */
 window.addEventListener("progressUpdated", updateProgressDisplay);
 
+// =====================================================
+// 🔒 CFC-LOCK ONLINE V72 — Supervisión de dominio
+// Expulsa si el dominio no está autorizado o si borran el script
+// =====================================================
+setInterval(() => {
+  if (!window.CFC_DOMAIN_OK) {
+    window.location.href = "/frontend/blocked.html";
+  }
+}, 10000);
+
 /* ==========================================================
    🔒 CFC_LOCK: V10.7-progress_fullsync-20251106
    ========================================================== */
