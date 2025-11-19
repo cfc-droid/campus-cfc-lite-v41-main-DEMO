@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen — Módulo 6 — Psicología de la Gestión del Capital</title>
+
+  <!-- ✅ CFC_FUNC_1_01_FIXRUTAS_2025-10-30 -->
+  <link rel="stylesheet" href="../../css/premium.css">
+  <link rel="stylesheet" href="../../css/exam-extra.css">
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
+
+  <!-- ✅ Motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Reposicionamiento visual del botón de tema -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px; /* 🔧 más pegado al borde */
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+
+<body data-module="6">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Examen — Módulo 6: Psicología de la Gestión del Capital</h1>
+    <p><em>Reflexioná antes de responder. Este examen evalúa tu comprensión sobre la mentalidad, hábitos y sesgos psicológicos involucrados en la gestión consciente del riesgo y del capital.</em></p>
+
+    <form id="exam6">
+      <!-- Pregunta 1 -->
+      <fieldset>
+        <legend>1) Según el Capítulo 1, ¿cuál es el propósito psicológico más profundo de gestionar el capital de forma consciente?</legend>
+        <!-- Correcta: C -->
+        <label><input name="q1" type="radio" value="A"> A) Maximizar la rentabilidad en el menor tiempo posible.</label><br>
+        <label><input name="q1" type="radio" value="B"> B) Evitar por completo las pérdidas mediante un control absoluto del riesgo.</label><br>
+        <label><input name="q1" type="radio" value="C"> C) Convertir la gestión del capital en una herramienta de autoconocimiento y control emocional.</label><br>
+        <label><input name="q1" type="radio" value="D"> D) Operar únicamente con base en indicadores técnicos y fórmulas estadísticas.</label>
+      </fieldset>
+
+      <!-- Pregunta 2 -->
+      <fieldset>
+        <legend>2) En el Capítulo 2, ¿qué caracteriza al trader que alcanza el “Nivel Consciente” del modelo CFC de Money Management Integrado?</legend>
+        <!-- Correcta: D -->
+        <label><input name="q2" type="radio" value="A"> A) Evita toda emoción y actúa solo de manera racional.</label><br>
+        <label><input name="q2" type="radio" value="B"> B) Opera de forma reactiva, ajustando el riesgo tras cada pérdida.</label><br>
+        <label><input name="q2" type="radio" value="C"> C) Se apega rígidamente a sus reglas sin adaptarse al contexto.</label><br>
+        <label><input name="q2" type="radio" value="D"> D) Combina disciplina técnica con autorregulación emocional, adaptándose sin romper su estructura.</label>
+      </fieldset>
+
+      <!-- Pregunta 3 -->
+      <fieldset>
+        <legend>3) De acuerdo con el Capítulo 3, ¿cuál es el error psicológico más común al diseñar una estrategia de gestión del capital?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q3" type="radio" value="A"> A) Mantener el mismo riesgo fijo sin importar los resultados previos.</label><br>
+        <label><input name="q3" type="radio" value="B"> B) Copiar estrategias ajenas sin considerar la propia personalidad y tolerancia emocional al riesgo.</label><br>
+        <label><input name="q3" type="radio" value="C"> C) Cambiar de estilo cada semana para evitar la monotonía operativa.</label><br>
+        <label><input name="q3" type="radio" value="D"> D) Usar un sistema semiautomático con control emocional estricto.</label>
+      </fieldset>
+
+      <!-- Pregunta 4 -->
+      <fieldset>
+        <legend>4) Según el Capítulo 4, ¿cuál es la forma más efectiva de superar el miedo a perder en el trading?</legend>
+        <!-- Correcta: A -->
+        <label><input name="q4" type="radio" value="A"> A) Reeducar la mente mediante exposición progresiva al riesgo y reinterpretar la pérdida como información, no como fracaso.</label><br>
+        <label><input name="q4" type="radio" value="B"> B) Reducir el tamaño de las posiciones hasta evitar cualquier riesgo.</label><br>
+        <label><input name="q4" type="radio" value="C"> C) Operar con impulsividad para contrarrestar el miedo a la inacción.</label><br>
+        <label><input name="q4" type="radio" value="D"> D) Eliminar toda emoción durante la sesión de trading.</label>
+      </fieldset>
+
+      <button type="button" onclick="enviarExamen()">Enviar respuestas</button>
+    </form>
+  </main>
+
+  <footer class="firma-cfc">
+    <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
+  </footer>
+
+  <!-- 🔙 Botón volver -->
+  <script src="../../js/backButton.js"></script>
+
+  <!-- ✅ Progress global -->
+  <script src="../../js/progress_v2.js?v=9.8C" defer></script>
+  <!-- ✅ Motor examen unificado -->
+  <script src="../../js/exam_v2.js"></script>
+  <!-- ✅ Auto-Injector Global -->
+  <script src="../../js/auto_injector.js?v=20251102" defer></script>
+  <!-- ✅ Tracker de actividad -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+
+  <!-- ✅ Narrador IA Integrado -->
+  <button class="tts-btn-fixed" title="Escuchar este examen 🎧">🎧</button>
+  <link rel="stylesheet" href="../../css/voiceReader.css?v=20251105">
+  <script src="../../js/core/voiceReader.js?v=20251105" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro independiente -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    // Cargar estado previo
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    // Evento de cambio
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      console.log("🌗 Tema cambiado a:", newTheme);
+    });
+  });
+  </script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../../js/bundle_core.min.js" defer></script> 
+</body>
+</html>  
