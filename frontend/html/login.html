@@ -145,6 +145,19 @@
         return id;
       }
 
+      // 🟦 ACCIÓN 1/7 — TOKEN ÚNICO MSCU V1
+function generateToken(length = 40) {
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  let result = '';
+  const array = new Uint32Array(length);
+  window.crypto.getRandomValues(array);
+
+  for (let i = 0; i < length; i++) {
+    result += chars[array[i] % chars.length];
+  }
+  return result;
+}
+
       const form = document.getElementById("loginForm");
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
