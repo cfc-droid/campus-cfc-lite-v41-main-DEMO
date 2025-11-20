@@ -6,6 +6,7 @@
    • Confeti dorado + transición dorada funcional
    ========================================================== */
 
+import { syncProgressEvent } from "./core/progress_firestore_v1.js";
 console.log("🧩 CFC_SYNC checkpoint: progress_v2.js — QA-SYNC V10.7 REAL", new Date().toLocaleString());
 
 /* =====================================================
@@ -50,6 +51,9 @@ function markModuleComplete(moduleNumber) {
   console.log(`🏁 CFC_SYNC → Módulo ${moduleNumber} completado → Siguiente: ${nextModule}`);
   updateProgressDisplay();
   if (moduleNumber < 20) showUnlockOverlay(nextModule);
+   
+   // 🔥 NUEVO — guardar en Firestore
+  syncProgressEvent(); 
 }
 
 /* =====================================================
