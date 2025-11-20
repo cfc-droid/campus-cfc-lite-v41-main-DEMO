@@ -55,8 +55,6 @@ import { syncProgressEvent } from "./core/progress_firestore_v1.js";
   } else {
     console.log("✅ Reanudando sesión previa — tiempo acumulado preservado.");
   }
-
-  syncProgressEvent();
   
   // ======== 🔔 Indicador visual ========
   const indicator = document.createElement("div");
@@ -110,6 +108,9 @@ import { syncProgressEvent } from "./core/progress_firestore_v1.js";
       study.minutesActive = Math.floor(totalSeconds / 60);
       localStorage.setItem("studyStats", JSON.stringify(study));
 
+  // 🔥 NUEVA LÍNEA OBLIGATORIA
+  syncProgressEvent();
+      
       updateIndicator(true);
       bell.play().catch(() => {});
       console.log(`CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`);
