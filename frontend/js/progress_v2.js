@@ -131,6 +131,9 @@ window.addEventListener("DOMContentLoaded", () => {
           // 🔁 Reinicio sincronizado con activity_tracker.js
           window.dispatchEvent(new Event("CFC_forceReset"));
 
+  // 🔥 NUEVO — guardar en Firestore
+  syncProgressEvent();
+           
           launchConfettiGold();
           setTimeout(() => location.reload(), 2200);
         }
