@@ -171,7 +171,21 @@
             CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa en otro dispositivo.");
             return;
           }
+         
+           // =======================================================
+// 🧩 MSCU V1 — Crear sesión oficial después del login
+// =======================================================
+await window.CFC_BUILD_SESSION({
+  user_id: email,             // ID lógico de la cuenta
+  email: email,
+  license_valid: true,        // Si llegó hasta acá → licencia OK
+  render_valid: true,         // Render validado en checkSession
+  firestore_valid: true,      // Firebase está activo
+  device_id: device_id
+});
 
+console.log("🎉 MSCU V1 — Sesión CFC creada exitosamente");
+       
           // 4️⃣ Iniciar heartbeats automáticos
           startHeartbeat(email, device_id);
           console.log("🟢 Autenticación completa. Redirigiendo al Campus...");
