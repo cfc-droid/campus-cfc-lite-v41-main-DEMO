@@ -1,8 +1,8 @@
 // 🧩 CFC-SYNC — Modelo de Sesión CFC (MSCU V1)
 // Archivo: /frontend/js/cfc_session_model.js
-// Versión: V1.0
+// Versión: V1.1
 // Autor: CFC
-// Descripción: Define la estructura base y helpers para la sesión CFC.
+// Descripción: Define la estructura base, expiración y helpers para la sesión CFC.
 
 // ------------------------------------------------------------
 // ESTRUCTURA OFICIAL MSCU V1
@@ -66,4 +66,31 @@ window.CFC_SAVE_SESSION = function(sessionObj) {
 window.CFC_CLEAR_SESSION = function() {
   localStorage.removeItem("cfc_session");
   console.log("🗑️ MSCU V1 — Sesión eliminada.");
+};
+
+// ------------------------------------------------------------
+// GENERAR EXPIRACIÓN (24 HS DESDE AHORA)
+// ------------------------------------------------------------
+
+window.CFC_BUILD_EXPIRATION = function() {
+  const now = Date.now();
+  return {
+    created: now,
+    expires: now + window.CFC_SESSION_EXPIRE_MS
+  };
+};
+
+// ------------------------------------------------------------
+// APLICAR EXPIRACIÓN A UN OBJETO DE SESIÓN MSCU V1
+// ------------------------------------------------------------
+
+window.CFC_APPLY_EXPIRATION = function(sessionObj) {
+  if (!sessionObj) return sessionObj;
+
+  const exp = window.CFC_BUILD_EXPIRATION();
+  sessionObj.session_created_at = exp.created;
+  sessionObj.session_expires_at = exp.expires;
+
+  console.log("⏳ MSCU V1 — Expiración aplicada:", exp);
+  return sessionObj;
 };
