@@ -158,6 +158,29 @@ function generateToken(length = 40) {
   return result;
 }
 
+// 🟦 ACCIÓN 3/7 — Validación Render MSCU V1
+async function validateRenderMSCU(email, device_id) {
+  try {
+    const res = await fetch("https://cfc-lock-proxy.onrender.com/check-session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, device_id })
+    });
+
+    const data = await res.json();
+
+    console.log("🔵 MSCU Render Check:", data);
+
+    // validez mínima requerida
+    return data?.valid === true || data?.status === "ok";
+  } catch (err) {
+    console.error("⚠️ Error validateRenderMSCU:", err);
+    
+    // 🔐 Fallback seguro: NO bloquear si Render falla 1 segundo
+    return true;
+  }
+}
+      
       const form = document.getElementById("loginForm");
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -171,6 +194,13 @@ function generateToken(length = 40) {
           // 1️⃣ Autenticación Firebase
           await CFC_login(email, license);
 
+// 🟦 Validación MSCU de Render
+const render_valid = await validateRenderMSCU(email, device_id);
+if (!render_valid) {
+  CFC_showBlockOverlay("⚠️ Validación de Render fallida. Acceso denegado.");
+  return;
+}
+    
           // 2️⃣ Registrar login en Render (marca el nuevo dispositivo)
           const registered = await registerLogin(email, device_id);
           if (!registered) {
