@@ -69,6 +69,8 @@ function updateProgressDisplay() {
   if (bar) bar.style.width = `${percent}%`;
   localStorage.setItem("progressPercent", percent);
   document.cookie = `progressPercent=${percent}; path=/; max-age=31536000`;
+
+  syncProgressEvent(); // 🌟 recomendado
 }
 
 /* =====================================================
@@ -151,6 +153,7 @@ window.addEventListener("examCompleted", (e) => {
   const { moduleNumber, passed } = e.detail || {};
   if (passed) markModuleComplete(moduleNumber);
   updateProgressDisplay();
+  syncProgressEvent(); // 🔥 NUEVO 
 });
 
 /* =====================================================
