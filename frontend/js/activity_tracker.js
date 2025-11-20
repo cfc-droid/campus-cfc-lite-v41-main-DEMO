@@ -6,6 +6,7 @@
 • Compatible con LOCK_TOTAL_PERSIST_REAL + stats_v1.js
 ========================================================== */
 
+import { syncProgressEvent } from "./core/progress_firestore_v1.js";
 (function () {
   const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
   const TIME_TOTAL_KEY = "CFC_time_total";
@@ -55,6 +56,8 @@
     console.log("✅ Reanudando sesión previa — tiempo acumulado preservado.");
   }
 
+  syncProgressEvent();
+  
   // ======== 🔔 Indicador visual ========
   const indicator = document.createElement("div");
   Object.assign(indicator.style, {
