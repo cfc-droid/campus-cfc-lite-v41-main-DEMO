@@ -5,7 +5,6 @@
 
 import { CFC_showBlockOverlay } from "../overlay_block.js";
 import { checkSession, startHeartbeat, registerLogin, triggerLogout } from "./cfc_api.js";
-import { syncProgressOnLogin } from "./progress_firestore_v1.js";
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -86,9 +85,6 @@ export async function CFC_login(email, license) {
   // 4️⃣ Verificar validez inmediata
   const valid = await checkSession(e, did);
   if (!valid) return;
-
-   // 🔥 Sincronización global de progreso (local ↔ remoto)
-    await syncProgressOnLogin();
 
   // 5️⃣ Activar latidos + monitoreo
   startHeartbeat(e, did);
