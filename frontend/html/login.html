@@ -248,10 +248,12 @@
           //      🔥 ACCIÓN 5/7 + 6/7 MSCU V1  
           // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
 
-          // 1) Eliminar sesiones viejas
-          localStorage.removeItem("cfc_session");
-          localStorage.removeItem("cfc_session_ID");
-          localStorage.removeItem("cfc_session_ACTIVE");
+// 1) Limpiar sesiones viejas (MSCU V1)
+localStorage.removeItem("cfc_session");
+localStorage.removeItem("CFC_SESSION");        // por compatibilidad
+localStorage.removeItem("CFC_SESSION_ID");
+localStorage.removeItem("CFC_SESSION_ACTIVE");
+
 
           // 2) Crear sesión MSCU V1 usando el builder oficial
           const sessionObj = await window.CFC_BUILD_SESSION({
