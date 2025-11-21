@@ -134,6 +134,14 @@
       import { CFC_showBlockOverlay } from "../js/overlay_block.js";
       import { checkSession, startHeartbeat, registerLogin } from "../js/core/cfc_api.js";
 
+      import {
+  getFirestore,
+  doc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const db = getFirestore();
+
       // 🧠 Generador persistente de Device ID
       function getDeviceId() {
         const key = "CFC_DEVICE_ID";
@@ -180,7 +188,22 @@ async function validateRenderMSCU(email, device_id) {
     return true;
   }
 }
-      
+
+      // 🟦 ACCIÓN 4/7 — Validación Firestore MSCU V1
+async function validateFirestoreMSCU(email) {
+  try {
+    const ref = doc(db, "licenses", email);
+    const snap = await getDoc(ref);
+
+    console.log("🟪 Firestore License Exists:", snap.exists());
+
+    return snap.exists();
+  } catch (err) {
+    console.error("⚠️ Firestore error:", err);
+    return false;
+  }
+}
+
       const form = document.getElementById("loginForm");
       form.addEventListener("submit", async (e) => {
         e.preventDefault();
@@ -193,6 +216,14 @@ async function validateRenderMSCU(email, device_id) {
         try {
           // 1️⃣ Autenticación Firebase
           await CFC_login(email, license);
+
+          // 🟦 ACCIÓN 4/7 — Validación Firestore
+const firestore_valid = await validateFirestoreMSCU(email);
+
+if (!firestore_valid) {
+  CFC_showBlockOverlay("⚠️ La licencia no está registrada en Firestore.");
+  return;
+}
 
 // 🟦 ACCIÓN 3/7 — Validación Render (MSCU V1 estandarizada)
 const render_valid_raw = await validateRenderMSCU(email, device_id);
