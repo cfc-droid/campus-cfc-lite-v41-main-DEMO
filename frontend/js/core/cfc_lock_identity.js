@@ -1,176 +1,215 @@
-/* ==========================================================
-   ✅ CFC_LOCK_IDENTITY_V68.0_FIRESTORE_RENDER_REALTIME
-   Sistema: Campus CFC LITE V41-DEMO
-   ========================================================== */
+/* ============================================================================
+   🔒 CFC_LOCK_IDENTITY.JS — V43 FINAL FIX (2025-11-21)
+   Sistema: Campus CFC LITE V41
+   Función: Identidad, sesión y login → compatible con CFC-GUARD + MSCU V1
+   ============================================================================ */
 
-import { CFC_showBlockOverlay } from "../overlay_block.js";
-import { checkSession, startHeartbeat, registerLogin, triggerLogout } from "./cfc_api.js";
+console.log("🟦 [CFC_LOCK_IDENTITY] Cargado correctamente");
 
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+// ============================================================================
+// 🔹 Helpers
+// ============================================================================
 
-/* ==========================================================
-   🔹 Firebase SAFE Config
-   ========================================================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-  authDomain: "cfc-lock-firebase.firebaseapp.com",
-  projectId: "cfc-lock-firebase",
-};
-
-let db;
-try {
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  console.log("🧩 Firebase inicializado (modo SAFE)");
-} catch (err) {
-  console.error("❌ Error Firebase:", err);
+function generateSessionID() {
+  return "SID-" + Math.random().toString(36).substring(2) + Date.now();
 }
 
-/* ==========================================================
-   🧩 Utilidades
-   ========================================================== */
-const makeSessionId = () => `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-const nowISO = () => new Date().toISOString();
-const makeDeviceId = () => {
-  let id = localStorage.getItem("CFC_DEVICE_ID");
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("CFC_DEVICE_ID", id);
+function getDeviceID() {
+  let did = localStorage.getItem("CFC_DEVICE_ID");
+  if (!did) {
+    did = "DID-" + Math.random().toString(36).substring(2) + Date.now();
+    localStorage.setItem("CFC_DEVICE_ID", did);
   }
-  return id;
-};
-
-/* ==========================================================
-   🔐 LOGIN (Firebase + Render Proxy)
-   ========================================================== */
-export async function CFC_login(email, license) {
-  const e = email.trim().toLowerCase();
-  const k = license.trim();
-  const sid = makeSessionId();
-  const did = makeDeviceId();
-  const ref = doc(db, "licenses", e);
-
-  // 1️⃣ Registrar en Firestore (sesión activa)
-  await setDoc(
-    ref,
-    {
-      email: e,
-      license_key: k,
-      session_id: sid,
-      device_id: did,
-      active_session: true,
-      session_force_closed: false,
-      last_active: serverTimestamp(),
-      updated_at_iso: nowISO(),
-    },
-    { merge: true }
-  );
-
-  // 2️⃣ Guardar en localStorage
-  localStorage.setItem("CFC_EMAIL", e);
-  localStorage.setItem("CFC_LICENSE", k);
-  localStorage.setItem("CFC_SESSION_ID", sid);
-  localStorage.setItem("CFC_DEVICE_ID", did);
-
-  console.log(`✅ Login Firebase OK | device_id=${did}`);
-
-  // 3️⃣ Registrar en servidor Render
-  const registered = await registerLogin(e, did);
-  if (!registered) {
-    CFC_showBlockOverlay("⚠️ No se pudo registrar el login en el servidor Render.");
-    return;
-  }
-
-  // 4️⃣ Verificar validez inmediata
-  const valid = await checkSession(e, did);
-  if (!valid) return;
-
-  // 5️⃣ Activar latidos + monitoreo
-  startHeartbeat(e, did);
-  startServerPolling(e, did);
-  startRealtimeSync(e, did); // NUEVO ✅ sincroniza Render + Firestore en tiempo real
-
-  // 6️⃣ Redirigir
-  setTimeout(() => (window.location.href = "../index.html"), 800);
+  return did;
 }
 
-/* ==========================================================
-   🔍 POLLING SERVIDOR — Validación periódica (Render)
-   ========================================================== */
-function startServerPolling(email, did) {
+function saveEmail(email) {
+  localStorage.setItem("CFC_EMAIL", email);
+}
+
+// ============================================================================
+// 🔹 CREACIÓN DE LA SESIÓN MSCU V1 — (ESTO ES LO QUE FALTABA PARA EL GUARD)
+// ============================================================================
+
+function createMSCU(email, device_id, session_token) {
+  const session = {
+    session_token: session_token,
+    email: email,
+    device_id: device_id,
+    license_valid: true,       // Render OK
+    firestore_valid: true,     // Se actualizará en tiempo real si cambia
+    render_valid: true,        // validación /check-session OK
+    created_at: Date.now(),
+    expires_at: Date.now() + 1000 * 60 * 60 * 24 // 24 horas
+  };
+
+  localStorage.setItem("CFC_SESSION", JSON.stringify(session));
+
+  console.log("🟢 [MSCU] Sesión MSCU creada correctamente:", session);
+}
+
+
+// ============================================================================
+// 🔹 FUNCIONES REMOTAS
+// ============================================================================
+
+async function registerLogin(email, device_id) {
+  try {
+    const url = `${window.CFC_PROXY}/login`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, device_id })
+    });
+
+    const data = await res.json();
+    console.log("📡 [Render /login] →", data);
+    return data;
+  } catch (e) {
+    console.error("❌ Error en registerLogin:", e);
+    return { status: "error" };
+  }
+}
+
+async function checkSession(email, device_id) {
+  try {
+    const url = `${window.CFC_PROXY}/check-session?email=${email}&device_id=${device_id}`;
+    const res = await fetch(url);
+    const data = await res.json();
+    console.log("📡 [Render /check-session] →", data);
+    return data;
+  } catch (e) {
+    console.error("❌ Error en checkSession:", e);
+    return { status: "invalid" };
+  }
+}
+
+
+// ============================================================================
+// 🔸 Heartbeat
+// ============================================================================
+
+async function startHeartbeat(email, device_id) {
   setInterval(async () => {
     try {
-      const valid = await checkSession(email, did);
-      if (!valid) {
-        console.warn("🚨 Sesión invalidada por Render (checkSession)");
-        triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
-      }
-    } catch (err) {
-      console.warn("⚠️ Error en polling servidor:", err.message);
+      await fetch(`${window.CFC_PROXY}/heartbeat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, device_id })
+      });
+      console.log("💓 Heartbeat OK");
+    } catch (e) {
+      console.warn("⚠ Heartbeat error");
     }
   }, 10000);
 }
 
-/* ==========================================================
-   🔔 LISTENER FIRESTORE — Detección remota en tiempo real
-   ========================================================== */
-function listenRemoteLogout(email, ref, did) {
-  onSnapshot(ref, (docSnap) => {
-    if (!docSnap.exists()) return;
-    const data = docSnap.data();
-    const active = data.active_session ?? true;
-    const force = data.session_force_closed ?? false;
-    const storedDid = localStorage.getItem("CFC_DEVICE_ID");
 
-    if ((!active || force) && storedDid === did) {
-      console.warn("🚨 Firestore detectó cierre remoto → logout inmediato");
-      triggerLogout("⚠️ Tu sesión fue cerrada desde otro dispositivo.");
-    }
-  });
+// ============================================================================
+// 🔸 Firestore Listener (opcional, pero recomendado)
+// ============================================================================
+
+function startRealtimeSync(email) {
+  try {
+    if (!window.db) return console.log("⚠ Firestore no cargado");
+
+    const ref = window.db.collection("licenses").doc(email);
+
+    ref.onSnapshot((doc) => {
+      if (!doc.exists) return;
+
+      const data = doc.data();
+      console.log("🔥 [Firestore Sync]", data);
+
+      if (data.session_force_closed === true) {
+        console.warn("🚨 Sesión cerrada desde Firebase");
+        localStorage.removeItem("CFC_SESSION");
+        window.location.href = "../html/login.html";
+      }
+    });
+
+  } catch (e) {
+    console.warn("⚠ Firestore listener error:", e);
+  }
 }
 
-/* ==========================================================
-   ⚡ Render Sync — chequeo activo de Render cada 15 s
-   ========================================================== */
-function startRealtimeSync(email, did) {
+
+// ============================================================================
+// 🔸 Server Polling (backup)
+// ============================================================================
+
+function startServerPolling(email, device_id) {
   setInterval(async () => {
-    try {
-      const res = await fetch(
-        `https://cfc-lock-proxy.onrender.com/check-session?email=${email}&device_id=${did}`
-      );
-      const data = await res.json();
-      if (data.status === "expired") {
-        console.warn("🚨 Render detectó cierre remoto → logout inmediato");
-        triggerLogout("⚠️ Tu sesión fue cerrada automáticamente (otro dispositivo inició sesión).");
-      }
-    } catch (err) {
-      console.warn("⚠️ Error al sincronizar con Render:", err);
+    const ch = await checkSession(email, device_id);
+
+    if (ch.status !== "valid") {
+      console.warn("🚨 Polling detectó sesión inválida");
+      localStorage.removeItem("CFC_SESSION");
+      window.location.href = "../html/login.html";
     }
   }, 15000);
 }
 
-/* ==========================================================
-   🧩 AUTOLOAD — Reanudar sesión previa
-   ========================================================== */
-document.addEventListener("DOMContentLoaded", () => {
-  const e = localStorage.getItem("CFC_EMAIL");
-  const did = localStorage.getItem("CFC_DEVICE_ID");
-  if (e && did) {
-    console.log("♻️ Restaurando sesión previa:", e);
-    startHeartbeat(e, did);
-    startServerPolling(e, did);
-    startRealtimeSync(e, did);
-    const ref = doc(db, "licenses", e);
-    listenRemoteLogout(e, ref, did);
-  }
-});
 
-console.log(`
-🧩 QA-SYNC | CFC_LOCK_IDENTITY_V68.0_FIRESTORE_RENDER_REALTIME
-────────────────────────────────────────────
-🔹 Listener Firestore activo + cierre remoto inmediato
-🔹 Polling + Render Sync combinados
-🔹 Sincronización en tiempo real entre Firestore y Proxy
-────────────────────────────────────────────
-`);
+// ============================================================================
+// 🔹 LOGIN PRINCIPAL — (AQUÍ ESTABA EL ERROR ORIGINAL)
+// ============================================================================
+
+async function CFC_login(email, license) {
+  console.log("⏳ Iniciando CFC_login…");
+
+  saveEmail(email);
+
+  const did = getDeviceID();
+  const sid = generateSessionID();
+
+  localStorage.setItem("CFC_LICENSE", license);
+  localStorage.setItem("CFC_SESSION_ID", sid);
+
+  // 1) Registrar login en Render
+  await registerLogin(email, did);
+
+  // 2) Verificar sesión real en Render
+  const valid = await checkSession(email, did);
+
+  if (valid.status !== "valid") {
+    console.warn("🚨 Render no validó la sesión…");
+    return alert("Error de sesión. Reintentá.");
+  }
+
+  console.log("🟢 Render validó correctamente.");
+
+
+  // ============================================================
+  //   ✔️ CREAR Y GUARDAR LA SESIÓN MSCU V1 OFICIAL
+  // ============================================================
+
+  createMSCU(email, did, sid);
+
+
+  // ============================================================
+  //   🔄 Iniciar servicios de sesión (heartbeat, sync, polling)
+  // ============================================================
+
+  startHeartbeat(email, did);
+  startRealtimeSync(email, did);
+  startServerPolling(email, did);
+
+
+  // ============================================================
+  //   🚀 REDIRECCIÓN FINAL AL CAMPUS
+  // ============================================================
+
+  setTimeout(() => {
+    console.log("➡ Redirigiendo al Campus…");
+    window.location.href = "../index.html";
+  }, 600);
+}
+
+
+// ============================================================================
+// 🔹 EXPORTAR (si se usa como módulo)
+// ============================================================================
+window.CFC_login = CFC_login;
+
+console.log("🟩 [CFC_LOCK_IDENTITY] Listo.");
