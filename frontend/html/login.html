@@ -246,25 +246,6 @@
           //      🔥 ACCIÓN 5/7 + 6/7 MSCU V1  
           // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
 
-          // 1) Eliminar sesiones viejas
-          localStorage.removeItem("CFC_SESSION");
-          localStorage.removeItem("CFC_SESSION_ID");
-          localStorage.removeItem("CFC_SESSION_ACTIVE");
-
-          // 2) Crear sesión MSCU V1 usando el builder oficial
-          const sessionObj = await window.CFC_BUILD_SESSION({
-            user_id: email,             // Firebase no usa UID en este login
-            email: email,
-            license_valid: true,
-            render_valid: render_valid,
-            firestore_valid: firestore_valid,
-            device_id: device_id
-          });
-
-          // 3) Guardar sesión
-          localStorage.setItem("CFC_SESSION", JSON.stringify(sessionObj));
-          console.log("💾 CFC_SESSION guardada (MSCU V1):", sessionObj);
-
           // 6️⃣ Iniciar heartbeat
           startHeartbeat(email, device_id);
 
