@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus CFC Trading LITE - Loader</title>
+
+  <style>
+    /* =====================================
+       LOADER PREMIUM CFC — AJUSTE REAL V7
+       ===================================== */
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: "Poppins", system-ui, sans-serif;
+      background: var(--color-bg, #000);
+      color: var(--color-accent, #d4af37);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      overflow: hidden;
+      text-align: center;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    /* 🔹 SVG del logo CFC */
+    svg {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 10px;
+      filter: drop-shadow(0 0 8px #d4af37aa);
+      transition: filter 0.5s ease;
+    }
+
+    /* 🔸 Frase motivacional */
+    p {
+      font-size: 15px;
+      font-style: italic;
+      color: var(--color-text, #ffffffcc);
+      margin-top: 6px;
+      animation: fade 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes fade {
+      from { opacity: 0.5; }
+      to { opacity: 1; }
+    }
+
+    /* 🔹 Botones principales */
+    .btn-main, .btn-demo {
+      padding: 10px 22px;
+      border: 1px solid var(--color-accent, #d4af37);
+      border-radius: 8px;
+      background: transparent;
+      color: var(--color-accent, #d4af37);
+      cursor: pointer;
+      margin: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .btn-main:hover, .btn-demo:hover {
+      background: var(--color-accent, #d4af37);
+      color: var(--color-bg, #000);
+      box-shadow: 0 0 12px var(--color-accent, #d4af37);
+    }
+
+    footer {
+      position: absolute;
+      bottom: 10px;
+      font-size: 11px;
+      color: #ffffff66;
+    }
+
+    /* 🌙 Botón global tema claro/oscuro */
+    #themeToggle {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      z-index: 99999;
+      background: var(--color-bg, #111);
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 0 12px rgba(255,215,0,0.35);
+      transition: all 0.4s ease-in-out;
+    }
+
+    #themeToggle:active {
+      transform: scale(0.9);
+    }
+  </style>
+</head>
+
+<body>
+  <div id="loader">
+    <!-- ✅ Logo reducido a 100px -->
+    <svg viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="48" stroke="#d4af37" stroke-width="2" fill="none" />
+      <text x="50%" y="54%" text-anchor="middle" fill="#d4af37" font-size="22" font-family="Poppins, sans-serif">
+        CFC
+      </text>
+    </svg>
+
+    <!-- ✅ Frase visible sin scroll -->
+    <p>El control es la verdadera libertad 🧠</p>
+
+    <button class="btn-main" onclick="window.location.href='/frontend/modules/index.html'">
+      Entrar al Campus
+    </button>
+
+    <button class="btn-demo" id="btnDemoPublica">Ver demo pública</button>
+  </div>
+
+  <!-- 🌗 Botón de alternancia modo claro/oscuro -->
+  <button id="themeToggle" title="Cambiar tema">🌙</button>
+
+  <footer>© 2025 Campus CFC Trading — V41</footer>
+
+  <script>
+    // =====================================================
+    // ✅ CFC_FUNC_5_1C_VISUAL_GLOBAL_20251101
+    // Botón modo oscuro visible en todo el Campus (Loader + interior)
+    // =====================================================
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("themeToggle");
+
+      // Aplicar tema guardado o por defecto
+      let tema = localStorage.getItem("tema") || "dark";
+      aplicarTema(tema);
+
+      btn.addEventListener("click", () => {
+        tema = tema === "dark" ? "light" : "dark";
+        aplicarTema(tema);
+        localStorage.setItem("tema", tema);
+      });
+
+      function aplicarTema(t) {
+        document.documentElement.setAttribute("data-theme", t);
+        btn.textContent = t === "dark" ? "☀️" : "🌙";
+
+        // Cambiar colores base del loader dinámicamente
+        const root = document.documentElement;
+        if (t === "dark") {
+          root.style.setProperty("--color-bg", "#000");
+          root.style.setProperty("--color-text", "#f5f5f5");
+          root.style.setProperty("--color-accent", "#ffd700");
+        } else {
+          root.style.setProperty("--color-bg", "#f5f5f5");
+          root.style.setProperty("--color-text", "#111");
+          root.style.setProperty("--color-accent", "#c9a634");
+        }
+      }
+
+      console.log("🧩 CFC_SYNC checkpoint:", "loader.html", "Modo oscuro activado", new Date().toLocaleString());
+    });
+  </script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="js/domain_lock_v72.js" defer></script>
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="js/bundle_core.min.js" defer></script>
+</body>
+</html>
