@@ -101,25 +101,28 @@
       </form>
     </div>
 
-    <!-- ==========================================================
-         🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
-         ========================================================== -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-      import {
-        initializeAppCheck,
-        ReCaptchaV3Provider,
-      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
+<!-- ==========================================================
+     🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
+     ========================================================== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-        authDomain: "cfc-lock-firebase.firebaseapp.com",
-        projectId: "cfc-lock-firebase",
-      };
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+    authDomain: "cfc-lock-firebase.firebaseapp.com",
+    projectId: "cfc-lock-firebase",
+  };
 
-// APP CHECK COMPLETAMENTE DESACTIVADO
-      console.log("🧩 AppCheck deshabilitado (modo Cloudflare SAFE).");
-    </script>
+  // 🔥 Firebase sin AppCheck (modo compatible Cloudflare)
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // Exponer para el script de login
+  window.CFC_FIREBASE = { app, db };
+
+  console.log("🧩 Firebase inicializado SIN AppCheck (Cloudflare SAFE).");
+</script>
 
     <!-- ==========================================================
          🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
@@ -135,7 +138,7 @@
         getDoc
       } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-      const db = getFirestore();
+      const db = window.CFC_FIREBASE.db;
 
       // 🧠 Generador persistente de Device ID
       function getDeviceId() {
