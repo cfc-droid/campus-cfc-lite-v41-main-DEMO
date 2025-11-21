@@ -127,13 +127,12 @@
     </script>
 
     <!-- ==========================================================
-         🔐 Login Firebase + Render Proxy (Sesión única)
+         🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
          ========================================================== -->
     <script type="module">
       import { CFC_login } from "../js/core/cfc_lock_identity.js";
       import { CFC_showBlockOverlay } from "../js/overlay_block.js";
       import { checkSession, startHeartbeat, registerLogin } from "../js/core/cfc_api.js";
-      import { CFC_BUILD_SESSION } from "../js/cfc_session_builder.js";
 
       import {
         getFirestore,
@@ -143,7 +142,7 @@
 
       const db = getFirestore();
 
-      // Device ID persistente
+      // 🧠 Generador persistente de Device ID
       function getDeviceId() {
         const key = "CFC_DEVICE_ID";
         let id = localStorage.getItem(key);
@@ -154,7 +153,7 @@
         return id;
       }
 
-      // Token único MSCU V1
+      // 🟦 ACCIÓN 1/7 — TOKEN ÚNICO MSCU V1
       function generateToken(length = 40) {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
         let result = '';
@@ -167,7 +166,7 @@
         return result;
       }
 
-      // Validación Render
+      // 🟦 ACCIÓN 3/7 — Validación Render MSCU V1
       async function validateRenderMSCU(email, device_id) {
         try {
           const res = await fetch("https://cfc-lock-proxy.onrender.com/check-session", {
@@ -177,21 +176,24 @@
           });
 
           const data = await res.json();
-          console.log("🔵 MSCU Render Check:", data);
-          return data?.valid === true || data?.status === "ok";
 
+          console.log("🔵 MSCU Render Check:", data);
+
+          return data?.valid === true || data?.status === "ok";
         } catch (err) {
           console.error("⚠️ Error validateRenderMSCU:", err);
           return true;
         }
       }
 
-      // Validación Firestore
+      // 🟦 ACCIÓN 4/7 — Validación Firestore MSCU V1
       async function validateFirestoreMSCU(email) {
         try {
           const ref = doc(db, "licenses", email);
           const snap = await getDoc(ref);
+
           console.log("🟪 Firestore License Exists:", snap.exists());
+
           return snap.exists();
         } catch (err) {
           console.error("⚠️ Firestore error:", err);
@@ -199,12 +201,9 @@
         }
       }
 
-      // -------------------------------------------------------------
-      // 🟩 EVENTO LOGIN FINAL MSCU V1
-      // -------------------------------------------------------------
-      document.getElementById("loginForm").addEventListener("submit", async (e) => {
+      const form = document.getElementById("loginForm");
+      form.addEventListener("submit", async (e) => {
         e.preventDefault();
-
         const email = document.getElementById("email").value.trim();
         const license = document.getElementById("license").value.trim();
         const device_id = getDeviceId();
@@ -212,56 +211,66 @@
         console.log("🟡 Intentando login Firebase:", email);
 
         try {
-          // 1️⃣ Login Firebase
+          // 1️⃣ Autenticación Firebase
           await CFC_login(email, license);
 
-          // 2️⃣ Validación Firestore
+          // 2️⃣ Firestore
           const firestore_valid = await validateFirestoreMSCU(email);
           if (!firestore_valid) {
             CFC_showBlockOverlay("⚠️ La licencia no está registrada en Firestore.");
             return;
           }
 
-          // 3️⃣ Validación Render
+          // 3️⃣ Render
           const render_valid_raw = await validateRenderMSCU(email, device_id);
           const render_valid = (render_valid_raw === true);
-          console.log("🔵 CFC-MSCU Render Valid:", render_valid);
 
           if (!render_valid) {
             CFC_showBlockOverlay("⚠️ Validación de Render fallida. Acceso denegado.");
             return;
           }
 
-          // 4️⃣ Registrar login en Render
+          // 4️⃣ Registrar en Render
           const registered = await registerLogin(email, device_id);
           if (!registered) {
             CFC_showBlockOverlay("⚠️ No se pudo registrar la sesión.");
             return;
           }
 
-          // 5️⃣ Validar sesión única
-          const session_ok = await checkSession(email, device_id);
-          if (!session_ok) {
-            CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa.");
+          // 5️⃣ Chequear sesión única
+          const valid = await checkSession(email, device_id);
+          if (!valid) {
+            CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa en otro dispositivo.");
             return;
           }
 
-          // 6️⃣ Guardar sesión MSCU V1 (ACCIÓN 5/7 + 6/7)
+          // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+          //      🔥 ACCIÓN 5/7 + 6/7 MSCU V1  
+          // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
+
+          // 1) Eliminar sesiones viejas
           localStorage.removeItem("CFC_SESSION");
           localStorage.removeItem("CFC_SESSION_ID");
           localStorage.removeItem("CFC_SESSION_ACTIVE");
 
-          await CFC_BUILD_SESSION({
-            user_id: email,
+          // 2) Crear sesión MSCU V1 usando el builder oficial
+          const sessionObj = await window.CFC_BUILD_SESSION({
+            user_id: email,             // Firebase no usa UID en este login
             email: email,
             license_valid: true,
             render_valid: render_valid,
             firestore_valid: firestore_valid,
-            device_id: device_id,
+            device_id: device_id
           });
 
-          // 7️⃣ Heartbeat + Redirección
+          // 3) Guardar sesión
+          localStorage.setItem("CFC_SESSION", JSON.stringify(sessionObj));
+          console.log("💾 CFC_SESSION guardada (MSCU V1):", sessionObj);
+
+          // 6️⃣ Iniciar heartbeat
           startHeartbeat(email, device_id);
+
+          // 7️⃣ Redirigir
           console.log("🟢 Autenticación completa. Redirigiendo al Campus...");
           window.location.href = "../index.html";
 
@@ -272,18 +281,17 @@
       });
     </script>
 
-    <!-- Overlay Premium -->
+    <!-- ✅ Overlay Premium -->
     <script type="module" src="../js/overlay_block.js?v=47.3"></script>
 
-    <!-- Logs -->
     <script>
       console.log("✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL activo");
     </script>
 
-    <!-- Domain Lock -->
-    <script src="../js/domain_lock_v72.js" defer></script>
+    <!-- 🔒 CFC-LOCK V72 -->
+    <script src="../js/domain_lock_v72.js" defer></script> 
 
-    <!-- Bundle -->
-    <script src="../js/bundle_core.min.js" defer></script>
+    <!-- 🔥 CFC-BUNDLE -->
+    <script src="../js/bundle_core.min.js" defer></script> 
   </body>
 </html>
