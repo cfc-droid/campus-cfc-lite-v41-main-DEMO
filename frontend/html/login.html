@@ -194,8 +194,13 @@ async function validateRenderMSCU(email, device_id) {
           // 1️⃣ Autenticación Firebase
           await CFC_login(email, license);
 
-// 🟦 Validación MSCU de Render
-const render_valid = await validateRenderMSCU(email, device_id);
+// 🟦 ACCIÓN 3/7 — Validación Render (MSCU V1 estandarizada)
+const render_valid_raw = await validateRenderMSCU(email, device_id);
+const render_valid = (render_valid_raw === true);
+
+// Log oficial MSCU
+console.log("🔵 CFC-MSCU Render Valid:", render_valid);
+
 if (!render_valid) {
   CFC_showBlockOverlay("⚠️ Validación de Render fallida. Acceso denegado.");
   return;
