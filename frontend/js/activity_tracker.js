@@ -6,7 +6,6 @@
 • Compatible con LOCK_TOTAL_PERSIST_REAL + stats_v1.js
 ========================================================== */
 
-import { syncProgressEvent } from "./core/progress_firestore_v1.js";
 (function () {
   const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
   const TIME_TOTAL_KEY = "CFC_time_total";
@@ -55,7 +54,7 @@ import { syncProgressEvent } from "./core/progress_firestore_v1.js";
   } else {
     console.log("✅ Reanudando sesión previa — tiempo acumulado preservado.");
   }
-  
+
   // ======== 🔔 Indicador visual ========
   const indicator = document.createElement("div");
   Object.assign(indicator.style, {
@@ -108,9 +107,6 @@ import { syncProgressEvent } from "./core/progress_firestore_v1.js";
       study.minutesActive = Math.floor(totalSeconds / 60);
       localStorage.setItem("studyStats", JSON.stringify(study));
 
-  // 🔥 NUEVA LÍNEA OBLIGATORIA
-  syncProgressEvent();
-      
       updateIndicator(true);
       bell.play().catch(() => {});
       console.log(`CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`);
