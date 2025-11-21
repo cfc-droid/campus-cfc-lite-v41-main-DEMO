@@ -6,7 +6,6 @@
    • Confeti dorado + transición dorada funcional
    ========================================================== */
 
-import { syncProgressEvent } from "./core/progress_firestore_v1.js";
 console.log("🧩 CFC_SYNC checkpoint: progress_v2.js — QA-SYNC V10.7 REAL", new Date().toLocaleString());
 
 /* =====================================================
@@ -51,9 +50,6 @@ function markModuleComplete(moduleNumber) {
   console.log(`🏁 CFC_SYNC → Módulo ${moduleNumber} completado → Siguiente: ${nextModule}`);
   updateProgressDisplay();
   if (moduleNumber < 20) showUnlockOverlay(nextModule);
-   
-   // 🔥 NUEVO — guardar en Firestore
-  syncProgressEvent(); 
 }
 
 /* =====================================================
@@ -69,8 +65,6 @@ function updateProgressDisplay() {
   if (bar) bar.style.width = `${percent}%`;
   localStorage.setItem("progressPercent", percent);
   document.cookie = `progressPercent=${percent}; path=/; max-age=31536000`;
-
-  syncProgressEvent(); // 🌟 recomendado
 }
 
 /* =====================================================
@@ -133,9 +127,6 @@ window.addEventListener("DOMContentLoaded", () => {
           // 🔁 Reinicio sincronizado con activity_tracker.js
           window.dispatchEvent(new Event("CFC_forceReset"));
 
-  // 🔥 NUEVO — guardar en Firestore
-  syncProgressEvent();
-           
           launchConfettiGold();
           setTimeout(() => location.reload(), 2200);
         }
@@ -153,7 +144,6 @@ window.addEventListener("examCompleted", (e) => {
   const { moduleNumber, passed } = e.detail || {};
   if (passed) markModuleComplete(moduleNumber);
   updateProgressDisplay();
-  syncProgressEvent(); // 🔥 NUEVO 
 });
 
 /* =====================================================
