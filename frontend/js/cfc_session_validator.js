@@ -1,42 +1,46 @@
 // ===============================================================
-// 🛡️ CFC-SYNC — Validador oficial de sesión (MSCU V1 FINAL)
+// 🛡️ CFC-SYNC — Validador de Sesión (MSCU V1 — FINAL 2025)
 // Archivo: /frontend/js/cfc_session_validator.js
-// Versión: V1.2 — 21/11/2025
+// Versión: V1.5 — Compatibilidad total con CFC_GUARD + CFC_IDENTITY
 // Autor: Cristian F. Choqui (CFC)
 // ===============================================================
 
-//-------------------------------------------------------------
-// Cargar sesión (wrapper)
-//-------------------------------------------------------------
+// ------------------------------------------------------------
+// LEER SESIÓN OFICIAL
+// ------------------------------------------------------------
 window.CFC_GET_SESSION = function () {
   try {
     const raw = localStorage.getItem("CFC_SESSION");
     return raw ? JSON.parse(raw) : null;
   } catch (e) {
-    console.error("❌ Error leyendo sesión:", e);
+    console.error("❌ Error al leer sesión:", e);
     return null;
   }
 };
 
-//-------------------------------------------------------------
-// Validar expiración
-//-------------------------------------------------------------
+// ------------------------------------------------------------
+// VALIDAR EXPIRACIÓN (created_at + expires_at)
+// ------------------------------------------------------------
 window.CFC_VALIDATE_EXPIRATION = function (session) {
-  return session && Date.now() < session.expires_at;
+  return (
+    session &&
+    typeof session.expires_at === "number" &&
+    Date.now() < session.expires_at
+  );
 };
 
-//-------------------------------------------------------------
-// Validar Device ID persistente
-//-------------------------------------------------------------
+// ------------------------------------------------------------
+// VALIDAR DEVICE ID LOCAL
+// ------------------------------------------------------------
 window.CFC_VALIDATE_DEVICE = function (session) {
   const did = localStorage.getItem("CFC_DEVICE_ID");
   if (!did) return false;
   return session.device_id === did;
 };
 
-//-------------------------------------------------------------
-// Validar flags remotos
-//-------------------------------------------------------------
+// ------------------------------------------------------------
+// VALIDAR FLAGS REMOTOS
+// ------------------------------------------------------------
 window.CFC_VALIDATE_REMOTE_FLAGS = function (session) {
   return (
     session.license_valid === true &&
@@ -45,27 +49,27 @@ window.CFC_VALIDATE_REMOTE_FLAGS = function (session) {
   );
 };
 
-//-------------------------------------------------------------
-// Validación completa (sin redirección)
-//-------------------------------------------------------------
+// ------------------------------------------------------------
+// VALIDACIÓN COMPLETA MSCU V1
+// ------------------------------------------------------------
 window.CFC_VALIDATE_FULL_SESSION = function () {
-  const session = window.CFC_GET_SESSION();
-  if (!session) return false;
+  const s = window.CFC_GET_SESSION();
+  if (!s) return false;
 
   const valid =
-    session.session_token &&
-    session.email &&
-    session.device_id &&
-    window.CFC_VALIDATE_EXPIRATION(session) &&
-    window.CFC_VALIDATE_DEVICE(session) &&
-    window.CFC_VALIDATE_REMOTE_FLAGS(session);
+    s.session_token &&
+    s.email &&
+    s.device_id &&
+    window.CFC_VALIDATE_EXPIRATION(s) &&
+    window.CFC_VALIDATE_DEVICE(s) &&
+    window.CFC_VALIDATE_REMOTE_FLAGS(s);
 
   console.log("🛡️ CFC-SESSION Validator (MSCU V1):", {
-    token: !!session.session_token,
-    email: !!session.email,
-    device: window.CFC_VALIDATE_DEVICE(session),
-    expiration: window.CFC_VALIDATE_EXPIRATION(session),
-    remote_flags: window.CFC_VALIDATE_REMOTE_FLAGS(session),
+    token: !!s.session_token,
+    email: !!s.email,
+    device: window.CFC_VALIDATE_DEVICE(s),
+    expiration: window.CFC_VALIDATE_EXPIRATION(s),
+    remote_flags: window.CFC_VALIDATE_REMOTE_FLAGS(s),
     final: valid,
   });
 
