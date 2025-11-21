@@ -249,9 +249,9 @@
           // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
 
           // 1) Eliminar sesiones viejas
-          localStorage.removeItem("CFC_SESSION");
-          localStorage.removeItem("CFC_SESSION_ID");
-          localStorage.removeItem("CFC_SESSION_ACTIVE");
+          localStorage.removeItem("cfc_session");
+          localStorage.removeItem("cfc_session_ID");
+          localStorage.removeItem("cfc_session_ACTIVE");
 
           // 2) Crear sesión MSCU V1 usando el builder oficial
           const sessionObj = await window.CFC_BUILD_SESSION({
@@ -265,7 +265,7 @@
 
           // 3) Guardar sesión
           localStorage.setItem("cfc_session", JSON.stringify(sessionObj));
-          console.log("💾 CFC_SESSION guardada (MSCU V1):", sessionObj);
+          console.log("💾 cfc_session guardada (MSCU V1):", sessionObj);
 
           // 6️⃣ Iniciar heartbeat
           startHeartbeat(email, device_id);
