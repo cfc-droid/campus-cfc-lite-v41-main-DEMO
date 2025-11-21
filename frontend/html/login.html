@@ -117,12 +117,7 @@
         projectId: "cfc-lock-firebase",
       };
 
-      const app = initializeApp(firebaseConfig);
-      initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider("dummy-key"),
-        isTokenAutoRefreshEnabled: false,
-      });
-
+// APP CHECK COMPLETAMENTE DESACTIVADO
       console.log("🧩 AppCheck deshabilitado (modo Cloudflare SAFE).");
     </script>
 
