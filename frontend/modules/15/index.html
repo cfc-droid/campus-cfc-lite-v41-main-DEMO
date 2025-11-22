@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Módulo 15 — Campus CFC</title>
+
+  <!-- ✅ CFC_FUNC_2.5_FIXRUTAS_2025-10-30 — rutas relativas corregidas -->
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102">
+  <link rel="stylesheet" href="../../css/premium.css?v=20251104">
+  <link rel="stylesheet" href="../../css/exam-extra.css?v=20251104">
+
+  <!-- ✅ motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_3_FIX_V41.21 — Sistema unificado de tema global -->
+  <script src="../../js/theme_chapter_v2.js?v=20251106" defer></script>
+</head>
+
+<body data-module="15">
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Módulo 15 — Arquitectura del Trading Mental Automático</h1>
+    <p>Seleccioná una sección para continuar con tu formación:</p>
+
+    <nav>
+      <a href="./cap1.html" class="btn-main">📘 Capítulo 1</a>
+      <a href="./cap2.html" class="btn-main">📗 Capítulo 2</a>
+      <a href="./cap3.html" class="btn-main">📙 Capítulo 3</a>
+      <a href="./cap4.html" class="btn-main">📕 Capítulo 4</a>
+      <a href="./exam.html" class="btn-main">🧠 Examen final</a>
+    </nav>
+
+    <br>
+    <button class="btn-main" onclick="window.location.href='../index.html'">⬅ Volver al listado de módulos</button>
+  </main>
+
+  <!-- 🧩 [CFC-SYNC INSERT BEGIN] -->
+  <!-- ✅ CFC_FUNC_2.5_CHECKPOINT_2025-10-30 — módulo cargado correctamente -->
+  <script>
+    console.log("🧩 CFC_SYNC checkpoint: modules/1/index.html cargado — QA-SYNC V7.7", new Date().toLocaleString());
+  </script>
+
+  <!-- ✅ CFC_FUNC_8_3_FIX_V1.7_REALTIME_QA_SAFE_20251106 -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+
+  <!-- ✅ QA-SYNC CHECK — Verificación tema global + contraste -->
+  <script>
+    console.log("🧩 QA-SYNC CHECK:", "modules/1/index.html — Tema global y contraste activos");
+  </script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro independiente -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("theme-toggle");
+  if (!btn) return;
+
+  // Cargar estado previo
+  const currentTheme = localStorage.getItem("theme") || "dark";
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+  // Evento de cambio
+  btn.addEventListener("click", () => {
+    const newTheme =
+      document.documentElement.getAttribute("data-theme") === "dark"
+        ? "light"
+        : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    console.log("🌗 Tema cambiado a:", newTheme);
+  });
+});
+</script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
