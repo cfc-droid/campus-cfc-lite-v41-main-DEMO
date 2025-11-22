@@ -5,14 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Campus CFC LITE — Inicio</title>
 
-  <script>
-    (function() {
-      const isCloudflare = window.location.hostname.includes("pages.dev");
-      const base = isCloudflare ? "/" : "/frontend/";
-      document.write(`<base href="${base}">`);
-    })();
-  </script>
-
   <!-- Estilos -->
   <link rel="stylesheet" href="css/variables.css?v=20251102" />
   <link rel="stylesheet" href="css/premium.min.css?v=20251104" />
@@ -182,10 +174,10 @@
       <button class="btn-main" onclick="location.href='pages/profile.html'">👤 Perfil</button>
       <button class="btn-main" onclick="toggleThemeSafe()">🌗 Cambiar fondo</button>
     </div>
-<!-- ✅ CFC_FUNC_9_1_20251105 — CFC-PACK PLUS V1 -->
-<a href="/assets/CFC_Pack_2025.zip" download class="btn-premium">
-  📘 Contenido adicional (CFC Pack 2025)
-</a>
+
+    <a href="/assets/CFC_Pack_2025.zip" download class="btn-premium">
+      📘 Contenido adicional (CFC Pack 2025)
+    </a>
 
     <p class="hint">
       💡 Sugerencia: guardá este enlace directo a los módulos:<br />
@@ -198,96 +190,14 @@
   <!-- Scripts -->
   <script src="js/loader.js?v=20251105" defer></script>
   <script src="js/footer.js?v=20251103" defer></script>
-  <!-- <script src="js/theme.js?v=20251103" defer></script> -->
 
-<!-- ✅ CFC_FUNC_5_3_FIX_V41.21 — Sistema unificado de tema global -->
-<script src="js/theme_chapter_v2.js?v=20251106" defer></script>
-  
-  <!-- ✅ Nueva mini guía visual -->
+  <script src="js/theme_chapter_v2.js?v=20251106" defer></script>
   <script src="js/guide.js?v=20251103" defer></script>
 
-  <script>
-    /* ✨ Partículas doradas + motivador */
-    document.addEventListener("DOMContentLoaded", () => {
-      const container = document.getElementById("particles-bg");
-      for (let i = 0; i < 20; i++) {
-        const p = document.createElement("div");
-        p.classList.add("particle");
-        p.style.left = Math.random() * 100 + "%";
-        p.style.animationDuration = 5 + Math.random() * 10 + "s";
-        p.style.animationDelay = Math.random() * 10 + "s";
-        container.appendChild(p);
-      }
+  <!-- 🔒 CFC-LOCK V72 -->
+  <script src="js/domain_lock_v72.js" defer></script>
 
-      const frases = [
-        "El control es la verdadera libertad 🧠",
-        "El mercado premia la paciencia 🕰️",
-        "Disciplina hoy, libertad mañana 💰",
-        "Tu constancia define tu curva de capital 📈",
-        "La emoción es tu peor enemigo 😶‍🌫️"
-      ];
-      let i = 0;
-      const rotator = document.getElementById("motivation-rotator");
-      setInterval(() => {
-        i = (i + 1) % frases.length;
-        rotator.style.opacity = 0;
-        setTimeout(() => {
-          rotator.textContent = frases[i];
-          rotator.style.opacity = 1;
-        }, 600);
-      }, 5000);
-    });
-
-    function toggleThemeSafe() {
-      try { toggleTheme(); }
-      catch(e){ console.warn("toggleTheme no disponible:", e); }
-    }
-  </script>
-
-  <!-- 🧩 QA-SYNC V43.3 — Mini Guía Visual confirmada -->
-  <script>
-    console.log("🧩 CFC_SYNC checkpoint:", "index.html — CFC_FUNC_7_2BIS_20251102 aplicado", new Date().toLocaleString());
-  </script>
-
-<!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  // Evitar duplicados
-  if (!document.getElementById("theme-toggle")) {
-    const btn = document.createElement("button");
-    btn.id = "theme-toggle";
-    btn.textContent = "☀️";
-    document.body.appendChild(btn);
-
-    // Cargar estado previo
-    const currentTheme = localStorage.getItem("theme") || "dark";
-    document.documentElement.setAttribute("data-theme", currentTheme);
-    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
-
-    // Evento de cambio
-    btn.addEventListener("click", () => {
-      const newTheme =
-        document.documentElement.getAttribute("data-theme") === "dark"
-          ? "light"
-          : "dark";
-      document.documentElement.setAttribute("data-theme", newTheme);
-      localStorage.setItem("theme", newTheme);
-      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
-    });
-  }
-});
-</script> 
-
-<!-- ✅ CFC_LOCK_HEARTCORE_V70 — Verificador global de sesión -->
-<script src="../js/cfc_lock_core.js?v=70"></script>
-  
-<!-- 🔒 CFC-LOCK V72 -->
-<script src="js/domain_lock_v72.js" defer></script>
-
-<!-- 🛡 CFC-GUARD V1 — Inserción mínima para PRUEBA 3 -->
-<script src="js/cfc_guard.js" defer></script>
-
-<!-- 🔥 CFC-BUNDLE -->
-<script src="js/bundle_core.min.js" defer></script>
+  <!-- 🔥 CFC-BUNDLE -->
+  <script src="js/bundle_core.min.js" defer></script>
 </body>
 </html>
