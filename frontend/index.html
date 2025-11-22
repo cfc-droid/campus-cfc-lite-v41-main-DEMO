@@ -63,76 +63,24 @@
       transform: scale(1.06);
       box-shadow: 0 0 22px rgba(255,215,0,0.8);
     }
-    @keyframes zoomIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(20px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ==========================================================
-       ✅ CFC_FUNC_7_2BIS_20251102 — Estilos guía visual interactiva
-       ========================================================== */
-    .guide-overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      z-index: 10000;
-      animation: fadeIn 0.6s ease forwards;
-    }
-    .guide-box {
-      background: var(--color-panel, #111);
-      color: var(--color-text, #f5f5f5);
-      padding: 25px 35px;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
-      max-width: 450px;
-      text-align: center;
-      line-height: 1.5;
-      border: 2px solid #ffd700;
-      animation: pulseGlow 2.5s infinite alternate ease-in-out;
-    }
-    .guide-box h2 {
-      color: var(--color-accent, #ffd700);
-      margin-bottom: 15px;
-    }
-    .guide-box ul {
-      list-style: none;
-      padding: 0;
-      margin: 0 0 20px;
-    }
-    .guide-box li {
-      margin: 8px 0;
-      font-weight: 500;
-    }
-    .btn-guide {
-      background: linear-gradient(90deg, #d4af37, #ffd700);
-      color: #000;
-      font-weight: 700;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: transform 0.2s, box-shadow 0.3s;
-    }
-    .btn-guide:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
-    }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes pulseGlow {
-      from { box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); }
-      to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
-    }
   </style>
 </head>
 
 <body>
+  <!-- ✅ Redirección automática si NO hay sesión -->
+  <script>
+    try {
+      const email = localStorage.getItem("CFC_EMAIL");
+      const did = localStorage.getItem("CFC_DEVICE_ID");
+
+      if (!email || !did) {
+        window.location.href = "/html/login.html";
+      }
+    } catch(e) {
+      window.location.href = "/html/login.html";
+    }
+  </script>
+
   <!-- ✨ Intro Premium Splash -->
   <div id="intro-splash">
     <img id="logoCFC" src="img/logo.png" alt="Logo CFC" />
@@ -149,8 +97,8 @@
     <div class="menu">
       <a href="index.html">Inicio</a>
       <a href="modules/index.html">Módulos</a>
-      <a href="./pages/resultados.html">Resultados</a>
-      <a href="./pages/profile.html">Perfil</a>
+      <a href="pages/results.html">Resultados</a>
+      <a href="pages/profile.html">Perfil</a>
     </div>
   </nav>
 
@@ -191,13 +139,16 @@
   <script src="js/loader.js?v=20251105" defer></script>
   <script src="js/footer.js?v=20251103" defer></script>
 
+  <!-- ✅ Tema global -->
   <script src="js/theme_chapter_v2.js?v=20251106" defer></script>
+
+  <!-- ✅ Guía visual -->
   <script src="js/guide.js?v=20251103" defer></script>
 
-  <!-- 🔒 CFC-LOCK V72 -->
+  <!-- ✅ CFC-LOCK -->
   <script src="js/domain_lock_v72.js" defer></script>
 
-  <!-- 🔥 CFC-BUNDLE -->
+  <!-- ✅ BUNDLE -->
   <script src="js/bundle_core.min.js" defer></script>
 </body>
 </html>
