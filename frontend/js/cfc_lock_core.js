@@ -1,16 +1,32 @@
 /* ==========================================================
-   ✅ CFC_LOCK_CORE_V70.0_FINALFIX
+   ✅ CFC_LOCK_CORE_V70.1_PERMISSIVE_READY
    Sistema: Campus CFC LITE V41-DEMO
-   Propósito: Cierre automático multi-dispositivo garantizado
+   Propósito: Guard con modo PERMISIVO para pruebas del índice
    ========================================================== */
 
-(async () => {
+const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
+
+(function () {
+
   const API_URL = "https://cfc-lock-proxy.onrender.com";
+
+  function getMSCU() {
+    try {
+      const data = localStorage.getItem("CFC_SESSION");
+      return data ? JSON.parse(data) : null;
+    } catch (e) {
+      return null;
+    }
+  }
 
   function logoutNow(reason) {
     console.warn("🚨 Logout forzado:", reason);
-    localStorage.clear();
-    sessionStorage.clear();
+
+    // ✅ NO borra todo — solo claves relacionadas
+    localStorage.removeItem("CFC_SESSION");
+    localStorage.removeItem("CFC_EMAIL");
+    localStorage.removeItem("CFC_DEVICE_ID");
+
     const msg = reason || "⚠️ Sesión cerrada automáticamente.";
     const overlay = document.createElement("div");
     overlay.innerHTML = `
@@ -24,25 +40,69 @@
         <div style="font-size:16px;margin-top:10px;">Redirigiendo...</div>
       </div>`;
     document.body.appendChild(overlay);
-    setTimeout(() => (window.location.href = "/html/login.html?expired=true"), 2000);
+
+    setTimeout(() => {
+      window.location.href = "/frontend/html/login.html?expired=true";
+    }, 1800);
   }
 
-  async function verify() {
-    const email = localStorage.getItem("CFC_EMAIL");
-    const did = localStorage.getItem("CFC_DEVICE_ID");
-    if (!email || !did) return;
-
+  async function verifyRemoteSession(email, device_id) {
     try {
-      const res = await fetch(`${API_URL}/check-session?email=${email}&device_id=${did}`);
+      const res = await fetch(`${API_URL}/check-session?email=${email}&device_id=${device_id}`);
       const data = await res.json();
-      if (data.status === "expired" || data.status === "invalid") {
-        logoutNow("Tu sesión fue cerrada desde otro dispositivo.");
-      }
+      return data?.status === "valid";
     } catch (err) {
       console.log("🔁 Error temporal al verificar sesión:", err.message);
+      return true; // ✅ No desconecta por error de red
     }
   }
 
-  console.log("🧠 CFC_LOCK_CORE activo → monitoreo cada 5 s");
-  setInterval(verify, 5000);
+  async function runLock() {
+
+    const mscu = getMSCU();
+
+    // ✅ Permitir login operar sin guard
+    if (window.location.pathname.includes("login")) {
+      console.log("🛑 Guard inactivo en login — OK");
+      return;
+    }
+
+    // ✅ Si no existe MSCU → aplicar según modo
+    if (!mscu) {
+      if (CFC_LOCK_ENFORCE) {
+        logoutNow("Sesión no válida o expirada.");
+      }
+      console.warn("⚠️ MSCU inexistente — permitido por modo PERMISIVO");
+      return;
+    }
+
+    const { session_user_email, device_id } = mscu;
+
+    // ✅ Si falta info → actuar según modo
+    if (!session_user_email || !device_id) {
+      if (CFC_LOCK_ENFORCE) {
+        logoutNow("Datos de sesión incompletos.");
+      }
+      console.warn("⚠️ MSCU incompleto — permitido por modo PERMISIVO");
+      return;
+    }
+
+    // ✅ Si modo permisivo → no seguir verificando
+    if (!CFC_LOCK_ENFORCE) {
+      console.log("🟡 Guard en modo PERMISIVO — navegación permitida");
+      return;
+    }
+
+    // ✅ MODO ESTRICTO — verificar remoto
+    const valid = await verifyRemoteSession(session_user_email, device_id);
+
+    if (!valid) {
+      logoutNow("Tu sesión fue cerrada desde otro dispositivo.");
+    }
+  }
+
+  console.log(`🧠 CFC_LOCK_CORE activo → modo=${CFC_LOCK_ENFORCE ? "ENFORCE" : "PERMISSIVE"}`);
+  setInterval(runLock, 5000);
+  runLock();
+
 })();
