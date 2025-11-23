@@ -47,45 +47,30 @@
       return "html/login.html";
     }
 
-    // ----------------------------------------------------------
-    // 3) Validar la sesión usando el validador oficial
-    // ----------------------------------------------------------
-    let isValid = false;
+   // ----------------------------------------------------------
+// 3) Validar la sesión usando versión compatible con MSCU del login
+// ----------------------------------------------------------
+let isValid = false;
 
-    if (typeof window.CFC_VALIDATE_FULL_SESSION === "function") {
-      // Uso del validador MSCU V1
-      isValid = window.CFC_VALIDATE_FULL_SESSION();
-    } else {
-      // Fallback mínimo por si el validador no está disponible
-      console.warn("⚠️ CFC-GUARD: CFC_VALIDATE_FULL_SESSION no existe, usando validación mínima.");
-      const session =
-        typeof window.CFC_GET_SESSION === "function"
-          ? window.CFC_GET_SESSION()
-          : null;
+const raw = localStorage.getItem("CFC_SESSION");
+if (raw) {
+  try {
+    const session = JSON.parse(raw);
 
-      if (!session) {
-        isValid = false;
-      } else {
-        const now = Date.now();
+    const hasFields =
+      session.session_id &&
+      session.device_id &&
+      session.session_user_email &&
+      typeof session.session_created_at === "number" &&
+      typeof session.session_expires_at === "number";
 
-        const hasFields =
-          session.user_id &&
-          session.email &&
-          session.device_id &&
-          session.session_token &&
-          typeof session.session_expires_at === "number";
+    const notExpired = Date.now() < session.session_expires_at;
 
-        const notExpired = now < session.session_expires_at;
-        const localDid = localStorage.getItem("CFC_DEVICE_ID");
-        const deviceOK = localDid && session.device_id === localDid;
-        const flagsOK =
-          session.license_valid === true &&
-          session.render_valid === true &&
-          session.firestore_valid === true;
-
-        isValid = !!(hasFields && notExpired && deviceOK && flagsOK);
-      }
-    }
+    isValid = !!(hasFields && notExpired);
+  } catch (e) {
+    isValid = false;
+  }
+}
 
     // ----------------------------------------------------------
     // 4) Si la sesión NO es válida → redirigir a login
