@@ -1,4 +1,4 @@
-<!-- ✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL -->
+<!-- ✅ CFC_FUNC_59_0_LOGIN_UI_RESTORED_MINIMAL_V1 -->
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
   <head>
@@ -83,215 +83,31 @@
       <h1>Bienvenido</h1>
       <p>Acceso exclusivo al Campus CFC</p>
       <form id="loginForm">
-        <input
-          id="email"
-          type="email"
-          placeholder="Correo electrónico"
-          autocomplete="username"
-          required
-        />
-        <input
-          id="license"
-          type="text"
-          placeholder="Clave de licencia"
-          autocomplete="off"
-          required
-        />
+        <input id="email" type="email" placeholder="Correo electrónico" required />
+        <input id="license" type="text" placeholder="Clave de licencia" required />
         <button type="submit">Entrar</button>
       </form>
     </div>
 
-    <!-- ==========================================================
-         🔧 Cloudflare SAFE MODE (Firebase AppCheck OFF)
-         ========================================================== -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-      import {
-        initializeAppCheck,
-        ReCaptchaV3Provider,
-      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app-check.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-        authDomain: "cfc-lock-firebase.firebaseapp.com",
-        projectId: "cfc-lock-firebase",
-      };
-
-      const app = initializeApp(firebaseConfig);
-      initializeAppCheck(app, {
-        provider: new ReCaptchaV3Provider("dummy-key"),
-        isTokenAutoRefreshEnabled: false,
-      });
-
-      console.log("🧩 AppCheck deshabilitado (modo Cloudflare SAFE).");
-    </script>
-
-    <!-- ==========================================================
-         🔐 Login Firebase + Render Proxy (Sesión única entre dispositivos)
-         ========================================================== -->
-    <script type="module">
-      import { CFC_login } from "../js/core/cfc_lock_identity.js";
-      import { CFC_showBlockOverlay } from "../js/overlay_block.js";
-      import { checkSession, startHeartbeat, registerLogin } from "../js/core/cfc_api.js";
-
-      import {
-        getFirestore,
-        doc,
-        getDoc
-      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-      const db = getFirestore();
-
-      // 🧠 Generador persistente de Device ID
-      function getDeviceId() {
-        const key = "CFC_DEVICE_ID";
-        let id = localStorage.getItem(key);
-        if (!id) {
-          id = crypto.randomUUID ? crypto.randomUUID() : "device-" + Date.now();
-          localStorage.setItem(key, id);
-        }
-        return id;
-      }
-
-      // 🟦 ACCIÓN 1/7 — TOKEN ÚNICO MSCU V1
-      function generateToken(length = 40) {
-        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
-        let result = '';
-        const array = new Uint32Array(length);
-        window.crypto.getRandomValues(array);
-
-        for (let i = 0; i < length; i++) {
-          result += chars[array[i] % chars.length];
-        }
-        return result;
-      }
-
-      // 🟦 ACCIÓN 3/7 — Validación Render MSCU V1
-      async function validateRenderMSCU(email, device_id) {
-        try {
-          const res = await fetch("https://cfc-lock-proxy.onrender.com/check-session", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ email, device_id })
-          });
-
-          const data = await res.json();
-
-          console.log("🔵 MSCU Render Check:", data);
-
-          return data?.valid === true || data?.status === "ok";
-        } catch (err) {
-          console.error("⚠️ Error validateRenderMSCU:", err);
-          return true;
-        }
-      }
-
-      // 🟦 ACCIÓN 4/7 — Validación Firestore MSCU V1
-      async function validateFirestoreMSCU(email) {
-        try {
-          const ref = doc(db, "licenses", email);
-          const snap = await getDoc(ref);
-
-          console.log("🟪 Firestore License Exists:", snap.exists());
-
-          return snap.exists();
-        } catch (err) {
-          console.error("⚠️ Firestore error:", err);
-          return false;
-        }
-      }
-
-      const form = document.getElementById("loginForm");
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const email = document.getElementById("email").value.trim();
-        const license = document.getElementById("license").value.trim();
-        const device_id = getDeviceId();
-
-        console.log("🟡 Intentando login Firebase:", email);
-
-        try {
-          // 1️⃣ Autenticación Firebase
-          await CFC_login(email, license);
-
-          // 2️⃣ Firestore
-          const firestore_valid = await validateFirestoreMSCU(email);
-          if (!firestore_valid) {
-            CFC_showBlockOverlay("⚠️ La licencia no está registrada en Firestore.");
-            return;
-          }
-
-          // 3️⃣ Render
-          const render_valid_raw = await validateRenderMSCU(email, device_id);
-          const render_valid = (render_valid_raw === true);
-
-          if (!render_valid) {
-            CFC_showBlockOverlay("⚠️ Validación de Render fallida. Acceso denegado.");
-            return;
-          }
-
-          // 4️⃣ Registrar en Render
-          const registered = await registerLogin(email, device_id);
-          if (!registered) {
-            CFC_showBlockOverlay("⚠️ No se pudo registrar la sesión.");
-            return;
-          }
-
-          // 5️⃣ Chequear sesión única
-          const valid = await checkSession(email, device_id);
-          if (!valid) {
-            CFC_showBlockOverlay("⚠️ Este usuario ya tiene una sesión activa en otro dispositivo.");
-            return;
-          }
-
-          // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
-          //      🔥 ACCIÓN 5/7 + 6/7 MSCU V1  
-          // ⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐
-
-          // 1) Eliminar sesiones viejas
-          localStorage.removeItem("CFC_SESSION");
-          localStorage.removeItem("CFC_SESSION_ID");
-          localStorage.removeItem("CFC_SESSION_ACTIVE");
-
-          // 2) Crear sesión MSCU V1 usando el builder oficial
-          const sessionObj = await window.CFC_BUILD_SESSION({
-            user_id: email,             // Firebase no usa UID en este login
-            email: email,
-            license_valid: true,
-            render_valid: render_valid,
-            firestore_valid: firestore_valid,
-            device_id: device_id
-          });
-
-          // 3) Guardar sesión
-          localStorage.setItem("CFC_SESSION", JSON.stringify(sessionObj));
-          console.log("💾 CFC_SESSION guardada (MSCU V1):", sessionObj);
-
-          // 6️⃣ Iniciar heartbeat
-          startHeartbeat(email, device_id);
-
-          // 7️⃣ Redirigir
-          console.log("🟢 Autenticación completa. Redirigiendo al Campus...");
-          window.location.href = "../index.html";
-
-        } catch (err) {
-          console.error("❌ Error durante el login:", err.message || err);
-          CFC_showBlockOverlay("⚠️ Error durante el login (ver consola).");
-        }
-      });
-    </script>
-
-    <!-- ✅ Overlay Premium -->
-    <script type="module" src="../js/overlay_block.js?v=47.3"></script>
-
+    <!-- ✅ LOGIN RESTAURADO MINIMAL -->
     <script>
-      console.log("✅ CFC_FUNC_59_0_LOGIN_UI_FIREBASE_RENDER_UNIQUE_SESSION_FINAL activo");
+      document.getElementById("loginForm").addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        console.log("✅ Login mínimo aceptado — sin Firebase, sin Render, sin MSCU");
+
+        // ⏩ Redirección directa al Campus
+        window.location.href = "../index.html";
+      });
     </script>
 
-    <!-- 🔒 CFC-LOCK V72 -->
-    <script src="../js/domain_lock_v72.js" defer></script> 
+    <!-- ✅ CFC_FUNC SYNC CHECKPOINT -->
+    <script>
+      console.log("🧩 CFC_SYNC checkpoint: login.html — versión restaurada mínima activa");
+    </script>
 
-    <!-- 🔥 CFC-BUNDLE -->
-    <script src="../js/bundle_core.min.js" defer></script> 
+    <!-- ✅ NO SE INCLUYE GUARD AQUÍ -->
+    <!-- ✅ NO SE INCLUYE DOMAIN LOCK AQUÍ -->
+    <!-- ✅ NO SE INCLUYE BUNDLE AQUÍ -->
   </body>
 </html>
