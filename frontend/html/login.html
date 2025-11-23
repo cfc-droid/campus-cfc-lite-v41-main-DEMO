@@ -1,4 +1,4 @@
-<!-- ✅ CFC_FUNC_59_0_LOGIN_UI_RESTORED_MINIMAL_V1 -->
+<!-- ✅ CFC_FUNC_59_1_LOGIN_WITH_MSCU_CONSTRUCTOR_V1 -->
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
   <head>
@@ -89,21 +89,45 @@
       </form>
     </div>
 
-    <!-- ✅ LOGIN RESTAURADO MINIMAL -->
+    <!-- ✅ MSCU — Constructor REAL (sin Firebase, sin Guard) -->
+    <script>
+      function CFC_BUILD_MSCU(email) {
+        const session = {
+          session_id: "sid_" + crypto.randomUUID(),
+          device_id: localStorage.getItem("CFC_DEVICE_ID") || "dev_" + crypto.randomUUID(),
+          session_created_at: Date.now(),
+          session_expires_at: Date.now() + (24 * 60 * 60 * 1000),
+          session_user_email: email,
+          session_valid: true
+        };
+
+        localStorage.setItem("CFC_DEVICE_ID", session.device_id);
+        localStorage.setItem("CFC_SESSION", JSON.stringify(session));
+
+        console.log("✅ MSCU generado y guardado:", session);
+      }
+    </script>
+
+    <!-- ✅ LOGIN CONSTRUCTOR ACTIVADO -->
     <script>
       document.getElementById("loginForm").addEventListener("submit", function (e) {
         e.preventDefault();
 
-        console.log("✅ Login mínimo aceptado — sin Firebase, sin Render, sin MSCU");
+        const email = document.getElementById("email").value.trim();
+        const license = document.getElementById("license").value.trim();
 
-        // ⏩ Redirección directa al Campus
+        console.log("✅ Login aceptado — generando MSCU...");
+
+        CFC_BUILD_MSCU(email);
+
+        // ⏩ Redirección al Campus
         window.location.href = "../index.html";
       });
     </script>
 
     <!-- ✅ CFC_FUNC SYNC CHECKPOINT -->
     <script>
-      console.log("🧩 CFC_SYNC checkpoint: login.html — versión restaurada mínima activa");
+      console.log("🧩 CFC_SYNC checkpoint: login.html — constructor MSCU activo");
     </script>
 
     <!-- ✅ NO SE INCLUYE GUARD AQUÍ -->
