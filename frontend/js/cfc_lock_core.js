@@ -125,15 +125,13 @@ setTimeout(() => {
       font-size:26px;
       text-align:center;">
       <div>🚨 Sesión activa en otro dispositivo</div>
-      <div style="margin-top:12px;font-size:18px;">
-        Serás desconectado por seguridad...
-      </div>
+<div style="margin-top:12px;font-size:18px;">
+  Sesión finalizada en este navegador
+</div>
     </div>`;
   document.body.appendChild(overlay);
 
-  setTimeout(() => {
-    window.location.href = "/frontend/html/login.html?conflict=true";
-  }, 1600);
+window.location.href = "/frontend/html/login.html?conflict=true";
 }, 3000);
 
       // ✅ Evento interno sin expulsión
