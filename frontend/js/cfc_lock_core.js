@@ -67,22 +67,14 @@ const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
       return;
     }
 
-/* ✅ CFC_FUNC_4_5_D4 — POST-EXPULSION BLOCKER */
-const urlParams = new URLSearchParams(window.location.search);
-const isConflictLogin = urlParams.get("conflict") === "true";
-
-/* ✅ CFC_D4_BLOCK — bloqueo post-expulsión */
-if (!mscu) {
-  console.warn("🚫 CFC_D4_BLOCK — navegación bloqueada tras expulsión");
-  window.location.href = "/frontend/html/login.html?conflict=true";
-  return;
-}
-
-// Si estamos en login con conflicto → limpiar rastros
-if (isConflictLogin) {
-  sessionStorage.removeItem("CFC_PREV_SESSION");
-  console.log("🧹 CFC_D4_CLEAN — sesión previa ignorada tras conflicto");
-}
+    // ✅ Si no existe MSCU → aplicar según modo
+    if (!mscu) {
+      if (CFC_LOCK_ENFORCE) {
+        logoutNow("Sesión no válida o expirada.");
+      }
+      console.warn("⚠️ MSCU inexistente — permitido por modo PERMISIVO");
+      return;
+    }
 
     const { session_user_email, device_id } = mscu;
 
@@ -94,67 +86,13 @@ if (isConflictLogin) {
       console.warn("⚠️ MSCU incompleto — permitido por modo PERMISIVO");
       return;
     }
-  
-/* ✅ CFC_FUNC_4_5_D2 — SESSION CONFLICT DETECTOR */
-try {
-  const previousSession = sessionStorage.getItem("CFC_PREV_SESSION");
-  const mscuRaw = localStorage.getItem("CFC_SESSION");
 
-  if (previousSession && mscuRaw) {
-    const prev = JSON.parse(previousSession);
-    const curr = JSON.parse(mscuRaw);
-
-    const sameUser = prev.session_user_email === curr.session_user_email;
-    const differentDevice = prev.device_id !== curr.device_id;
-    const changedToken = true; // ✅ fuerza detección en modo permisivo
-
-    if (sameUser && (differentDevice || changedToken)) {
-      console.warn("🚨 CFC_SESSION_CONFLICT detectado — otro dispositivo activo");
-
-/* ✅ CFC_FUNC_4_5_D3 — OVERLAY + REDIRECCIÓN INMEDIATA */
-const overlay = document.createElement("div");
-overlay.innerHTML = `
-  <div style="
-    position:fixed;inset:0;z-index:999999;
-    background:rgba(0,0,0,0.92);
-    display:flex;align-items:center;justify-content:center;
-    flex-direction:column;
-    font-family:Poppins,sans-serif;
-    color:#ffd700;
-    font-size:26px;
-    text-align:center;">
-    <div>🚨 Sesión activa en otro dispositivo</div>
-    <div style="margin-top:12px;font-size:18px;">
-      Sesión finalizada en este navegador
-    </div>
-  </div>`;
-document.body.appendChild(overlay);
-
-/* ✅ REDIRECCIÓN INMEDIATA */
-window.location.href = "/frontend/html/login.html?conflict=true";
-return;
-
-/* ✅ Evento interno sin expulsión */
-window.dispatchEvent(new CustomEvent("CFC_SESSION_CONFLICT"));
-
-console.log("✅ Evento CFC_SESSION_CONFLICT enviado correctamente");
+    // ✅ Si modo permisivo → no seguir verificando
+    if (!CFC_LOCK_ENFORCE) {
+      console.log("🟡 Guard en modo PERMISIVO — navegación permitida");
+      return;
     }
-  }
 
-  if (mscuRaw) {
-    sessionStorage.setItem("CFC_PREV_SESSION", mscuRaw);
-  }
-
-} catch (err) {
-  console.error("❌ Error en detector D2:", err);
-}
-
-// ✅ ahora sí:
-if (!CFC_LOCK_ENFORCE) {
-  console.log("🟡 Guard en modo PERMISIVO — navegación permitida");
-  return;
-}
-     
     // ✅ MODO ESTRICTO — verificar remoto
     const valid = await verifyRemoteSession(session_user_email, device_id);
 
