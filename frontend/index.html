@@ -141,6 +141,14 @@
 </head>
 
 <body>
+
+  <script>
+  const hasSession = sessionStorage.getItem("CFC_LOGIN_OK");
+  if (!hasSession) {
+    window.location.href = "html/login.html";
+  }
+</script>
+  
   <!-- ✨ Intro Premium Splash -->
   <div id="intro-splash">
     <img id="logoCFC" src="img/logo.png" alt="Logo CFC" />
