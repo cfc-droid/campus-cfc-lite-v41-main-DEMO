@@ -67,14 +67,29 @@ const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
       return;
     }
 
-    // ✅ Si no existe MSCU → aplicar según modo
-    if (!mscu) {
-      if (CFC_LOCK_ENFORCE) {
-        logoutNow("Sesión no válida o expirada.");
-      }
-      console.warn("⚠️ MSCU inexistente — permitido por modo PERMISIVO");
-      return;
-    }
+// ✅ Si no existe MSCU → aplicar bloqueo post-expulsión
+if (!mscu) {
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const isConflictLogin = urlParams.get("conflict") === "true";
+
+  // ✅ Si no hay MSCU y NO estamos en login → forzar salida
+  if (!window.location.pathname.includes("login")) {
+    console.warn("🚫 CFC_D4_BLOCK — navegación bloqueada tras expulsión");
+    window.location.href = "/frontend/html/login.html?conflict=true";
+    return;
+  }
+
+  // ✅ Si estamos en login con conflicto → limpiar estado previo
+  if (isConflictLogin) {
+    sessionStorage.removeItem("CFC_PREV_SESSION");
+    console.log("🧹 CFC_D4_CLEAN — sesión previa ignorada tras conflicto");
+  }
+
+  // ✅ En modo permisivo, permitir login operar
+  console.warn("⚠️ MSCU inexistente — permitido por modo PERMISIVO");
+  return;
+}
 
      /* ✅ CFC_FUNC_4_5_D4 — POST-EXPULSION BLOCKER */
 const urlParams = new URLSearchParams(window.location.search);
