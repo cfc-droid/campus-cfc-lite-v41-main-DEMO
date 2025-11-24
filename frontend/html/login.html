@@ -318,6 +318,22 @@ const CFC_USERS = {
 };
 </script>
 
+    <!-- ✅ CFC_FUNC_4_5_D1 — DEVICE_ID GENERATOR -->
+<script>
+(function() {
+  // Verificar si ya existe un DEVICE_ID
+  let deviceId = localStorage.getItem("CFC_DEVICE_ID");
+
+  // Si no existe, generar uno nuevo
+  if (!deviceId) {
+    deviceId = 'dev-' + Math.random().toString(36).substring(2, 12) + Date.now().toString(36);
+    localStorage.setItem("CFC_DEVICE_ID", deviceId);
+  }
+
+  console.log("🆔 CFC_DEVICE_ID activo:", deviceId);
+})();
+</script>
+
     <!-- ✅ HANDLER REAL SIN MSCU -->
    <script>
   document.getElementById("loginForm").addEventListener("submit", function (e) {
