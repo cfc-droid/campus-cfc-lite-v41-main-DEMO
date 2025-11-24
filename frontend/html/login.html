@@ -1,4 +1,4 @@
-<!-- ✅ CFC_FUNC_59_1_LOGIN_WITH_MSCU_CONSTRUCTOR_V1 -->
+<!-- ✅ CFC_FUNC_59_2_LOGIN_HANDLER_RESTORED_V1 -->
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
   <head>
@@ -75,6 +75,13 @@
         background-color: #fff;
         color: #000;
       }
+
+      .error-msg {
+        color: #ff4d4d;
+        font-size: 12px;
+        margin-top: 10px;
+        display: none;
+      }
     </style>
   </head>
 
@@ -86,52 +93,41 @@
         <input id="email" type="email" placeholder="Correo electrónico" required />
         <input id="license" type="text" placeholder="Clave de licencia" required />
         <button type="submit">Entrar</button>
+        <div id="errorMsg" class="error-msg">Credenciales no válidas</div>
       </form>
     </div>
 
-    <!-- ✅ MSCU — Constructor REAL (sin Firebase, sin Guard) -->
-    <script>
-      function CFC_BUILD_MSCU(email) {
-        const session = {
-          session_id: "sid_" + crypto.randomUUID(),
-          device_id: localStorage.getItem("CFC_DEVICE_ID") || "dev_" + crypto.randomUUID(),
-          session_created_at: Date.now(),
-          session_expires_at: Date.now() + (24 * 60 * 60 * 1000),
-          session_user_email: email,
-          session_valid: true
-        };
-
-        localStorage.setItem("CFC_DEVICE_ID", session.device_id);
-        localStorage.setItem("CFC_SESSION", JSON.stringify(session));
-
-        console.log("✅ MSCU generado y guardado:", session);
-      }
-    </script>
-
-    <!-- ✅ LOGIN CONSTRUCTOR ACTIVADO -->
+    <!-- ✅ HANDLER REAL SIN MSCU -->
     <script>
       document.getElementById("loginForm").addEventListener("submit", function (e) {
         e.preventDefault();
 
         const email = document.getElementById("email").value.trim();
         const license = document.getElementById("license").value.trim();
+        const errorMsg = document.getElementById("errorMsg");
 
-        console.log("✅ Login aceptado — generando MSCU...");
+        // ✅ Validación mínima restaurada (sin MSCU aún)
+        if (email === "" || license === "") {
+          errorMsg.style.display = "block";
+          console.log("❌ Acceso denegado — faltan credenciales");
+          return;
+        }
 
-        CFC_BUILD_MSCU(email);
+        errorMsg.style.display = "none";
+        console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
 
-        // ⏩ Redirección al Campus
-        window.location.href = "../index.html";
+        // ⏸ NO REDIRIGE AÚN (hasta acción 4/5-A.3)
       });
     </script>
 
     <!-- ✅ CFC_FUNC SYNC CHECKPOINT -->
     <script>
-      console.log("🧩 CFC_SYNC checkpoint: login.html — constructor MSCU activo");
+      console.log("🧩 CFC_SYNC checkpoint: login.html — handler restaurado sin MSCU");
     </script>
 
     <!-- ✅ NO SE INCLUYE GUARD AQUÍ -->
     <!-- ✅ NO SE INCLUYE DOMAIN LOCK AQUÍ -->
+    <!-- ✅ NO SE INCLUYE MSCU AQUÍ -->
     <!-- ✅ NO SE INCLUYE BUNDLE AQUÍ -->
   </body>
 </html>
