@@ -140,18 +140,20 @@
   </style>
 </head>
 
-  <script>
-  // ✅ Bloqueo suavizado para Acción 4/5-A.3
-  const cameFromLogin = sessionStorage.getItem("CFC_LOGIN_OK");
-  if (!cameFromLogin) {
-    console.log("🚫 Acceso sin login — redirigiendo");
-    window.location.href = "html/login.html";
-  } else {
-    console.log("✅ Acceso permitido temporalmente (sin MSCU)");
-  }
-</script>
-
 <body>
+
+<!-- ✅ CFC_FUNC_4_5_A3 — Verificación mínima login -->
+<script>
+  (function() {
+    const ok = sessionStorage.getItem("CFC_LOGIN_OK");
+    if (!ok) {
+      console.log("🚫 Acceso sin login — redirigiendo (A3 FIX)");
+      window.location.href = "./html/login.html";
+    } else {
+      console.log("✅ Acceso permitido — sesión marcada (A3 FIX)");
+    }
+  })();
+</script>
   
   <!-- ✨ Intro Premium Splash -->
   <div id="intro-splash">
