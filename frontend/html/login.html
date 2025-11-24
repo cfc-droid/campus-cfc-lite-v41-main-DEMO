@@ -98,27 +98,29 @@
     </div>
 
     <!-- ✅ HANDLER REAL SIN MSCU -->
-    <script>
-      document.getElementById("loginForm").addEventListener("submit", function (e) {
-        e.preventDefault();
+   <script>
+  document.getElementById("loginForm").addEventListener("submit", function (e) {
+    e.preventDefault();
 
-        const email = document.getElementById("email").value.trim();
-        const license = document.getElementById("license").value.trim();
-        const errorMsg = document.getElementById("errorMsg");
+    const email = document.getElementById("email").value.trim();
+    const license = document.getElementById("license").value.trim();
+    const errorMsg = document.getElementById("errorMsg");
 
-        // ✅ Validación mínima restaurada (sin MSCU aún)
-        if (email === "" || license === "") {
-          errorMsg.style.display = "block";
-          console.log("❌ Acceso denegado — faltan credenciales");
-          return;
-        }
+    if (email === "" || license === "") {
+      errorMsg.style.display = "block";
+      console.log("❌ Acceso denegado — faltan credenciales");
+      return;
+    }
 
-        errorMsg.style.display = "none";
-        console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
+    errorMsg.style.display = "none";
+    console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
 
-        // ⏸ NO REDIRIGE AÚN (hasta acción 4/5-A.3)
-      });
-    </script>
+    // ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
+    sessionStorage.setItem("CFC_LOGIN_OK", "1");
+
+    // ⏸ NO REDIRIGE AÚN
+  });
+</script>
 
     <!-- ✅ CFC_FUNC SYNC CHECKPOINT -->
     <script>
@@ -130,6 +132,5 @@
     <!-- ✅ NO SE INCLUYE MSCU AQUÍ -->
     <!-- ✅ NO SE INCLUYE BUNDLE AQUÍ -->
 
-    sessionStorage.setItem("CFC_LOGIN_OK", "1");
   </body>
 </html>
