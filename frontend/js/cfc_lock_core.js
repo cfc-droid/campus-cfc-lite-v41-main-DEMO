@@ -76,6 +76,23 @@ const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
       return;
     }
 
+     /* ✅ CFC_FUNC_4_5_D4 — POST-EXPULSION BLOCKER */
+const urlParams = new URLSearchParams(window.location.search);
+const isConflictLogin = urlParams.get("conflict") === "true";
+
+// Si no hay MSCU y la página NO es login → bloquear navegación
+if (!mscu && !window.location.pathname.includes("login")) {
+  console.warn("🚫 CFC_D4_BLOCK — navegación bloqueada tras expulsión");
+  window.location.href = "/frontend/html/login.html?conflict=true";
+  return;
+}
+
+// Si hay conflicto en login, no restaurar MSCU automáticamente
+if (isConflictLogin) {
+  sessionStorage.removeItem("CFC_PREV_SESSION");
+  console.log("🧹 CFC_D4_CLEAN — sesión previa ignorada tras conflicto");
+}
+
     const { session_user_email, device_id } = mscu;
 
     // ✅ Si falta info → actuar según modo
