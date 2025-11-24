@@ -125,6 +125,15 @@
     errorMsg.style.display = "none";
     console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
 
+    // ✅ VALIDACIÓN REAL CONTRA TABLA CFC_USERS — ACCIÓN 4/5-C.2
+    if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
+      errorMsg.style.display = "block";
+      console.log("❌ Acceso denegado — credenciales no válidas");
+      return;
+    }
+
+    console.log("✅ Credenciales válidas — acceso permitido");
+
 // ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 
