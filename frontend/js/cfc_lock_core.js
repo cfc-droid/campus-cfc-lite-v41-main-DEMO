@@ -131,8 +131,8 @@ setTimeout(() => {
     </div>`;
   document.body.appendChild(overlay);
 
+/* ✅ REDIRECCIÓN INMEDIATA */
 window.location.href = "/frontend/html/login.html?conflict=true";
-}, 3000);
 
       // ✅ Evento interno sin expulsión
       window.dispatchEvent(new CustomEvent("CFC_SESSION_CONFLICT"));
