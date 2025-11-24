@@ -72,7 +72,7 @@ const urlParams = new URLSearchParams(window.location.search);
 const isConflictLogin = urlParams.get("conflict") === "true";
 
 // Si no existe MSCU y NO es login → bloquear
-if (!mscu && !window.location.pathname.includes("login")) {
+if (!mscu && !isConflictLogin) {
   console.warn("🚫 CFC_D4_BLOCK — navegación bloqueada tras expulsión");
   window.location.href = "/frontend/html/login.html?conflict=true";
   return;
