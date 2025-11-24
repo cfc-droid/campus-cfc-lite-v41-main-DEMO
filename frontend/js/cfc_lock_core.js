@@ -93,6 +93,39 @@ const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
       return;
     }
 
+/* ✅ CFC_FUNC_4_5_D2 — SESSION CONFLICT DETECTOR */
+try {
+  const previousSession = sessionStorage.getItem("CFC_PREV_SESSION");
+  const mscuRaw = localStorage.getItem("CFC_SESSION");
+
+  if (previousSession && mscuRaw) {
+    const prev = JSON.parse(previousSession);
+    const curr = JSON.parse(mscuRaw);
+
+    const sameUser = prev.session_user_email === curr.session_user_email;
+    const differentDevice = prev.device_id !== curr.device_id;
+    const changedToken = prev.session_token !== curr.session_token;
+
+    if (sameUser && (differentDevice || changedToken)) {
+      console.warn("🚨 CFC_SESSION_CONFLICT detectado — otro dispositivo activo");
+
+      // ✅ Evento interno sin expulsión
+      window.dispatchEvent(new CustomEvent("CFC_SESSION_CONFLICT"));
+
+      // ✅ Log visible en consola para pruebas del índice
+      console.log("✅ Evento CFC_SESSION_CONFLICT enviado correctamente");
+    }
+  }
+
+  // ✅ Guardar estado actual para próxima iteración
+  if (mscuRaw) {
+    sessionStorage.setItem("CFC_PREV_SESSION", mscuRaw);
+  }
+
+} catch (err) {
+  console.error("❌ Error en detector D2:", err);
+}
+     
     // ✅ MODO ESTRICTO — verificar remoto
     const valid = await verifyRemoteSession(session_user_email, device_id);
 
