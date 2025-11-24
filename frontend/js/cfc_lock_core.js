@@ -103,6 +103,31 @@ try {
     if (sameUser && (differentDevice || changedToken)) {
       console.warn("🚨 CFC_SESSION_CONFLICT detectado — otro dispositivo activo");
 
+/* ✅ CFC_FUNC_4_5_D3 — OVERLAY + EXPULSIÓN DIFERIDA */
+setTimeout(() => {
+  const overlay = document.createElement("div");
+  overlay.innerHTML = `
+    <div style="
+      position:fixed;inset:0;z-index:999999;
+      background:rgba(0,0,0,0.92);
+      display:flex;align-items:center;justify-content:center;
+      flex-direction:column;
+      font-family:Poppins,sans-serif;
+      color:#ffd700;
+      font-size:26px;
+      text-align:center;">
+      <div>🚨 Sesión activa en otro dispositivo</div>
+      <div style="margin-top:12px;font-size:18px;">
+        Serás desconectado por seguridad...
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  setTimeout(() => {
+    window.location.href = "/frontend/html/login.html?conflict=true";
+  }, 1600);
+}, 3000);
+
       // ✅ Evento interno sin expulsión
       window.dispatchEvent(new CustomEvent("CFC_SESSION_CONFLICT"));
 
