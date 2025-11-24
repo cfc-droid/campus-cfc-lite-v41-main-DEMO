@@ -151,18 +151,6 @@
     window.location.href = "./html/login.html";
   } else {
     console.log("✅ Acceso permitido — sesión marcada (A3 FIX)");
-    }
-    })();
-    </script>
-
-<!-- ✅ CFC_FUNC_4_5_D1 — DEVICE_ID CONFIRMATION -->
-<script>
-(function() {
-  const deviceId = localStorage.getItem("CFC_DEVICE_ID");
-  if (deviceId) {
-    console.log("🆔 CFC_DEVICE_ID detectado en index:", deviceId);
-  } else {
-    console.warn("⚠ No hay CFC_DEVICE_ID — se generará al volver al login");
   }
 })();
 </script>
