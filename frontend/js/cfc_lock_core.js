@@ -87,44 +87,45 @@ const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
       return;
     }
 
-     /* ✅ CFC_FUNC_4_5_D2 — SESSION CONFLICT DETECTOR */
-try {
-  const previousSession = sessionStorage.getItem("CFC_PREV_SESSION");
-  const mscuRaw = localStorage.getItem("CFC_SESSION");
+// ✅ Si modo permisivo → no seguir verificando
+if (!CFC_LOCK_ENFORCE) {
+  console.log("🟡 Guard en modo PERMISIVO — navegación permitida");
+  
+  /* ✅ CFC_FUNC_4_5_D2 — SESSION CONFLICT DETECTOR */
+  try {
+    const previousSession = sessionStorage.getItem("CFC_PREV_SESSION");
+    const mscuRaw = localStorage.getItem("CFC_SESSION");
 
-  if (previousSession && mscuRaw) {
-    const prev = JSON.parse(previousSession);
-    const curr = JSON.parse(mscuRaw);
+    if (previousSession && mscuRaw) {
+      const prev = JSON.parse(previousSession);
+      const curr = JSON.parse(mscuRaw);
 
-    const sameUser = prev.session_user_email === curr.session_user_email;
-    const differentDevice = prev.device_id !== curr.device_id;
-    const changedToken = prev.session_token !== curr.session_token;
+      const sameUser = prev.session_user_email === curr.session_user_email;
+      const differentDevice = prev.device_id !== curr.device_id;
+      const changedToken = prev.session_token !== curr.session_token;
 
-    if (sameUser && (differentDevice || changedToken)) {
-      console.warn("🚨 CFC_SESSION_CONFLICT detectado — otro dispositivo activo");
+      if (sameUser && (differentDevice || changedToken)) {
+        console.warn("🚨 CFC_SESSION_CONFLICT detectado — otro dispositivo activo");
 
-      // ✅ Evento interno sin expulsión
-      window.dispatchEvent(new CustomEvent("CFC_SESSION_CONFLICT"));
+        // ✅ Evento interno sin expulsión
+        window.dispatchEvent(new CustomEvent("CFC_SESSION_CONFLICT"));
 
-      // ✅ Log visible en consola para pruebas del índice
-      console.log("✅ Evento CFC_SESSION_CONFLICT enviado correctamente");
+        // ✅ Log visible en consola para pruebas del índice
+        console.log("✅ Evento CFC_SESSION_CONFLICT enviado correctamente");
+      }
     }
+
+    // ✅ Guardar estado actual para próxima iteración
+    if (mscuRaw) {
+      sessionStorage.setItem("CFC_PREV_SESSION", mscuRaw);
+    }
+
+  } catch (err) {
+    console.error("❌ Error en detector D2:", err);
   }
 
-  // ✅ Guardar estado actual para próxima iteración
-  if (mscuRaw) {
-    sessionStorage.setItem("CFC_PREV_SESSION", mscuRaw);
-  }
-
-} catch (err) {
-  console.error("❌ Error en detector D2:", err);
+  return;
 }
-
-         // ✅ Si modo permisivo → no seguir verificando
-    if (!CFC_LOCK_ENFORCE) {
-      console.log("🟡 Guard en modo PERMISIVO — navegación permitida");
-      return;
-    }
      
     // ✅ MODO ESTRICTO — verificar remoto
     const valid = await verifyRemoteSession(session_user_email, device_id);
