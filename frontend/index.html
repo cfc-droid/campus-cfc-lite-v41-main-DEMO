@@ -289,5 +289,11 @@ document.addEventListener("DOMContentLoaded", () => {
   
 <!-- 🔥 CFC-BUNDLE -->
 <script src="js/bundle_core.min.js" defer></script>
-</body>
-</html>
+
+<script>
+  // ✅ Bloqueo simple sin Guard ni MSCU
+  const hasSession = sessionStorage.getItem("CFC_LOGIN_OK");
+  if (!hasSession) {
+    window.location.href = "html/login.html";
+  }
+</script>
