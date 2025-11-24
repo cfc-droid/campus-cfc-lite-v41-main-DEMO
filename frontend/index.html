@@ -144,18 +144,16 @@
 
 <!-- ✅ CFC_FUNC_4_5_A3 — Verificación mínima login -->
 <script>
-document.getElementById("loginForm").addEventListener("submit", function (e) {
-  e.preventDefault();
-
-  const email = document.getElementById("email").value.trim();
-  const license = document.getElementById("license").value.trim();
-  const errorMsg = document.getElementById("errorMsg");
-
-  if (email === "" || license === "") {
-    errorMsg.style.display = "block";
-    console.log("❌ Acceso denegado — faltan credenciales");
-    return;
+(function() {
+  const ok = sessionStorage.getItem("CFC_LOGIN_OK");
+  if (!ok) {
+    console.log("🚫 Acceso sin login — redirigiendo (A3 FIX)");
+    window.location.href = "./html/login.html";
+  } else {
+    console.log("✅ Acceso permitido — sesión marcada (A3 FIX)");
   }
+})();
+</script>
 
   errorMsg.style.display = "none";
   console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
