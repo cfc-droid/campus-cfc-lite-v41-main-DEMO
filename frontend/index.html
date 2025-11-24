@@ -144,15 +144,28 @@
 
 <!-- ✅ CFC_FUNC_4_5_A3 — Verificación mínima login -->
 <script>
-  (function() {
-    const ok = sessionStorage.getItem("CFC_LOGIN_OK");
-    if (!ok) {
-      console.log("🚫 Acceso sin login — redirigiendo (A3 FIX)");
-      window.location.href = "./html/login.html";
-    } else {
-      console.log("✅ Acceso permitido — sesión marcada (A3 FIX)");
-    }
-  })();
+document.getElementById("loginForm").addEventListener("submit", function (e) {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim();
+  const license = document.getElementById("license").value.trim();
+  const errorMsg = document.getElementById("errorMsg");
+
+  if (email === "" || license === "") {
+    errorMsg.style.display = "block";
+    console.log("❌ Acceso denegado — faltan credenciales");
+    return;
+  }
+
+  errorMsg.style.display = "none";
+  console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
+
+  // ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
+  sessionStorage.setItem("CFC_LOGIN_OK", "1");
+
+  // ✅ REDIRECCIÓN NECESARIA PARA COMPLETAR EL FLUJO
+  window.location.href = "../index.html";
+});
 </script>
   
   <!-- ✨ Intro Premium Splash -->
