@@ -97,21 +97,6 @@
       </form>
     </div>
 
-    <div id="errorPremium" style="
-  display:none;
-  margin-top:12px;
-  padding:10px;
-  border:1px solid rgba(255,215,0,0.35);
-  border-radius:10px;
-  background:rgba(0,0,0,0.35);
-  color:#ffd700;
-  font-size:13px;
-  text-align:center;
-">
-  🚫 Acceso denegado<br>
-  <span style="opacity:0.8">Correo o clave incorrectos</span>
-</div>
-
     <!-- ✅ CFC_USERS TABLE — ACCIÓN 4/5-C.1 -->
 <script>
   const CFC_USERS = {
@@ -141,11 +126,18 @@
     console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
 
     // ✅ VALIDACIÓN REAL CONTRA TABLA CFC_USERS — ACCIÓN 4/5-C.2
-    if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
-      errorMsg.style.display = "block";
-      console.log("❌ Acceso denegado — credenciales no válidas");
-      return;
-    }
+if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
+
+  // ✅ OCULTAR MENSAJES ANTERIORES
+  errorMsg.style.display = "none";
+  document.getElementById("errorPremium").style.display = "none";
+
+  // ✅ MOSTRAR MENSAJE PREMIUM
+  document.getElementById("errorPremium").style.display = "block";
+  console.log("❌ Acceso denegado — mensaje premium activo");
+
+  return;
+}
 
     console.log("✅ Credenciales válidas — acceso permitido");
 
