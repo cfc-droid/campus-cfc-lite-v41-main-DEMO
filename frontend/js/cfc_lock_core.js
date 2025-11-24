@@ -102,7 +102,7 @@ if (!CFC_LOCK_ENFORCE) {
 
       const sameUser = prev.session_user_email === curr.session_user_email;
       const differentDevice = prev.device_id !== curr.device_id;
-      const changedToken = prev.session_token !== curr.session_token;
+    const changedToken = true; // ✅ fuerza evaluación en modo permisivo
 
       if (sameUser && (differentDevice || changedToken)) {
         console.warn("🚨 CFC_SESSION_CONFLICT detectado — otro dispositivo activo");
