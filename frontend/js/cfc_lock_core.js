@@ -86,10 +86,6 @@ const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
       console.warn("⚠️ MSCU incompleto — permitido por modo PERMISIVO");
       return;
     }
-
-// ✅ Si modo permisivo → no seguir verificando
-if (!CFC_LOCK_ENFORCE) {
-  console.log("🟡 Guard en modo PERMISIVO — navegación permitida");
   
 /* ✅ CFC_FUNC_4_5_D2 — SESSION CONFLICT DETECTOR */
 try {
