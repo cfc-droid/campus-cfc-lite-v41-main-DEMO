@@ -115,10 +115,12 @@
     errorMsg.style.display = "none";
     console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
 
-    // ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
-    sessionStorage.setItem("CFC_LOGIN_OK", "1");
+// ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
+sessionStorage.setItem("CFC_LOGIN_OK", "1");
 
-    // ⏸ NO REDIRIGE AÚN
+// ✅ REDIRIGIR A INDEX DESDE /frontend/html/login.html
+window.location.href = "../index.html";
+
   });
 </script>
 
