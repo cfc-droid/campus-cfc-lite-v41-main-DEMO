@@ -387,5 +387,62 @@ window.location.href = "../index.html";
     <!-- ✅ NO SE INCLUYE MSCU AQUÍ -->
     <!-- ✅ NO SE INCLUYE BUNDLE AQUÍ -->
 
+<!-- ✅ CFC_FUNC_4_5_D4 — LOGIN CONFLICT OVERLAY -->
+<script>
+(function() {
+
+  // Detectar si login fue abierto con conflicto
+  const urlParams = new URLSearchParams(window.location.search);
+  const isConflict = urlParams.get("conflict") === "true";
+
+  if (!isConflict) return; // ✅ Login normal — no hacer nada
+
+  console.warn("🚨 CFC_LOGIN_CONFLICT — overlay activado");
+
+  // Crear overlay negro-dorado
+  const overlay = document.createElement("div");
+  overlay.innerHTML = `
+    <div style="
+      position:fixed;inset:0;z-index:999999;
+      background:rgba(0,0,0,0.92);
+      display:flex;align-items:center;justify-content:center;
+      flex-direction:column;
+      font-family:Poppins,sans-serif;
+      color:#ffd700;
+      font-size:26px;
+      text-align:center;
+      cursor:default;
+    ">
+      <div style="margin-bottom:14px;">🚫 Sesión iniciada en otro dispositivo</div>
+      <button id="cfcReturnLoginBtn" style="
+        margin-top:10px;
+        background:#ffd700;
+        color:#000;
+        padding:10px 18px;
+        border-radius:10px;
+        font-size:16px;
+        border:none;
+        cursor:pointer;
+        font-weight:bold;
+      ">
+        Ir al login
+      </button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+
+  // Bloquear clics, teclado y scroll
+  document.body.style.overflow = "hidden";
+  window.onkeydown = e => e.preventDefault();
+  window.onclick = e => e.preventDefault();
+
+  // Acción del botón
+  document.getElementById("cfcReturnLoginBtn").addEventListener("click", () => {
+    window.location.href = "/frontend/html/login.html";
+  });
+
+})();
+</script>
+    
   </body>
 </html>
