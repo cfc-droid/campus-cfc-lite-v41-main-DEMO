@@ -42,7 +42,15 @@ async function registerLogin(email, did) {
 
 function triggerLogout(msg) {
   console.log("🚨 Logout forzado:", msg);
+
+  const deviceId = localStorage.getItem("CFC_DEVICE_ID"); // conservar
+
   localStorage.clear();
+
+  if (deviceId) {
+    localStorage.setItem("CFC_DEVICE_ID", deviceId);
+  }
+
   setTimeout(() => {
     window.location.href = "/html/login.html?expired=true";
   }, 800);
@@ -56,8 +64,19 @@ function startHeartbeat(email, did) {
   }, 5000);
 }
 
-import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getFirestore, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+const {
+  initializeApp,
+  getApps,
+  getApp
+} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js");
+
+const {
+  getFirestore,
+  doc,
+  setDoc,
+  onSnapshot,
+  serverTimestamp
+} = await import("https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js");
 
 /* ==========================================================
    🔹 Firebase SAFE Config
@@ -94,7 +113,7 @@ const makeDeviceId = () => {
 /* ==========================================================
    🔐 LOGIN (Firebase + Render Proxy)
    ========================================================== */
-export async function CFC_login(email, license) {
+window.CFC_login = async function (email, license) {
   const e = email.trim().toLowerCase();
   const k = license.trim();
   const sid = makeSessionId();
