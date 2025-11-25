@@ -65,7 +65,7 @@ window.CFC_login = async function (email, license) {
   const k = license.trim();
   const sid = makeSessionId();
   const did = makeDeviceId();
-  const ref = db.collection("sessions").doc(e);
+  const ref = db.collection("licenses").doc(e);
 
   try {
     await ref.set(
@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (email && did) {
     console.log("♻️ Restaurando sesión previa:", email);
 
-    const ref = db.collection("sessions").doc(email);
+    const ref = db.collection("licenses").doc(e);
 
     // Restaurar listeners
     listenRemoteLogout(email, ref, did);
