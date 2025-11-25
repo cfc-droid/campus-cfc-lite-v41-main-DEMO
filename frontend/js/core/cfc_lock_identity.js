@@ -3,8 +3,58 @@
    Sistema: Campus CFC LITE V41-DEMO
    ========================================================== */
 
-import { CFC_showBlockOverlay } from "../overlay_block.js";
-import { checkSession, startHeartbeat, registerLogin, triggerLogout } from "./cfc_api.js";
+function CFC_showBlockOverlay(msg) {
+  const overlay = document.createElement("div");
+  overlay.style = `
+    position:fixed;inset:0;z-index:99999;
+    background:rgba(0,0,0,0.85);
+    color:#ffd700;font-family:Poppins,sans-serif;
+    display:flex;align-items:center;justify-content:center;
+    flex-direction:column;font-size:22px;
+  `;
+  overlay.innerHTML = `<div>⚠️ ${msg}</div>`;
+  document.body.appendChild(overlay);
+}
+
+async function checkSession(email, did) {
+  try {
+    const res = await fetch(
+      `https://cfc-lock-proxy.onrender.com/check-session?email=${email}&device_id=${did}`
+    );
+    const data = await res.json();
+    return data.status === "ok";
+  } catch {
+    return true;
+  }
+}
+
+async function registerLogin(email, did) {
+  try {
+    const res = await fetch(
+      `https://cfc-lock-proxy.onrender.com/register-login?email=${email}&device_id=${did}`
+    );
+    const data = await res.json();
+    return data.status === "registered";
+  } catch {
+    return false;
+  }
+}
+
+function triggerLogout(msg) {
+  console.log("🚨 Logout forzado:", msg);
+  localStorage.clear();
+  setTimeout(() => {
+    window.location.href = "/html/login.html?expired=true";
+  }, 800);
+}
+
+function startHeartbeat(email, did) {
+  setInterval(() => {
+    fetch(
+      `https://cfc-lock-proxy.onrender.com/heartbeat?email=${email}&device_id=${did}`
+    );
+  }, 5000);
+}
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
