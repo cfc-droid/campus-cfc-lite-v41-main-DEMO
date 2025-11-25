@@ -49,7 +49,7 @@ export async function CFC_login(email, license) {
   const k = license.trim();
   const sid = makeSessionId();
   const did = makeDeviceId();
-  const ref = doc(db, "licenses", e);
+  const ref = doc(db, "sessions", e);
 
   // 1️⃣ Registrar en Firestore (sesión activa)
   await setDoc(
