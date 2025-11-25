@@ -1,0 +1,72 @@
+/* ============================================================
+   Archivo: /frontend/css/micro.css
+   Versión: V37 FINAL
+   Punto: 10/15 — Experiencia Premium Visual Unificada
+   Paso: 4/6 — Animaciones micro-interactivas CSS
+   Autor: Cristian F. Choqui (CFC)
+   Descripción: Añade efectos hover y animaciones suaves
+                en tarjetas, botones e íconos del Campus.
+=============================================================== */
+
+/* ================================
+   EFECTOS HOVER EN TARJETAS Y BOTONES
+=================================== */
+.tarjeta:hover,
+button:hover,
+.btn:hover,
+.gold-card:hover {
+  transform: scale(1.05);
+  transition: all 0.3s ease-in-out;
+  filter: brightness(1.1);
+}
+
+/* ================================
+   EFECTOS DE ÍCONOS
+=================================== */
+.icon:hover,
+svg:hover {
+  animation: shake 0.4s;
+  cursor: pointer;
+}
+
+/* Animación shake (vibración corta) */
+@keyframes shake {
+  0% { transform: rotate(0); }
+  25% { transform: rotate(3deg); }
+  50% { transform: rotate(-3deg); }
+  75% { transform: rotate(2deg); }
+  100% { transform: rotate(0); }
+}
+
+/* ================================
+   EFECTOS EN BARRAS DE PROGRESO
+=================================== */
+.cfc-progress-bar {
+  transition: width 0.5s ease-in-out, background 0.5s ease-in-out;
+}
+
+.cfc-progress-bar:hover {
+  filter: drop-shadow(0 0 6px gold);
+}
+
+/* ================================
+   EFECTO KEN BURNS SUAVE (IMÁGENES HERO)
+=================================== */
+.hero-img {
+  animation: kenburns 12s ease-in-out infinite alternate;
+  transform-origin: center;
+}
+
+@keyframes kenburns {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.1) translate(-5px, -5px); }
+}
+
+/* ================================
+   EFECTOS EN ENLACES PREMIUM
+=================================== */
+a:hover {
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(255, 215, 0, 0.6);
+  transition: color 0.3s ease, text-shadow 0.3s ease;
+}

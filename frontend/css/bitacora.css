@@ -1,0 +1,156 @@
+/* ==========================================================
+   ✅ CFC_FUNC_41_4_CSS_V41.4 — Estilos Bitácora Mental con Filtros Activos
+   ========================================================== */
+
+body {
+  background: radial-gradient(circle at center, #0a0a0a, #000);
+  color: #fff;
+  font-family: 'Poppins', sans-serif;
+  padding: 20px;
+}
+
+.bitacora-header {
+  text-align: center;
+  color: #FFD700;
+  margin-bottom: 10px;
+}
+
+.bitacora-container {
+  max-width: 720px;
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  border-radius: 16px;
+  padding: 20px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+}
+
+/* 🔹 Filtros */
+.bitacora-filters {
+  margin: 10px 0 20px;
+  padding: 15px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 215, 0, 0.2);
+  text-align: center;
+}
+.filters-title {
+  color: #FFD700;
+  font-size: 1rem;
+  margin-bottom: 10px;
+}
+.filters-group {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.filters-group label {
+  color: #FFD700;
+  font-size: 0.85rem;
+}
+.filters-group input, .filters-group select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.08);
+  color: #FFD700;
+  border: 1px solid rgba(255,215,0,0.3);
+  font-size: 0.9rem;
+}
+
+#toneSelect {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #FFD700;
+  border: 1px solid rgba(255, 215, 0, 0.4);
+  border-radius: 10px;
+}
+
+#iconSelector {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.icon-option {
+  cursor: pointer;
+  font-size: 1.4rem;
+  transition: transform 0.2s;
+}
+.icon-option:hover,
+.icon-option.selected {
+  transform: scale(1.3);
+  filter: drop-shadow(0 0 6px #FFD700);
+}
+
+#thoughts {
+  width: 100%;
+  height: 120px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 215, 0, 0.3);
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+}
+
+.btn-main, .btn-secondary, .btn-return {
+  background: #FFD700;
+  color: #000;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  font-weight: 600;
+}
+.btn-secondary {
+  background: transparent;
+  color: #FFD700;
+  border: 1px solid #FFD700;
+}
+.btn-main:hover, .btn-secondary:hover, .btn-return:hover {
+  background: #fff3b0;
+  color: #000;
+}
+
+.thought-header {
+  display: flex;
+  justify-content: space-between;
+  color: #FFD700;
+  font-size: 0.9rem;
+}
+.thought-text {
+  margin: 8px 0;
+  color: #fff;
+  white-space: pre-wrap;
+}
+.thought-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.edit-btn, .delete-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  color: #FFD700;
+}
+.edit-btn:hover, .delete-btn:hover {
+  transform: scale(1.2);
+}
+
+@media (max-width: 600px) {
+  .filters-group { flex-direction: column; }
+  #thoughts { height: 100px; }
+  .btn-main, .btn-secondary { width: 100%; }
+}
+
+/* 🔒 CFC_LOCK: V41.4_BITACORA_FILTER_CSS_20251106 */
