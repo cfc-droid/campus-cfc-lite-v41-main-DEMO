@@ -65,7 +65,7 @@ window.CFC_login = async function (email, license) {
   const k = license.trim();
   const sid = makeSessionId();
   const did = makeDeviceId();
-  const ref = db.collection("licenses").doc(e);
+  const ref = db.collection("licenses").doc(email);
 
   try {
     await ref.set(
@@ -130,7 +130,7 @@ function listenRemoteLogout(email, ref, did) {
 
       // Redirigir
       setTimeout(() => {
-        window.location.href = "/frontend/html/login.html?expired=true";
+        window.location.href = "../html/login.html?expired=true";
       }, 1500);
     }
   });
@@ -154,7 +154,7 @@ function startRenderSync(email, did) {
         }
 
         setTimeout(() => {
-          window.location.href = "/frontend/html/login.html?expired=true";
+          window.location.href = "../html/login.html?expired=true";
         }, 1500);
       }
     } catch (err) {
@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (email && did) {
     console.log("♻️ Restaurando sesión previa:", email);
 
-    const ref = db.collection("licenses").doc(e);
+    const ref = db.collection("licenses").doc(email);
 
     // Restaurar listeners
     listenRemoteLogout(email, ref, did);
