@@ -357,6 +357,37 @@ if (window.CFC_login) {
   CFC_login(email, license);
 }
 
+// ==========================================================
+// 🔥 REGISTRO REAL DE SESIÓN EN RENDER (OBLIGATORIO)
+// ==========================================================
+(async () => {
+  try {
+    // Generar o recuperar device_id EXACTO
+    let deviceId = localStorage.getItem("CFC_DEVICE_ID");
+    if (!deviceId) {
+      deviceId = self.crypto?.randomUUID?.() || ("dev_" + Math.random().toString(36).slice(2, 12));
+      localStorage.setItem("CFC_DEVICE_ID", deviceId);
+    }
+
+    console.log("🟡 Enviando sesión a Render:", email, deviceId);
+
+    const res = await fetch("https://cfc-lock-proxy.onrender.com/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: email,
+        device_id: deviceId
+      })
+    });
+
+    const data = await res.json();
+    console.log("🟢 Respuesta Render /login:", data);
+
+  } catch (err) {
+    console.error("❌ Error enviando login a Render:", err);
+  }
+})();
+    
 // ⚠️ IMPORTANTE: RETRASAMOS LA REDIRECCIÓN SOLO UN POCO
 setTimeout(() => {
   sessionStorage.setItem("CFC_LOGIN_OK", "1");
