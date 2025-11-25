@@ -350,13 +350,18 @@ if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
   return;
 }
 
-    console.log("✅ Credenciales válidas — acceso permitido");
+console.log("✅ Credenciales válidas — acceso permitido");
 
-// ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
-sessionStorage.setItem("CFC_LOGIN_OK", "1");
+// 🔥 ACTIVAR SESIÓN ÚNICA (🔥 ESTA LÍNEA ERA LA QUE FALTABA)
+if (window.CFC_login) {
+  CFC_login(email, license);
+}
 
-// ✅ REDIRIGIR A INDEX DESDE /frontend/html/login.html
-window.location.href = "../index.html";
+// ⚠️ IMPORTANTE: RETRASAMOS LA REDIRECCIÓN SOLO UN POCO
+setTimeout(() => {
+  sessionStorage.setItem("CFC_LOGIN_OK", "1");
+  window.location.href = "../index.html";
+}, 800);
 
   });
 </script>
