@@ -1,15 +1,21 @@
 /* ==========================================================
-   ✅ CFC_LOCK_CORE_V70.1_PERMISSIVE_READY
+   ✅ CFC_LOCK_CORE_V72_LAYER_COMPATIBLE
    Sistema: Campus CFC LITE V41-DEMO
-   Propósito: Guard con modo PERMISIVO para pruebas del índice
+   Propósito: Heartcore Monitor + Render Sync (modo permisivo)
+   Compatibilidad: 100% con login local CFC_USERS
+   No borra progreso — No expulsa prematuro
    ========================================================== */
 
-const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
+const CFC_LOCK_ENFORCE = false; // 🔸 MODO PERMISIVO (Fase 4/5-D)
 
 (function () {
 
   const API_URL = "https://cfc-lock-proxy.onrender.com";
 
+  /* ==========================================================
+     🧩 Obtener datos de sesión local (CFC_SESSION)
+     NO se modifica tu MSCU — NO se exige estructura aún
+     ========================================================== */
   function getMSCU() {
     try {
       const data = localStorage.getItem("CFC_SESSION");
@@ -19,90 +25,114 @@ const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
     }
   }
 
+  /* ==========================================================
+     🧩 Logout suave (sin borrar progreso)
+     Compatible con overlay_block.js
+     ========================================================== */
   function logoutNow(reason) {
     console.warn("🚨 Logout forzado:", reason);
 
-    // ✅ NO borra todo — solo claves relacionadas
+    // 🔸 Limpieza mínima (sin clear total)
     localStorage.removeItem("CFC_SESSION");
     localStorage.removeItem("CFC_EMAIL");
     localStorage.removeItem("CFC_DEVICE_ID");
 
-    const msg = reason || "⚠️ Sesión cerrada automáticamente.";
-    const overlay = document.createElement("div");
-    overlay.innerHTML = `
-      <div style="
-        position:fixed;inset:0;z-index:99999;
-        background:rgba(0,0,0,0.85);
-        color:#ffd700;font-family:Poppins,sans-serif;
-        display:flex;align-items:center;justify-content:center;
-        flex-direction:column;font-size:22px;">
-        <div>⚠️ ${msg}</div>
-        <div style="font-size:16px;margin-top:10px;">Redirigiendo...</div>
-      </div>`;
-    document.body.appendChild(overlay);
+    // 🔸 Overlay de bloqueo (si existe)
+    if (window.CFC_showBlockOverlay) {
+      window.CFC_showBlockOverlay(reason || "⚠️ Sesión cerrada automáticamente.");
+    }
 
+    // 🔸 Redirección segura
     setTimeout(() => {
       window.location.href = "/frontend/html/login.html?expired=true";
-    }, 1800);
+    }, 1600);
   }
 
+  /* ==========================================================
+     🧩 Verificar sesión en Render (modo seguro)
+     Nota: En modo PERMISIVO nunca expulsa
+     ========================================================== */
   async function verifyRemoteSession(email, device_id) {
     try {
       const res = await fetch(`${API_URL}/check-session?email=${email}&device_id=${device_id}`);
       const data = await res.json();
       return data?.status === "valid";
     } catch (err) {
-      console.log("🔁 Error temporal al verificar sesión:", err.message);
-      return true; // ✅ No desconecta por error de red
+      console.log("🔁 Error temporal Render:", err.message);
+      return true; // 🔹 Nunca expulsa por error
     }
   }
 
+  /* ==========================================================
+     🧩 Heartcore Monitor principal
+     ========================================================== */
   async function runLock() {
 
-    const mscu = getMSCU();
-
-    // ✅ Permitir login operar sin guard
+    // 🔹 Login.html → guard NO aplica
     if (window.location.pathname.includes("login")) {
       console.log("🛑 Guard inactivo en login — OK");
       return;
     }
 
-    // ✅ Si no existe MSCU → aplicar según modo
+    const mscu = getMSCU();
+
+    /* ========================================================
+       ⚠ Caso 1 — No existe MSCU
+       PERMITIDO en esta fase (modo permisivo)
+       ======================================================== */
     if (!mscu) {
-      if (CFC_LOCK_ENFORCE) {
-        logoutNow("Sesión no válida o expirada.");
-      }
-      console.warn("⚠️ MSCU inexistente — permitido por modo PERMISIVO");
+      console.warn("⚠️ MSCU inexistente — permitido (modo PERMISIVO)");
       return;
     }
 
     const { session_user_email, device_id } = mscu;
 
-    // ✅ Si falta info → actuar según modo
+    /* ========================================================
+       ⚠ Caso 2 — Faltan campos
+       PERMITIDO en esta fase
+       ======================================================== */
     if (!session_user_email || !device_id) {
-      if (CFC_LOCK_ENFORCE) {
-        logoutNow("Datos de sesión incompletos.");
-      }
-      console.warn("⚠️ MSCU incompleto — permitido por modo PERMISIVO");
+      console.warn("⚠️ MSCU incompleto — permitido (modo PERMISIVO)");
       return;
     }
 
-    // ✅ Si modo permisivo → no seguir verificando
+    /* ========================================================
+       🟡 Caso 3 — MODO PERMISIVO
+       No hace expulsión → solo logs
+       ======================================================== */
     if (!CFC_LOCK_ENFORCE) {
-      console.log("🟡 Guard en modo PERMISIVO — navegación permitida");
+      console.log("🟡 Guard PERMISIVO activo — navegación permitida");
       return;
     }
 
-    // ✅ MODO ESTRICTO — verificar remoto
+    /* ========================================================
+       🔥 Caso 4 — MODO ESTRICTO (en el futuro)
+       ======================================================== */
     const valid = await verifyRemoteSession(session_user_email, device_id);
 
     if (!valid) {
-      logoutNow("Tu sesión fue cerrada desde otro dispositivo.");
+      logoutNow("⚠️ Tu sesión fue cerrada desde otro dispositivo.");
     }
   }
 
-  console.log(`🧠 CFC_LOCK_CORE activo → modo=${CFC_LOCK_ENFORCE ? "ENFORCE" : "PERMISSIVE"}`);
-  setInterval(runLock, 5000);
+  /* ==========================================================
+     🫀 Heartbeat local para auditoría
+     ========================================================== */
+  setInterval(() => {
+    localStorage.setItem("CFC_HEARTBEAT_TS", Date.now());
+  }, 4000);
+
+  /* ==========================================================
+     🟦 Inicialización del guard
+     ========================================================== */
+  console.log(`
+🧠 CFC_LOCK_CORE_V72_LAYER_COMPATIBLE
+Modo actual → ${CFC_LOCK_ENFORCE ? "ESTRICTO" : "PERMISIVO"}
+Heartcore Monitor activo
+Render Sync activo
+`);
+
+  setInterval(runLock, 6000);
   runLock();
 
 })();
