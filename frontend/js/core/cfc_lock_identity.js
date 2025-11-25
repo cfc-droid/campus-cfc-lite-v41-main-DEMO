@@ -161,7 +161,7 @@ document.addEventListener("DOMContentLoaded", () => {
     startHeartbeat(e, did);
     startServerPolling(e, did);
     startRealtimeSync(e, did);
-    const ref = doc(db, "licenses", e);
+    const ref = doc(db, "sessions", e);
     listenRemoteLogout(e, ref, did);
   }
 });
