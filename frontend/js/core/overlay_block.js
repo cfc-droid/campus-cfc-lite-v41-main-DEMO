@@ -1,12 +1,17 @@
 /* ==========================================================
-   ✅ CFC_FUNC_47_2_OVERLAY_BLOCK_UI
+   ✅ CFC_FUNC_47_2_OVERLAY_BLOCK_UI_V72_COMPATIBLE
    Sistema: CFC-LOCK Overlay Dorado-Negro
-   Versión: V47.2-F — Fecha: 2025-11-09
+   Versión: V47.2-F — Adaptado V72-Layer
    Auditor: CFC-SYNC QA-SYNC VERIFIED
    ========================================================== */
 
-export function CFC_showBlockOverlay(msg = "Acceso bloqueado") {
-  // 🔸 Protección: evitar overlay en la pantalla de login
+/**
+ * IMPORTANTE:
+ * Tu proyecto NO usa módulos ES6 → NO se debe exportar.
+ * Exponemos la función como variable global segura.
+ */
+window.CFC_showBlockOverlay = function (msg = "Acceso bloqueado") {
+  // 🔸 Evitar overlay en la pantalla de login
   const isLoginPage = window.location.pathname.includes("login.html");
   if (isLoginPage) {
     console.log("🟡 Overlay bloqueado en login.html — no se mostrará.");
@@ -28,7 +33,7 @@ export function CFC_showBlockOverlay(msg = "Acceso bloqueado") {
     </div>
   `;
 
-  // 🔸 Estilos dinámicos
+  // 🔸 Estilos dinámicos premium (negro + dorado)
   const style = document.createElement("style");
   style.textContent = `
     .cfc-overlay-block {
@@ -79,6 +84,7 @@ export function CFC_showBlockOverlay(msg = "Acceso bloqueado") {
     }
   `;
 
+  // 🔸 Insertar en el documento
   document.head.appendChild(style);
   document.body.appendChild(overlay);
 
@@ -88,9 +94,9 @@ export function CFC_showBlockOverlay(msg = "Acceso bloqueado") {
   });
 
   console.log("🧱 CFC Overlay de bloqueo activado:", msg);
-}
+};
 
-// ==========================================================
-// 🔖 Línea de control QA-SYNC
-// ==========================================================
-console.log("✅ CFC_FUNC_47_2_OVERLAY_BLOCK_UI activo — V47.2-F QA-SYNC");
+/* ==========================================================
+   🔖 Línea de control QA-SYNC
+   ========================================================== */
+console.log("✅ CFC_FUNC_47_2_OVERLAY_BLOCK_UI_V72_COMPATIBLE activo — QA-SYNC");
