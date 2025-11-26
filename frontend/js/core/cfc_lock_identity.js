@@ -1,18 +1,11 @@
 /* ==========================================================
-   🔐 CFC_LOCK_IDENTITY_V72_HYBRID_SILENT
-   Sistema: Campus CFC LITE V41
-   Subpaso: 4.7 — Identidad híbrida REAL (PRUEBA 14)
-   Modo: HYBRID-SILENT (detecta duplicados sin expulsar)
+   🔐 CFC_LOCK_IDENTITY_V72_ENFORCE_REAL
+   Subpaso: 6.7 — Listener Firestore + expulsión real
+   Auditor: CFC-SYNC
    ========================================================== */
 
-/* ==========================================================
-   🔹 IMPORTS PERMITIDOS
-   ========================================================== */
-import { CFC_showBlockOverlay } from "../overlay_block.js";
+import { CFC_showBlockOverlay } from "./overlay_block.js";
 
-/* ==========================================================
-   🔹 FIREBASE CONFIG — SAFE + HÍBRIDO 🎯
-   ========================================================== */
 import {
   initializeApp,
   getApps,
@@ -27,6 +20,9 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+/* ==========================================================
+   Firebase
+   ========================================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
   authDomain: "cfc-lock-firebase.firebaseapp.com",
@@ -36,18 +32,18 @@ const firebaseConfig = {
 let db = null;
 try {
   db = getFirestore(getApps().length ? getApp() : initializeApp(firebaseConfig));
-  console.log("🧩 Firebase cargado en modo HYBRID-SILENT");
+  console.log("🧩 Firebase cargado (ENFORCE)");
 } catch (err) {
-  console.error("❌ Error al inicializar Firebase:", err);
+  console.error("❌ Error inicializando Firebase:", err);
 }
 
 /* ==========================================================
-   🔹 UTILIDADES
+   Utilidades
    ========================================================== */
+const nowISO = () => new Date().toISOString();
+
 const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-
-const nowISO = () => new Date().toISOString();
 
 const makeDeviceId = () => {
   let id = localStorage.getItem("CFC_DEVICE_ID");
@@ -59,10 +55,9 @@ const makeDeviceId = () => {
 };
 
 /* ==========================================================
-   🔥 REGISTRO EN FIRESTORE (HYBRID)
-   Se usa SOLO después de login local real
+   Guardar en Firestore versión ENFORCE
    ========================================================== */
-async function registerSessionHybrid(email, device_id, session_id) {
+async function registerSessionEnforce(email, device_id, session_id) {
   try {
     await setDoc(doc(db, "sessions", email), {
       email,
@@ -73,17 +68,40 @@ async function registerSessionHybrid(email, device_id, session_id) {
       updated_at_iso: nowISO()
     });
 
-    console.log("🟢 [HYBRID] Sesión registrada en Firestore:");
-    console.log({ email, device_id, session_id });
+    console.log("🟢 [ENFORCE] Sesión registrada Firestore:", {
+      email,
+      device_id,
+      session_id
+    });
   } catch (err) {
-    console.error("❌ Error registrando sesión híbrida:", err);
+    console.error("❌ Error registrando sesión (ENFORCE):", err);
   }
 }
 
 /* ==========================================================
-   🔹 LISTENER FIRESTORE (detecta duplicados)
+   Expulsión desde FIRESTORE SNAPSHOT
    ========================================================== */
-function listenHybrid(email, device_id) {
+async function forceLogoutFS(reason, email, device_id) {
+  console.warn("🚨 SNAPSHOT → expulsión:", reason);
+
+  CFC_showBlockOverlay(email, device_id, reason);
+
+  const preserve = ["CFC_PROGRESS", "CFC_TIMER", "CFC_LAST_MODULE"];
+  const todo = Object.keys(localStorage);
+  for (const k of todo) {
+    if (!preserve.includes(k)) localStorage.removeItem(k);
+  }
+  sessionStorage.clear();
+
+  setTimeout(() => {
+    window.location.href = "/frontend/html/login.html";
+  }, 1500);
+}
+
+/* ==========================================================
+   Listener ENFORCE (expulsión)
+   ========================================================== */
+function listenEnforce(email, device_id) {
   const ref = doc(db, "sessions", email);
 
   onSnapshot(ref, (snap) => {
@@ -91,67 +109,65 @@ function listenHybrid(email, device_id) {
 
     const data = snap.data();
 
-    console.log("📡 Firestore snapshot recibido:", data);
+    console.log("📡 SNAPSHOT ENFORCE:", data);
 
     if (data.device_id !== device_id) {
-      console.warn("⚠️ [HYBRID] Duplicado detectado (otro device activo)");
-      console.log("📌 MODO SILENT → NO expulsar");
+      forceLogoutFS("Sesión iniciada en otro dispositivo (FIRESTORE)", email, device_id);
+    }
+
+    if (data.active_session === false) {
+      forceLogoutFS("Sesión cerrada remotamente (FIRESTORE)", email, device_id);
     }
   });
 }
 
 /* ==========================================================
-   🔥 Render Sync (solo detección)
+   Render Hybrid (primera validación)
    ========================================================== */
-async function checkRenderHybrid(email, device_id) {
+async function checkRender(email, device_id) {
   try {
     const res = await fetch(
       `https://cfc-lock-proxy.onrender.com/check-session?email=${email}&device_id=${device_id}`
     );
     const json = await res.json();
-    console.log("🌐 Render check →", json);
+    console.log("🌐 Render check (ENFORCE):", json);
 
-    if (json.status === "invalid") {
-      console.warn("⚠️ Render detectó otro dispositivo activo (SILENT)");
+    if (json.status === "invalid" || json.status === "expired") {
+      forceLogoutFS("Sesión iniciada en otro dispositivo (RENDER INIT)", email, device_id);
     }
   } catch (err) {
-    console.log("🔁 Error Render:", err.message);
+    console.warn("⚠️ Error Render:", err);
   }
 }
 
 /* ==========================================================
-   🔐 FUNCIÓN PRINCIPAL — CFC_login()
-   (Se mantiene idéntica, solo agrega HYBRID dentro)
+   CFC_login — versión ENFORCE REAL
    ========================================================== */
 export async function CFC_login(email, license) {
-  console.log("🧩 CFC_login() ejecutado — identidad híbrida activada");
+  console.log("🧩 CFC_login() — ENFORCE REAL");
 
   const e = email.trim().toLowerCase();
   const k = license.trim();
   const sid = makeSessionId();
   const did = makeDeviceId();
 
-  // Guardado local
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sid);
   localStorage.setItem("CFC_DEVICE_ID", did);
 
-  // Híbrido: registrar en Firestore
-  await registerSessionHybrid(e, did, sid);
+  await registerSessionEnforce(e, did, sid);
 
-  // Híbrido: activar listener
-  listenHybrid(e, did);
+  listenEnforce(e, did);
 
-  // Híbrido: primera validación Render
-  checkRenderHybrid(e, did);
+  checkRender(e, did);
 
   return { email: e, device_id: did, session_id: sid };
 }
 
 /* ==========================================================
-   🔹 EXPORT GLOBAL CONTROLADA (PRUEBA 11)
+   Export global
    ========================================================== */
 window.CFC_login = CFC_login;
 
-console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_HYBRID_SILENT cargado");
+console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_ENFORCE_REAL cargado");
