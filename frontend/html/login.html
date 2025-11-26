@@ -356,6 +356,8 @@ if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 
 // ✅ REDIRIGIR A INDEX DESDE /frontend/html/login.html
+const { email, device_id, session_id } = await CFC_login(email, license);
+sessionStorage.setItem("CFC_LOGIN_OK", "1");
 window.location.href = "../index.html";
 
   });
