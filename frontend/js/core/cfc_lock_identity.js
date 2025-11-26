@@ -1,19 +1,17 @@
 /* ==========================================================
-   🔐 CFC_LOCK_IDENTITY_V72_LAYER_MODE + EXPORT_11B
+   🔐 CFC_LOCK_IDENTITY_V72_HYBRID_SILENT
    Sistema: Campus CFC LITE V41
-   Modo: SAFE — Solo inicialización, sin ejecución automática
-   Parche: EXPORTACIÓN GLOBAL CONTROLADA (PRUEBA 11)
+   Subpaso: 4.7 — Identidad híbrida REAL (PRUEBA 14)
+   Modo: HYBRID-SILENT (detecta duplicados sin expulsar)
    ========================================================== */
 
 /* ==========================================================
-   🔹 IMPORTS PERMITIDOS EN V72-LAYER
+   🔹 IMPORTS PERMITIDOS
    ========================================================== */
 import { CFC_showBlockOverlay } from "../overlay_block.js";
 
 /* ==========================================================
-   🔹 Firebase SAFE Config
-   (No autentica, no valida usuarios)
-   Solo inicializa Firestore para uso futuro
+   🔹 FIREBASE CONFIG — SAFE + HÍBRIDO 🎯
    ========================================================== */
 import {
   initializeApp,
@@ -29,9 +27,6 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* ==========================================================
-   🔹 CONFIG FIREBASE — PERMITIDO
-   ========================================================== */
 const firebaseConfig = {
   apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
   authDomain: "cfc-lock-firebase.firebaseapp.com",
@@ -39,17 +34,15 @@ const firebaseConfig = {
 };
 
 let db = null;
-
 try {
-  const app = getApps().length ? getApp() : initializeApp(firebaseConfig);
-  db = getFirestore(app);
-  console.log("🧩 Firebase cargado en modo SAFE (V72-LAYER)");
+  db = getFirestore(getApps().length ? getApp() : initializeApp(firebaseConfig));
+  console.log("🧩 Firebase cargado en modo HYBRID-SILENT");
 } catch (err) {
-  console.error("❌ Error al inicializar Firebase (SAFE):", err);
+  console.error("❌ Error al inicializar Firebase:", err);
 }
 
 /* ==========================================================
-   🧩 UTILIDADES SEGURAS (permitidas)
+   🔹 UTILIDADES
    ========================================================== */
 const makeSessionId = () =>
   `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
@@ -66,72 +59,99 @@ const makeDeviceId = () => {
 };
 
 /* ==========================================================
-   🔐 FUNCIÓN PRINCIPAL — CFC_login()
-   Es la única permitida en esta etapa
-   NO se ejecuta sola
-   NO inicia listeners
-   NO inicia heartbeat
-   NO registra sesión todavía
-   Solo prepara estructura MSCU local
+   🔥 REGISTRO EN FIRESTORE (HYBRID)
+   Se usa SOLO después de login local real
    ========================================================== */
+async function registerSessionHybrid(email, device_id, session_id) {
+  try {
+    await setDoc(doc(db, "sessions", email), {
+      email,
+      device_id,
+      session_id,
+      active_session: true,
+      last_active: serverTimestamp(),
+      updated_at_iso: nowISO()
+    });
 
+    console.log("🟢 [HYBRID] Sesión registrada en Firestore:");
+    console.log({ email, device_id, session_id });
+  } catch (err) {
+    console.error("❌ Error registrando sesión híbrida:", err);
+  }
+}
+
+/* ==========================================================
+   🔹 LISTENER FIRESTORE (detecta duplicados)
+   ========================================================== */
+function listenHybrid(email, device_id) {
+  const ref = doc(db, "sessions", email);
+
+  onSnapshot(ref, (snap) => {
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+
+    console.log("📡 Firestore snapshot recibido:", data);
+
+    if (data.device_id !== device_id) {
+      console.warn("⚠️ [HYBRID] Duplicado detectado (otro device activo)");
+      console.log("📌 MODO SILENT → NO expulsar");
+    }
+  });
+}
+
+/* ==========================================================
+   🔥 Render Sync (solo detección)
+   ========================================================== */
+async function checkRenderHybrid(email, device_id) {
+  try {
+    const res = await fetch(
+      `https://cfc-lock-proxy.onrender.com/check-session?email=${email}&device_id=${device_id}`
+    );
+    const json = await res.json();
+    console.log("🌐 Render check →", json);
+
+    if (json.status === "invalid") {
+      console.warn("⚠️ Render detectó otro dispositivo activo (SILENT)");
+    }
+  } catch (err) {
+    console.log("🔁 Error Render:", err.message);
+  }
+}
+
+/* ==========================================================
+   🔐 FUNCIÓN PRINCIPAL — CFC_login()
+   (Se mantiene idéntica, solo agrega HYBRID dentro)
+   ========================================================== */
 export async function CFC_login(email, license) {
-  console.log("🧩 CFC_login() llamado correctamente DESPUÉS de login local");
+  console.log("🧩 CFC_login() ejecutado — identidad híbrida activada");
 
-  // Normalización
   const e = email.trim().toLowerCase();
   const k = license.trim();
   const sid = makeSessionId();
   const did = makeDeviceId();
 
-  // Guardado LOCAL (SAFE)
+  // Guardado local
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sid);
   localStorage.setItem("CFC_DEVICE_ID", did);
 
-  console.log(`
-  🔐 CFC_LOCK_IDENTITY_V72_LAYER — Datos preparados (MSCU LOCAL)
-  --------------------------------------------------
-  email: ${e}
-  device_id: ${did}
-  session_id: ${sid}
-  (AÚN NO SE ENVÍA NADA A FIRESTORE)
-  (AÚN NO SE INICIA HEARTBEAT)
-  (AÚN NO SE INICIA RENDER SYNC)
-  --------------------------------------------------
-  `);
+  // Híbrido: registrar en Firestore
+  await registerSessionHybrid(e, did, sid);
 
-  return {
-    email: e,
-    device_id: did,
-    session_id: sid,
-  };
+  // Híbrido: activar listener
+  listenHybrid(e, did);
+
+  // Híbrido: primera validación Render
+  checkRenderHybrid(e, did);
+
+  return { email: e, device_id: did, session_id: sid };
 }
 
 /* ==========================================================
-   🚫 PROHIBIDO EN ESTA ETAPA (V72-LAYER)
-   ----------------------------------------------------------
-   NO AUTOCALL
-   NO AUTOLOAD
-   NO LISTENERS
-   NO HEARTBEAT
-   NO SYNC
-   NO POLLING
-   NO FIRESTORE WRITE
-   ----------------------------------------------------------
-   Por eso no hay ningún addEventListener aquí
-   ========================================================== */
-
-/* ==========================================================
-   🟡 PARCHE 11-B — EXPORTACIÓN GLOBAL CONTROLADA
-   ----------------------------------------------------------
-   Esto permite usar:
-       CFC_login(...)
-   en la consola del navegador.
-   NO activa nada automático.
-   NO cambia el comportamiento SAFE.
+   🔹 EXPORT GLOBAL CONTROLADA (PRUEBA 11)
    ========================================================== */
 window.CFC_login = CFC_login;
 
-console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_LAYER + EXPORT_11B listo (CFC_login exportado)");
+console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_HYBRID_SILENT cargado");
