@@ -320,7 +320,7 @@ const CFC_USERS = {
 
     <!-- ✅ HANDLER REAL SIN MSCU -->
    <script>
-  document.getElementById("loginForm").addEventListener("submit", function (e) {
+  document.getElementById("loginForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
     const email = document.getElementById("email").value.trim();
