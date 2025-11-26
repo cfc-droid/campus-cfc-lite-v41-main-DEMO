@@ -1,173 +1,156 @@
 /* ==========================================================
-   🔐 CFC_LOCK_IDENTITY_V72_ENFORCE_REAL
-   Subpaso: 6.7 — Listener Firestore + expulsión real
+   🟥 CFC_LOCK_IDENTITY_V72_ENFORCE_REAL (GLOBAL)
+   Firestore + Render Hybrid
    Auditor: CFC-SYNC
    ========================================================== */
 
-import { CFC_showBlockOverlay } from "./overlay_block.js";
+(function () {
 
-import {
-  initializeApp,
-  getApps,
-  getApp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_ENFORCE_REAL cargado");
 
-import {
-  getFirestore,
-  doc,
-  setDoc,
-  onSnapshot,
-  serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  /* -------------------------------------------
+     Firebase inicializar
+  ------------------------------------------- */
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+    authDomain: "cfc-lock-firebase.firebaseapp.com",
+    projectId: "cfc-lock-firebase",
+  };
 
-/* ==========================================================
-   Firebase
-   ========================================================== */
-const firebaseConfig = {
-  apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-  authDomain: "cfc-lock-firebase.firebaseapp.com",
-  projectId: "cfc-lock-firebase",
-};
-
-let db = null;
-try {
-  db = getFirestore(getApps().length ? getApp() : initializeApp(firebaseConfig));
-  console.log("🧩 Firebase cargado (ENFORCE)");
-} catch (err) {
-  console.error("❌ Error inicializando Firebase:", err);
-}
-
-/* ==========================================================
-   Utilidades
-   ========================================================== */
-const nowISO = () => new Date().toISOString();
-
-const makeSessionId = () =>
-  `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
-
-const makeDeviceId = () => {
-  let id = localStorage.getItem("CFC_DEVICE_ID");
-  if (!id) {
-    id = crypto.randomUUID();
-    localStorage.setItem("CFC_DEVICE_ID", id);
-  }
-  return id;
-};
-
-/* ==========================================================
-   Guardar en Firestore versión ENFORCE
-   ========================================================== */
-async function registerSessionEnforce(email, device_id, session_id) {
+  let db = null;
   try {
-    await setDoc(doc(db, "sessions", email), {
-      email,
-      device_id,
-      session_id,
-      active_session: true,
-      last_active: serverTimestamp(),
-      updated_at_iso: nowISO()
+    const app = firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore(app);
+    console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
+  } catch (err) {
+    console.error("❌ Firebase init error:", err);
+  }
+
+  /* -------------------------------------------
+     Utilidades
+  ------------------------------------------- */
+  const nowISO = () => new Date().toISOString();
+
+  function makeSessionId() {
+    return `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+  }
+
+  function makeDeviceId() {
+    let id = localStorage.getItem("CFC_DEVICE_ID");
+    if (!id) {
+      id = crypto.randomUUID();
+      localStorage.setItem("CFC_DEVICE_ID", id);
+    }
+    return id;
+  }
+
+  /* -------------------------------------------
+     Registrar sesión Firestore (ENFORCE REAL)
+  ------------------------------------------- */
+  async function registerSession(email, device_id, session_id) {
+    try {
+      await db.collection("sessions").doc(email).set({
+        email,
+        device_id,
+        session_id,
+        active_session: true,
+        last_active: firebase.firestore.FieldValue.serverTimestamp(),
+        updated_at_iso: nowISO()
+      });
+
+      console.log("🟢 [ENFORCE] Sesión registrada FS:", {
+        email, device_id, session_id
+      });
+
+    } catch (err) {
+      console.error("❌ registerSession error:", err);
+    }
+  }
+
+  /* -------------------------------------------
+     Expulsar por SNAPSHOT
+  ------------------------------------------- */
+  function forceLogoutFS(reason, email, device_id) {
+    console.warn("🚨 SNAPSHOT expulsión:", reason);
+
+    if (window.CFC_showBlockOverlay)
+      CFC_showBlockOverlay(email, device_id, reason);
+
+    const preserve = ["CFC_PROGRESS", "CFC_TIMER", "CFC_LAST_MODULE"];
+    Object.keys(localStorage).forEach(k => {
+      if (!preserve.includes(k)) localStorage.removeItem(k);
     });
 
-    console.log("🟢 [ENFORCE] Sesión registrada Firestore:", {
-      email,
-      device_id,
-      session_id
+    sessionStorage.clear();
+
+    setTimeout(() => {
+      window.location.href = "/frontend/html/login.html";
+    }, 1200);
+  }
+
+  /* -------------------------------------------
+     Listener Firestore REAL (ENFORCE)
+  ------------------------------------------- */
+  function listenEnforce(email, device_id) {
+    db.collection("sessions").doc(email).onSnapshot(doc => {
+      if (!doc.exists) return;
+
+      const data = doc.data();
+      console.log("📡 SNAPSHOT:", data);
+
+      if (data.device_id !== device_id) {
+        forceLogoutFS("Sesión iniciada en otro dispositivo (FIRESTORE)", email, device_id);
+      }
+
+      if (data.active_session === false) {
+        forceLogoutFS("Sesión cerrada remotamente (FIRESTORE)", email, device_id);
+      }
     });
-  } catch (err) {
-    console.error("❌ Error registrando sesión (ENFORCE):", err);
   }
-}
 
-/* ==========================================================
-   Expulsión desde FIRESTORE SNAPSHOT
-   ========================================================== */
-async function forceLogoutFS(reason, email, device_id) {
-  console.warn("🚨 SNAPSHOT → expulsión:", reason);
+  /* -------------------------------------------
+     Validación inicial Render
+  ------------------------------------------- */
+  async function checkRender(email, device_id) {
+    try {
+      const r = await fetch(
+        `https://cfc-lock-proxy.onrender.com/check-session?email=${email}&device_id=${device_id}`
+      );
+      const json = await r.json();
+      console.log("🌐 Render INIT:", json);
 
-  CFC_showBlockOverlay(email, device_id, reason);
-
-  const preserve = ["CFC_PROGRESS", "CFC_TIMER", "CFC_LAST_MODULE"];
-  const todo = Object.keys(localStorage);
-  for (const k of todo) {
-    if (!preserve.includes(k)) localStorage.removeItem(k);
+      if (json.status === "invalid" || json.status === "expired") {
+        forceLogoutFS("Sesión iniciada en otro dispositivo (RENDER INIT)", email, device_id);
+      }
+    } catch (e) {
+      console.warn("⚠️ Render INIT error:", e);
+    }
   }
-  sessionStorage.clear();
 
-  setTimeout(() => {
-    window.location.href = "/frontend/html/login.html";
-  }, 1500);
-}
+  /* -------------------------------------------
+     LOGIN GLOBAL (se usa en login.html)
+  ------------------------------------------- */
+  window.CFC_login = async function(email, license) {
 
-/* ==========================================================
-   Listener ENFORCE (expulsión)
-   ========================================================== */
-function listenEnforce(email, device_id) {
-  const ref = doc(db, "sessions", email);
+    console.log("🧩 CFC_login() — ENFORCE REAL");
 
-  onSnapshot(ref, (snap) => {
-    if (!snap.exists()) return;
+    const e = email.trim().toLowerCase();
+    const k = license.trim();
+    const sid = makeSessionId();
+    const did = makeDeviceId();
 
-    const data = snap.data();
+    localStorage.setItem("CFC_EMAIL", e);
+    localStorage.setItem("CFC_LICENSE", k);
+    localStorage.setItem("CFC_SESSION_ID", sid);
+    localStorage.setItem("CFC_DEVICE_ID", did);
 
-    console.log("📡 SNAPSHOT ENFORCE:", data);
+    await registerSession(e, did, sid);
 
-    if (data.device_id !== device_id) {
-      forceLogoutFS("Sesión iniciada en otro dispositivo (FIRESTORE)", email, device_id);
-    }
+    listenEnforce(e, did);
 
-    if (data.active_session === false) {
-      forceLogoutFS("Sesión cerrada remotamente (FIRESTORE)", email, device_id);
-    }
-  });
-}
+    checkRender(e, did);
 
-/* ==========================================================
-   Render Hybrid (primera validación)
-   ========================================================== */
-async function checkRender(email, device_id) {
-  try {
-    const res = await fetch(
-      `https://cfc-lock-proxy.onrender.com/check-session?email=${email}&device_id=${device_id}`
-    );
-    const json = await res.json();
-    console.log("🌐 Render check (ENFORCE):", json);
+    return { email: e, device_id: did, session_id: sid };
+  };
 
-    if (json.status === "invalid" || json.status === "expired") {
-      forceLogoutFS("Sesión iniciada en otro dispositivo (RENDER INIT)", email, device_id);
-    }
-  } catch (err) {
-    console.warn("⚠️ Error Render:", err);
-  }
-}
-
-/* ==========================================================
-   CFC_login — versión ENFORCE REAL
-   ========================================================== */
-export async function CFC_login(email, license) {
-  console.log("🧩 CFC_login() — ENFORCE REAL");
-
-  const e = email.trim().toLowerCase();
-  const k = license.trim();
-  const sid = makeSessionId();
-  const did = makeDeviceId();
-
-  localStorage.setItem("CFC_EMAIL", e);
-  localStorage.setItem("CFC_LICENSE", k);
-  localStorage.setItem("CFC_SESSION_ID", sid);
-  localStorage.setItem("CFC_DEVICE_ID", did);
-
-  await registerSessionEnforce(e, did, sid);
-
-  listenEnforce(e, did);
-
-  checkRender(e, did);
-
-  return { email: e, device_id: did, session_id: sid };
-}
-
-/* ==========================================================
-   Export global
-   ========================================================== */
-window.CFC_login = CFC_login;
-
-console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_ENFORCE_REAL cargado");
+})();
