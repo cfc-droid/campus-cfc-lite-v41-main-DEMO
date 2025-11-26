@@ -1,13 +1,13 @@
 /* ==========================================================
-   🔐 CFC_LOCK_IDENTITY_V72_LAYER_MODE
+   🔐 CFC_LOCK_IDENTITY_V72_LAYER_MODE + EXPORT_11B
    Sistema: Campus CFC LITE V41
    Modo: SAFE — Solo inicialización, sin ejecución automática
+   Parche: EXPORTACIÓN GLOBAL CONTROLADA (PRUEBA 11)
    ========================================================== */
 
 /* ==========================================================
    🔹 IMPORTS PERMITIDOS EN V72-LAYER
    ========================================================== */
-// Solo overlay (no activa nada, solo muestra)
 import { CFC_showBlockOverlay } from "../overlay_block.js";
 
 /* ==========================================================
@@ -72,26 +72,26 @@ const makeDeviceId = () => {
    NO inicia listeners
    NO inicia heartbeat
    NO registra sesión todavía
-   Solo prepara estructura
+   Solo prepara estructura MSCU local
    ========================================================== */
 
 export async function CFC_login(email, license) {
   console.log("🧩 CFC_login() llamado correctamente DESPUÉS de login local");
 
-  // Normalizar datos
+  // Normalización
   const e = email.trim().toLowerCase();
   const k = license.trim();
   const sid = makeSessionId();
   const did = makeDeviceId();
 
-  // Guardar solo local (SAFE MODE)
+  // Guardado LOCAL (SAFE)
   localStorage.setItem("CFC_EMAIL", e);
   localStorage.setItem("CFC_LICENSE", k);
   localStorage.setItem("CFC_SESSION_ID", sid);
   localStorage.setItem("CFC_DEVICE_ID", did);
 
   console.log(`
-  🔐 CFC_LOCK_IDENTITY_V72_LAYER — Datos preparados
+  🔐 CFC_LOCK_IDENTITY_V72_LAYER — Datos preparados (MSCU LOCAL)
   --------------------------------------------------
   email: ${e}
   device_id: ${did}
@@ -118,9 +118,20 @@ export async function CFC_login(email, license) {
    NO HEARTBEAT
    NO SYNC
    NO POLLING
-   NO write en Firestore
+   NO FIRESTORE WRITE
    ----------------------------------------------------------
    Por eso no hay ningún addEventListener aquí
    ========================================================== */
 
-console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_LAYER listo (sin ejecución automática)");
+/* ==========================================================
+   🟡 PARCHE 11-B — EXPORTACIÓN GLOBAL CONTROLADA
+   ----------------------------------------------------------
+   Esto permite usar:
+       CFC_login(...)
+   en la consola del navegador.
+   NO activa nada automático.
+   NO cambia el comportamiento SAFE.
+   ========================================================== */
+window.CFC_login = CFC_login;
+
+console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_LAYER + EXPORT_11B listo (CFC_login exportado)");
