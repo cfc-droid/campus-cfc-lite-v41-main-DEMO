@@ -1,113 +1,170 @@
 /* ==========================================================
-   🔐 CFC_LOCK_CORE_V71.0_HEARTCORE_SILENT
-   Subpaso: 4.7 — PRUEBA 15
-   Función: Heartbeat REAL + Render Sync REAL (sin expulsar)
+   🔐 CFC_LOCK_CORE_V72_ENFORCE_REAL
+   Sistema: Campus CFC LITE V41
+   Subpaso: 6.7 — Expulsión REAL con overlay
+   Función: Heartbeat + Update + Check + Expulsión real
+   Auditor: CFC-SYNC
    ========================================================== */
 
-const CFC_LOCK_ENFORCE = false; // 🔥 SILENT — NO expulsar aún
+import { CFC_showBlockOverlay } from "./core/../js/core/overlay_block.js"; 
+// Ruta corregida automáticamente por CFC-SYNC si es necesario.
 
-(function () {
+/* ==========================================================
+   🔥 MODO ENFORCE REAL — expulsión inmediata
+   ========================================================== */
+const CFC_LOCK_ENFORCE = true;
 
-  const API = "https://cfc-lock-proxy.onrender.com";
+/* ==========================================================
+   API Render
+   ========================================================== */
+const API = "https://cfc-lock-proxy.onrender.com";
 
-  /* ----------------------------------------------
-     Obtener MSCU local
-  ---------------------------------------------- */
-  function getLocalSession() {
-    const email = localStorage.getItem("CFC_EMAIL");
-    const device_id = localStorage.getItem("CFC_DEVICE_ID");
-    const session_id = localStorage.getItem("CFC_SESSION_ID");
+/* ==========================================================
+   Obtener MSCU local
+   ========================================================== */
+function getLocalSession() {
+  const email = localStorage.getItem("CFC_EMAIL");
+  const device_id = localStorage.getItem("CFC_DEVICE_ID");
+  const session_id = localStorage.getItem("CFC_SESSION_ID");
 
-    return email && device_id && session_id
-      ? { email, device_id, session_id }
-      : null;
+  return email && device_id && session_id
+    ? { email, device_id, session_id }
+    : null;
+}
+
+/* ==========================================================
+   Limpiar MSCU local — anti-revivir
+   ========================================================== */
+function clearMSCU() {
+  console.log("🧹 [CFC-LOCK] Limpiando MSCU local…");
+
+  const preserve = ["CFC_PROGRESS", "CFC_TIMER", "CFC_LAST_MODULE", "CFC_HISTORY"];
+
+  const todo = Object.keys(localStorage);
+  for (const k of todo) {
+    if (!preserve.includes(k)) localStorage.removeItem(k);
   }
 
-  /* ----------------------------------------------
-     Heartbeat → Mantener sesión viva (SILENT)
-  ---------------------------------------------- */
-  async function sendHeartbeat(s) {
-    try {
-      const res = await fetch(`${API}/heartbeat`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: s.email,
-          device_id: s.device_id
-        })
-      });
+  sessionStorage.clear();
+}
 
-      const json = await res.json();
-      console.log("❤️ [HEARTBEAT]", json);
-    } catch (err) {
-      console.warn("⚠️ Error Heartbeat:", err.message);
+/* ==========================================================
+   Expulsión REAL — overlay + limpieza + redirect
+   ========================================================== */
+async function forceLogout(reason, email, device_id) {
+  if (window.__CFC_FORCELOGOUT_ACTIVE__) {
+    console.warn("⛔ FORCED LOGOUT ya activo — anti-loop");
+    return;
+  }
+  window.__CFC_FORCELOGOUT_ACTIVE__ = true;
+
+  console.warn("🔒 [CFC-LOCK] Expulsando dispositivo…", { email, device_id, reason });
+
+  CFC_showBlockOverlay(email, device_id, reason);
+
+  clearMSCU();
+
+  // Bloqueo total
+  document.body.style.pointerEvents = "none";
+  document.body.style.overflow = "hidden";
+
+  setTimeout(() => {
+    window.location.href = "/frontend/html/login.html";
+  }, 1800);
+}
+
+/* ==========================================================
+   Heartbeat
+   ========================================================== */
+async function sendHeartbeat(s) {
+  try {
+    const res = await fetch(`${API}/heartbeat`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: s.email,
+        device_id: s.device_id
+      })
+    });
+    const json = await res.json();
+    console.log("❤️ [HEARTBEAT]", json);
+  } catch (err) {
+    console.warn("⚠️ Heartbeat Error:", err);
+  }
+}
+
+/* ==========================================================
+   Update-session
+   ========================================================== */
+async function sendUpdate(s) {
+  try {
+    const res = await fetch(`${API}/update-session`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: s.email,
+        device_id: s.device_id,
+        session_id: s.session_id
+      })
+    });
+
+    const json = await res.json();
+    console.log("🟡 [UPDATE-SESSION]", json);
+
+    if (CFC_LOCK_ENFORCE && json.status === "invalid") {
+      await forceLogout("Sesión iniciada en otro dispositivo (UPDATE)", s.email, s.device_id);
     }
+
+  } catch (err) {
+    console.warn("⚠️ update-session error:", err);
   }
+}
 
-  /* ----------------------------------------------
-     Update-session → Sync híbrido
-  ---------------------------------------------- */
-  async function sendUpdate(s) {
-    try {
-      const res = await fetch(`${API}/update-session`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: s.email,
-          device_id: s.device_id,
-          session_id: s.session_id
-        })
-      });
+/* ==========================================================
+   Check-session (Render)
+   ========================================================== */
+async function checkRemote(s) {
+  try {
+    const res = await fetch(
+      `${API}/check-session?email=${s.email}&device_id=${s.device_id}`
+    );
+    const json = await res.json();
 
-      const json = await res.json();
-      console.log("🟡 [UPDATE-SESSION]", json);
-    } catch (err) {
-      console.warn("⚠️ Error update-session:", err.message);
-    }
-  }
+    console.log("🌐 [CHECK-SESSION]", json);
 
-  /* ----------------------------------------------
-     Check-session → Estado remoto
-  ---------------------------------------------- */
-  async function checkRemote(s) {
-    try {
-      const res = await fetch(
-        `${API}/check-session?email=${s.email}&device_id=${s.device_id}`
-      );
-      const json = await res.json();
+    if (!CFC_LOCK_ENFORCE) return;
 
-      console.log("🌐 [CHECK-SESSION]", json);
-
-      if (json.status === "invalid" || json.status === "expired") {
-        console.warn("⚠️ SILENT: Sesión duplicada o expirada detectada.");
-      }
-
-    } catch (err) {
-      console.warn("⚠️ Error check-session:", err.message);
-    }
-  }
-
-  /* ----------------------------------------------
-     Loop principal
-  ---------------------------------------------- */
-  async function heartcoreLoop() {
-    const s = getLocalSession();
-
-    if (!s) {
-      console.warn("⚠️ Heartcore: no hay MSCU (OK)");
-      return;
+    if (json.status === "invalid" || json.status === "expired") {
+      await forceLogout("Sesión iniciada en otro dispositivo (CHECK)", s.email, s.device_id);
     }
 
-    if (window.location.pathname.includes("login")) return;
+  } catch (err) {
+    console.warn("⚠️ check-session error:", err);
+  }
+}
 
-    await sendHeartbeat(s);
-    await sendUpdate(s);
-    await checkRemote(s);
+/* ==========================================================
+   Loop HEARTCORE ENFORCE
+   ========================================================== */
+async function heartcoreLoop() {
+  const s = getLocalSession();
+
+  if (!s) {
+    console.warn("⚠️ Heartcore: no hay MSCU local");
+    return;
   }
 
-  console.log("🧩 QA-SYNC | CFC_LOCK_CORE V71.0 HEARTCORE-SILENT activo");
+  if (window.location.pathname.includes("login")) return;
 
-  setInterval(heartcoreLoop, 5000);
-  heartcoreLoop();
+  await sendHeartbeat(s);
+  await sendUpdate(s);
+  await checkRemote(s);
+}
 
-})();
+/* ==========================================================
+   INICIO
+   ========================================================== */
+console.log("🧩 QA-SYNC | CFC_LOCK_CORE V72-ENFORCE REAL cargado");
+
+setInterval(heartcoreLoop, 5000);
+heartcoreLoop();
