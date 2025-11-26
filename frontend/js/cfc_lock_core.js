@@ -1,108 +1,54 @@
 /* ==========================================================
-   ✅ CFC_LOCK_CORE_V70.1_PERMISSIVE_READY
-   Sistema: Campus CFC LITE V41-DEMO
-   Propósito: Guard con modo PERMISIVO para pruebas del índice
+   🔐 CFC_LOCK_CORE_V70.2_HYBRID_SILENT
+   Subpaso: 4.7 — PRUEBA 14
+   Función: Heartbeat + Render Sync (solo detección)
    ========================================================== */
 
-const CFC_LOCK_ENFORCE = false; // ✅ MODO PERMISIVO PARA PRUEBA 5/8-C.2
+const CFC_LOCK_ENFORCE = false; // 🔥 SILENT MODE — NO expulsar
 
 (function () {
 
-  const API_URL = "https://cfc-lock-proxy.onrender.com";
+  const API = "https://cfc-lock-proxy.onrender.com";
 
-  function getMSCU() {
-    try {
-      const data = localStorage.getItem("CFC_SESSION");
-      return data ? JSON.parse(data) : null;
-    } catch (e) {
-      return null;
+  function getLocalSession() {
+    const email = localStorage.getItem("CFC_EMAIL");
+    const device_id = localStorage.getItem("CFC_DEVICE_ID");
+    const session_id = localStorage.getItem("CFC_SESSION_ID");
+    return email && device_id && session_id
+      ? { email, device_id, session_id }
+      : null;
+  }
+
+  async function runHybrid() {
+    const s = getLocalSession();
+
+    if (!s) {
+      console.warn("⚠️ [HYBRID] No MSCU local (OK en SILENT)");
+      return;
     }
-  }
 
-  function logoutNow(reason) {
-    console.warn("🚨 Logout forzado:", reason);
+    if (window.location.pathname.includes("login")) return;
 
-    // ✅ NO borra todo — solo claves relacionadas
-    localStorage.removeItem("CFC_SESSION");
-    localStorage.removeItem("CFC_EMAIL");
-    localStorage.removeItem("CFC_DEVICE_ID");
-
-    const msg = reason || "⚠️ Sesión cerrada automáticamente.";
-    const overlay = document.createElement("div");
-    overlay.innerHTML = `
-      <div style="
-        position:fixed;inset:0;z-index:99999;
-        background:rgba(0,0,0,0.85);
-        color:#ffd700;font-family:Poppins,sans-serif;
-        display:flex;align-items:center;justify-content:center;
-        flex-direction:column;font-size:22px;">
-        <div>⚠️ ${msg}</div>
-        <div style="font-size:16px;margin-top:10px;">Redirigiendo...</div>
-      </div>`;
-    document.body.appendChild(overlay);
-
-    setTimeout(() => {
-      window.location.href = "/frontend/html/login.html?expired=true";
-    }, 1800);
-  }
-
-  async function verifyRemoteSession(email, device_id) {
+    // Render Sync
     try {
-      const res = await fetch(`${API_URL}/check-session?email=${email}&device_id=${device_id}`);
-      const data = await res.json();
-      return data?.status === "valid";
+      const res = await fetch(
+        `${API}/check-session?email=${s.email}&device_id=${s.device_id}`
+      );
+      const json = await res.json();
+
+      console.log("🌐 [HYBRID] Render Sync:", json);
+
+      if (json.status === "invalid") {
+        console.warn("⚠️ Render detectó sesión duplicada (SILENT)");
+      }
+
     } catch (err) {
-      console.log("🔁 Error temporal al verificar sesión:", err.message);
-      return true; // ✅ No desconecta por error de red
+      console.log("🔁 Error Render Hybrid:", err.message);
     }
   }
 
-  async function runLock() {
-
-    const mscu = getMSCU();
-
-    // ✅ Permitir login operar sin guard
-    if (window.location.pathname.includes("login")) {
-      console.log("🛑 Guard inactivo en login — OK");
-      return;
-    }
-
-    // ✅ Si no existe MSCU → aplicar según modo
-    if (!mscu) {
-      if (CFC_LOCK_ENFORCE) {
-        logoutNow("Sesión no válida o expirada.");
-      }
-      console.warn("⚠️ MSCU inexistente — permitido por modo PERMISIVO");
-      return;
-    }
-
-    const { session_user_email, device_id } = mscu;
-
-    // ✅ Si falta info → actuar según modo
-    if (!session_user_email || !device_id) {
-      if (CFC_LOCK_ENFORCE) {
-        logoutNow("Datos de sesión incompletos.");
-      }
-      console.warn("⚠️ MSCU incompleto — permitido por modo PERMISIVO");
-      return;
-    }
-
-    // ✅ Si modo permisivo → no seguir verificando
-    if (!CFC_LOCK_ENFORCE) {
-      console.log("🟡 Guard en modo PERMISIVO — navegación permitida");
-      return;
-    }
-
-    // ✅ MODO ESTRICTO — verificar remoto
-    const valid = await verifyRemoteSession(session_user_email, device_id);
-
-    if (!valid) {
-      logoutNow("Tu sesión fue cerrada desde otro dispositivo.");
-    }
-  }
-
-  console.log(`🧠 CFC_LOCK_CORE activo → modo=${CFC_LOCK_ENFORCE ? "ENFORCE" : "PERMISSIVE"}`);
-  setInterval(runLock, 5000);
-  runLock();
+  console.log("🧩 QA-SYNC | CFC_LOCK_CORE V70.2 HYBRID-SILENT activo");
+  setInterval(runHybrid, 5000);
+  runHybrid();
 
 })();
