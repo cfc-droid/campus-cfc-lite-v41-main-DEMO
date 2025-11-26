@@ -355,8 +355,14 @@ if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
 // ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 
-// ✅ REDIRIGIR A INDEX DESDE /frontend/html/login.html
-const { email, device_id, session_id } = await CFC_login(email, license);
+// ========================================================
+// 🔧 FIX CRÍTICO: evitar redeclaración de "email"
+// ========================================================
+const loginData = await CFC_login(email, license);
+const device_id = loginData.device_id;
+const session_id = loginData.session_id;
+// ========================================================
+
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 window.location.href = "../index.html";
 
