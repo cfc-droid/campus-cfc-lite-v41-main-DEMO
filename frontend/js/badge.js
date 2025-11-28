@@ -41,7 +41,7 @@
     const updateProgress = () => {
       let p = localStorage.getItem("progressPercent");
 
-      // Copia espejo desde cookie si no existe en localStorage
+      // Copia desde cookie si no existe en localStorage
       if (!p) {
         const cookie = document.cookie.split("; ").find((r) => r.startsWith("progressPercent="));
         if (cookie) p = cookie.split("=")[1];
@@ -53,7 +53,6 @@
 
     updateProgress();
 
-    // 🔁 Listener para sincronización entre pestañas
     window.addEventListener("storage", (e) => {
       if (e.key === "progressPercent") {
         document.cookie = `progressPercent=${e.newValue}; path=/; max-age=31536000`;
@@ -61,7 +60,6 @@
       }
     });
 
-    // 🔁 Refresco cada 2 segundos + respaldo en cookie
     setInterval(() => {
       const p = localStorage.getItem("progressPercent") || 0;
       document.cookie = `progressPercent=${p}; path=/; max-age=31536000`;
