@@ -6,6 +6,12 @@
 
 (function () {
 
+     // 🚫 Protección: si Firebase NO existe, cancelar este archivo
+  if (!window.firebase) {
+    console.warn("⛔ Firebase no disponible — CFC_LOCK_IDENTITY deshabilitado en:", window.location.pathname);
+    return;
+  }
+   
   console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_ENFORCE_REAL cargado");
 
   /* -------------------------------------------
