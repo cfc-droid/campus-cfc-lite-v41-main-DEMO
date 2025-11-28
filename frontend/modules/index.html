@@ -243,7 +243,7 @@
   <script src="../js/motivation_v2.js?v=20251101" defer></script>
   <script src="../js/auto_injector.js?v=20251102" defer></script>
 
-  <!-- ✅ Overlay Motivacional Dorado + Audio + Confeti + Detección dinámica -->
+  <!-- Motivational overlay -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const resetBtn = document.getElementById("resetProgressBtn");
@@ -262,7 +262,6 @@
         overlay.id = "motivationalOverlay";
         overlay.innerHTML = `<p>${frases[Math.floor(Math.random() * frases.length)]}</p>`;
 
-        // Detectar modo visual real
         const bg = getComputedStyle(document.body).getPropertyValue("--color-bg").trim();
         const isLight = bg.includes("255") || bg === "#fff" || bg === "white";
         overlay.style.background = isLight ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.85)";
@@ -270,12 +269,10 @@
 
         document.body.appendChild(overlay);
 
-        // Sonido
         const audio = new Audio("../audio/bell-gold.wav");
         audio.volume = 0.7;
         setTimeout(() => audio.play().catch(()=>{}), 300);
 
-        // Confeti
         for (let i = 0; i < 60; i++) {
           const conf = document.createElement("div");
           conf.classList.add("confetti");
@@ -286,7 +283,6 @@
           setTimeout(() => conf.remove(), 3500);
         }
 
-        // Mostrar y remover
         setTimeout(() => overlay.classList.add("visible"), 100);
         setTimeout(() => overlay.classList.remove("visible"), 3500);
         setTimeout(() => overlay.remove(), 4000);
@@ -299,17 +295,15 @@
     console.log("🧩 CFC_SYNC checkpoint: modules/index.html — V45.2_FIX_THEME_FINAL ✅", new Date().toLocaleString());
   </script>
 
-  <!-- ✅ CFC_FUNC_5_1C_FIX_V47_MODULES — Restauración botón claro/oscuro -->
+  <!-- Botón claro/oscuro -->
 <script>
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("theme-toggle");
   const currentTheme = localStorage.getItem("theme") || "dark";
 
-  // Aplicar tema guardado
   document.documentElement.setAttribute("data-theme", currentTheme);
   btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
 
-  // Cambiar tema
   btn.addEventListener("click", () => {
     const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
     document.documentElement.setAttribute("data-theme", newTheme);
@@ -323,7 +317,7 @@ document.addEventListener("DOMContentLoaded", () => {
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<!-- Identity -->
+<!-- Identity (ruta corregida) -->
 <script src="../js/core/cfc_lock_identity.js" defer></script>  
 
 <!-- 🔒 CFC-LOCK LITE -->
