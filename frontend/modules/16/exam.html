@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen — Módulo 16 — Reversión Psicológica y Superación del Burnout</title>
+
+  <!-- ✅ CFC_FUNC_1_01_FIXRUTAS_2025-10-30 -->
+  <link rel="stylesheet" href="../../css/premium.css">
+  <link rel="stylesheet" href="../../css/exam-extra.css">
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
+
+  <!-- ✅ Motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Botón tema fijo negro-dorado -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+
+<body data-module="16">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Examen — Módulo 16: Reversión Psicológica y Superación del Burnout</h1>
+    <p><em>Reflexioná antes de responder. Este examen evalúa tu comprensión sobre la recuperación mental, la resiliencia emocional y la restauración del equilibrio interno del trader.</em></p>
+
+    <form id="exam16">
+      <!-- Pregunta 1 -->
+      <fieldset>
+        <legend>1) Según el Capítulo 1, ¿cuál es el primer paso esencial para revertir el burnout del trader?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q1" type="radio" value="A"> A) Buscar nuevas estrategias de entrada y salida en el mercado.</label><br>
+        <label><input name="q1" type="radio" value="B"> B) Reconocer y aceptar el agotamiento emocional antes de intentar recuperar el rendimiento.</label><br>
+        <label><input name="q1" type="radio" value="C"> C) Forzar la disciplina operativa sin descanso ni pausa.</label><br>
+        <label><input name="q1" type="radio" value="D"> D) Ignorar los síntomas emocionales y centrarse en resultados económicos.</label>
+      </fieldset>
+
+      <!-- Pregunta 2 -->
+      <fieldset>
+        <legend>2) En el Capítulo 2, ¿qué propósito cumple el Triángulo de Autorregulación CFC en la reconstrucción mental?</legend>
+        <!-- Correcta: C -->
+        <label><input name="q2" type="radio" value="A"> A) Controlar las emociones mediante represión consciente.</label><br>
+        <label><input name="q2" type="radio" value="B"> B) Sustituir las emociones por análisis racional continuo.</label><br>
+        <label><input name="q2" type="radio" value="C"> C) Restablecer la coherencia entre pensamiento, emoción y acción para lograr equilibrio operativo.</label><br>
+        <label><input name="q2" type="radio" value="D"> D) Incrementar la velocidad de reacción ante los movimientos del mercado.</label>
+      </fieldset>
+
+      <!-- Pregunta 3 -->
+      <fieldset>
+        <legend>3) De acuerdo con el Capítulo 3, ¿qué representa la aplicación del “Observador Neutral” durante una sesión de trading?</legend>
+        <!-- Correcta: D -->
+        <label><input name="q3" type="radio" value="A"> A) Eliminar por completo las emociones antes de operar.</label><br>
+        <label><input name="q3" type="radio" value="B"> B) Concentrarse en las pérdidas para evitar repetir errores.</label><br>
+        <label><input name="q3" type="radio" value="C"> C) Aumentar la presión cognitiva para mantener la alerta.</label><br>
+        <label><input name="q3" type="radio" value="D"> D) Observar las emociones sin juzgarlas, reconociendo su función sin dejarse arrastrar por ellas.</label>
+      </fieldset>
+
+      <!-- Pregunta 4 -->
+      <fieldset>
+        <legend>4) En el Capítulo 4, ¿cuál es el significado del “dominio emocional” en la metodología CFC?</legend>
+        <!-- Correcta: A -->
+        <label><input name="q4" type="radio" value="A"> A) Mantener la coherencia neuroemocional, donde emoción y razón trabajan en sincronicidad para operar con calma y precisión.</label><br>
+        <label><input name="q4" type="radio" value="B"> B) Reprimir las emociones negativas para preservar la disciplina operativa.</label><br>
+        <label><input name="q4" type="radio" value="C"> C) Operar con intensidad emocional para obtener mayor motivación.</label><br>
+        <label><input name="q4" type="radio" value="D"> D) Desconectarse emocionalmente del proceso para evitar el estrés cognitivo.</label>
+      </fieldset>
+
+      <button type="button" onclick="enviarExamen()">Enviar respuestas</button>
+    </form>
+  </main>
+
+  <footer class="firma-cfc">
+    <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
+  </footer>
+
+  <!-- 🔙 Botón volver -->
+  <script src="../../js/backButton.js"></script>
+
+  <!-- ✅ Progress global -->
+  <script src="../../js/progress_v2.js?v=9.8C" defer></script>
+  <!-- ✅ Motor examen unificado -->
+  <script src="../../js/exam_v2.js"></script>
+  <!-- ✅ Auto-Injector Global -->
+  <script src="../../js/auto_injector.js?v=20251102" defer></script>
+  <!-- ✅ Tracker de actividad -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+
+  <!-- ✅ Narrador IA Integrado -->
+  <button class="tts-btn-fixed" title="Escuchar este examen 🎧">🎧</button>
+  <link rel="stylesheet" href="../../css/voiceReader.css?v=20251105">
+  <script src="../../js/core/voiceReader.js?v=20251105" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Sistema persistente claro/oscuro -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      console.log("🌗 Tema cambiado a:", newTheme);
+    });
+  });
+  </script>
+
+<!-- 🔒 CFC-LOCK LITE -->
+<script src="../../js/domain_lock_lite.js" defer></script> 
+</body>
+</html>
