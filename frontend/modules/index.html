@@ -298,16 +298,6 @@
     console.log("🧩 CFC_SYNC checkpoint: modules/index.html — V45.2_FIX_THEME_FINAL ✅", new Date().toLocaleString());
   </script>
 
-  <!-- ✅ CFC_FUNC_5_1C_FIX_V47_MODULES — Restauración botón claro/oscuro -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-  const btn = document.getElementById("theme-toggle");
-  const currentTheme = localStorage.getItem("theme") || "dark";
-
-  // Aplicar tema guardado
-  document.documentElement.setAttribute("data-theme", currentTheme);
-  btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
-
 <!-- 🔒 CFC-LOCK LITE -->
 <script src="../js/domain_lock_lite.js" defer></script> 
 </body>
