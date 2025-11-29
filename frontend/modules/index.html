@@ -1,3 +1,6 @@
+<!-- ==========================================================
+✅ CFC_FUNC_2_18_V45.2_FIX_THEME_FINAL — Overlay Motivacional Premium Restaurado
+========================================================== -->
 <!DOCTYPE html>
 <html lang="es" data-theme="dark">
 <head>
@@ -11,7 +14,7 @@
   <link rel="stylesheet" href="../css/variables.css?v=20251101" />
 
   <style>
-    :root {
+      :root {
       transition: background-color 0.5s ease, color 0.5s ease;
     }
 
@@ -138,11 +141,54 @@
       from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-  </style>
+
+    /* Overlay motivacional */
+    #motivationalOverlay {
+      position: fixed;
+      inset: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease-in-out;
+      flex-direction: column;
+      line-height: 1.5;
+      letter-spacing: 0.4px;
+    }
+
+    #motivationalOverlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    #motivationalOverlay p {
+      max-width: 600px;
+      margin: 0 20px;
+    }
+
+    .confetti {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      top: -10px;
+      animation: fall 3s linear forwards;
+      z-index: 999999;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+  </style>    
 </head>
 
 <body>
-
+  <!-- ✅ Botón modo claro/oscuro sincronizado -->
 <button id="theme-toggle" title="Cambiar tema claro/oscuro" 
   style="
     position:fixed;top:18px;right:20px;width:44px;height:44px;
@@ -185,14 +231,95 @@
 
     <div style="text-align:center;">
       <button class="btn-volver" onclick="window.location.href='../loader.html?v=20251101'">⬅ Volver al inicio</button>
+      <button id="continueBtn" class="continue-btn">▶ Continuar último módulo</button>
+      <button id="resetProgressBtn" class="reset-btn">🔄 Reiniciar progreso</button>
     </div>
   </main>
 
   <footer>© 2025 Campus CFC Trading — Versión V41</footer>
 
-  <!-- SCRIPTS PERMITIDOS -->
   <script src="../js/progress_v2.js?v=20251102" defer></script>
-  <script src="../js/domain_lock_lite.js" defer></script>
+  <script src="../js/exam-logic_v2.js?v=20251101" defer></script>
+  <script src="../js/motivation_v2.js?v=20251101" defer></script>
+  <script src="../js/auto_injector.js?v=20251102" defer></script>
 
+  <!-- ✅ Overlay Motivacional Dorado + Audio + Confeti + Detección dinámica -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const resetBtn = document.getElementById("resetProgressBtn");
+      if (!resetBtn) return;
+
+      const frases = [
+        "✨ Volver a empezar también es progreso. Cada reinicio te acerca a la versión más consciente de vos mismo.",
+        "💫 Cada paso que reiniciás, fortalece tu disciplina mental. Seguís creciendo.",
+        "🔥 Reiniciar no es rendirse, es reprogramar tu mente para superar tu propio límite.",
+        "🌟 Cada comienzo es una oportunidad de hacerlo con más sabiduría que antes.",
+        "🏆 La constancia es el puente entre tus errores y tu maestría."
+      ];
+
+      resetBtn.addEventListener("click", () => {
+        const overlay = document.createElement("div");
+        overlay.id = "motivationalOverlay";
+        overlay.innerHTML = `<p>${frases[Math.floor(Math.random() * frases.length)]}</p>`;
+
+        // Detectar modo visual real
+        const bg = getComputedStyle(document.body).getPropertyValue("--color-bg").trim();
+        const isLight = bg.includes("255") || bg === "#fff" || bg === "white";
+        overlay.style.background = isLight ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.85)";
+        overlay.style.color = "#d4af37";
+
+        document.body.appendChild(overlay);
+
+        // Sonido
+        const audio = new Audio("../audio/bell-gold.wav");
+        audio.volume = 0.7;
+        setTimeout(() => audio.play().catch(()=>{}), 300);
+
+        // Confeti
+        for (let i = 0; i < 60; i++) {
+          const conf = document.createElement("div");
+          conf.classList.add("confetti");
+          conf.style.left = Math.random() * 100 + "vw";
+          conf.style.background = ["#d4af37", "#ffd700"][Math.floor(Math.random() * 2)];
+          conf.style.animationDuration = 2.5 + Math.random() * 1.5 + "s";
+          document.body.appendChild(conf);
+          setTimeout(() => conf.remove(), 3500);
+        }
+
+        // Mostrar y remover
+        setTimeout(() => overlay.classList.add("visible"), 100);
+        setTimeout(() => overlay.classList.remove("visible"), 3500);
+        setTimeout(() => overlay.remove(), 4000);
+      });
+    });
+  </script>
+
+  <script src="../js/activity_tracker.js?v=20251106" defer></script>
+  <script>
+    console.log("🧩 CFC_SYNC checkpoint: modules/index.html — V45.2_FIX_THEME_FINAL ✅", new Date().toLocaleString());
+  </script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47_MODULES — Restauración botón claro/oscuro -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("theme-toggle");
+  const currentTheme = localStorage.getItem("theme") || "dark";
+
+  // Aplicar tema guardado
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+  // Cambiar tema
+  btn.addEventListener("click", () => {
+    const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+  });
+});
+</script>
+
+<!-- 🔒 CFC-LOCK LITE -->
+<script src="../js/domain_lock_lite.js" defer></script> 
 </body>
 </html>
