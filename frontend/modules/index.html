@@ -308,16 +308,6 @@ document.addEventListener("DOMContentLoaded", () => {
   document.documentElement.setAttribute("data-theme", currentTheme);
   btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
 
-  // Cambiar tema
-  btn.addEventListener("click", () => {
-    const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
-    document.documentElement.setAttribute("data-theme", newTheme);
-    localStorage.setItem("theme", newTheme);
-    btn.textContent = newTheme === "light" ? "🌙" : "☀️";
-  });
-});
-</script>
-
 <!-- 🔒 CFC-LOCK LITE -->
 <script src="../js/domain_lock_lite.js" defer></script> 
 </body>
