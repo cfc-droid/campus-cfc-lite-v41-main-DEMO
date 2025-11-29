@@ -261,3 +261,65 @@
         const overlay = document.createElement("div");
         overlay.id = "motivationalOverlay";
         overlay.innerHTML = `<p>${frases[Math.floor(Math.random() * frases.length)]}</p>`;
+
+        // Detectar modo visual real
+        const bg = getComputedStyle(document.body).getPropertyValue("--color-bg").trim();
+        const isLight = bg.includes("255") || bg === "#fff" || bg === "white";
+        overlay.style.background = isLight ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.85)";
+        overlay.style.color = "#d4af37";
+
+        document.body.appendChild(overlay);
+
+        // Sonido
+        const audio = new Audio("../audio/bell-gold.wav");
+        audio.volume = 0.7;
+        setTimeout(() => audio.play().catch(()=>{}), 300);
+
+        // Confeti
+        for (let i = 0; i < 60; i++) {
+          const conf = document.createElement("div");
+          conf.classList.add("confetti");
+          conf.style.left = Math.random() * 100 + "vw";
+          conf.style.background = ["#d4af37", "#ffd700"][Math.floor(Math.random() * 2)];
+          conf.style.animationDuration = 2.5 + Math.random() * 1.5 + "s";
+          document.body.appendChild(conf);
+          setTimeout(() => conf.remove(), 3500);
+        }
+
+        // Mostrar y remover
+        setTimeout(() => overlay.classList.add("visible"), 100);
+        setTimeout(() => overlay.classList.remove("visible"), 3500);
+        setTimeout(() => overlay.remove(), 4000);
+      });
+    });
+  </script>
+
+  <script src="../js/activity_tracker.js?v=20251106" defer></script>
+  <script>
+    console.log("🧩 CFC_SYNC checkpoint: modules/index.html — V45.2_FIX_THEME_FINAL ✅", new Date().toLocaleString());
+  </script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47_MODULES — Restauración botón claro/oscuro -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("theme-toggle");
+  const currentTheme = localStorage.getItem("theme") || "dark";
+
+  // Aplicar tema guardado
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+  // Cambiar tema
+  btn.addEventListener("click", () => {
+    const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+  });
+});
+</script>
+
+<!-- 🔒 CFC-LOCK LITE -->
+<script src="../js/domain_lock_lite.js" defer></script> 
+</body>
+</html>
