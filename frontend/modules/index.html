@@ -261,27 +261,3 @@
         const overlay = document.createElement("div");
         overlay.id = "motivationalOverlay";
         overlay.innerHTML = `<p>${frases[Math.floor(Math.random() * frases.length)]}</p>`;
-
-        // Detectar modo visual real
-        const bg = getComputedStyle(document.body).getPropertyValue("--color-bg").trim();
-        const isLight = bg.includes("255") || bg === "#fff" || bg === "white";
-        overlay.style.background = isLight ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.85)";
-        overlay.style.color = "#d4af37";
-
-        document.body.appendChild(overlay);
-
-        // Sonido
-        const audio = new Audio("../audio/bell-gold.wav");
-        audio.volume = 0.7;
-        setTimeout(() => audio.play().catch(()=>{}), 300);
-
-        // Confeti
-        for (let i = 0; i < 60; i++) {
-          const conf = document.createElement("div");
-          conf.classList.add("confetti");
-          conf.style.left = Math.random() * 100 + "vw";
-          conf.style.background = ["#d4af37", "#ffd700"][Math.floor(Math.random() * 2)];
-          conf.style.animationDuration = 2.5 + Math.random() * 1.5 + "s";
-          document.body.appendChild(conf);
-          setTimeout(() => conf.remove(), 3500);
-        }
