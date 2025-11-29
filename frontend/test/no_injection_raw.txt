@@ -1,7 +1,11 @@
-TEST RAW
-Si esto se recarga o redirige → el problema es Cloudflare.
-Si NO se recarga → el problema es parte del Campus.
-Hora: <span id="now"></span>
+TEST RAW — PRUEBA 21
+Esta es una vista completamente aislada, SIN HTML del Campus, SIN Domain-Lock, SIN scripts.
+
+Si esta página se recarga automáticamente → el origen es Cloudflare, no el Campus.
+Si NO se recarga → la causa está dentro de algún script profundo del Campus.
+
+Hora actual:
+<span id="now"></span>
 
 <script>
  setInterval(() => {
