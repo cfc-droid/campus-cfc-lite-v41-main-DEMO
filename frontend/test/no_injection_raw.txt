@@ -1,0 +1,10 @@
+TEST RAW
+Si esto se recarga o redirige → el problema es Cloudflare.
+Si NO se recarga → el problema es parte del Campus.
+Hora: <span id="now"></span>
+
+<script>
+ setInterval(() => {
+   document.getElementById("now").textContent = new Date().toLocaleString();
+ }, 1000);
+</script>
