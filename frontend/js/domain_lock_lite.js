@@ -6,6 +6,7 @@
 // - iframes
 // - WebView (Android/iOS)
 // - dominios pirata
+// No toca login, progreso, ni sesión única.
 
 (function () {
   console.log("🛡️ CFC-LOCK LITE: domain_lock_lite.js inicializado");
@@ -52,11 +53,14 @@
 
   // ---------------------------------------
   // 4) BLOQUEAR WEBVIEW (Android/iOS App)
+  // Métodos de detección comunes:
+  // - userAgent contiene: wv, iPhone.*Version/.+Safari
+  // - ausencia de Safari real
   // ---------------------------------------
   const ua = navigator.userAgent || "";
   const isWebView =
-    /\bwv\b/.test(ua) ||
-    /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua);
+    /\bwv\b/.test(ua) || // Android WebView
+    /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua); // iOS WebView
 
   if (isWebView) {
     console.warn("⛔ BLOQUEADO: WebView detectado");
@@ -66,19 +70,18 @@
 
   // ---------------------------------------
   // 5) BLOQUEAR DOMINIOS NO AUTORIZADOS
-  // (DESACTIVADO PARA PRUEBA 16)
   // ---------------------------------------
-  // const DOMAIN_ALLOWLIST = [
-  //   "campus-cfc-lite-v41-main-demo.pages.dev",
-  //   "campuscfc.com",
-  //   "www.campuscfc.com"
-  // ];
+  const DOMAIN_ALLOWLIST = [
+    "campus-cfc-lite-v41-main-demo.pages.dev", // <— PONER AQUÍ TU DOMINIO REAL
+    "campuscfc.com",                          // <— si lo usas
+    "www.campuscfc.com"                       // <— si lo usas
+  ];
 
-  // if (!DOMAIN_ALLOWLIST.includes(location.hostname)) {
-  //   console.warn("⛔ BLOQUEADO: dominio no autorizado");
-  //   window.location.href = "/frontend/blocked.html";
-  //   return;
-  // }
+  if (!DOMAIN_ALLOWLIST.includes(location.hostname)) {
+    console.warn("⛔ BLOQUEADO: dominio no autorizado");
+    window.location.href = "/frontend/blocked.html";
+    return;
+  }
 
   // ---------------------------------------
   // SI TODO ES CORRECTO → CAMPUS PERMITIDO
