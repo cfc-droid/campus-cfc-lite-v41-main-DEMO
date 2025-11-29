@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🧠 Bitácora Mental del Trader — Campus CFC LITE</title>
+
+  <!-- ✅ CFC_FUNC_41_12_COLOR_FIX_FINAL_VISIBLE_V41.22C -->
+  <link rel="stylesheet" href="../css/premium.css?v=20251107" />
+  <link rel="stylesheet" href="../css/bitacora.css?v=20251107c" />
+
+  <style>
+    /* 🎨 BASE GLOBAL */
+    body.light-mode {
+      background: #ffffff !important;
+      color: #111111 !important;
+    }
+    body.dark-mode {
+      background: #000000 !important;
+      color: #f5f5f5 !important;
+    }
+
+    p, label, select, option, input, textarea, button, h2, h3, span {
+      transition: color 0.3s ease, background 0.3s ease, border 0.3s ease;
+    }
+
+    /* 🌞 Modo claro */
+    body.light-mode p,
+    body.light-mode label,
+    body.light-mode select,
+    body.light-mode option,
+    body.light-mode input,
+    body.light-mode textarea,
+    body.light-mode h2,
+    body.light-mode h3,
+    body.light-mode span,
+    body.light-mode .thought-text,
+    body.light-mode .thought-header {
+      color: #111 !important;
+    }
+
+    /* 🌙 Modo oscuro */
+    body.dark-mode p,
+    body.dark-mode label,
+    body.dark-mode select,
+    body.dark-mode option,
+    body.dark-mode input,
+    body.dark-mode textarea,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode span,
+    body.dark-mode .thought-text,
+    body.dark-mode .thought-header {
+      color: #f5f5f5 !important;
+    }
+
+    .bitacora-header {
+      color: #d4af37;
+      text-align: center;
+      margin-top: 15px;
+    }
+
+    .bitacora-container {
+      max-width: 700px;
+      margin: 0 auto;
+      padding: 20px;
+      border-radius: 12px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    body.light-mode .bitacora-container {
+      background: #ffffff;
+      box-shadow: 0 0 10px rgba(0,0,0,0.08);
+      color: #111;
+    }
+    body.dark-mode .bitacora-container {
+      background: rgba(20,20,20,0.9);
+      box-shadow: 0 0 10px rgba(255,215,0,0.15);
+      color: #f5f5f5;
+    }
+
+    /* ✍️ Área de texto */
+    textarea {
+      width: 100%;
+      height: 100px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,215,0,0.4);
+      padding: 10px;
+      font-family: Poppins, sans-serif;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+    body.light-mode textarea {
+      background: #ffffff;
+      color: #000;
+    }
+    body.dark-mode textarea {
+      background: #111;
+      color: #fff;
+    }
+
+    /* 🧠 Listado */
+    #list li {
+      margin-top: 12px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,215,0,0.3);
+      transition: background 0.3s ease, color 0.3s ease, transform 0.2s ease;
+      line-height: 1.5;
+    }
+    body.light-mode #list li {
+      background: #fffdf0;
+      color: #111;
+    }
+    body.dark-mode #list li {
+      background: rgba(40,40,40,0.9);
+      color: #f5f5f5;
+    }
+    #list li:hover {
+      transform: scale(1.01);
+      box-shadow: 0 0 8px rgba(212,175,55,0.4);
+    }
+
+    /* 💬 Contenido guardado */
+    .thought-header strong {
+      color: #d4af37;
+    }
+    .thought-text {
+      font-size: 0.95rem;
+      display: block;
+      margin-top: 4px;
+    }
+    .thought-text em {
+      color: #d4af37;
+      font-weight: 600;
+    }
+
+    /* 🪶 Botones */
+    .btn-main, .btn-return {
+      transition: all 0.3s ease;
+      font-weight: 600;
+    }
+
+    body.light-mode .btn-main {
+      background: #FFD700;
+      color: #000;
+      border: 2px solid #FFD700;
+    }
+    body.dark-mode .btn-main {
+      background: transparent;
+      color: #FFD700;
+      border: 2px solid #FFD700;
+    }
+
+    body.light-mode .btn-return {
+      background: #333;
+      color: #FFD700;
+      border: 2px solid #FFD700;
+    }
+    body.dark-mode .btn-return {
+      background: #FFD700;
+      color: #000;
+    }
+
+    /* 🎯 Selects e Inputs */
+    select, input[type="date"] {
+      border-radius: 6px;
+      padding: 4px 8px;
+      border: 1px solid rgba(212,175,55,0.4);
+      background: transparent;
+    }
+    body.light-mode select, body.light-mode input[type="date"] {
+      color: #111;
+      background: #fffef8;
+    }
+    body.dark-mode select, body.dark-mode input[type="date"] {
+      color: #f5f5f5;
+      background: #111;
+    }
+
+    /* 🌙 Botón flotante */
+    #themeToggle {
+      position: fixed;
+      top: 18px;
+      right: 22px;
+      background: rgba(255,215,0,0.2);
+      border: 2px solid rgba(255,215,0,0.4);
+      color: #FFD700;
+      border-radius: 50%;
+      width: 42px;
+      height: 42px;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+      z-index: 9999;
+    }
+    #themeToggle:hover {
+      background: #FFD700;
+      color: #000;
+      transform: scale(1.05);
+    }
+  </style>
+</head>
+
+<body>
+  <!-- 🌗 Botón de cambio de tema -->
+  <div id="themeToggle" title="Cambiar tema">🌙</div>
+
+  <h2 class="bitacora-header">🧠 Bitácora Mental del Trader</h2>
+  <p style="text-align:center;">Anotá tus pensamientos, reflexiones o aprendizajes del día.</p>
+
+  <div class="bitacora-container">
+    <div class="bitacora-top">
+      <select id="toneSelect">
+        <option value="">🌈 Seleccioná un tono sugerido (opcional)</option>
+        <option>Reflexivo / Inspirador</option>
+        <option>Científico / Energético</option>
+        <option>Introceptivo / Focalizado</option>
+        <option>Mentalidad / Racional</option>
+        <option>Sereno / Controlado</option>
+        <option>Motivador / Resiliente</option>
+        <option>Analítico / Desafiante</option>
+        <option>Filosófico / Sobrio</option>
+        <option>Fuerte / Emocional</option>
+      </select>
+
+      <div id="iconSelector">
+        <span class="icon-option">🔥</span><span class="icon-option">💡</span>
+        <span class="icon-option">🎯</span><span class="icon-option">🧘‍♂️</span>
+        <span class="icon-option">⚡</span><span class="icon-option">🌙</span>
+        <span class="icon-option">🌞</span><span class="icon-option">🧠</span>
+        <span class="icon-option">💭</span><span class="icon-option">✨</span>
+      </div>
+    </div>
+
+    <!-- 🔹 Filtros -->
+    <div class="bitacora-filters" id="filtersBlock">
+      <h3 class="filters-title">🔍 Filtros de Búsqueda</h3>
+      <div class="filters-group">
+        <label>📅 Desde:</label><input type="date" id="filterStart" />
+        <label>📅 Hasta:</label><input type="date" id="filterEnd" />
+      </div>
+      <div class="filters-group">
+        <label>🎭 Ícono:</label>
+        <select id="filterIcon">
+          <option value="">Todos</option>
+          <option>🔥</option><option>💡</option><option>🎯</option>
+          <option>🧘‍♂️</option><option>⚡</option><option>🌙</option>
+          <option>🌞</option><option>🧠</option><option>💭</option><option>✨</option>
+        </select>
+
+        <label>🎨 Tono:</label>
+        <select id="filterTone">
+          <option value="">Todos</option>
+          <option>Reflexivo / Inspirador</option>
+          <option>Científico / Energético</option>
+          <option>Introceptivo / Focalizado</option>
+          <option>Mentalidad / Racional</option>
+          <option>Sereno / Controlado</option>
+          <option>Motivador / Resiliente</option>
+          <option>Analítico / Desafiante</option>
+          <option>Filosófico / Sobrio</option>
+          <option>Fuerte / Emocional</option>
+        </select>
+      </div>
+      <button id="applyFilters" class="btn-main">Aplicar Filtros</button>
+      <button id="resetFilters" class="btn-secondary">Reiniciar</button>
+    </div>
+
+    <textarea id="thoughts" placeholder="Escribí aquí tu reflexión..."></textarea><br />
+    <button class="btn-main" onclick="saveThought()">Guardar</button>
+    <ul id="list"></ul>
+
+    <button class="btn-return" onclick="window.location.href='../pages/profile.html'">⬅ Volver al Perfil</button>
+  </div>
+
+  <script src="../js/bitacora.js?v=20251107CFC_FIX4"></script>
+
+  <!-- ✅ Tema sincronizado -->
+  <script>
+    function aplicarTemaCFC() {
+      const tema = localStorage.getItem("CFC_THEME_STATE") || "dark";
+      document.body.classList.toggle("light-mode", tema === "light");
+      document.body.classList.toggle("dark-mode", tema === "dark");
+      const btn = document.getElementById("themeToggle");
+      if (btn) btn.textContent = tema === "light" ? "🌞" : "🌙";
+    }
+    aplicarTemaCFC();
+
+    window.addEventListener("storage", (e) => {
+      if (e.key === "CFC_THEME_STATE") aplicarTemaCFC();
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("themeToggle");
+      if (!btn) return;
+      btn.addEventListener("click", () => {
+        const current = localStorage.getItem("CFC_THEME_STATE") || "dark";
+        const nuevo = current === "dark" ? "light" : "dark";
+        localStorage.setItem("CFC_THEME_STATE", nuevo);
+        aplicarTemaCFC();
+        console.log("🎨 CFC_THEME_SWITCH — Bitácora:", nuevo);
+      });
+    });
+  </script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
