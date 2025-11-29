@@ -1,12 +1,13 @@
 /* =========================================================
-   ✅ CFC_FUNC_5_2_AUTOLOAD_V20251106_SAFEFIX_PLUS — Versión corregida
+   ⚠️ VERSIÓN ESPECIAL PARA PRUEBA Nº 17 — SUBPASO 1
    📄 Archivo: /frontend/js/auto_injector.js
-   🔒 CFC-SYNC V8.2 | QA-SYNC V11.0 — 2025-11-19
+   🔍 Objetivo: Desactivar temporalmente inyecciones de scripts
+                para detectar si causan el reinicio automático.
    ---------------------------------------------------------
-   ✔️ Se elimina theme.js (no existe en tu repositorio)
-   ✔️ Sin errores 404 → sin “Unexpected token '<'”
-   ✔️ Inyección segura y validada
-   ✔️ 100% compatible con Cloudflare Pages
+   ✔ NO se elimina nada
+   ✔ NO se cambia estructura
+   ✔ Solo se comentan inyecciones
+   ✔ 100% reversible
 ========================================================= */
 
 (function () {
@@ -15,7 +16,7 @@
     ? "/frontend/js/"
     : "../js/";
 
-  // 🧩 Inyección segura con validación previa (HEAD)
+  // 🧩 Inyección segura (la función queda, no se usa)
   const injectScript = async (file, description = "") => {
     const src = base + file;
 
@@ -39,25 +40,34 @@
     }
   };
 
-  // 🧩 Núcleo base (corregido)
-  // ❌ REMOVIDO: theme.js (no existe)
-  injectScript("theme_chapter_v2.js?v=20251106", "Modo claro/oscuro modular");
-  injectScript("badge.js?v=20251102", "Badge motivacional persistente");
+  // ========================================================
+  // 🚫 SUBPASO 1 — DESACTIVAR TEMPORALMENTE ESTAS INYECCIONES
+  // ========================================================
 
-  // 🧩 (Opcionales)
-  // injectScript("daily-review.js?v=20251102");
-  // injectScript("backup.js?v=20251102");
+  // ❌ Desactivar theme_chapter_v2.js
+  // injectScript("theme_chapter_v2.js?v=20251106", "Modo claro/oscuro modular");
 
-  // 🧩 Log QA-SYNC
+  // ❌ Desactivar badge.js
+  // injectScript("badge.js?v=20251102", "Badge motivacional persistente");
+
+  // ========================================================
+  // Esto nos permitirá saber si alguno de esos scripts genera
+  // el reinicio / pantalla blanca en módulos/capítulos/exámenes.
+  // ========================================================
+
   console.log(
-    "🧩 CFC_SYNC checkpoint: auto_injector.js | SAFEFIX_PLUS V8.2 OK",
+    "🧩 PRUEBA Nº17 SUBPASO 1 — auto_injector.js cargado SIN scripts inyectados",
     new Date().toLocaleString()
   );
 })();
 
 /* =========================================================
-   ✅ CFC_FUNC_9_9_FIX_FINAL_V41.25 — Inyección botón “Continuar”
-   🔒 QA-SYNC V41.25 — CFC-SYNC V9.0
+   ⚠️ IMPORTANTE
+   Este bloque de chapter_nav.js se mantiene porque:
+   ✔ NO causa reinicios
+   ✔ No genera expulsiones
+   ✔ No interactúa con estilos ni badge
+   ✔ Es requerido para navegación interna
 ========================================================= */
 
 (function () {
@@ -68,6 +78,6 @@
 
   console.log(
     "🧩 CFC_SYNC checkpoint:",
-    "chapter_nav.js inyectado correctamente"
+    "chapter_nav.js inyectado correctamente (PRUEBA Nº17)"
   );
 })();
