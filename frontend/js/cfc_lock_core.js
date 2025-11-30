@@ -13,7 +13,7 @@
   console.log("🧩 QA-SYNC | CFC_LOCK_CORE V72.5 cargado");
 
   /* ---------------------------------------------------------
-     Obtener sesión local (sin progreso)
+     Obtener MSCU local
   --------------------------------------------------------- */
   function getLocalSession() {
     const email = localStorage.getItem("CFC_EMAIL");
@@ -38,7 +38,7 @@
   }
 
   /* ---------------------------------------------------------
-     EXPULSIÓN MAESTRA (única fuente de expulsiones)
+     EXPULSIÓN MAESTRA
   --------------------------------------------------------- */
   async function forceLogout(reason, email, device_id) {
 
@@ -61,25 +61,39 @@
   }
 
   /* ---------------------------------------------------------
-     CHECK REMOTO HÍBRIDO
+     Procesar SEÑALES de identity.js
   --------------------------------------------------------- */
-  async function checkRemote(s) {
-    try {
-      const r = await fetch(`${API}/check-session?email=${s.email}&device_id=${s.device_id}`);
-      const json = await r.json();
-      console.log("🌐 [CHECK-SESSION]", json);
+  function processIdentitySignals(s) {
 
-      if (CFC_LOCK_ENFORCE && (json.status === "invalid" || json.status === "expired")) {
-        await forceLogout("Sesión iniciada en otro dispositivo (CHECK)", s.email, s.device_id);
-      }
+    const signal = localStorage.getItem("CFC_HEARTCORE_SIGNAL");
+    if (!signal) return;
 
-    } catch (err) {
-      console.warn("⚠️ check-session error", err);
+    console.warn("📡 [HEARTCORE] Señal recibida:", signal);
+
+    localStorage.removeItem("CFC_HEARTCORE_SIGNAL");
+
+    switch (signal) {
+
+      case "DEVICE_CONFLICT":
+        forceLogout("Sesión iniciada en otro dispositivo (IDENTITY)", s.email, s.device_id);
+        break;
+
+      case "SESSION_CHANGED":
+        forceLogout("Sesión manipulada o reemplazada (IDENTITY)", s.email, s.device_id);
+        break;
+
+      case "SESSION_CLOSED":
+        forceLogout("Sesión cerrada remotamente (IDENTITY)", s.email, s.device_id);
+        break;
+
+      default:
+        console.log("ℹ️ Señal desconocida:", signal);
+        break;
     }
   }
 
   /* ---------------------------------------------------------
-     SEND HEARTBEAT
+     HEARTBEAT
   --------------------------------------------------------- */
   async function sendHeartbeat(s) {
     try {
@@ -117,42 +131,26 @@
     }
   }
 
-  /* =========================================================
-     🔴 5/5-D.5 — SIGNAL BUS (NOVEDAD)
-     Identity emite señales → Heartcore las ejecuta aquí
-  ========================================================= */
-  function processIdentitySignals(s) {
+  /* ---------------------------------------------------------
+     CHECK REMOTO
+  --------------------------------------------------------- */
+  async function checkRemote(s) {
+    try {
+      const r = await fetch(`${API}/check-session?email=${s.email}&device_id=${s.device_id}`);
+      const json = await r.json();
+      console.log("🌐 [CHECK-SESSION]", json);
 
-    const signal = localStorage.getItem("CFC_HEARTCORE_SIGNAL");
-    if (!signal) return;  // nada que procesar
+      if (CFC_LOCK_ENFORCE && (json.status === "invalid" || json.status === "expired")) {
+        await forceLogout("Sesión iniciada en otro dispositivo (CHECK)", s.email, s.device_id);
+      }
 
-    console.warn("📡 [HEARTCORE] Señal recibida:", signal);
-
-    // Limpiar para evitar loops
-    localStorage.removeItem("CFC_HEARTCORE_SIGNAL");
-
-    switch (signal) {
-
-      case "DEVICE_CONFLICT":
-        forceLogout("Sesión iniciada en otro dispositivo (IDENTITY)", s.email, s.device_id);
-        break;
-
-      case "SESSION_CHANGED":
-        forceLogout("Sesión manipulada o reemplazada (IDENTITY)", s.email, s.device_id);
-        break;
-
-      case "SESSION_CLOSED":
-        forceLogout("Sesión cerrada remotamente (IDENTITY)", s.email, s.device_id);
-        break;
-
-      default:
-        console.log("ℹ️ Señal no reconocida, ignorando:", signal);
-        break;
+    } catch (err) {
+      console.warn("⚠️ check-session error", err);
     }
   }
 
   /* ---------------------------------------------------------
-     HEARTCORE LOOP — ejecuta todo
+     HEARTCORE LOOP
   --------------------------------------------------------- */
   async function heartcoreLoop() {
 
