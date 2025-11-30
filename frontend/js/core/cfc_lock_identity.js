@@ -67,49 +67,86 @@
     }
   }
 
+  /* --------------------------------------------------------
+     ❌ ELIMINADO: forceLogoutFS
+     (Identity ya NO expulsa — solo emite señales)
+     -------------------------------------------------------- */
+
+
+  /* ============================================================
+       5/5-D.1 — Identity ENFORCE (Snapshot Normalizer)
+       Genera señales para HEARTCORE sin expulsar directamente.
+     ============================================================ */
+  window.CFC_identity_enforce = function(email, device_id, data) {
+    try {
+      console.log("🟪 [IDENTITY-ENFORCE] Evaluando snapshot…", data);
+
+      if (!data) return;
+
+      // 1) Device ID no coincide → sesión duplicada
+      if (data.device_id && data.device_id !== device_id) {
+        console.warn("🚨 [IDENTITY-ENFORCE] DEVICE MISMATCH");
+
+        localStorage.setItem("CFC_HEARTCORE_SIGNAL", "EXPEL_FS");
+        localStorage.setItem(
+          "CFC_HEARTCORE_REASON",
+          "Sesión iniciada en otro dispositivo (FIRESTORE)"
+        );
+        return;
+      }
+
+      // 2) active_session = false
+      if (data.active_session === false) {
+        console.warn("🚨 [IDENTITY-ENFORCE] ACTIVE_SESSION = FALSE");
+
+        localStorage.setItem("CFC_HEARTCORE_SIGNAL", "EXPEL_FS");
+        localStorage.setItem(
+          "CFC_HEARTCORE_REASON",
+          "Sesión cerrada remotamente (FIRESTORE)"
+        );
+        return;
+      }
+
+      // 3) session_id cambiado
+      const local_sid = localStorage.getItem("CFC_SESSION_ID");
+      if (data.session_id && data.session_id !== local_sid) {
+        console.warn("🚨 [IDENTITY-ENFORCE] SESSION_ID MISMATCH");
+
+        localStorage.setItem("CFC_HEARTCORE_SIGNAL", "EXPEL_FS");
+        localStorage.setItem(
+          "CFC_HEARTCORE_REASON",
+          "Cambio de session_id detectado (FIRESTORE)"
+        );
+        return;
+      }
+
+      console.log("🟩 [IDENTITY-ENFORCE] Snapshot válido ✔");
+
+    } catch (err) {
+      console.error("❌ [IDENTITY-ENFORCE] Error:", err);
+    }
+  };
+
+
   /* -------------------------------------------
-     Expulsar por SNAPSHOT
-  ------------------------------------------- */
-  function forceLogoutFS(reason, email, device_id) {
-    console.warn("🚨 SNAPSHOT expulsión:", reason);
-
-    if (window.CFC_showBlockOverlay)
-      CFC_showBlockOverlay(email, device_id, reason);
-
-    const preserve = ["CFC_PROGRESS", "CFC_TIMER", "CFC_LAST_MODULE"];
-    Object.keys(localStorage).forEach(k => {
-      if (!preserve.includes(k)) localStorage.removeItem(k);
-    });
-
-    sessionStorage.clear();
-
-    setTimeout(() => {
-      window.location.href = "/frontend/html/login.html";
-    }, 1200);
-  }
-
-  /* -------------------------------------------
-     Listener Firestore REAL (ENFORCE)
+     Listener Firestore REAL (RE-WRITTEN)
+     Ahora usa CFC_identity_enforce y NO expulsa.
   ------------------------------------------- */
   function listenEnforce(email, device_id) {
     db.collection("sessions").doc(email).onSnapshot(doc => {
       if (!doc.exists) return;
 
-      const data = doc.data();
+      const data = doc.data() || {};
       console.log("📡 SNAPSHOT:", data);
 
-      if (data.device_id !== device_id) {
-        forceLogoutFS("Sesión iniciada en otro dispositivo (FIRESTORE)", email, device_id);
-      }
-
-      if (data.active_session === false) {
-        forceLogoutFS("Sesión cerrada remotamente (FIRESTORE)", email, device_id);
-      }
+      // Identity solo genera señales para Heartcore
+      window.CFC_identity_enforce(email, device_id, data);
     });
   }
 
   /* -------------------------------------------
      Validación inicial Render
+     (ahora NO expulsa — solo emite señales)
   ------------------------------------------- */
   async function checkRender(email, device_id) {
     try {
@@ -120,7 +157,11 @@
       console.log("🌐 Render INIT:", json);
 
       if (json.status === "invalid" || json.status === "expired") {
-        forceLogoutFS("Sesión iniciada en otro dispositivo (RENDER INIT)", email, device_id);
+        localStorage.setItem("CFC_HEARTCORE_SIGNAL", "EXPEL_RENDER");
+        localStorage.setItem(
+          "CFC_HEARTCORE_REASON",
+          "Sesión iniciada en otro dispositivo (RENDER INIT)"
+        );
       }
     } catch (e) {
       console.warn("⚠️ Render INIT error:", e);
