@@ -292,32 +292,6 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script> 
 
-<!-- 🔥 Firebase GLOBAL - requerido por Identity y Heartcore -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyOua1kpY0xDEAp0u8e-7a5SdyB8abys",
-    authDomain: "cfc-lock-firebase.firebaseapp.com",
-    projectId: "cfc-lock-firebase",
-    storageBucket: "cfc-lock-firebase.firebasestorage.app",
-    messagingSenderId: "352796893243",
-    appId: "1:352796893243:web:2b8b2b30a3544559f0cf1e"
-  };
-
- // PREVIENE ERRORES
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-    console.log("🔥 Firebase inicializado correctamente");
-  } else {
-    console.log("🔥 Firebase ya existía");
-  }
-
-  // Instancia global SIEMPRE antes de identity/core/sync
-  const db = firebase.firestore();
-</script>
-
 <!-- 🔒 Overlay negro-dorado global -->
 <script src="js/core/overlay_block.js?v=72" defer></script>
 
@@ -326,16 +300,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
 <!-- 🛡 Heartcore ENFORCE | expulsión real -->
 <script src="js/cfc_lock_core.js?v=72" defer></script>
-
-
-<!-- 🧩 CFC-SYNC READER (VALIDACIÓN SUBPASO 5/5-A) -->
-<script src="js/cfc_sync_reader.js?v=1" defer></script>
-
-<!-- 🟡 CFC-SYNC WRITER (SUBPASO 5/5-B) -->
-<script src="js/cfc_sync_writer.js?v=1" defer></script>
-
-<!-- 🔵 CFC-SYNC REMOTE (SUBPASO 5/5-C) -->
-<script src="js/cfc_sync_remote.js?v=1" defer></script>  
 
 <!-- ⚙️ CFC-BUNDLE → SIEMPRE ÚLTIMO -->
 <script src="js/bundle_core.min.js" defer></script>
