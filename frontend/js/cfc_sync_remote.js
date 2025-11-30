@@ -11,10 +11,10 @@ console.log("🟦 CFC_SYNC_REMOTE_READY — Archivo remoto cargado", new Date().
    5/5-C.1 — Declaración base
    ============================================================ */
 
-async function CFC_syncRemote_export(email) { /* Implementado abajo */ }
-async function CFC_syncRemote_import(email) { /* Implementado abajo */ }
-function CFC_syncRemote_merge(localData, remoteData) { /* Implementado abajo */ }
-async function CFC_syncRemote_restore(email) { /* Implementado abajo */ }
+async function CFC_syncRemote_export(email) {}
+async function CFC_syncRemote_import(email) {}
+function CFC_syncRemote_merge(localData, remoteData) {}
+async function CFC_syncRemote_restore(email) {}
 
 
 /* ============================================================
@@ -135,7 +135,7 @@ async function CFC_syncRemote_restore(email) {
 
     let finalData = CFC_syncRemote_merge(localData, remoteData);
 
-    // 🛡 AGREGADO CRÍTICO: FILTRAR CLAVES PROHIBIDAS
+    // 🛡 FILTRO DE SEGURIDAD (CRÍTICO)
     const blocked = ["CFC_SESSION", "CFC_DEVICE", "CFC_HEART", "CFC_LOCK"];
     for (let key in finalData) {
       if (blocked.some(prefix => key.startsWith(prefix))) {
