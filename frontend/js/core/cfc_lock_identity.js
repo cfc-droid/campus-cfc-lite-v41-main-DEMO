@@ -1,28 +1,34 @@
 /* ==========================================================
-   🟥 CFC_LOCK_IDENTITY_V72.4 — HEARTCORE SIGNAL ENGINE
-   Firestore Snapshot + Render Check + Señales al Heartcore
-   Integración con SYNC REMOTE + CFC_LOCK_CORE_V72.5
+   🟥 CFC_LOCK_IDENTITY_V72_ENFORCE_REAL (GLOBAL)
+   Firestore + Render Hybrid
    Auditor: CFC-SYNC
    ========================================================== */
 
 (function () {
 
-  console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72.4 cargado");
+  console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_ENFORCE_REAL cargado");
 
-  /* ---------------------------------------------------------
-     FIREBASE (usa instancia global inicializada en firebase_init.js)
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     Firebase inicializar
+  ------------------------------------------- */
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+    authDomain: "cfc-lock-firebase.firebaseapp.com",
+    projectId: "cfc-lock-firebase",
+  };
+
   let db = null;
   try {
-    db = window.CFC_FIREBASE_DB;
-    console.log("🟢 Firebase (identity) inicializado correctamente");
+    const app = firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore(app);
+    console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
   } catch (err) {
-    console.error("❌ Error inicializando Firebase en identity:", err);
+    console.error("❌ Firebase init error:", err);
   }
 
-  /* ---------------------------------------------------------
-     UTILIDADES
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     Utilidades
+  ------------------------------------------- */
   const nowISO = () => new Date().toISOString();
 
   function makeSessionId() {
@@ -38,17 +44,9 @@
     return id;
   }
 
-  /* ---------------------------------------------------------
-     EMISIÓN DE SEÑALES → HEARTCORE
-  --------------------------------------------------------- */
-  function sendHeartcoreSignal(type) {
-    console.warn("📡 Emisión señal HEARTCORE:", type);
-    localStorage.setItem("CFC_HEARTCORE_SIGNAL", type);
-  }
-
-  /* ---------------------------------------------------------
-     REGISTRAR SESIÓN EN FIRESTORE
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     Registrar sesión Firestore (ENFORCE REAL)
+  ------------------------------------------- */
   async function registerSession(email, device_id, session_id) {
     try {
       await db.collection("sessions").doc(email).set({
@@ -58,112 +56,101 @@
         active_session: true,
         last_active: firebase.firestore.FieldValue.serverTimestamp(),
         updated_at_iso: nowISO()
-      }, { merge: true });
+      });
 
-      console.log("🟢 [IDENTITY] Sesión registrada:", { email, device_id, session_id });
+      console.log("🟢 [ENFORCE] Sesión registrada FS:", {
+        email, device_id, session_id
+      });
 
     } catch (err) {
       console.error("❌ registerSession error:", err);
     }
   }
 
-  /* ---------------------------------------------------------
-     SNAPSHOT HANDLER
-  --------------------------------------------------------- */
-  function handleSnapshot(email, device_id, session_id, data) {
+  /* -------------------------------------------
+     Expulsar por SNAPSHOT
+  ------------------------------------------- */
+  function forceLogoutFS(reason, email, device_id) {
+    console.warn("🚨 SNAPSHOT expulsión:", reason);
 
-    console.log("📡 [IDENTITY] SNAPSHOT recibido:", data);
+    if (window.CFC_showBlockOverlay)
+      CFC_showBlockOverlay(email, device_id, reason);
 
-    // 1) Cambio de dispositivo
-    if (data.device_id !== device_id) {
-      sendHeartcoreSignal("DEVICE_CONFLICT");
-      return;
-    }
+    const preserve = ["CFC_PROGRESS", "CFC_TIMER", "CFC_LAST_MODULE"];
+    Object.keys(localStorage).forEach(k => {
+      if (!preserve.includes(k)) localStorage.removeItem(k);
+    });
 
-    // 2) Sesión cerrada
-    if (data.active_session === false) {
-      sendHeartcoreSignal("SESSION_CLOSED");
-      return;
-    }
+    sessionStorage.clear();
 
-    // 3) Cambio de session_id
-    if (data.session_id !== session_id) {
-      sendHeartcoreSignal("SESSION_CHANGED");
-      return;
-    }
+    setTimeout(() => {
+      window.location.href = "/frontend/html/login.html";
+    }, 1200);
   }
 
-  /* ---------------------------------------------------------
-     LISTENER FIRESTORE CONTINUO
-  --------------------------------------------------------- */
-  function listenIdentity(email, device_id, session_id) {
+  /* -------------------------------------------
+     Listener Firestore REAL (ENFORCE)
+  ------------------------------------------- */
+  function listenEnforce(email, device_id) {
+    db.collection("sessions").doc(email).onSnapshot(doc => {
+      if (!doc.exists) return;
 
-    db.collection("sessions")
-      .doc(email)
-      .onSnapshot(doc => {
+      const data = doc.data();
+      console.log("📡 SNAPSHOT:", data);
 
-        if (!doc.exists) return;
-        const data = doc.data();
+      if (data.device_id !== device_id) {
+        forceLogoutFS("Sesión iniciada en otro dispositivo (FIRESTORE)", email, device_id);
+      }
 
-        handleSnapshot(email, device_id, session_id, data);
-      });
+      if (data.active_session === false) {
+        forceLogoutFS("Sesión cerrada remotamente (FIRESTORE)", email, device_id);
+      }
+    });
   }
 
-  /* ---------------------------------------------------------
-     CHECK RENDER (validación híbrida inicial)
-  --------------------------------------------------------- */
-  async function checkRenderIdentity(email, device_id) {
+  /* -------------------------------------------
+     Validación inicial Render
+  ------------------------------------------- */
+  async function checkRender(email, device_id) {
     try {
       const r = await fetch(
         `https://cfc-lock-proxy.onrender.com/check-session?email=${email}&device_id=${device_id}`
       );
       const json = await r.json();
-      console.log("🌐 [IDENTITY] Render INIT:", json);
+      console.log("🌐 Render INIT:", json);
 
       if (json.status === "invalid" || json.status === "expired") {
-        sendHeartcoreSignal("DEVICE_CONFLICT");
+        forceLogoutFS("Sesión iniciada en otro dispositivo (RENDER INIT)", email, device_id);
       }
-
-    } catch (err) {
-      console.warn("⚠️ Render INIT error:", err);
+    } catch (e) {
+      console.warn("⚠️ Render INIT error:", e);
     }
   }
 
-  /* ---------------------------------------------------------
-     LOGIN GLOBAL
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     LOGIN GLOBAL (se usa en login.html)
+  ------------------------------------------- */
   window.CFC_login = async function(email, license) {
 
-    console.log("🧩 CFC_login() — HEARTCORE READY");
+    console.log("🧩 CFC_login() — ENFORCE REAL");
 
     const e = email.trim().toLowerCase();
     const k = license.trim();
+    const sid = makeSessionId();
+    const did = makeDeviceId();
 
-    const session_id = makeSessionId();
-    const device_id = makeDeviceId();
-
-    /* Guardar MSCU mínima */
     localStorage.setItem("CFC_EMAIL", e);
     localStorage.setItem("CFC_LICENSE", k);
-    localStorage.setItem("CFC_SESSION_ID", session_id);
-    localStorage.setItem("CFC_DEVICE_ID", device_id);
+    localStorage.setItem("CFC_SESSION_ID", sid);
+    localStorage.setItem("CFC_DEVICE_ID", did);
 
-    /* Registrar sesión remota */
-    await registerSession(e, device_id, session_id);
+    await registerSession(e, did, sid);
 
-    /* Activar monitoreo SNAPSHOT */
-    listenIdentity(e, device_id, session_id);
+    listenEnforce(e, did);
 
-    /* Validación híbrida Render */
-    checkRenderIdentity(e, device_id);
+    checkRender(e, did);
 
-    console.log("🟢 Login Identity COMPLETO — listo para HEARTCORE");
-
-    return {
-      email: e,
-      device_id,
-      session_id
-    };
+    return { email: e, device_id: did, session_id: sid };
   };
 
 })();
