@@ -363,6 +363,22 @@ const device_id = loginData.device_id;
 const session_id = loginData.session_id;
 // ========================================================
 
+// ============================================================
+// 5/5-C — RESTORE REMOTO OBLIGATORIO TRAS LOGIN
+// ============================================================
+console.log("🟦 [LOGIN] Ejecutando RESTORE remoto antes de entrar…", email);
+
+try {
+    await CFC_syncRemote_restore(email);
+
+    console.log("🟢 [LOGIN] RESTORE completado — redirigiendo al Campus");
+} catch (err) {
+    console.error("❌ [LOGIN] Error durante RESTORE:", err);
+}
+
+// ============================================================
+// 5/5-A.3 — Marcar login OK y redirigir
+// ============================================================
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 window.location.href = "../index.html";
 
