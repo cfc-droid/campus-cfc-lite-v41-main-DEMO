@@ -292,21 +292,11 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script> 
 
-<!-- 🔒 Overlay negro-dorado global -->
-<script src="js/core/overlay_block.js?v=72" defer></script>
-
-<!-- 🔐 Identidad Firestore + Render | ENFORCE REAL -->
-<script src="js/core/cfc_lock_identity.js?v=72" defer></script>
-
-<!-- 🛡 Heartcore ENFORCE | expulsión real -->
-<script src="js/cfc_lock_core.js?v=72" defer></script>
-
-<!-- 🔥 Firebase para CFC-SYNC REMOTE (REAL CONFIG) -->
+<!-- 🔥 Firebase GLOBAL - requerido por Identity y Heartcore -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <script>
-  // Configuración REAL del proyecto CFC LOCK FIREBASE
   const firebaseConfig = {
     apiKey: "AIzaSyOua1kpY0xDEAp0u8e-7a5SdyB8abys",
     authDomain: "cfc-lock-firebase.firebaseapp.com",
@@ -316,18 +306,19 @@ document.addEventListener("DOMContentLoaded", () => {
     appId: "1:352796893243:web:2b8b2b30a3544559f0cf1e"
   };
 
-  // Previene doble inicialización (REQUIRED)
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-    console.log("🔥 Firebase inicializado — Config REMOTE cargada correctamente");
-  } else {
-    firebase.app();
-    console.log("🔥 Firebase ya estaba inicializado — usando instancia existente");
-  }
-
-  // Instancia global (necesaria para CFC-SYNC REMOTE)
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 </script>
+
+<!-- 🔒 Overlay negro-dorado global -->
+<script src="js/core/overlay_block.js?v=72" defer></script>
+
+<!-- 🔐 Identidad Firestore + Render | ENFORCE REAL -->
+<script src="js/core/cfc_lock_identity.js?v=72" defer></script>
+
+<!-- 🛡 Heartcore ENFORCE | expulsión real -->
+<script src="js/cfc_lock_core.js?v=72" defer></script>
+
 
 <!-- 🧩 CFC-SYNC READER (VALIDACIÓN SUBPASO 5/5-A) -->
 <script src="js/cfc_sync_reader.js?v=1" defer></script>
