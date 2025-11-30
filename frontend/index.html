@@ -293,8 +293,8 @@ document.addEventListener("DOMContentLoaded", () => {
 </script> 
 
 <!-- 🔥 Firebase GLOBAL - requerido por Identity y Heartcore -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js" defer></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js" defer></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
 <script>
   const firebaseConfig = {
@@ -306,7 +306,15 @@ document.addEventListener("DOMContentLoaded", () => {
     appId: "1:352796893243:web:2b8b2b30a3544559f0cf1e"
   };
 
-  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+ // PREVIENE ERRORES
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    console.log("🔥 Firebase inicializado correctamente");
+  } else {
+    console.log("🔥 Firebase ya existía");
+  }
+
+  // Instancia global SIEMPRE antes de identity/core/sync
   const db = firebase.firestore();
 </script>
 
