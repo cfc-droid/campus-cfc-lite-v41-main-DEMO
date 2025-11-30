@@ -1,8 +1,8 @@
 /* ============================================================
-   🔵 CFC-SYNC REMOTE V1 — SUBPASO 5/5-C
-   Gestión remota completa: EXPORT / IMPORT / MERGE / RESTORE
-   Ubicación remota obligatoria: users/<email>/sync/v1
-   29-11-2025 — CFC-SYNC ENGINE
+   🔵 CFC-SYNC REMOTE V1.2 — SUBPASO 5/5-C CORREGIDO
+   Gestión remota segura: EXPORT / IMPORT / MERGE / RESTORE
+   Ubicación remota: users/<email>/sync/v1
+   29-11-2025 — CFC-SYNC ENGINE (Protección extendida)
    ============================================================ */
 
 console.log("🟦 CFC_SYNC_REMOTE_READY — Archivo remoto cargado", new Date().toLocaleString());
@@ -11,22 +11,27 @@ console.log("🟦 CFC_SYNC_REMOTE_READY — Archivo remoto cargado", new Date().
    5/5-C.1 — Declaración base
    ============================================================ */
 
-async function CFC_syncRemote_export(email) { /* se implementa abajo */ }
-async function CFC_syncRemote_import(email) { /* se implementa abajo */ }
-function CFC_syncRemote_merge(localData, remoteData) { /* se implementa abajo */ }
-async function CFC_syncRemote_restore(email) { /* se implementa abajo */ }
+async function CFC_syncRemote_export(email) { /* Implementado abajo */ }
+async function CFC_syncRemote_import(email) { /* Implementado abajo */ }
+function CFC_syncRemote_merge(localData, remoteData) { /* Implementado abajo */ }
+async function CFC_syncRemote_restore(email) { /* Implementado abajo */ }
 
 
 /* ============================================================
    5/5-C.2 — EXPORT
-   Guarda TODO el JSON local en Firestore bajo:
-   users/<email>/sync/v1
+   Guarda TODO el JSON local en Firestore
    ============================================================ */
 async function CFC_syncRemote_export(email) {
+
+  // 🛡 VALIDACIÓN DE EMAIL
+  if (!email || typeof email !== "string") {
+    console.error("❌ [REMOTE-EXPORT] Email inválido:", email);
+    return null;
+  }
+
   try {
     console.log("⬆️ [REMOTE-EXPORT] Iniciando exportación…", email);
 
-    // Obtener datos locales con el READER
     const localData = CFC_syncReader_collect();
 
     const payload = {
@@ -54,10 +59,16 @@ async function CFC_syncRemote_export(email) {
 
 /* ============================================================
    5/5-C.3 — IMPORT
-   Lee el documento remoto users/<email>/sync/v1
-   NO escribe nada en localStorage todavía.
+   Lee remoto sin modificar localStorage
    ============================================================ */
 async function CFC_syncRemote_import(email) {
+
+  // 🛡 VALIDACIÓN DE EMAIL
+  if (!email || typeof email !== "string") {
+    console.error("❌ [REMOTE-IMPORT] Email inválido:", email);
+    return null;
+  }
+
   try {
     console.log("⬇️ [REMOTE-IMPORT] Leyendo remoto…", email);
 
@@ -86,9 +97,7 @@ async function CFC_syncRemote_import(email) {
 
 
 /* ============================================================
-   5/5-C.4 — MERGE
-   Arma el JSON final sin escribir local aún.
-   Prioridad: LOCAL > REMOTO
+   5/5-C.4 — MERGE (LOCAL > REMOTO)
    ============================================================ */
 function CFC_syncRemote_merge(localData = {}, remoteData = {}) {
 
@@ -108,16 +117,32 @@ function CFC_syncRemote_merge(localData = {}, remoteData = {}) {
 
 /* ============================================================
    5/5-C.5 — RESTORE
-   IMPORT remoto → READER local → MERGE → WRITER
+   IMPORT → MERGE → FILTRO SEGURIDAD → WRITER
    ============================================================ */
 async function CFC_syncRemote_restore(email) {
+
+  // 🛡 VALIDACIÓN DE EMAIL
+  if (!email || typeof email !== "string") {
+    console.error("❌ [REMOTE-RESTORE] Email inválido:", email);
+    return null;
+  }
+
   try {
     console.log("🔄 [REMOTE-RESTORE] Restauración iniciada…", email);
 
     const remoteData = await CFC_syncRemote_import(email);
     const localData = CFC_syncReader_collect();
 
-    const finalData = CFC_syncRemote_merge(localData, remoteData);
+    let finalData = CFC_syncRemote_merge(localData, remoteData);
+
+    // 🛡 AGREGADO CRÍTICO: FILTRAR CLAVES PROHIBIDAS
+    const blocked = ["CFC_SESSION", "CFC_DEVICE", "CFC_HEART", "CFC_LOCK"];
+    for (let key in finalData) {
+      if (blocked.some(prefix => key.startsWith(prefix))) {
+        console.warn("⛔ [REMOTE-RESTORE] Clave remota prohibida eliminada:", key);
+        delete finalData[key];
+      }
+    }
 
     const result = CFC_syncWriter_run(finalData);
 
@@ -129,3 +154,10 @@ async function CFC_syncRemote_restore(email) {
     return null;
   }
 }
+
+
+/* ============================================================
+   FIN DEL ARCHIVO + MENSAJE DE PRUEBAS
+   ============================================================ */
+
+console.log("🧪 CFC-SYNC REMOTE listo para pruebas manuales desde consola.");
