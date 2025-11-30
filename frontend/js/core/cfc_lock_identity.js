@@ -1,7 +1,7 @@
 /* ==========================================================
    🟥 CFC_LOCK_IDENTITY_V72.4 — HEARTCORE SIGNAL ENGINE
    Firestore Snapshot + Render Check + Señales al Heartcore
-   Integración completa con SYNC REMOTE + CFC_LOCK_CORE_V72.3
+   Integración con SYNC REMOTE + CFC_LOCK_CORE_V72.5
    Auditor: CFC-SYNC
    ========================================================== */
 
@@ -10,11 +10,11 @@
   console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72.4 cargado");
 
   /* ---------------------------------------------------------
-     FIREBASE INIT (instancia global ya existente)
+     FIREBASE (usa instancia global inicializada en firebase_init.js)
   --------------------------------------------------------- */
   let db = null;
   try {
-    db = firebase.firestore();
+    db = window.CFC_FIREBASE_DB;
     console.log("🟢 Firebase (identity) inicializado correctamente");
   } catch (err) {
     console.error("❌ Error inicializando Firebase en identity:", err);
@@ -39,7 +39,7 @@
   }
 
   /* ---------------------------------------------------------
-     🔴 EMISIÓN DE SEÑALES AL HEARTCORE (Core lo procesa)
+     EMISIÓN DE SEÑALES → HEARTCORE
   --------------------------------------------------------- */
   function sendHeartcoreSignal(type) {
     console.warn("📡 Emisión señal HEARTCORE:", type);
@@ -47,7 +47,7 @@
   }
 
   /* ---------------------------------------------------------
-     REGISTRAR SESIÓN (primer paso al loguear)
+     REGISTRAR SESIÓN EN FIRESTORE
   --------------------------------------------------------- */
   async function registerSession(email, device_id, session_id) {
     try {
@@ -68,7 +68,7 @@
   }
 
   /* ---------------------------------------------------------
-     SNAPSHOT HANDLER — Evaluación del documento en vivo
+     SNAPSHOT HANDLER
   --------------------------------------------------------- */
   function handleSnapshot(email, device_id, session_id, data) {
 
@@ -80,13 +80,13 @@
       return;
     }
 
-    // 2) Sesión remota cerrada
+    // 2) Sesión cerrada
     if (data.active_session === false) {
       sendHeartcoreSignal("SESSION_CLOSED");
       return;
     }
 
-    // 3) Cambio de session_id (manipulación o suplantación)
+    // 3) Cambio de session_id
     if (data.session_id !== session_id) {
       sendHeartcoreSignal("SESSION_CHANGED");
       return;
@@ -94,7 +94,7 @@
   }
 
   /* ---------------------------------------------------------
-     LISTENER FIRESTORE — monitoreo continuo
+     LISTENER FIRESTORE CONTINUO
   --------------------------------------------------------- */
   function listenIdentity(email, device_id, session_id) {
 
@@ -110,7 +110,7 @@
   }
 
   /* ---------------------------------------------------------
-     CHECK RENDER — validación híbrida inicial
+     CHECK RENDER (validación híbrida inicial)
   --------------------------------------------------------- */
   async function checkRenderIdentity(email, device_id) {
     try {
@@ -130,7 +130,7 @@
   }
 
   /* ---------------------------------------------------------
-     LOGIN GLOBAL — llamado desde login.html
+     LOGIN GLOBAL
   --------------------------------------------------------- */
   window.CFC_login = async function(email, license) {
 
@@ -142,16 +142,16 @@
     const session_id = makeSessionId();
     const device_id = makeDeviceId();
 
-    /* Guardar MSCU mínima (NO progreso) */
+    /* Guardar MSCU mínima */
     localStorage.setItem("CFC_EMAIL", e);
     localStorage.setItem("CFC_LICENSE", k);
     localStorage.setItem("CFC_SESSION_ID", session_id);
     localStorage.setItem("CFC_DEVICE_ID", device_id);
 
-    /* Registrar en Firestore */
+    /* Registrar sesión remota */
     await registerSession(e, device_id, session_id);
 
-    /* Activar listener permanente */
+    /* Activar monitoreo SNAPSHOT */
     listenIdentity(e, device_id, session_id);
 
     /* Validación híbrida Render */
