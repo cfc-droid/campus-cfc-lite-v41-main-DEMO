@@ -8,16 +8,6 @@
 console.log("🟦 CFC_SYNC_REMOTE_READY — Archivo remoto cargado", new Date().toLocaleString());
 
 /* ============================================================
-   5/5-C.1 — Declaración base
-   ============================================================ */
-
-async function CFC_syncRemote_export(email) {}
-async function CFC_syncRemote_import(email) {}
-function CFC_syncRemote_merge(localData, remoteData) {}
-async function CFC_syncRemote_restore(email) {}
-
-
-/* ============================================================
    5/5-C.2 — EXPORT
    Guarda TODO el JSON local en Firestore
    ============================================================ */
