@@ -304,17 +304,25 @@ document.addEventListener("DOMContentLoaded", () => {
 <!-- 🔥 Firebase necesario para CFC-SYNC REMOTE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
 <script>
   const firebaseConfig = {
-    apiKey: "...",
-    authDomain: "...",
-    projectId: "...",
-    storageBucket: "...",
-    messagingSenderId: "...",
-    appId: "..."
+    apiKey: "TU_APIKEY_AQUÍ",
+    authDomain: "TU_AUTHDOMAIN",
+    projectId: "TU_PROJECTID",
+    storageBucket: "TU_BUCKET",
+    messagingSenderId: "TU_SENDERID",
+    appId: "TU_APPID"
   };
-  firebase.initializeApp(firebaseConfig);
-  console.log("🔥 Firebase OK para REMOTE");
+
+  // Evita errores si la app ya estaba inicializada
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+    console.log("🔥 Firebase inicializado — listo para REMOTE");
+  } else {
+    firebase.app();
+    console.log("🔥 Firebase ya existente — usando instancia actual");
+  }
 </script>
 
 <!-- 🧩 CFC-SYNC READER (VALIDACIÓN SUBPASO 5/5-A) -->
