@@ -1,5 +1,5 @@
 /* ============================================================
-   🔵 CFC-SYNC REMOTE V1.2 — SUBPASO 5/5-C CORREGIDO
+   🔵 CFC-SYNC REMOTE V1.2 — SUBPASO 5/5-C CORREGIDO (FINAL)
    Gestión remota segura: EXPORT / IMPORT / MERGE / RESTORE
    Ubicación remota: users/<email>/sync/v1
    29-11-2025 — CFC-SYNC ENGINE (Protección extendida)
