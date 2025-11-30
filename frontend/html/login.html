@@ -352,6 +352,9 @@ if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
 
     console.log("✅ Credenciales válidas — acceso permitido");
 
+// ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
+sessionStorage.setItem("CFC_LOGIN_OK", "1");
+
 // ========================================================
 // 🔧 FIX CRÍTICO: evitar redeclaración de "email"
 // ========================================================
@@ -360,22 +363,6 @@ const device_id = loginData.device_id;
 const session_id = loginData.session_id;
 // ========================================================
 
-// ============================================================
-// 5/5-C — RESTORE REMOTO OBLIGATORIO TRAS LOGIN
-// ============================================================
-console.log("🟦 [LOGIN] Ejecutando RESTORE remoto antes de entrar…", email);
-
-try {
-    await CFC_syncRemote_restore(email);
-
-    console.log("🟢 [LOGIN] RESTORE completado — redirigiendo al Campus");
-} catch (err) {
-    console.error("❌ [LOGIN] Error durante RESTORE:", err);
-}
-
-// ============================================================
-// 5/5-A.3 — Marcar login OK y redirigir
-// ============================================================
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 window.location.href = "../index.html";
 
@@ -392,33 +379,12 @@ window.location.href = "../index.html";
     <!-- ✅ NO SE INCLUYE MSCU AQUÍ -->
     <!-- ✅ NO SE INCLUYE BUNDLE AQUÍ -->
 
-<!-- 🔥 Firebase necesario ANTES de identity -->
+<!-- Firebase necesario solo para login + identity -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyOua1kpY0xDEAp0u8e-7a5SdyB8abys",
-    authDomain: "cfc-lock-firebase.firebaseapp.com",
-    projectId: "cfc-lock-firebase",
-    storageBucket: "cfc-lock-firebase.firebasestorage.app",
-    messagingSenderId: "352796893243",
-    appId: "1:352796893243:web:2b8b2b30a3544559f0cf1e"
-  };
-
-  if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-    console.log("🔥 Firebase inicializado en login.html");
-  } else {
-    console.log("🔥 Firebase ya estaba inicializado");
-  }
-
-  // Instancia global antes de Identity
-  const db = firebase.firestore();
-</script>
-
-<!-- 🔐 Identity (requiere Firebase) -->
-<script src="../js/core/cfc_lock_identity.js?v=72" defer></script>
+<!-- 🔐 Identidad Firestore + Render | necesario en login -->
+<script src="../js/core/cfc_lock_identity.js?v=72"></script>
     
   </body>
 </html>
