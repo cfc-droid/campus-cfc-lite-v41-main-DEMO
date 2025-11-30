@@ -1,8 +1,8 @@
 /* ==========================================================
-   🟩 CFC_LOCK_CORE_V72.5 — HEARTCORE SIGNAL BUS
-   Render + Firestore + Identity Signals
-   Expulsión REAL sin loops — preserva progreso
-   Auditor CFC-SYNC
+   🟩 CFC_LOCK_CORE_V72_ENFORCE_REAL (GLOBAL)
+   Sistema híbrido Render + Local
+   Función: Heartbeat + Update + Check + Expulsión Real
+   Auditor: CFC-SYNC
    ========================================================== */
 
 (function () {
@@ -10,11 +10,11 @@
   const API = "https://cfc-lock-proxy.onrender.com";
   const CFC_LOCK_ENFORCE = true;
 
-  console.log("🧩 QA-SYNC | CFC_LOCK_CORE V72.5 cargado");
+  console.log("🧩 QA-SYNC | CFC_LOCK_CORE V72-ENFORCE REAL cargado");
 
-  /* ---------------------------------------------------------
+  /* -------------------------------------------
      Obtener MSCU local
-  --------------------------------------------------------- */
+  ------------------------------------------- */
   function getLocalSession() {
     const email = localStorage.getItem("CFC_EMAIL");
     const device_id = localStorage.getItem("CFC_DEVICE_ID");
@@ -22,11 +22,11 @@
     return (email && device_id && session_id) ? { email, device_id, session_id } : null;
   }
 
-  /* ---------------------------------------------------------
-     Limpieza sin borrar progreso
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     Limpieza full excepto progreso
+  ------------------------------------------- */
   function clearMSCU() {
-    console.log("🧹 [HEARTCORE] Limpieza MSCU…");
+    console.log("🧹 [CFC-LOCK] Limpieza MSCU LOCAL…");
 
     const preserve = ["CFC_PROGRESS", "CFC_TIMER", "CFC_LAST_MODULE", "CFC_HISTORY"];
 
@@ -37,15 +37,15 @@
     sessionStorage.clear();
   }
 
-  /* ---------------------------------------------------------
-     EXPULSIÓN MAESTRA
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     EXPULSIÓN REAL
+  ------------------------------------------- */
   async function forceLogout(reason, email, device_id) {
 
     if (window.__CFC_FORCELOGOUT_ACTIVE__) return;
     window.__CFC_FORCELOGOUT_ACTIVE__ = true;
 
-    console.warn("🚨 EXPULSIÓN REAL — HEARTCORE:", { reason, email, device_id });
+    console.warn("🚨 EXPULSIÓN REAL:", { reason, email, device_id });
 
     if (window.CFC_showBlockOverlay)
       CFC_showBlockOverlay(email, device_id, reason);
@@ -57,44 +57,12 @@
 
     setTimeout(() => {
       window.location.href = "/frontend/html/login.html";
-    }, 1400);
+    }, 1500);
   }
 
-  /* ---------------------------------------------------------
-     Procesar SEÑALES de identity.js
-  --------------------------------------------------------- */
-  function processIdentitySignals(s) {
-
-    const signal = localStorage.getItem("CFC_HEARTCORE_SIGNAL");
-    if (!signal) return;
-
-    console.warn("📡 [HEARTCORE] Señal recibida:", signal);
-
-    localStorage.removeItem("CFC_HEARTCORE_SIGNAL");
-
-    switch (signal) {
-
-      case "DEVICE_CONFLICT":
-        forceLogout("Sesión iniciada en otro dispositivo (IDENTITY)", s.email, s.device_id);
-        break;
-
-      case "SESSION_CHANGED":
-        forceLogout("Sesión manipulada o reemplazada (IDENTITY)", s.email, s.device_id);
-        break;
-
-      case "SESSION_CLOSED":
-        forceLogout("Sesión cerrada remotamente (IDENTITY)", s.email, s.device_id);
-        break;
-
-      default:
-        console.log("ℹ️ Señal desconocida:", signal);
-        break;
-    }
-  }
-
-  /* ---------------------------------------------------------
-     HEARTBEAT
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     Heartbeat
+  ------------------------------------------- */
   async function sendHeartbeat(s) {
     try {
       const r = await fetch(`${API}/heartbeat`, {
@@ -103,37 +71,36 @@
         body: JSON.stringify({ email: s.email, device_id: s.device_id })
       });
       console.log("❤️ [HEARTBEAT]", await r.json());
-    } catch (err) {
-      console.warn("⚠️ Heartbeat error", err);
+    } catch (e) {
+      console.warn("⚠️ Heartbeat error", e);
     }
   }
 
-  /* ---------------------------------------------------------
-     UPDATE SESSION
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     Update-session
+  ------------------------------------------- */
   async function sendUpdate(s) {
     try {
       const r = await fetch(`${API}/update-session`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {"Content-Type": "application/json"},
         body: JSON.stringify(s)
       });
       const json = await r.json();
-
       console.log("🟡 [UPDATE-SESSION]", json);
 
       if (CFC_LOCK_ENFORCE && json.status === "invalid") {
         await forceLogout("Sesión iniciada en otro dispositivo (UPDATE)", s.email, s.device_id);
       }
 
-    } catch (err) {
-      console.warn("⚠️ update-session error", err);
+    } catch (e) {
+      console.warn("⚠️ update-session error", e);
     }
   }
 
-  /* ---------------------------------------------------------
-     CHECK REMOTO
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     Check Render híbrido
+  ------------------------------------------- */
   async function checkRemote(s) {
     try {
       const r = await fetch(`${API}/check-session?email=${s.email}&device_id=${s.device_id}`);
@@ -144,22 +111,22 @@
         await forceLogout("Sesión iniciada en otro dispositivo (CHECK)", s.email, s.device_id);
       }
 
-    } catch (err) {
-      console.warn("⚠️ check-session error", err);
+    } catch (e) {
+      console.warn("⚠️ check-session error", e);
     }
   }
 
-  /* ---------------------------------------------------------
-     HEARTCORE LOOP
-  --------------------------------------------------------- */
+  /* -------------------------------------------
+     LOOP HEARTCORE
+  ------------------------------------------- */
   async function heartcoreLoop() {
 
     const s = getLocalSession();
     if (!s) return;
 
+    // No ejecutar en login
     if (window.location.pathname.includes("login")) return;
 
-    processIdentitySignals(s);
     await sendHeartbeat(s);
     await sendUpdate(s);
     await checkRemote(s);
