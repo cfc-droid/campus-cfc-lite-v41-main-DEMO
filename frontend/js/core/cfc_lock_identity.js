@@ -17,14 +17,14 @@
     projectId: "cfc-lock-firebase",
   };
 
-  let db = null;
-  try {
-const app = firebase.app();
-const db = firebase.firestore();
-    console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
-  } catch (err) {
-    console.error("❌ Firebase init error:", err);
-  }
+let db = null;
+try {
+  const app = firebase.app();
+  db = firebase.firestore();  // <–– SIN "const"
+  console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
+} catch (err) {
+  console.error("❌ Firebase init error:", err);
+}
 
   /* -------------------------------------------
      Utilidades
