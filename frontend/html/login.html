@@ -379,16 +379,17 @@ window.location.href = "../index.html";
     <!-- ✅ NO SE INCLUYE MSCU AQUÍ -->
     <!-- ✅ NO SE INCLUYE BUNDLE AQUÍ -->
 
-<!-- Firebase necesario solo para login + identity -->
+<!-- 1) DOMAIN LOCK (ANTES DE TODO) -->
+<script src="../js/domain_lock_v72.js?v=72"></script>
+
+<!-- 2) FIREBASE (SDK) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
+<!-- 3) FIREBASE INIT (APP GLOBAL) -->
 <script src="../js/core/firebase_init.js?v=1"></script>
 
-<script src="../js/domain_lock_v72.js?v=72"></script>
-
-<!-- 🔐 Identidad Firestore + Render | necesario en login -->
+<!-- 4) IDENTITY (USA FIREBASE GLOBAL + DOMAIN LOCK) -->
 <script src="../js/core/cfc_lock_identity.js?v=72"></script>
-    
-  </body>
+</body>
 </html>
