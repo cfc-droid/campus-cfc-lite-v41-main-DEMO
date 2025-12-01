@@ -12,6 +12,7 @@ console.log(
 
 /* ============================================================
    🟦 5/5-B.3 — VALIDACIÓN DEL PAYLOAD
+   (CORREGIDO PARA PRUEBA 3 — RESTAURACIÓN PARCIAL SEGURA)
    ============================================================ */
 function CFC_syncWriter_validatePayload(jsonData) {
   console.log("🔍 [WRITER] Validando payload recibido…");
@@ -35,18 +36,19 @@ function CFC_syncWriter_validatePayload(jsonData) {
     "CFC_LOCK"
   ];
 
+  // 🔥 PRUEBA 3 — CAMBIO CRÍTICO:
+  // Ya NO se cancela restauración por encontrar 1 clave prohibida.
+  // Ahora simplemente se elimina la clave del payload y se sigue.
   for (let key of claves) {
     for (let block of prefijosProhibidos) {
       if (key.startsWith(block)) {
-        console.warn(
-          `⚠️ [WRITER] Clave prohibida detectada y omitida: ${key}`
-        );
-        return false;
+        console.warn(`⚠️ [WRITER] Clave prohibida omitida del payload: ${key}`);
+        delete jsonData[key]; // ← ELIMINAR CLAVE PROHIBIDA
       }
     }
   }
 
-  console.log("✅ [WRITER] Payload válido.");
+  console.log("✅ [WRITER] Payload válido (con claves prohibidas omitidas si existían).");
   return true;
 }
 
