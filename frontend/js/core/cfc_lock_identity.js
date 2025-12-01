@@ -19,8 +19,8 @@
 
   let db = null;
   try {
-    const app = firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore(app);
+const app = firebase.app();
+const db = firebase.firestore();
     console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
   } catch (err) {
     console.error("❌ Firebase init error:", err);
