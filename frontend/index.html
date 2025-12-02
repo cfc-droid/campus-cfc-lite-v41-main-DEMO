@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Campus CFC LITE — Inicio</title>
+
+  <script>
+    (function() {
+      const isCloudflare = window.location.hostname.includes("pages.dev");
+      const base = isCloudflare ? "/" : "/frontend/";
+      document.write(`<base href="${base}">`);
+    })();
+  </script>
+
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="css/premium.min.css?v=20251104" />
+
+  <style>
+    /* ============================================================
+       ✅ CFC_FUNC_1_1_7_V41.7 — Splash Premium (Logo + Glow mejorado)
+       ============================================================ */
+    #intro-splash {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle, #000 0%, #0a0a0a 100%);
+      z-index: 9999;
+      transition: opacity 1s ease-in-out;
+    }
+    #intro-splash.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    #intro-splash img {
+      width: 265px;
+      border-radius: 14px;
+      border: 2px solid #ffd700;
+      box-shadow:
+        0 0 25px rgba(255,215,0,0.85),
+        0 0 60px rgba(255,215,0,0.4);
+      animation: zoomIn 1.4s ease-in-out;
+    }
+    #splash-phrase {
+      color: #ffd700;
+      margin: 18px 0;
+      font-weight: 600;
+      font-size: 1.15rem;
+      text-shadow: 0 0 14px rgba(255,215,0,0.45);
+      animation: fadeInUp 1.8s ease-in-out;
+    }
+    #enterSplash {
+      padding: 13px 28px;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(90deg,#ffd700,#f0c03d);
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 16px rgba(255,215,0,0.6);
+      transition: all 0.3s ease;
+      animation: fadeInUp 2.2s ease-in-out;
+    }
+    #enterSplash:hover {
+      background: #000;
+      color: #ffd700;
+      transform: scale(1.06);
+      box-shadow: 0 0 22px rgba(255,215,0,0.8);
+    }
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ==========================================================
+       ✅ CFC_FUNC_7_2BIS_20251102 — Estilos guía visual interactiva
+       ========================================================== */
+    .guide-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      animation: fadeIn 0.6s ease forwards;
+    }
+    .guide-box {
+      background: var(--color-panel, #111);
+      color: var(--color-text, #f5f5f5);
+      padding: 25px 35px;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+      max-width: 450px;
+      text-align: center;
+      line-height: 1.5;
+      border: 2px solid #ffd700;
+      animation: pulseGlow 2.5s infinite alternate ease-in-out;
+    }
+    .guide-box h2 {
+      color: var(--color-accent, #ffd700);
+      margin-bottom: 15px;
+    }
+    .guide-box ul {
+      list-style: none;
+      padding: 0;
+      margin: 0 0 20px;
+    }
+    .guide-box li {
+      margin: 8px 0;
+      font-weight: 500;
+    }
+    .btn-guide {
+      background: linear-gradient(90deg, #d4af37, #ffd700);
+      color: #000;
+      font-weight: 700;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.3s;
+    }
+    .btn-guide:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes pulseGlow {
+      from { box-shadow: 0 0 8px rgba(255, 215, 0, 0.4); }
+      to { box-shadow: 0 0 20px rgba(255, 215, 0, 0.8); }
+    }
+  </style>
+</head>
+
+<body>
+
+<!-- ✅ CFC_FUNC_4_5_A3 — Verificación mínima login -->
+<script>
+(function() {
+  const ok = sessionStorage.getItem("CFC_LOGIN_OK");
+  if (!ok) {
+    console.log("🚫 Acceso sin login — redirigiendo (A3 FIX)");
+    window.location.href = "./html/login.html";
+  } else {
+    console.log("✅ Acceso permitido — sesión marcada (A3 FIX)");
+  }
+})();
+</script>
+
+  <!-- ✨ Intro Premium Splash -->
+  <div id="intro-splash">
+    <img id="logoCFC" src="img/logo.png" alt="Logo CFC" />
+    <p id="splash-phrase">El control es la verdadera libertad 🧠</p>
+    <button id="enterSplash">Entrar al Campus</button>
+  </div>
+
+  <!-- ✨ Fondo de partículas -->
+  <div id="particles-bg"></div>
+
+  <!-- 🧩 Navbar -->
+  <nav class="navbar">
+    <div class="logo">Campus CFC LITE V41</div>
+    <div class="menu">
+      <a href="index.html">Inicio</a>
+      <a href="modules/index.html">Módulos</a>
+      <a href="./pages/resultados.html">Resultados</a>
+      <a href="./pages/profile.html">Perfil</a>
+    </div>
+  </nav>
+
+  <!-- 🧩 Contenido principal -->
+  <main class="card">
+    <span class="pill">Versión LITE con progreso, exámenes y sonidos 🎧</span>
+    <h1>Campus CFC LITE</h1>
+
+    <p id="motivation-rotator">El control es la verdadera libertad 🧠</p>
+
+    <p class="lead">
+      20 módulos (4 capítulos + examen por módulo), progreso, historial y refuerzos motivacionales.
+    </p>
+
+    <div class="main-buttons">
+      <button class="btn-main" onclick="window.location.href='intro.html'">🎬 Ver Video Guía</button>
+      <button class="btn-main" onclick="showGuide()">🧭 Cómo usar el Campus</button>
+      <button class="btn-main" onclick="location.href='modules/index.html'">🎓 Entrar al Campus</button>
+      <button class="btn-main" onclick="location.href='pages/results.html'">📈 Mi historial de exámenes</button>
+      <button class="btn-main" onclick="location.href='pages/faq.html'">❓ FAQ</button>
+      <button class="btn-main" onclick="location.href='pages/profile.html'">👤 Perfil</button>
+      <button class="btn-main" onclick="toggleThemeSafe()">🌗 Cambiar fondo</button>
+    </div>
+<!-- ✅ CFC_FUNC_9_1_20251105 — CFC-PACK PLUS V1 -->
+<a href="/assets/CFC_Pack_2025.zip" download class="btn-premium">
+  📘 Contenido adicional (CFC Pack 2025)
+</a>
+
+    <p class="hint">
+      💡 Sugerencia: guardá este enlace directo a los módulos:<br />
+      <code>modules/index.html</code>
+    </p>
+  </main>
+
+  <div id="footer-placeholder"></div>
+
+  <!-- Scripts -->
+  <script src="js/loader.js?v=20251105" defer></script>
+  <script src="js/footer.js?v=20251103" defer></script>
+  <!-- <script src="js/theme.js?v=20251103" defer></script> -->
+
+<!-- ✅ CFC_FUNC_5_3_FIX_V41.21 — Sistema unificado de tema global -->
+<script src="js/theme_chapter_v2.js?v=20251106" defer></script>
+  
+  <!-- ✅ Nueva mini guía visual -->
+  <script src="js/guide.js?v=20251103" defer></script>
+
+  <script>
+    /* ✨ Partículas doradas + motivador */
+    document.addEventListener("DOMContentLoaded", () => {
+      const container = document.getElementById("particles-bg");
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement("div");
+        p.classList.add("particle");
+        p.style.left = Math.random() * 100 + "%";
+        p.style.animationDuration = 5 + Math.random() * 10 + "s";
+        p.style.animationDelay = Math.random() * 10 + "s";
+        container.appendChild(p);
+      }
+
+      const frases = [
+        "El control es la verdadera libertad 🧠",
+        "El mercado premia la paciencia 🕰️",
+        "Disciplina hoy, libertad mañana 💰",
+        "Tu constancia define tu curva de capital 📈",
+        "La emoción es tu peor enemigo 😶‍🌫️"
+      ];
+      let i = 0;
+      const rotator = document.getElementById("motivation-rotator");
+      setInterval(() => {
+        i = (i + 1) % frases.length;
+        rotator.style.opacity = 0;
+        setTimeout(() => {
+          rotator.textContent = frases[i];
+          rotator.style.opacity = 1;
+        }, 600);
+      }, 5000);
+    });
+
+    function toggleThemeSafe() {
+      try { toggleTheme(); }
+      catch(e){ console.warn("toggleTheme no disponible:", e); }
+    }
+  </script>
+
+  <!-- 🧩 QA-SYNC V43.3 — Mini Guía Visual confirmada -->
+  <script>
+    console.log("🧩 CFC_SYNC checkpoint:", "index.html — CFC_FUNC_7_2BIS_20251102 aplicado", new Date().toLocaleString());
+  </script>
+
+<!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  // Evitar duplicados
+  if (!document.getElementById("theme-toggle")) {
+    const btn = document.createElement("button");
+    btn.id = "theme-toggle";
+    btn.textContent = "☀️";
+    document.body.appendChild(btn);
+
+    // Cargar estado previo
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    // Evento de cambio
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    });
+  }
+});
+</script> 
+
+<!-- 🔒 Overlay negro-dorado global -->
+<script src="js/core/overlay_block.js?v=72" defer></script>
+
+<!-- 🔐 Identidad Firestore + Render | ENFORCE REAL -->
+<script src="js/core/cfc_lock_identity.js?v=72" defer></script>
+
+<!-- 🛡 Heartcore ENFORCE | expulsión real -->
+<script src="js/cfc_lock_core.js?v=72" defer></script>
+
+<!-- 🔒 CFC-LOCK LITE -->
+<script src="/js/domain_lock_lite.js"></script>
+</body>
+</html>
