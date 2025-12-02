@@ -295,7 +295,14 @@ document.addEventListener("DOMContentLoaded", () => {
 <!-- 🔒 Overlay negro-dorado global -->
 <script src="js/core/overlay_block.js?v=72" defer></script>
 
-<!-- 🔐 Identidad Firestore + Render | ENFORCE REAL -->
+<!-- 1) FIREBASE SDK -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+
+<!-- 2) FIREBASE INIT GLOBAL -->
+<script src="js/core/firebase_init.js?v=1"></script>
+
+<!-- 3) IDENTITY -->
 <script src="js/core/cfc_lock_identity.js?v=72" defer></script>
 
 <!-- 🛡 Heartcore ENFORCE | expulsión real -->
