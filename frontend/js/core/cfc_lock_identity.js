@@ -9,17 +9,21 @@
   console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_ENFORCE_REAL cargado");
 
   /* -------------------------------------------
-     Firebase inicializar (CORREGIDO)
+     Firebase inicializar
   ------------------------------------------- */
-  // ❗ YA NO se inicializa Firebase aquí. 
-  // Identity usa la instancia global creada en firebase_init.js
+  const firebaseConfig = {
+    apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+    authDomain: "cfc-lock-firebase.firebaseapp.com",
+    projectId: "cfc-lock-firebase",
+  };
 
   let db = null;
   try {
-    db = window.CFC_FIREBASE_DB;  // ← instancia única global
-    console.log("🟢 Firebase conectado mediante instancia GLOBAL (INIT OK)");
+    const app = firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore(app);
+    console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
   } catch (err) {
-    console.error("❌ Firebase init error (GLOBAL):", err);
+    console.error("❌ Firebase init error:", err);
   }
 
   /* -------------------------------------------
