@@ -117,7 +117,7 @@
   }
 
   /* -------------------------------------------
-     LOOP HEARTCORE (DESACTIVADO POR DEFECTO)
+     LOOP HEARTCORE
   ------------------------------------------- */
   async function heartcoreLoop() {
 
@@ -132,20 +132,7 @@
     await checkRemote(s);
   }
 
-  /* -------------------------------------------
-     ❌ ELIMINADO:
-     setInterval(heartcoreLoop, 5000);
-     heartcoreLoop();
-     (Esto causaba expulsiones tempranas)
-  ------------------------------------------- */
-
-  /* -------------------------------------------
-     🟢 NUEVO — Activación SOLO después de BOOT
-  ------------------------------------------- */
-  window.addEventListener("CFC_BOOT_OK", () => {
-    console.log("🟩 HEARTCORE habilitado tras BOOT");
-    heartcoreLoop();
-    setInterval(heartcoreLoop, 5000);
-  });
+  setInterval(heartcoreLoop, 5000);
+  heartcoreLoop();
 
 })();
