@@ -323,6 +323,10 @@ const CFC_USERS = {
   document.getElementById("loginForm").addEventListener("submit", async function (e) {
     e.preventDefault();
 
+    // 🔥 LIMPIEZA ABSOLUTA DE SESIONES ANTERIORES
+  localStorage.clear();
+  sessionStorage.clear();
+
     const email = document.getElementById("email").value.trim();
     const license = document.getElementById("license").value.trim();
     const errorMsg = document.getElementById("errorMsg");
