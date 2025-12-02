@@ -19,9 +19,9 @@
 
 let db = null;
 try {
-  const app = firebase.app();
-  db = firebase.firestore();  // <–– SIN "const"
-  console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
+  db = window.CFC_FIREBASE_DB; // ← INSTANCIA GLOBAL CORRECTA
+  if (!db) throw new Error("CFC_FIREBASE_DB no está inicializado");
+  console.log("🟢 Firebase DB cargado desde instancia global (INIT V2)");
 } catch (err) {
   console.error("❌ Firebase init error:", err);
 }
