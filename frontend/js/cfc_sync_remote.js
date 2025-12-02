@@ -30,7 +30,7 @@ async function CFC_syncRemote_export(email) {
       version: "v1"
     };
 
-    await firebase.firestore()
+    await window.CFC_FIREBASE_DB
       .collection("users")
       .doc(email)
       .collection("sync")
@@ -62,7 +62,7 @@ async function CFC_syncRemote_import(email) {
   try {
     console.log("⬇️ [REMOTE-IMPORT] Leyendo remoto…", email);
 
-    const snap = await firebase.firestore()
+    const snap = await window.CFC_FIREBASE_DB
       .collection("users")
       .doc(email)
       .collection("sync")
