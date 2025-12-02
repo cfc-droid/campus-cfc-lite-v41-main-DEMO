@@ -1,0 +1,328 @@
+<!-- ==========================================================
+✅ CFC_FUNC_2_18_V45.2_FIX_THEME_FINAL — Overlay Motivacional Premium Restaurado
+========================================================== -->
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Módulos del Campus CFC LITE</title>
+
+  <!-- CSS principal -->
+  <link rel="stylesheet" href="../css/premium.css?v=20251103" />
+  <link rel="stylesheet" href="../css/extra-extra.css?v=20251101" />
+  <link rel="stylesheet" href="../css/variables.css?v=20251101" />
+
+  <style>
+      :root {
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    body {
+      font-family: "Poppins", sans-serif;
+      background-color: var(--color-bg);
+      color: var(--color-text);
+      margin: 0;
+      padding: 0;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    main {
+      max-width: 1100px;
+      margin: 40px auto;
+      background: var(--color-panel);
+      border-radius: 10px;
+      box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.25);
+      padding: 30px;
+      transition: background-color 0.5s ease, color 0.5s ease;
+    }
+
+    h1 {
+      text-align: center;
+      color: var(--color-accent);
+      margin-bottom: 30px;
+      transition: color 0.5s ease;
+    }
+
+    ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+
+    li {
+      background: var(--color-panel);
+      border-radius: 8px;
+      padding: 14px;
+      text-align: center;
+      font-weight: 600;
+      box-shadow: 0 0px 8px rgba(0, 0, 0, 0.25);
+      transition: transform 0.25s, box-shadow 0.25s, background-color 0.5s ease;
+      opacity: 0;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    li:hover {
+      transform: scale(1.05);
+      box-shadow: 0 12px 18px rgba(255, 215, 0, 0.7);
+    }
+
+    a {
+      color: var(--color-text);
+      text-decoration: none;
+      display: block;
+      transition: color 0.3s ease;
+    }
+
+    a:hover {
+      color: var(--color-accent);
+    }
+
+    footer {
+      text-align: center;
+      margin-top: 40px;
+      font-size: 0.9em;
+      color: var(--color-text);
+      opacity: 0.8;
+      transition: color 0.5s ease;
+    }
+
+    .btn-volver {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 12px 25px;
+      background: linear-gradient(90deg, #0072ff, #00c6ff);
+      color: white;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.2s ease-in-out;
+      border: none;
+    }
+
+    .btn-volver:hover {
+      transform: scale(1.05);
+      background: linear-gradient(90deg, #005dd4, #00a3cc);
+    }
+
+    #cfc-progress-container {
+      width: 90%;
+      margin: 0 auto 30px auto;
+      background: #222;
+      border-radius: 12px;
+      height: 24px;
+      overflow: hidden;
+      box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.5);
+      position: relative;
+    }
+
+    #cfc-progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #d4af37, #ffd700);
+      transition: width 0.5s ease-in-out;
+    }
+
+    #cfc-progress-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: #fff;
+      font-weight: bold;
+      font-size: 14px;
+      text-shadow: 1px 1px 3px #000;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Overlay motivacional */
+    #motivationalOverlay {
+      position: fixed;
+      inset: 0;
+      font-size: 1.4rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      z-index: 99999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.8s ease-in-out;
+      flex-direction: column;
+      line-height: 1.5;
+      letter-spacing: 0.4px;
+    }
+
+    #motivationalOverlay.visible {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    #motivationalOverlay p {
+      max-width: 600px;
+      margin: 0 20px;
+    }
+
+    .confetti {
+      position: fixed;
+      width: 8px;
+      height: 8px;
+      top: -10px;
+      animation: fall 3s linear forwards;
+      z-index: 999999;
+    }
+
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+  </style>    
+</head>
+
+<body>
+  <!-- ✅ Botón modo claro/oscuro sincronizado -->
+<button id="theme-toggle" title="Cambiar tema claro/oscuro" 
+  style="
+    position:fixed;top:18px;right:20px;width:44px;height:44px;
+    border-radius:50%;border:2px solid var(--color-accent,#ffd700);
+    background:var(--color-panel,#111);color:var(--color-accent,#ffd700);
+    font-size:1.2rem;font-weight:700;cursor:pointer;z-index:9999;
+    transition:all .3s ease-in-out;box-shadow:0 0 10px rgba(255,215,0,0.3);
+  ">🌙</button>
+
+  <main id="dashboard">
+    <h1>📘 Módulos del Campus CFC Trading LITE</h1>
+
+    <div id="cfc-progress-container">
+      <div id="cfc-progress-bar"></div>
+      <span id="cfc-progress-text">0% completado</span>
+    </div>
+
+    <ul>
+      <li><a class="module-link" href="./1/index.html">Módulo 1 – Introducción a la Psicología del Trader</a></li>
+      <li><a class="module-link" href="./2/index.html">Módulo 2 – Neurociencia del Trading</a></li>
+      <li><a class="module-link" href="./3/index.html">Módulo 3 – Fundamentos de Psicología Profunda</a></li>
+      <li><a class="module-link" href="./4/index.html">Módulo 4 – Modelo Mental del Trader Profesional</a></li>
+      <li><a class="module-link" href="./5/index.html">Módulo 5 – Herramientas Avanzadas de Regulación Emocional</a></li>
+      <li><a class="module-link" href="./6/index.html">Módulo 6 – Psicología de la Gestión del Capital</a></li>
+      <li><a class="module-link" href="./7/index.html">Módulo 7 – Estrategias Psicológicas por Etapas</a></li>
+      <li><a class="module-link" href="./8/index.html">Módulo 8 – Integración Estrategia–Psicología</a></li>
+      <li><a class="module-link" href="./9/index.html">Módulo 9 – Casos de Estudio y Simulaciones Reales</a></li>
+      <li><a class="module-link" href="./10/index.html">Módulo 10 – Optimización Mental y Rendimiento Peak</a></li>
+      <li><a class="module-link" href="./11/index.html">Módulo 11 – Ecosistema de Apoyo y Herramientas</a></li>
+      <li><a class="module-link" href="./12/index.html">Módulo 12 – Maestría Continua y Legado</a></li>
+      <li><a class="module-link" href="./13/index.html">Módulo 13 – Psicología del Error y Reprogramación Mental</a></li>
+      <li><a class="module-link" href="./14/index.html">Módulo 14 – El Mapa del Autocontrol Extremo</a></li>
+      <li><a class="module-link" href="./15/index.html">Módulo 15 – Arquitectura del Trading Mental Automático</a></li>
+      <li><a class="module-link" href="./16/index.html">Módulo 16 – Reversión Psicológica y Superación del Burnout</a></li>
+      <li><a class="module-link" href="./17/index.html">Módulo 17 – Psicología del Trader de Alto Impacto</a></li>
+      <li><a class="module-link" href="./18/index.html">Módulo 18 – La Mentalidad del Mentor Trader</a></li>
+      <li><a class="module-link" href="./19/index.html">Módulo 19 – Integración Total Cuerpo–Mente–Mercado</a></li>
+      <li><a class="module-link" href="./20/index.html">Módulo 20 – Legado Final del Trader Consciente</a></li>
+    </ul>
+
+    <div style="text-align:center;">
+      <button class="btn-volver" onclick="window.location.href='../loader.html?v=20251101'">⬅ Volver al inicio</button>
+      <button id="continueBtn" class="continue-btn">▶ Continuar último módulo</button>
+      <button id="resetProgressBtn" class="reset-btn">🔄 Reiniciar progreso</button>
+    </div>
+  </main>
+
+  <footer>© 2025 Campus CFC Trading — Versión V41</footer>
+
+  <script src="../js/progress_v2.js?v=20251102" defer></script>
+  <script src="../js/exam-logic_v2.js?v=20251101" defer></script>
+  <script src="../js/motivation_v2.js?v=20251101" defer></script>
+  <script src="../js/auto_injector.js?v=20251102" defer></script>
+
+  <!-- ✅ Overlay Motivacional Dorado + Audio + Confeti + Detección dinámica -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const resetBtn = document.getElementById("resetProgressBtn");
+      if (!resetBtn) return;
+
+      const frases = [
+        "✨ Volver a empezar también es progreso. Cada reinicio te acerca a la versión más consciente de vos mismo.",
+        "💫 Cada paso que reiniciás, fortalece tu disciplina mental. Seguís creciendo.",
+        "🔥 Reiniciar no es rendirse, es reprogramar tu mente para superar tu propio límite.",
+        "🌟 Cada comienzo es una oportunidad de hacerlo con más sabiduría que antes.",
+        "🏆 La constancia es el puente entre tus errores y tu maestría."
+      ];
+
+      resetBtn.addEventListener("click", () => {
+        const overlay = document.createElement("div");
+        overlay.id = "motivationalOverlay";
+        overlay.innerHTML = `<p>${frases[Math.floor(Math.random() * frases.length)]}</p>`;
+
+        // Detectar modo visual real
+        const bg = getComputedStyle(document.body).getPropertyValue("--color-bg").trim();
+        const isLight = bg.includes("255") || bg === "#fff" || bg === "white";
+        overlay.style.background = isLight ? "rgba(255,255,255,0.95)" : "rgba(0,0,0,0.85)";
+        overlay.style.color = "#d4af37";
+
+        document.body.appendChild(overlay);
+
+        // Sonido
+        const audio = new Audio("../audio/bell-gold.wav");
+        audio.volume = 0.7;
+        setTimeout(() => audio.play().catch(()=>{}), 300);
+
+        // Confeti
+        for (let i = 0; i < 60; i++) {
+          const conf = document.createElement("div");
+          conf.classList.add("confetti");
+          conf.style.left = Math.random() * 100 + "vw";
+          conf.style.background = ["#d4af37", "#ffd700"][Math.floor(Math.random() * 2)];
+          conf.style.animationDuration = 2.5 + Math.random() * 1.5 + "s";
+          document.body.appendChild(conf);
+          setTimeout(() => conf.remove(), 3500);
+        }
+
+        // Mostrar y remover
+        setTimeout(() => overlay.classList.add("visible"), 100);
+        setTimeout(() => overlay.classList.remove("visible"), 3500);
+        setTimeout(() => overlay.remove(), 4000);
+      });
+    });
+  </script>
+
+  <script src="../js/activity_tracker.js?v=20251106" defer></script>
+  <script>
+    console.log("🧩 CFC_SYNC checkpoint: modules/index.html — V45.2_FIX_THEME_FINAL ✅", new Date().toLocaleString());
+  </script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47_MODULES — Restauración botón claro/oscuro -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const btn = document.getElementById("theme-toggle");
+  const currentTheme = localStorage.getItem("theme") || "dark";
+
+  // Aplicar tema guardado
+  document.documentElement.setAttribute("data-theme", currentTheme);
+  btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+  // Cambiar tema
+  btn.addEventListener("click", () => {
+    const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", newTheme);
+    localStorage.setItem("theme", newTheme);
+    btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+  });
+});
+</script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
