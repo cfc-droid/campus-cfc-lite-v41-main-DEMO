@@ -9,7 +9,7 @@
   console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_ENFORCE_REAL cargado");
 
   /* -------------------------------------------
-     Firebase inicializar
+     Firebase inicializar (USAR INSTANCIA GLOBAL)
   ------------------------------------------- */
   const firebaseConfig = {
     apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
@@ -19,11 +19,17 @@
 
   let db = null;
   try {
-    const app = firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore(app);
-    console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
+
+    // 🔥 USAR INSTANCIA GLOBAL — NO inicializar de nuevo
+    if (window.CFC_FIREBASE_DB) {
+      db = window.CFC_FIREBASE_DB;
+      console.log("🟢 Identity usando instancia global de Firebase");
+    } else {
+      console.error("❌ ERROR GRAVE: CFC_FIREBASE_DB no existe — firebase_init.js no cargó antes.");
+    }
+
   } catch (err) {
-    console.error("❌ Firebase init error:", err);
+    console.error("❌ Firebase init error (IDENTITY):", err);
   }
 
   /* -------------------------------------------
