@@ -379,15 +379,54 @@ window.location.href = "../index.html";
     <!-- ✅ NO SE INCLUYE MSCU AQUÍ -->
     <!-- ✅ NO SE INCLUYE BUNDLE AQUÍ -->
 
-<!-- Firebase necesario solo para login + identity -->
+<!-- Firebase necesario solo para login -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<!-- Inicialización global única -->
-<script src="../js/core/firebase_init.js?v=1"></script>
+<!-- Inicialización global -->
+<script src="../js/core/firebase_init.js?v=41"></script>
 
-<!-- Identidad Firestore + Render -->
-<script src="../js/core/cfc_lock_identity.js?v=72"></script>
-    
-  </body>
-</html>
+<script>
+  document.getElementById("loginForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const email = document.getElementById("email").value.trim().toLowerCase();
+    const license = document.getElementById("license").value.trim();
+
+    if (!email || !license) return;
+
+    if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
+      document.getElementById("errorPremium").style.display = "block";
+      return;
+    }
+
+    /* Registrar datos mínimos */
+    const device_id = crypto.randomUUID();
+    const session_id = Date.now() + "_" + Math.random().toString(36).slice(2, 10);
+
+    localStorage.setItem("CFC_EMAIL", email);
+    localStorage.setItem("CFC_LICENSE", license);
+    localStorage.setItem("CFC_DEVICE_ID", device_id);
+    localStorage.setItem("CFC_SESSION_ID", session_id);
+
+    sessionStorage.setItem("CFC_LOGIN_OK", "1");
+
+    /* Registrar sesión básica en Firestore */
+    try {
+      const db = firebase.firestore();
+      await db.collection("sessions").doc(email).set({
+        email,
+        device_id,
+        session_id,
+        active_session: true,
+        last_active: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch (e) {
+      console.error("❌ Error registrando sesión:", e);
+    }
+
+    window.location.href = "../index.html";
+  });
+</script>
+
+<!-- NO CARGAR IDENTITY AQUÍ -->
