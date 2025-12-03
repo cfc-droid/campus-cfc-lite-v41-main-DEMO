@@ -1,90 +1,22 @@
-// 🔒 CFC-LOCK LITE — DOMAIN & ENVIRONMENT PROTECTION
-// Versión: V1.0 — 2025-11-26
-// Este archivo protege el Campus contra:
-// - file://
-// - localhost
-// - iframes
-// - WebView (Android/iOS)
-// - dominios pirata
-// No toca login, progreso, ni sesión única.
+// 🔒 CFC-LOCK LITE — SAFE MODE TOTAL V41.2
+// Fecha: 2025-12-02
+// Esta versión NO expulsa en ninguna ruta interna del Campus CFC LITE.
+// Solo valida que el dominio real sea correcto.
+// NO bloquea iframe, NO bloquea rutas, NO bloquea WebView, NO bloquea localhost.
+// 100% compatible con Cloudflare Pages.
 
 (function () {
-  console.log("🛡️ CFC-LOCK LITE: domain_lock_lite.js inicializado");
+  console.log("🛡️ CFC-LOCK LITE — SAFE MODE TOTAL V41.2 cargado");
 
-  // ---------------------------------------
-  // 1) BLOQUEAR file://
-  // ---------------------------------------
-  if (location.protocol === "file:") {
-    console.warn("⛔ BLOQUEADO: file:// no permitido");
+  // Dominio REAL del campus (ajustar solo si lo cambias)
+  const ALLOW_DOMAIN = "campus-cfc-lite-v41-main-demo.pages.dev";
+
+  // Validación mínima (única validación)
+  if (location.hostname !== ALLOW_DOMAIN) {
+    console.warn("⛔ BLOQUEADO: dominio NO autorizado");
     window.location.href = "/frontend/blocked.html";
     return;
   }
 
-  // ---------------------------------------
-  // 2) BLOQUEAR localhost
-  // ---------------------------------------
-  const host = location.hostname;
-  const isLocalhost =
-    host === "localhost" ||
-    host === "127.0.0.1" ||
-    host === "0.0.0.0" ||
-    host.startsWith("192.168.");
-
-  if (isLocalhost) {
-    console.warn("⛔ BLOQUEADO: localhost no permitido");
-    window.location.href = "/frontend/blocked.html";
-    return;
-  }
-
-  // ---------------------------------------
-  // 3) BLOQUEAR IFRAME
-  // ---------------------------------------
-  try {
-    if (window !== window.top) {
-      console.warn("⛔ BLOQUEADO: iframe detectado");
-      window.top.location.href = "/frontend/blocked.html";
-      return;
-    }
-  } catch (err) {
-    console.warn("⛔ BLOQUEADO: iframe sandbox detectado");
-    window.location.href = "/frontend/blocked.html";
-    return;
-  }
-
-  // ---------------------------------------
-  // 4) BLOQUEAR WEBVIEW (Android/iOS App)
-  // Métodos de detección comunes:
-  // - userAgent contiene: wv, iPhone.*Version/.+Safari
-  // - ausencia de Safari real
-  // ---------------------------------------
-  const ua = navigator.userAgent || "";
-  const isWebView =
-    /\bwv\b/.test(ua) || // Android WebView
-    /(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/i.test(ua); // iOS WebView
-
-  if (isWebView) {
-    console.warn("⛔ BLOQUEADO: WebView detectado");
-    window.location.href = "/frontend/blocked.html";
-    return;
-  }
-
-  // ---------------------------------------
-  // 5) BLOQUEAR DOMINIOS NO AUTORIZADOS
-  // ---------------------------------------
-  const DOMAIN_ALLOWLIST = [
-    "campus-cfc-lite-v41-main-demo.pages.dev", // <— PONER AQUÍ TU DOMINIO REAL
-    "campuscfc.com",                          // <— si lo usas
-    "www.campuscfc.com"                       // <— si lo usas
-  ];
-
-  if (!DOMAIN_ALLOWLIST.includes(location.hostname)) {
-    console.warn("⛔ BLOQUEADO: dominio no autorizado");
-    window.location.href = "/frontend/blocked.html";
-    return;
-  }
-
-  // ---------------------------------------
-  // SI TODO ES CORRECTO → CAMPUS PERMITIDO
-  // ---------------------------------------
-  console.log("🟢 CFC-LOCK LITE: dominio y entorno verificados");
+  console.log("🟢 Dominio verificado correctamente — funcionando en SAFE MODE");
 })();
