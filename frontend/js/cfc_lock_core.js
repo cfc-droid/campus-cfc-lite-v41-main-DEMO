@@ -1,16 +1,26 @@
 /* ==========================================================
-   🟩 CFC_LOCK_CORE_V72_ENFORCE_REAL (GLOBAL)
-   Sistema híbrido Render + Local
-   Función: Heartbeat + Update + Check + Expulsión Real
-   Auditor: CFC-SYNC
+   🟩 CFC_LOCK_CORE_V72_SAFE_MODE_V41
+   Fix PRUEBA 7 — Desactivar ENFORCE en Módulos y Capítulos
+   Función: evitar expulsión falsa a los 8–11 segundos
    ========================================================== */
 
 (function () {
 
   const API = "https://cfc-lock-proxy.onrender.com";
-  const CFC_LOCK_ENFORCE = true;
 
-  console.log("🧩 QA-SYNC | CFC_LOCK_CORE V72-ENFORCE REAL cargado");
+  // 🔥 MODO SEGURO → solo ENFORCE en index.html y páginas raíz
+  const pathname = window.location.pathname;
+
+  const IS_INDEX =
+    pathname.endsWith("/index.html") ||
+    pathname.endsWith("/frontend/index.html") ||
+    pathname === "/" ||
+    pathname === "/frontend/";
+
+  // 👉 En módulos/capítulos/exámenes DESACTIVAMOS ENFORCE
+  const CFC_LOCK_ENFORCE = IS_INDEX;
+
+  console.log("🧩 QA-SYNC | CFC_LOCK_CORE SAFE MODE — ENFORCE:", CFC_LOCK_ENFORCE);
 
   /* -------------------------------------------
      Obtener MSCU local
@@ -89,6 +99,7 @@
       const json = await r.json();
       console.log("🟡 [UPDATE-SESSION]", json);
 
+      // ⚠️ Solo expulsar si estamos en ENFORCE (index.html)
       if (CFC_LOCK_ENFORCE && json.status === "invalid") {
         await forceLogout("Sesión iniciada en otro dispositivo (UPDATE)", s.email, s.device_id);
       }
@@ -107,6 +118,7 @@
       const json = await r.json();
       console.log("🌐 [CHECK-SESSION]", json);
 
+      // ⚠️ Solo expulsar si estamos en ENFORCE (index.html)
       if (CFC_LOCK_ENFORCE && (json.status === "invalid" || json.status === "expired")) {
         await forceLogout("Sesión iniciada en otro dispositivo (CHECK)", s.email, s.device_id);
       }
