@@ -318,74 +318,6 @@ const CFC_USERS = {
 };
 </script>
 
-    <!-- ✅ HANDLER REAL SIN MSCU -->
-   <script>
-  document.getElementById("loginForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
-
-    const email = document.getElementById("email").value.trim();
-    const license = document.getElementById("license").value.trim();
-    const errorMsg = document.getElementById("errorMsg");
-
-    if (email === "" || license === "") {
-      errorMsg.style.display = "block";
-      console.log("❌ Acceso denegado — faltan credenciales");
-      return;
-    }
-
-    errorMsg.style.display = "none";
-    console.log("✅ Credenciales ingresadas — login permitido (sin MSCU)");
-
-    // ✅ VALIDACIÓN REAL CONTRA TABLA CFC_USERS — ACCIÓN 4/5-C.2
-if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
-
-  // ✅ OCULTAR MENSAJES ANTERIORES
-  errorMsg.style.display = "none";
-  document.getElementById("errorPremium").style.display = "none";
-
-  // ✅ MOSTRAR MENSAJE PREMIUM
-  document.getElementById("errorPremium").style.display = "block";
-  console.log("❌ Acceso denegado — mensaje premium activo");
-
-  return;
-}
-
-    console.log("✅ Credenciales válidas — acceso permitido");
-
-// ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
-sessionStorage.setItem("CFC_LOGIN_OK", "1");
-
-// ========================================================
-// 🔧 FIX CRÍTICO: evitar redeclaración de "email"
-// ========================================================
-const loginData = await CFC_login(email, license);
-const device_id = loginData.device_id;
-const session_id = loginData.session_id;
-// ========================================================
-
-sessionStorage.setItem("CFC_LOGIN_OK", "1");
-window.location.href = "../index.html";
-
-  });
-</script>
-
-    <!-- ✅ CFC_FUNC SYNC CHECKPOINT -->
-    <script>
-      console.log("🧩 CFC_SYNC checkpoint: login.html — handler restaurado sin MSCU");
-    </script>
-
-    <!-- ✅ NO SE INCLUYE GUARD AQUÍ -->
-    <!-- ✅ NO SE INCLUYE DOMAIN LOCK AQUÍ -->
-    <!-- ✅ NO SE INCLUYE MSCU AQUÍ -->
-    <!-- ✅ NO SE INCLUYE BUNDLE AQUÍ -->
-
-<!-- Firebase necesario solo para login -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-<!-- Inicialización global -->
-<script src="../js/core/firebase_init.js?v=41"></script>
-
 <script>
   document.getElementById("loginForm").addEventListener("submit", async function (e) {
     e.preventDefault();
@@ -428,5 +360,3 @@ window.location.href = "../index.html";
     window.location.href = "../index.html";
   });
 </script>
-
-<!-- NO CARGAR IDENTITY AQUÍ -->
