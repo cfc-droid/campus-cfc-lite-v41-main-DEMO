@@ -1,25 +1,22 @@
 /* ==========================================================
-   🟩 CFC_FIREBASE_DB — Inicializador único global
+   🟩 CFC_FIREBASE_INIT — MSCU V41 (versión estable)
+   Inicialización única, mínima y compatible con Identity/Core
    ========================================================== */
 
-console.log("🟡 [CFC_FIREBASE_INIT] Iniciando verificación...");
+console.log("🟡 [CFC_FIREBASE_INIT] Verificando instancia...");
 
-if (!firebase.apps.length) {
-  const firebaseConfig = {
-    apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-    authDomain: "cfc-lock-firebase.firebaseapp.com",
-    projectId: "cfc-lock-firebase",
-  };
+try {
+  if (!firebase.apps.length) {
+    firebase.initializeApp({
+      apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
+      authDomain: "cfc-lock-firebase.firebaseapp.com",
+      projectId: "cfc-lock-firebase",
+    });
 
-  try {
-    const app = firebase.initializeApp(firebaseConfig);
-    window.CFC_FIREBASE_DB = firebase.firestore(app);
-
-    console.log("🟢 [CFC_FIREBASE_INIT] Firebase inicializado correctamente — instancia global lista.");
-  } catch (e) {
-    console.error("❌ [CFC_FIREBASE_INIT] Error al inicializar Firebase:", e);
+    console.log("🟢 [CFC_FIREBASE_INIT] Firebase inicializado correctamente.");
+  } else {
+    console.log("🔵 [CFC_FIREBASE_INIT] Firebase ya estaba inicializado.");
   }
-} else {
-  console.log("🔵 [CFC_FIREBASE_INIT] Firebase ya estaba inicializado — usando instancia existente.");
-  window.CFC_FIREBASE_DB = firebase.firestore();
+} catch (err) {
+  console.error("❌ [CFC_FIREBASE_INIT] Error crítico:", err);
 }
