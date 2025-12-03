@@ -1,0 +1,15 @@
+{
+  "version": "LITE V37 FINAL",
+  "autor": "Cristian F. Choqui",
+  "tema": "oscuro",
+  "branding": {
+    "nombre": "Campus CFC Trading",
+    "logo": "logo-campus.png",
+    "color_principal": "#00ccff"
+  },
+  "usuario": {
+    "nombre": "Alumno",
+    "idioma": "es",
+    "progreso": 0
+  }
+}
