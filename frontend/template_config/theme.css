@@ -1,0 +1,32 @@
+/* ==========================================================
+Archivo: /frontend/template_config/theme.css
+Versión: V37 FINAL
+=========================================================== */
+
+:root {
+  --color-primario: #FFD700;   /* Dorado */
+  --color-secundario: #FF8C00; /* Naranja */
+  --color-fondo: #0a0a0a;
+  --color-texto: #f9f9f9;
+  --color-acento: #222;
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  transition: background 1s ease-in-out, color 0.5s ease-in-out;
+}
+
+button, .btn {
+  background: linear-gradient(90deg, var(--color-primario), var(--color-secundario));
+  color: #111;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  transition: transform 0.3s ease-in-out;
+}
+
+button:hover, .btn:hover {
+  transform: scale(1.05);
+}

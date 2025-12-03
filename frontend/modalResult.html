@@ -1,0 +1,156 @@
+<!-- ==========================================================
+     Archivo: /frontend/modalResult.html
+     Propósito: Plantilla visual reutilizable del modal post-examen
+     Versión: V37.2 FULL — Compatible con CFC-FULL-LOCK v4.0
+     ========================================================== -->
+<div id="modalResult" class="modal-result">
+  <div class="modal-content">
+    <h2 id="modalState"></h2>
+    <p id="modalScore"></p>
+    <p id="modalMotivation"></p>
+    <button id="closeModalBtn">Cerrar</button>
+  </div>
+</div>
+
+<style>
+  #modalResult {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(0,0,0,0.75);
+    z-index: 9999;
+    opacity: 0;
+    transition: opacity 0.6s ease;
+  }
+  #modalResult.active { opacity: 1; }
+
+  #modalResult .modal-content {
+    background: #0a0a0a;
+    border: 2px solid #d4af37;
+    color: #eaeaea;
+    padding: 25px;
+    border-radius: 14px;
+    max-width: 420px;
+    text-align: center;
+    font-family: "Poppins", sans-serif;
+    transform: scale(0.95);
+    transition: transform 0.4s ease;
+  }
+  #modalResult.active .modal-content { transform: scale(1); }
+
+  #modalResult button {
+    background: #d4af37;
+    border: none;
+    border-radius: 8px;
+    color: #0a0a0a;
+    padding: 10px 24px;
+    margin-top: 15px;
+    cursor: pointer;
+    transition: 0.3s ease;
+    font-weight: 600;
+  }
+  #modalResult button:hover { filter: brightness(1.2); }
+
+  /* ==========================================================
+     [INICIO BLOQUE CFC NUEVO]
+     ========================================================== */
+  /* 🔹 Colores dinámicos aprob./desaprob. + efecto suave */
+  .modal-success {
+    background: linear-gradient(180deg, #eaffea, #c4f9d2);
+    border: 2px solid #1fbf60 !important;
+    color: #0a0a0a !important;
+    box-shadow: 0 0 12px rgba(31,191,96,0.6);
+  }
+  .modal-fail {
+    background: linear-gradient(180deg, #ffeaea, #f9c4c4);
+    border: 2px solid #bf1f1f !important;
+    color: #0a0a0a !important;
+    box-shadow: 0 0 12px rgba(191,31,31,0.6);
+  }
+  .modal-btn-success {
+    background: #1fbf60 !important;
+    color: #fff !important;
+  }
+  .modal-btn-fail {
+    background: #bf1f1f !important;
+    color: #fff !important;
+  }
+  .motivation {
+    margin-top: 12px;
+    font-style: italic;
+    color: #222;
+    font-weight: 500;
+  }
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(25px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fadeInUp { animation: fadeInUp 0.6s ease forwards; }
+
+  /* 🔸Nuevo: efecto de salida suave */
+  @keyframes fadeOutDown {
+    from { opacity: 1; transform: translateY(0); }
+    to { opacity: 0; transform: translateY(20px); }
+  }
+  .fadeOutDown { animation: fadeOutDown 0.5s ease forwards; }
+  /* ==========================================================
+     [FIN BLOQUE CFC NUEVO]
+     ========================================================== */
+</style>
+
+<!-- ==========================================================
+     [INICIO BLOQUE CFC NUEVO]
+     ==========================================================
+     🔹 BLOQUE 5 / 5 — Integración final visual con exam-logic.js
+     🔹 Añade cierre animado y llamada automática desde exam-logic.js
+     ========================================================== -->
+<script>
+  // Inicializador visual compatible con exam-logic.js + motivationPlus.js
+  window.initModalResult = function (estado, score, total, aprobado, motivacion) {
+    const modal = document.getElementById("modalResult");
+    const content = modal.querySelector(".modal-content");
+    const title = document.getElementById("modalState");
+    const scoreTxt = document.getElementById("modalScore");
+    const motiTxt = document.getElementById("modalMotivation");
+    const btn = document.getElementById("closeModalBtn");
+
+    title.textContent = aprobado ? "✅ Aprobado" : "❌ Desaprobado";
+    scoreTxt.textContent = `Resultado: ${score}/${total}`;
+    motiTxt.textContent = motivacion || "";
+
+    content.classList.remove("modal-success", "modal-fail");
+    btn.classList.remove("modal-btn-success", "modal-btn-fail");
+
+    if (aprobado) {
+      content.classList.add("modal-success", "fadeInUp");
+      btn.classList.add("modal-btn-success");
+    } else {
+      content.classList.add("modal-fail", "fadeInUp");
+      btn.classList.add("modal-btn-fail");
+    }
+
+    modal.classList.add("active");
+
+    // Efecto de cierre animado
+    btn.onclick = () => {
+      content.classList.remove("fadeInUp");
+      content.classList.add("fadeOutDown");
+      setTimeout(() => {
+        modal.classList.remove("active");
+        content.classList.remove("fadeOutDown");
+      }, 400);
+    };
+
+    // Enlace automático con sistema motivacional
+    if (typeof getMotivation === "function") {
+      const frase = getMotivation(aprobado);
+      console.log("🎯 Motivación aplicada:", frase);
+    }
+  };
+</script>
+<!-- ==========================================================
+     [FIN BLOQUE CFC NUEVO]
+     ========================================================== -->
+
+/* FIN DE ARCHIVO — /frontend/modalResult.html— Integridad validada CFC-FULL-LOCK v5.0 */
