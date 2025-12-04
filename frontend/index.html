@@ -303,6 +303,8 @@ document.addEventListener("DOMContentLoaded", () => {
      🔥 PRUEBA 6 — Inicialización Firebase Global V5
      CFC_SYNC_FIREBASE_GLOBAL_V5 — 4/12/2025
 ================================================= -->
+
+  <!-- 🔥 PRUEBA 6 — Inicialización Firebase Global V5 -->
 <script>
 try {
   console.log("🔥 [CFC-FIREBASE] Iniciando Firebase global…");
@@ -323,19 +325,24 @@ try {
   window.CFC_DB = firebase.firestore();
   console.log("📌 [CFC-FIREBASE] Firestore asignado a window.CFC_DB");
 
+  // ⬇⬇⬇ SOLO CAMBIAMOS ESTO ⬇⬇⬇
   window.CFC_TestWrite = async function () {
     try {
       console.log("✍️ [CFC-FIREBASE] Intentando escribir test remoto…");
 
-      await window.CFC_DB.collection("CFC_TEST").doc("TEST_V5").set({
-        timestamp: new Date().toISOString(),
-        test: "OK_V5",
-        source: "index.html"
-      });
+      // 👉 Usamos la colección "sessions", que tus reglas permiten (if true)
+      await window.CFC_DB
+        .collection("sessions")
+        .doc("TEST_SYNC_V5")
+        .set({
+          timestamp: new Date().toISOString(),
+          test: "OK_V5",
+          source: "index.html"
+        });
 
-      console.log("✅ [CFC-FIREBASE] Escritura remota exitosa (TEST_V5)");
+      console.log("✅ [CFC-FIREBASE] Escritura remota exitosa (TEST_SYNC_V5)");
     } catch (err) {
-      console.error("❌ [CFC-FIREBASE] Error al escribir TEST_V5:", err);
+      console.error("❌ [CFC-FIREBASE] Error al escribir TEST_SYNC_V5:", err);
     }
   };
 
