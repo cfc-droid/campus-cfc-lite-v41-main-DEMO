@@ -1,24 +1,28 @@
 // ============================================================
-// 🧩 CFC SYNC — BOOT V5
+// 🧩 CFC SYNC — BOOT V5 (REAL)
 // Restauración automática al iniciar sesión
+// Combina progreso LOCAL + REMOTO y lo escribe seguro
 // ============================================================
 
 window.CFC_syncBootV5_start = async (email) => {
-    console.log("🔵 BOOT V5 — iniciado", email);
+    console.log("🔵 BOOT V5 — iniciado para:", email);
 
-    // Traer progreso remoto
-    const remote = await CFC_syncRemoteV5_import(email);
+    try {
+        // ------------------------------------------
+        // 1) Leer Reader V5 (local + remoto)
+        // ------------------------------------------
+        const merged = await window.CFC_syncReaderV5(email);
 
-    // Leer progreso local
-    const local = CFC_syncReaderV5();
+        console.log("🟣 BOOT V5 — progreso combinado (merged):", merged);
 
-    // Fusionar (prioridad al remoto si existe)
-    const merged = { ...local, ...remote };
+        // ------------------------------------------
+        // 2) Restaurar (escribir progreso local ANTES de entrar)
+        // ------------------------------------------
+        window.CFC_syncWriterV5(merged);
 
-    console.log("🟣 BOOT V5 — merged:", merged);
+        console.log("🟢 CFC_SYNC_BOOT_V5_OK — Progreso restaurado");
 
-    // Restaurar progreso
-    CFC_syncWriterV5(merged);
-
-    console.log("🟢 CFC_SYNC_BOOT_V5_OK");
+    } catch (err) {
+        console.error("❌ BOOT V5 ERROR:", err);
+    }
 };
