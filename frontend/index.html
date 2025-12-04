@@ -292,28 +292,32 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 </script> 
 
-<!-- 🔒 Overlay negro-dorado global -->
-<script src="js/core/overlay_block.js?v=72" defer></script>
+  <!-- 🔒 Overlay negro-dorado global -->
+  <script src="js/core/overlay_block.js?v=72" defer></script>
 
-<!-- 🔐 Identidad Firestore + Render | ENFORCE REAL -->
-<script src="js/core/cfc_lock_identity.js?v=72" defer></script>
+  <!-- ✅ Firebase global para Sync V5 + Identity -->
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
 
-<!-- 🧩 CFC-SYNC READER V5 -->
-<script src="js/cfc_sync_reader_v5.js"></script>
+  <!-- 🧩 CFC-SYNC READER V5 -->
+  <script src="js/cfc_sync_reader_v5.js"></script>
 
-<!-- 🧩 CFC-SYNC WRITER V5 -->
-<script src="js/cfc_sync_writer_v5.js"></script>
+  <!-- 🧩 CFC-SYNC WRITER V5 -->
+  <script src="js/cfc_sync_writer_v5.js"></script>
 
-<!-- 🧩 CFC-SYNC REMOTE V5 -->
-<script src="js/cfc_sync_remote_v5.js"></script>
+  <!-- 🧩 CFC-SYNC REMOTE V5 -->
+  <script src="js/cfc_sync_remote_v5.js"></script>
 
-<!-- 🧩 CFC-SYNC BOOT V5 -->
-<script src="js/cfc_sync_boot_v5.js"></script>
+  <!-- 🧩 CFC-SYNC BOOT V5 -->
+  <script src="js/cfc_sync_boot_v5.js"></script>
 
-<!-- 🛡 Heartcore ENFORCE | expulsión real -->
-<script src="js/cfc_lock_core.js?v=72" defer></script>
+  <!-- 🔐 Identidad Firestore + Render | ENFORCE REAL -->
+  <script src="js/core/cfc_lock_identity.js?v=72" defer></script>
 
-<!-- ⚙️ CFC-BUNDLE → SIEMPRE ÚLTIMO -->
-<script src="js/bundle_core.min.js" defer></script>
+  <!-- 🛡 Heartcore ENFORCE | expulsión real -->
+  <script src="js/cfc_lock_core.js?v=72" defer></script>
+
+  <!-- ⚙️ CFC-BUNDLE → SIEMPRE ÚLTIMO -->
+  <script src="js/bundle_core.min.js" defer></script>
 </body>
 </html>
