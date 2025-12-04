@@ -308,12 +308,11 @@ try {
   console.log("🔥 [CFC-FIREBASE] Iniciando Firebase global…");
 
   const firebaseConfig = {
-    apiKey: "TU_API_KEY",
-    authDomain: "TU_AUTH_DOMAIN",
-    projectId: "TU_PROJECT_ID"
+    apiKey: "AIzaSyQoLUJAKY0eDapAfu6e-7a5Sbdy8Babys",
+    authDomain: "cfc-lock-firebase.firebaseapp.com",
+    projectId: "cfc-lock-firebase"
   };
 
-  // Evita re-inicializar si ya está iniciada
   if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
     console.log("✅ [CFC-FIREBASE] Firebase inicializado correctamente en index.html");
@@ -321,19 +320,19 @@ try {
     console.log("ℹ️ [CFC-FIREBASE] Firebase ya estaba inicializado.");
   }
 
-  // Instancia global del DB
   window.CFC_DB = firebase.firestore();
   console.log("📌 [CFC-FIREBASE] Firestore asignado a window.CFC_DB");
 
-  // Prueba de lectura y escritura mínima
-  window.CFC_TestWrite = async function() {
+  window.CFC_TestWrite = async function () {
     try {
-      console.log("✍️ [CFC-FIREBASE] Intentando escribir test remoto...");
+      console.log("✍️ [CFC-FIREBASE] Intentando escribir test remoto…");
+
       await window.CFC_DB.collection("CFC_TEST").doc("TEST_V5").set({
         timestamp: new Date().toISOString(),
         test: "OK_V5",
         source: "index.html"
       });
+
       console.log("✅ [CFC-FIREBASE] Escritura remota exitosa (TEST_V5)");
     } catch (err) {
       console.error("❌ [CFC-FIREBASE] Error al escribir TEST_V5:", err);
@@ -341,7 +340,7 @@ try {
   };
 
   console.log("🧪 [CFC-FIREBASE] Ejecutá CFC_TestWrite() en consola para verificar.");
-  
+
 } catch (e) {
   console.error("❌ [CFC-FIREBASE] Fallo crítico al inicializar Firebase:", e);
 }
