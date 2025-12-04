@@ -1,4 +1,10 @@
+// ============================================================
+// 🧩 CFC SYNC — READER V5
+// Lee solo progreso seguro del Campus (no toca device/session)
+// ============================================================
+
 window.CFC_syncReaderV5 = () => {
+
     const allowed = [
         "progress_mod",
         "exam_mod",
