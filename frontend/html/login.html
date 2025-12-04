@@ -363,6 +363,12 @@ const device_id = loginData.device_id;
 const session_id = loginData.session_id;
 // ========================================================
 
+// ========================================================
+// 🔥 BOOT SYNC V5 — restauración automática REAL
+// ========================================================
+console.log("🟢 Identity OK — Boot V5");
+CFC_syncBootV5_start(email);
+    
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 window.location.href = "../index.html";
 
