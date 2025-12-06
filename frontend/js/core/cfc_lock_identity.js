@@ -8,23 +8,22 @@
 
   console.log("🧩 QA-SYNC | CFC_LOCK_IDENTITY_V72_ENFORCE_REAL cargado");
 
-  /* -------------------------------------------
-     Firebase inicializar
-  ------------------------------------------- */
-  const firebaseConfig = {
-    apiKey: "AIzaSyDLWDiJaXYQbXeDAp8uE6-7abSdyBBabys",
-    authDomain: "cfc-lock-firebase.firebaseapp.com",
-    projectId: "cfc-lock-firebase",
-  };
+ /* -------------------------------------------
+   Firebase inicializar (USAR INSTANCIA GLOBAL)
+------------------------------------------- */
+let db = null;
 
-  let db = null;
-  try {
-    const app = firebase.initializeApp(firebaseConfig);
-    db = firebase.firestore(app);
-    console.log("🟢 Firebase cargado (GLOBAL ENFORCE)");
-  } catch (err) {
-    console.error("❌ Firebase init error:", err);
+try {
+  if (window.CFC_FIREBASE_DB) {
+    db = window.CFC_FIREBASE_DB;
+    console.log("🟢 Firebase conectado desde instancia GLOBAL");
+  } else {
+    console.error("❌ No existe CFC_FIREBASE_DB — firebase_init.js no cargó");
   }
+
+} catch (err) {
+  console.error("❌ Firebase init error:", err);
+}
 
   /* -------------------------------------------
      Utilidades
