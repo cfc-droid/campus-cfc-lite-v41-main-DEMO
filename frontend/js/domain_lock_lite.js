@@ -16,11 +16,9 @@
     // 1) LISTA DE DOMINIOS PERMITIDOS
     // (El usuario luego ajusta estos valores)
     // -----------------------------------------
-    const ALLOWED_HOSTS = [
-        "midominio.com",
-        "campus.midominio.com",
-        "cfc-v41.pages.dev"
-    ];
+const ALLOWED_HOSTS = [
+    "campus-cfc-lite-v41-main-demo.pages.dev"
+];
 
     // -----------------------------------------
     // 2) DETECCIÓN DE IFRAMES
