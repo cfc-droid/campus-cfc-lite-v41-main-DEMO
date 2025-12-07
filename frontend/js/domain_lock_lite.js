@@ -17,7 +17,7 @@
     // (El usuario luego ajusta estos valores)
     // -----------------------------------------
 const ALLOWED_HOSTS = [
-    "campus-cfc-lite-v41-main-demo.pages.dev"
+    "xxx-bloqueo-test.com"
 ];
 
     // -----------------------------------------
