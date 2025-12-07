@@ -86,6 +86,10 @@
   </head>
 
   <body>
+
+    <!-- 🔒 DOMAIN-LOCK LITE (SUBPASO 4/5-E) — DEBE IR ARRIBA -->
+    <script src="../js/domain_lock_lite.js" defer></script>
+    
     <div class="login-box">
       <h1>Bienvenido</h1>
       <p>Acceso exclusivo al Campus CFC</p>
@@ -382,9 +386,6 @@ window.location.href = "../index.html";
 <!-- Firebase necesario solo para login + identity -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-
-<!-- 🔒 DOMAIN-LOCK LITE (SUBPASO 4/5-E) -->
-<script src="../js/domain_lock_lite.js" defer></script>
 
 <!-- 🔐 Identidad Firestore + Render | necesario en login -->
 <script src="../js/core/cfc_lock_identity.js?v=72"></script>
