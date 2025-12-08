@@ -31,3 +31,34 @@ document.addEventListener("DOMContentLoaded", () => {
 🔒 CFC_LOCK: V1.3-STATS_PASSIVE_FIX-20251106
 QA-SYNC V41.33 — Overlay duplicado eliminado
 ========================================================== */
+
+
+
+/* ==========================================================
+🟣 SUBPASO 1.8 — Registrar PRIMERA SESIÓN
+Acción 1.1 — Guardar firstSessionDate si no existe
+(AGREGADO SIN ALTERAR NADA DEL ARCHIVO ORIGINAL)
+========================================================== */
+
+(function () {
+  try {
+    // Cargar stats globales
+    let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+
+    // Si no existe firstSessionDate, la creamos
+    if (!stats.firstSessionDate) {
+      const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
+      stats.firstSessionDate = today;
+
+      // Guardar nuevamente
+      localStorage.setItem("CFC_stats", JSON.stringify(stats));
+
+      console.log("📌 firstSessionDate registrado:", today);
+    } else {
+      console.log("📎 firstSessionDate ya existía:", stats.firstSessionDate);
+    }
+
+  } catch (err) {
+    console.error("⚠️ Error registrando firstSessionDate:", err);
+  }
+})();
