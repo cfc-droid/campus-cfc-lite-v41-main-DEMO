@@ -87,46 +87,45 @@
   // ==========================================================
   // 🔥🔥🔥 CFC_STATS V5.1 — INTEGRACIÓN REAL (NO TOCAR O MUTAR NADA MÁS)
   // ==========================================================
-  function CFC_updateStatsFromTracker(elapsedSeconds) {
+ function CFC_updateStatsFromTracker(elapsedSeconds) {
     try {
       let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
 
-      // -------- Fecha actual en dd/mm/yyyy --------
       const now = new Date();
       const dd = String(now.getDate()).padStart(2, "0");
       const mm = String(now.getMonth() + 1).padStart(2, "0");
       const yyyy = now.getFullYear();
       const today = `${dd}/${mm}/${yyyy}`;
 
-      // -------- Inicialización segura --------
       stats.activeTotalMinutes = stats.activeTotalMinutes || 0;
       stats.activeTodayMinutes = stats.activeTodayMinutes || 0;
       stats.daysStudiedTotal = stats.daysStudiedTotal || 0;
       stats.lastStudyDay = stats.lastStudyDay || today;
 
-      // -------- Si cambió el día, resetear activeTodayMinutes --------
+      // -------- Si cambió el día → resetear
       if (stats.lastStudyDay !== today) {
         stats.activeTodayMinutes = 0;
+
+        // 🔥🔥🔥 FIX REAL
+        stats._todayCounted = false;
+
         stats.lastStudyDay = today;
       }
 
-      // -------- Sumar minutos --------
       const minutesElapsed = Math.floor(elapsedSeconds / 60);
       if (minutesElapsed > 0) {
         stats.activeTotalMinutes += minutesElapsed;
         stats.activeTodayMinutes += minutesElapsed;
       }
 
-      // -------- Sumar días reales si hubo estudio --------
+      // -------- Sumar días reales
       if (minutesElapsed > 0) {
-        // Si es el primer estudio del día → contar día nuevo si corresponde
         if (!stats._todayCounted) {
           stats.daysStudiedTotal += 1;
-          stats._todayCounted = true; // marca de seguridad
+          stats._todayCounted = true;
         }
       }
 
-      // Guardar stats actualizadas
       localStorage.setItem("CFC_stats", JSON.stringify(stats));
 
       console.log(
@@ -137,8 +136,6 @@
     }
   }
   // ==========================================================
-
-
 
   // ======== 🔁 Loop maestro persistente ========
   const SYNC_PERIOD = 10000;
