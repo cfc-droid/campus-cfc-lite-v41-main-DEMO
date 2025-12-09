@@ -33,11 +33,10 @@ QA-SYNC V41.33 — Overlay duplicado eliminado
 ========================================================== */
 
 
-
 /* ==========================================================
 🟣 SUBPASO 1.8 — Registrar PRIMERA SESIÓN
 Acción 1.1 — Guardar firstSessionDate si no existe
-(AGREGADO SIN ALTERAR NADA DEL ARCHIVO ORIGINAL)
+(Formato requerido: dd/mm/yyyy)
 ========================================================== */
 
 (function () {
@@ -45,15 +44,21 @@ Acción 1.1 — Guardar firstSessionDate si no existe
     // Cargar stats globales
     let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
 
+    // Convertir hoy a formato dd/mm/yyyy
+    const d = new Date();
+    const dd = String(d.getDate()).padStart(2, "0");
+    const mm = String(d.getMonth() + 1).padStart(2, "0");
+    const yyyy = d.getFullYear();
+    const todayFormatted = `${dd}/${mm}/${yyyy}`;
+
     // Si no existe firstSessionDate, la creamos
     if (!stats.firstSessionDate) {
-      const today = new Date().toISOString().split("T")[0]; // yyyy-mm-dd
-      stats.firstSessionDate = today;
+      stats.firstSessionDate = todayFormatted;
 
       // Guardar nuevamente
       localStorage.setItem("CFC_stats", JSON.stringify(stats));
 
-      console.log("📌 firstSessionDate registrado:", today);
+      console.log("📌 firstSessionDate registrado:", todayFormatted);
     } else {
       console.log("📎 firstSessionDate ya existía:", stats.firstSessionDate);
     }
