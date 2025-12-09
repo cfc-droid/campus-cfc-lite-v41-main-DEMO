@@ -71,3 +71,48 @@
     "chapter_nav.js inyectado correctamente"
   );
 })();
+
+/* =========================================================
+   🟣 SUBPASO 4.8 — Registrar MÓDULO ACTUAL  
+   🔥 CFC_STATS_V5.1_SUBPASO_4.8_REAL — 2025-12-09
+   ---------------------------------------------------------
+   ✔ Detecta automáticamente el módulo actual
+   ✔ Guarda currentModule en localStorage.CFC_stats
+   ✔ No afecta ningún otro sistema
+   ✔ Totalmente aislado y seguro
+========================================================= */
+
+(function () {
+  try {
+    // Solo ejecutar dentro de /modules/x/
+    const match = window.location.pathname.match(/\/modules\/(\d+)\//);
+    if (!match) return; // No estás en un módulo → salir
+
+    const moduleNumber = parseInt(match[1], 10);
+    const moduleName = `Módulo ${moduleNumber}`;
+
+    // Leer stats actual
+    let stats = {};
+    try {
+      stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+    } catch {
+      stats = {};
+    }
+
+    // Guardar módulo actual
+    stats.currentModule = moduleName;
+
+    localStorage.setItem("CFC_stats", JSON.stringify(stats));
+
+    console.log(
+      `📌 CFC_STATS_V5.1_SUBPASO_4.8 → currentModule guardado: ${moduleName}`
+    );
+
+  } catch (err) {
+    console.error("❌ Error SUBPASO 4.8 (currentModule):", err);
+  }
+})();
+
+/* ==========================================================
+   🔒 CFC_LOCK: V41.3-MOD_CURRENT-20251209
+   ========================================================== */
