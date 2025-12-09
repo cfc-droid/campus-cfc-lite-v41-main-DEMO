@@ -87,45 +87,51 @@
   // ==========================================================
   // 🔥🔥🔥 CFC_STATS V5.1 — INTEGRACIÓN REAL (NO TOCAR O MUTAR NADA MÁS)
   // ==========================================================
- function CFC_updateStatsFromTracker(elapsedSeconds) {
+  function CFC_updateStatsFromTracker(elapsedSeconds) {
     try {
       let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
 
+      // -------- Fecha actual en dd/mm/yyyy --------
       const now = new Date();
       const dd = String(now.getDate()).padStart(2, "0");
       const mm = String(now.getMonth() + 1).padStart(2, "0");
       const yyyy = now.getFullYear();
       const today = `${dd}/${mm}/${yyyy}`;
 
+      // -------- Inicialización segura --------
       stats.activeTotalMinutes = stats.activeTotalMinutes || 0;
       stats.activeTodayMinutes = stats.activeTodayMinutes || 0;
       stats.daysStudiedTotal = stats.daysStudiedTotal || 0;
       stats.lastStudyDay = stats.lastStudyDay || today;
 
-      // -------- Si cambió el día → resetear
+      // 🔸 Acumuladores internos en segundos (no usados en otros archivos)
+      stats._totalSeconds = stats._totalSeconds || 0;
+      stats._todaySeconds = stats._todaySeconds || 0;
+      stats._todayCounted = stats._todayCounted || false;
+
+      // -------- Si cambió el día → resetear contadores diarios --------
       if (stats.lastStudyDay !== today) {
+        stats._todaySeconds = 0;
         stats.activeTodayMinutes = 0;
-
-        // 🔥🔥🔥 FIX REAL
         stats._todayCounted = false;
-
         stats.lastStudyDay = today;
       }
 
-      const minutesElapsed = Math.floor(elapsedSeconds / 60);
-      if (minutesElapsed > 0) {
-        stats.activeTotalMinutes += minutesElapsed;
-        stats.activeTodayMinutes += minutesElapsed;
+      // -------- Acumular segundos --------
+      stats._totalSeconds += elapsedSeconds;
+      stats._todaySeconds += elapsedSeconds;
+
+      // -------- Calcular minutos a partir de los segundos acumulados --------
+      stats.activeTotalMinutes = Math.floor(stats._totalSeconds / 60);
+      stats.activeTodayMinutes = Math.floor(stats._todaySeconds / 60);
+
+      // -------- Sumar días reales de estudio (≥ 1 min en el día) --------
+      if (!stats._todayCounted && stats._todaySeconds >= 60) {
+        stats.daysStudiedTotal += 1;      // 👈 aquí se suma el día
+        stats._todayCounted = true;
       }
 
-      // -------- Sumar días reales
-      if (minutesElapsed > 0) {
-        if (!stats._todayCounted) {
-          stats.daysStudiedTotal += 1;
-          stats._todayCounted = true;
-        }
-      }
-
+      // Guardar stats actualizadas
       localStorage.setItem("CFC_stats", JSON.stringify(stats));
 
       console.log(
