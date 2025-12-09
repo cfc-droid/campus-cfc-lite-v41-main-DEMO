@@ -84,6 +84,62 @@
     }
   };
 
+  // ==========================================================
+  // 🔥🔥🔥 CFC_STATS V5.1 — INTEGRACIÓN REAL (NO TOCAR O MUTAR NADA MÁS)
+  // ==========================================================
+  function CFC_updateStatsFromTracker(elapsedSeconds) {
+    try {
+      let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+
+      // -------- Fecha actual en dd/mm/yyyy --------
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, "0");
+      const mm = String(now.getMonth() + 1).padStart(2, "0");
+      const yyyy = now.getFullYear();
+      const today = `${dd}/${mm}/${yyyy}`;
+
+      // -------- Inicialización segura --------
+      stats.activeTotalMinutes = stats.activeTotalMinutes || 0;
+      stats.activeTodayMinutes = stats.activeTodayMinutes || 0;
+      stats.daysStudiedTotal = stats.daysStudiedTotal || 0;
+      stats.lastStudyDay = stats.lastStudyDay || today;
+
+      // -------- Si cambió el día, resetear activeTodayMinutes --------
+      if (stats.lastStudyDay !== today) {
+        stats.activeTodayMinutes = 0;
+        stats.lastStudyDay = today;
+      }
+
+      // -------- Sumar minutos --------
+      const minutesElapsed = Math.floor(elapsedSeconds / 60);
+      if (minutesElapsed > 0) {
+        stats.activeTotalMinutes += minutesElapsed;
+        stats.activeTodayMinutes += minutesElapsed;
+      }
+
+      // -------- Sumar días reales si hubo estudio --------
+      if (minutesElapsed > 0) {
+        // Si es el primer estudio del día → contar día nuevo si corresponde
+        if (!stats._todayCounted) {
+          stats.daysStudiedTotal += 1;
+          stats._todayCounted = true; // marca de seguridad
+        }
+      }
+
+      // Guardar stats actualizadas
+      localStorage.setItem("CFC_stats", JSON.stringify(stats));
+
+      console.log(
+        `📊 CFC_STATS SYNC V5.1 → Total:${stats.activeTotalMinutes}m | Hoy:${stats.activeTodayMinutes}m | Días:${stats.daysStudiedTotal}`
+      );
+    } catch (e) {
+      console.error("❌ Error en CFC_STATS V5.1:", e);
+    }
+  }
+  // ==========================================================
+
+
+
   // ======== 🔁 Loop maestro persistente ========
   const SYNC_PERIOD = 10000;
   const SYNC_TOLERANCE = 250;
@@ -95,6 +151,8 @@
 
     if (diff >= SYNC_PERIOD - SYNC_TOLERANCE) {
       const elapsed = (now - startTime) / 1000;
+
+      // -------- registrar en timer original --------
       totalSeconds += elapsed;
       startTime = now;
       lastSync = now;
@@ -109,7 +167,12 @@
 
       updateIndicator(true);
       bell.play().catch(() => {});
-      console.log(`CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`);
+      console.log(
+        `CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`
+      );
+
+      // -------- 🔥 ACTUALIZACIÓN REAL DE STATS --------
+      CFC_updateStatsFromTracker(elapsed);
     }
 
     rafId = requestAnimationFrame(forcedLoop);
@@ -135,6 +198,9 @@
       localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
       localStorage.setItem(LAST_SYNC_KEY, now);
       console.log("⏸️ CFC_TIMER pausado (pestaña oculta o cierre).");
+
+      // 🔥 registrar stats incluso en pausa
+      CFC_updateStatsFromTracker(elapsed);
     }
   };
 
