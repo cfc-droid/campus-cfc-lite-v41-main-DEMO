@@ -33,23 +33,21 @@
       s.src = src;
       s.defer = true;
       document.head.appendChild(s);
+
     } catch (err) {
       console.warn(`⚠️ [SAFEFIX_PLUS] Falla al cargar ${file}:`, err);
     }
   };
 
   // 🧩 Núcleo base (corregido)
-  // ❌ REMOVIDO: theme.js (no existe)
   injectScript("theme_chapter_v2.js?v=20251106", "Modo claro/oscuro modular");
   injectScript("badge.js?v=20251102", "Badge motivacional persistente");
 
-  // 🧩 Log QA-SYNC
   console.log(
     "🧩 CFC_SYNC checkpoint: auto_injector.js | SAFEFIX_PLUS V8.2 OK",
     new Date().toLocaleString()
   );
 })();
-  
 
 /* =========================================================
    ✅ CFC_FUNC_9_9_FIX_FINAL_V41.25 — Inyección botón “Continuar”
@@ -68,27 +66,53 @@
   );
 })();
 
-
 /* =========================================================
-   🟣 SUBPASO 4.8 — Registrar MÓDULO ACTUAL
+   🟣 SUBPASO 4.8 REAL — Registrar módulo actual COMPLETO
    🔥 CFC_STATS_V5.1_SUBPASO_4.8_REAL — 2025-12-09
    ---------------------------------------------------------
-   ✔ Detecta automáticamente el módulo actual
-   ✔ Guarda currentModule en localStorage.CFC_stats
-   ✔ No afecta ningún otro sistema
-   ✔ Totalmente aislado y seguro
+   ✔ Detecta módulo actual /modules/x/
+   ✔ Guarda: número + nombre corto + nombre completo
+   ✔ 100% aislado y sin afectar ningún otro sistema
 ========================================================= */
 
 (function () {
   try {
     // Solo ejecutar dentro de /modules/x/
     const match = window.location.pathname.match(/\/modules\/(\d+)\//);
-    if (!match) return; // No estás en /modules/x → salir
+    if (!match) return;
 
     const moduleNumber = parseInt(match[1], 10);
-    const moduleName = `Módulo ${moduleNumber}`;
 
-    // Leer stats actual
+    // Nombre corto
+    const shortName = `Módulo ${moduleNumber}`;
+
+    // Tabla oficial completa EXACTA que figura en modules/index.html
+    const CFC_MODULES_FULL = {
+      1: "Módulo 1 – Introducción a la Psicología del Trader",
+      2: "Módulo 2 – Neurociencia del Trading",
+      3: "Módulo 3 – Fundamentos de Psicología Profunda",
+      4: "Módulo 4 – Modelo Mental del Trader Profesional",
+      5: "Módulo 5 – Herramientas Avanzadas de Regulación Emocional",
+      6: "Módulo 6 – Psicología de la Gestión del Capital",
+      7: "Módulo 7 – Estrategias Psicológicas por Etapas",
+      8: "Módulo 8 – Integración Estrategia–Psicología",
+      9: "Módulo 9 – Casos de Estudio y Simulaciones Reales",
+      10: "Módulo 10 – Optimización Mental y Rendimiento Peak",
+      11: "Módulo 11 – Ecosistema de Apoyo y Herramientas",
+      12: "Módulo 12 – Maestría Continua y Legado",
+      13: "Módulo 13 – Psicología del Error y Reprogramación Mental",
+      14: "Módulo 14 – El Mapa del Autocontrol Extremo",
+      15: "Módulo 15 – Arquitectura del Trading Mental Automático",
+      16: "Módulo 16 – Reversión Psicológica y Superación del Burnout",
+      17: "Módulo 17 – Psicología del Trader de Alto Impacto",
+      18: "Módulo 18 – La Mentalidad del Mentor Trader",
+      19: "Módulo 19 – Integración Total Cuerpo–Mente–Mercado",
+      20: "Módulo 20 – Legado Final del Trader Consciente"
+    };
+
+    const fullName = CFC_MODULES_FULL[moduleNumber];
+
+    // Leer stats previo
     let stats = {};
     try {
       stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
@@ -96,19 +120,23 @@
       stats = {};
     }
 
-    // Guardar módulo actual
-    stats.currentModule = moduleName;
+    // Guardado FULL
+    stats.currentModuleNumber = moduleNumber;
+    stats.currentModule = shortName;
+    stats.currentModuleFullName = fullName;
+
     localStorage.setItem("CFC_stats", JSON.stringify(stats));
 
-    console.log(
-      `📌 CFC_STATS_V5.1_SUBPASO_4.8 → currentModule guardado: ${moduleName}`
-    );
+    console.log("📌 CFC_STATS_V5.1_SUBPASO_4.8_REAL — Módulo registrado:");
+    console.log("   → Número:", moduleNumber);
+    console.log("   → Corto :", shortName);
+    console.log("   → Completo :", fullName);
+
   } catch (err) {
-    console.error("❌ Error SUBPASO 4.8 (currentModule):", err);
+    console.error("❌ Error SUBPASO 4.8 REAL:", err);
   }
 })();
 
-
 /* ==========================================================
    🔒 CFC_LOCK: V41.3-MOD_CURRENT-20251209
-========================================================== */
+========================================================= */
