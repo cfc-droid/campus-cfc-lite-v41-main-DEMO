@@ -67,3 +67,34 @@ Acción 1.1 — Guardar firstSessionDate si no existe
     console.error("⚠️ Error registrando firstSessionDate:", err);
   }
 })();
+
+/* ==========================================================
+🟣 SUBPASO 2.8 — Registrar ÚLTIMA SESIÓN
+Acción 1.1 — Guardar lastSessionDate SIEMPRE al cargar el Campus
+(AGREGADO SIN ALTERAR NADA DEL ARCHIVO ORIGINAL)
+========================================================== */
+
+(function () {
+  try {
+    // Cargar stats globales
+    let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+
+    // Convertir fecha actual a dd/mm/aaaa
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+    const todayFormatted = `${day}/${month}/${year}`;
+
+    // Registrar SIEMPRE la última sesión
+    stats.lastSessionDate = todayFormatted;
+
+    // Guardar cambios
+    localStorage.setItem("CFC_stats", JSON.stringify(stats));
+
+    console.log("📌 lastSessionDate actualizada:", todayFormatted);
+
+  } catch (err) {
+    console.error("⚠️ Error registrando lastSessionDate:", err);
+  }
+})();
