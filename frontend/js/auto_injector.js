@@ -73,23 +73,48 @@
 })();
 
 /* =========================================================
-   🟣 SUBPASO 4.8 — Registrar MÓDULO ACTUAL  
-   🔥 CFC_STATS_V5.1_SUBPASO_4.8_REAL — 2025-12-09
+   🟣 SUBPASO 4.10 — Registrar MÓDULO ACTUAL  
+   🔥 CFC_STATS_V6.0_SUBPASO_4.10_REAL — 2025-12-10
    ---------------------------------------------------------
-   ✔ Detecta automáticamente el módulo actual
-   ✔ Guarda currentModule en localStorage.CFC_stats
-   ✔ No afecta ningún otro sistema
-   ✔ Totalmente aislado y seguro
+   ✔ Detecta automáticamente /modules/x/
+   ✔ Guarda el NOMBRE COMPLETO del módulo
+   ✔ Totalmente seguro e independiente
 ========================================================= */
 
 (function () {
   try {
-    // Solo ejecutar dentro de /modules/x/
-    const match = window.location.pathname.match(/\/modules\/(\d+)\//);
-    if (!match) return; // No estás en un módulo → salir
+    // Detectar si estamos dentro de /modules/x/
+    const match = window.location.pathname.match(/\/modules\/(\d+)(?:\/|$)/);
+    if (!match) return; // No estamos dentro de un módulo
 
     const moduleNumber = parseInt(match[1], 10);
-    const moduleName = `Módulo ${moduleNumber}`;
+
+    // Tabla completa oficial del Campus CFC LITE V41
+    const CFC_MODULES_FULL = {
+      1: "Módulo 1 – Introducción a la Psicología del Trader",
+      2: "Módulo 2 – Neurociencia del Trading",
+      3: "Módulo 3 – Fundamentos de Psicología Profunda",
+      4: "Módulo 4 – Modelo Mental del Trader Profesional",
+      5: "Módulo 5 – Herramientas Avanzadas de Regulación Emocional",
+      6: "Módulo 6 – Psicología de la Gestión del Capital",
+      7: "Módulo 7 – Estrategias Psicológicas por Etapas",
+      8: "Módulo 8 – Integración Estrategia–Psicología",
+      9: "Módulo 9 – Casos de Estudio y Simulaciones Reales",
+      10:"Módulo 10 – Optimización Mental y Rendimiento Peak",
+      11:"Módulo 11 – Ecosistema de Apoyo y Herramientas",
+      12:"Módulo 12 – Maestría Continua y Legado",
+      13:"Módulo 13 – Psicología del Error y Reprogramación Mental",
+      14:"Módulo 14 – El Mapa del Autocontrol Extremo",
+      15:"Módulo 15 – Arquitectura del Trading Mental Automático",
+      16:"Módulo 16 – Reversión Psicológica y Superación del Burnout",
+      17:"Módulo 17 – Psicología del Trader de Alto Impacto",
+      18:"Módulo 18 – La Mentalidad del Mentor Trader",
+      19:"Módulo 19 – Integración Total Cuerpo–Mente–Mercado",
+      20:"Módulo 20 – Legado Final del Trader Consciente"
+    };
+
+    // Seleccionar nombre exacto
+    const moduleName = CFC_MODULES_FULL[moduleNumber] || `Módulo ${moduleNumber}`;
 
     // Leer stats actual
     let stats = {};
@@ -99,20 +124,16 @@
       stats = {};
     }
 
-    // Guardar módulo actual
+    // Guardar módulo actual EXACTO
     stats.currentModule = moduleName;
 
     localStorage.setItem("CFC_stats", JSON.stringify(stats));
 
     console.log(
-      `📌 CFC_STATS_V5.1_SUBPASO_4.8 → currentModule guardado: ${moduleName}`
+      `📌 CFC_STATS_V6.0_SUBPASO_4.10 → currentModule guardado correctamente: ${moduleName}`
     );
 
   } catch (err) {
-    console.error("❌ Error SUBPASO 4.8 (currentModule):", err);
+    console.error("❌ Error SUBPASO 4.10 (currentModule):", err);
   }
 })();
-
-/* ==========================================================
-   🔒 CFC_LOCK: V41.3-MOD_CURRENT-20251209
-   ========================================================== */
