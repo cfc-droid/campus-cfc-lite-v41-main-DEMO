@@ -98,3 +98,46 @@ Acción 1.1 — Guardar lastSessionDate SIEMPRE al cargar el Campus
     console.error("⚠️ Error registrando lastSessionDate:", err);
   }
 })();
+
+/* ==========================================================
+🟣 SUBPASO 3.8 — Registrar DÍAS TOTALES DE ESTUDIO
+Acciones 1.3 / 2.3 / 3.3
+========================================================== */
+
+(function () {
+  try {
+    // Cargar stats globales
+    let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+
+    // Convertir fecha actual a dd/mm/yyyy
+    const now = new Date();
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+    const today = `${day}/${month}/${year}`;
+
+    // Si el campo no existe aún, inicializarlo
+    if (!stats.lastStudyDay) {
+      stats.lastStudyDay = today;
+      localStorage.setItem("CFC_stats", JSON.stringify(stats));
+      console.log("📌 lastStudyDay creado:", today);
+      return;
+    }
+
+    // Si es un día nuevo Y se estudió realmente
+    if (stats.lastStudyDay !== today && stats.activeTodayMinutes > 0) {
+      stats.daysStudiedTotal = (stats.daysStudiedTotal || 0) + 1;
+      stats.lastStudyDay = today;
+
+      // Guardar cambios
+      localStorage.setItem("CFC_stats", JSON.stringify(stats));
+
+      console.log("🟢 Día estudiado registrado (+1) →", stats.daysStudiedTotal);
+    } else {
+      console.log("ℹ️ Día NO sumado → mismo día o sin estudio.");
+    }
+
+  } catch (err) {
+    console.error("⚠️ Error SUBPASO 3.8 (días estudio):", err);
+  }
+})();
