@@ -78,7 +78,7 @@
 (function () {
   try {
     // Solo ejecutar dentro de /modules/x/
-    const match = window.location.pathname.match(/\/modules\/(\d+)\//);
+    const match = window.location.pathname.match(/\/modules\/(\d+)(?:\/|$)/);
     if (!match) return;
 
     const moduleNumber = parseInt(match[1], 10);
