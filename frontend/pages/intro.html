@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Campus CFC — Intro</title>
+  <link rel="stylesheet" href="../css/premium.min.css?v=20251103">
+  <style>
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      background: radial-gradient(circle at center, #000 0%, #0a0a0a 100%);
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      color: #ffd700;
+      animation: fadeIn 1.2s ease-in-out;
+    }
+    #logo {
+      width: 240px;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 30px rgba(255,215,0,0.3);
+      animation: zoomIn 1.5s ease-in-out;
+    }
+    #phrase {
+      margin-top: 18px;
+      font-size: 1.15rem;
+      font-weight: 600;
+      text-shadow: 0 0 10px rgba(255,215,0,0.4);
+      animation: fadeInUp 1.8s ease-in-out;
+    }
+    #enterBtn {
+      margin-top: 26px;
+      padding: 12px 28px;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(90deg, #ffd700, #f0c03d);
+      color: #000;
+      font-weight: 600;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255,215,0,0.4);
+      transition: 0.3s;
+      animation: fadeInUp 2.2s ease-in-out;
+    }
+    #enterBtn:hover {
+      background: #000;
+      color: #ffd700;
+      transform: scale(1.05);
+      box-shadow: 0 0 14px rgba(255,215,0,0.6);
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes zoomIn {
+      from { opacity: 0; transform: scale(0.8); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+
+<body>
+  <img id="logo" src="../img/logo.png" alt="Trading CFC Logo">
+  <p id="phrase">El control es la verdadera libertad 🧠</p>
+  <button id="enterBtn">Entrar al Campus</button>
+
+  <script>
+    // Frases motivacionales aleatorias
+    const frases = [
+      "El control es la verdadera libertad 🧠",
+      "El mercado premia la paciencia 🕰️",
+      "Disciplina hoy, libertad mañana 💰",
+      "Ganá cuando mantenés la calma en el caos 🌙"
+    ];
+    document.getElementById("phrase").textContent =
+      frases[Math.floor(Math.random() * frases.length)];
+
+    // Redirección automática
+    setTimeout(() => {
+      window.location.href = "../index.html";
+    }, 4000);
+
+    // Opción manual
+    document.getElementById("enterBtn").addEventListener("click", () => {
+      window.location.href = "../index.html";
+    });
+  </script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
