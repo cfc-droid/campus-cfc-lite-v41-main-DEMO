@@ -10,12 +10,10 @@
 ========================================================= */
 
 (function () {
-  // 🧩 Base dinámica según dominio
   const base = window.location.hostname.includes("pages.dev")
     ? "/frontend/js/"
     : "../js/";
 
-  // 🧩 Inyección segura con validación previa (HEAD)
   const injectScript = async (file, description = "") => {
     const src = base + file;
 
@@ -33,22 +31,14 @@
       s.src = src;
       s.defer = true;
       document.head.appendChild(s);
-
     } catch (err) {
       console.warn(`⚠️ [SAFEFIX_PLUS] Falla al cargar ${file}:`, err);
     }
   };
 
-  // 🧩 Núcleo base (corregido)
-  // ❌ REMOVIDO: theme.js (no existe)
   injectScript("theme_chapter_v2.js?v=20251106", "Modo claro/oscuro modular");
   injectScript("badge.js?v=20251102", "Badge motivacional persistente");
 
-  // 🧩 (Opcionales)
-  // injectScript("daily-review.js?v=20251102");
-  // injectScript("backup.js?v=20251102");
-
-  // 🧩 Log QA-SYNC
   console.log(
     "🧩 CFC_SYNC checkpoint: auto_injector.js | SAFEFIX_PLUS V8.2 OK",
     new Date().toLocaleString()
@@ -74,16 +64,17 @@
 
 /* =========================================================
    🟣 SUBPASO 4.10 — Registrar MÓDULO ACTUAL  
-   🔥 CFC_STATS_V6.0_SUBPASO_4.10_REAL — 2025-12-10
+   🔥 CFC_STATS_V6.1_SUBPASO_4.10_FIXED_REAL — 2025-12-10
    ---------------------------------------------------------
    ✔ Detecta automáticamente /modules/x/
-   ✔ Guarda el NOMBRE COMPLETO del módulo
-   ✔ Totalmente seguro e independiente
+   ✔ Ya NO pisa el módulo actual si es inferior
+   ✔ Respeta el progreso real (ej: si aprobaste 2→ muestra 3)
+   ✔ Avanza SOLO si corresponde
+   ✔ No altera nada del resto del Campus
 ========================================================= */
 
 (function () {
   try {
-    // Detectar si estamos dentro de /modules/x/
     const match = window.location.pathname.match(/\/modules\/(\d+)(?:\/|$)/);
     if (!match) return; // No estamos dentro de un módulo
 
@@ -113,7 +104,6 @@
       20:"Módulo 20 – Legado Final del Trader Consciente"
     };
 
-    // Seleccionar nombre exacto
     const moduleName = CFC_MODULES_FULL[moduleNumber] || `Módulo ${moduleNumber}`;
 
     // Leer stats actual
@@ -124,16 +114,32 @@
       stats = {};
     }
 
-    // Guardar módulo actual EXACTO
+    // Detectar si ya existe currentModule guardado
+    let alreadySavedNumber = null;
+
+    if (stats.currentModule) {
+      const m = stats.currentModule.match(/Módulo\s+(\d+)/);
+      if (m) alreadySavedNumber = parseInt(m[1], 10);
+    }
+
+    // ⛔ No retroceder nunca
+    if (alreadySavedNumber !== null && moduleNumber < alreadySavedNumber) {
+      console.log(
+        `⛔ CFC_STATS_SUBPASO_4.10 → Evitado retroceso: ${moduleNumber} < ${alreadySavedNumber}`
+      );
+      return;
+    }
+
+    // ✔ Guardar módulo actual SOLO si avanza o si no existe
     stats.currentModule = moduleName;
 
     localStorage.setItem("CFC_stats", JSON.stringify(stats));
 
     console.log(
-      `📌 CFC_STATS_V6.0_SUBPASO_4.10 → currentModule guardado correctamente: ${moduleName}`
+      `📌 CFC_STATS_V6.1_SUBPASO_4.10_FIXED → currentModule actualizado a: ${moduleName}`
     );
 
   } catch (err) {
-    console.error("❌ Error SUBPASO 4.10 (currentModule):", err);
+    console.error("❌ Error SUBPASO 4.10_FIXED (currentModule):", err);
   }
 })();
