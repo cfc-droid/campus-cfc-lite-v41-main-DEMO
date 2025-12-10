@@ -86,7 +86,8 @@
     btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
 
     btn.addEventListener("click", () => {
-      const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      const newTheme = 
+        document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
       document.documentElement.setAttribute("data-theme", newTheme);
       localStorage.setItem("CFC_THEME_STATE", newTheme);
       btn.textContent = newTheme === "light" ? "🌙" : "☀️";
@@ -149,6 +150,7 @@
 
   <!-- =========================================================
        ⭐⭐⭐ NUEVO MODAL PREMIUM — 11 DATOS COMPLETOS CFC_STATS
+       🚀 SUBPASO 5.11 — CÁLCULO REAL (X) y (X+1)
        ========================================================= -->
   <script>
   document.getElementById("btnStats").addEventListener("click", () => {
@@ -156,9 +158,89 @@
     const prev = document.querySelector("#miProgresoOverlay");
     if (prev) prev.remove();
 
-    let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+    /* ==========================
+       1) Cargar stats existentes
+       ========================== */
+    let stats = {};
+    try { stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}"); }
+    catch { stats = {}; }
 
-    // Valores defensivos
+    /* ==========================
+       2) Tabla oficial (nombres)
+       ========================== */
+    const MODULES_FULL = {
+      1:"Módulo 1 – Introducción a la Psicología del Trader",
+      2:"Módulo 2 – Neurociencia del Trading",
+      3:"Módulo 3 – Fundamentos de Psicología Profunda",
+      4:"Módulo 4 – Modelo Mental del Trader Profesional",
+      5:"Módulo 5 – Herramientas Avanzadas de Regulación Emocional",
+      6:"Módulo 6 – Psicología de la Gestión del Capital",
+      7:"Módulo 7 – Estrategias Psicológicas por Etapas",
+      8:"Módulo 8 – Integración Estrategia–Psicología",
+      9:"Módulo 9 – Casos de Estudio y Simulaciones Reales",
+      10:"Módulo 10 – Optimización Mental y Rendimiento Peak",
+      11:"Módulo 11 – Ecosistema de Apoyo y Herramientas",
+      12:"Módulo 12 – Maestría Continua y Legado",
+      13:"Módulo 13 – Psicología del Error y Reprogramación Mental",
+      14:"Módulo 14 – El Mapa del Autocontrol Extremo",
+      15:"Módulo 15 – Arquitectura del Trading Mental Automático",
+      16:"Módulo 16 – Reversión Psicológica y Superación del Burnout",
+      17:"Módulo 17 – Psicología del Trader de Alto Impacto",
+      18:"Módulo 18 – La Mentalidad del Mentor Trader",
+      19:"Módulo 19 – Integración Total Cuerpo–Mente–Mercado",
+      20:"Módulo 20 – Legado Final del Trader Consciente"
+    };
+
+    /* ==========================================
+       3) Calcular progreso REAL desde exámenes
+       ========================================== */
+    let modulesCompletedCount = 0;
+    let highestPassed = 0;
+
+    for (let i = 1; i <= 20; i++) {
+      const sc = parseInt(localStorage.getItem(`mod${i}_score`) || "0", 10);
+      if (sc >= 3) {
+        modulesCompletedCount++;
+        if (i > highestPassed) highestPassed = i;
+      }
+    }
+
+    /* ==========================================
+       4) Actualizar stats con datos reales
+       ========================================== */
+
+    // (A) Módulos completados reales
+    stats.modulesCompleted = modulesCompletedCount;
+
+    // (B) Último módulo completado (X)
+    if (highestPassed > 0) {
+      stats.lastCompletedModule =
+        MODULES_FULL[highestPassed] || `Módulo ${highestPassed}`;
+    } else {
+      stats.lastCompletedModule = "—";
+    }
+
+    // (C) Módulo actual (X+1)
+    const nextNum = Math.min(highestPassed + 1, 20);
+    const autoCurrent = MODULES_FULL[nextNum] || `Módulo ${nextNum}`;
+
+    // Validación defensiva
+    let savedNum = null;
+    if (stats.currentModule) {
+      const m = stats.currentModule.match(/Módulo\s+(\d+)/);
+      if (m) savedNum = parseInt(m[1], 10);
+    }
+
+    if (!savedNum || savedNum <= highestPassed) {
+      stats.currentModule = autoCurrent;
+    }
+
+    // Guardar stats actualizados
+    localStorage.setItem("CFC_stats", JSON.stringify(stats));
+
+    /* ==========================================
+       5) Helpers
+       ========================================== */
     const def = (v, d) => (v === undefined || v === null ? d : v);
 
     const modulesCompleted = def(stats.modulesCompleted, 0);
@@ -182,6 +264,9 @@
       return h > 0 ? `${h} h ${min} min` : `${min} min`;
     };
 
+    /* ==========================================
+       6) Overlay (misma estética)
+       ========================================== */
     const overlay = document.createElement("div");
     overlay.id = "miProgresoOverlay";
     overlay.style = `
@@ -202,7 +287,6 @@
 
         <h2 style="text-align:center;">📊 Tu Progreso</h2>
 
-        <!-- Barra de progreso -->
         <div style="width:100%;height:14px;background:#333;border-radius:10px;margin:18px 0;overflow:hidden;">
           <div style="width:${percent}%;height:100%;background:#FFD700;box-shadow:0 0 10px #FFD700;"></div>
         </div>
