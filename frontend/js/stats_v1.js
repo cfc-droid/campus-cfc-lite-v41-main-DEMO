@@ -1,143 +1,121 @@
 /* ==========================================================
-✅ CFC_FUNC_8_1_FIX_V1.3_20251106 — Sin overlay duplicado
-Mantiene logs y sincronización, pero sin crear modal visual.
+   CFC_STATS V1.4 — SAFE MODE (NO sobrescribe campos críticos)
+   Autor: CFC-DROID · 2025-12-10
+   ----------------------------------------------------------
+   ✔ Mantiene firstSessionDate
+   ✔ Actualiza lastSessionDate sin borrar otros campos
+   ✔ NO toca currentModule
+   ✔ NO toca lastCompletedModule
+   ✔ NO toca modulesCompleted
+   ✔ NO toca CFC_stats existentes
+   ✔ 100% compatible con subpasos 4.10 / 5.10 / 5.11
+   ✔ NO rompe SYNC CENTRAL
 ========================================================== */
 
+/* ==========================================================
+   1) Inicialización segura
+========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById("btnStats");
   if (btn) {
-    console.log("🧩 CFC-STATS → Listener activo pero overlay desactivado (controlado por profile.html)");
+    console.log("🧩 CFC-STATS SAFE MODE → Listener activo (Profile controlado por profile.html)");
   }
 });
 
-/* 🔹 Registro pasivo del progreso */
-(function passiveStatsSync() {
+/* ==========================================================
+   2) Cargar CFC_stats sin sobrescribir nada
+========================================================== */
+function loadStatsSafe() {
+  let stats = {};
   try {
-    const progressData = JSON.parse(localStorage.getItem("progressData") || "{}");
-    const completed = (progressData.completed || []).length;
-    const percent = Math.round((completed / 20) * 100);
-    const totalSeconds = parseFloat(localStorage.getItem("CFC_time_total") || 0);
-    const totalMin = Math.floor(totalSeconds / 60);
-    const totalHours = Math.floor(totalMin / 60);
-    const days = localStorage.getItem("CFC_days") || 1;
-    const totalDays = localStorage.getItem("CFC_totalDays") || 1;
-    console.log(`CFC-STATS SYNC → ${completed}/20 módulos (${percent}%) | ${totalHours}h ${totalMin % 60}min | Días:${days}/${totalDays}`);
-  } catch (err) {
-    console.warn("⚠️ CFC-STATS passiveSync error:", err);
+    stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+  } catch {
+    stats = {};
   }
-})();
+  return stats;
+}
+
+function saveStatsSafe(obj) {
+  localStorage.setItem("CFC_stats", JSON.stringify(obj));
+}
 
 /* ==========================================================
-🔒 CFC_LOCK: V1.3-STATS_PASSIVE_FIX-20251106
-QA-SYNC V41.33 — Overlay duplicado eliminado
+   3) Registrar PRIMERA SESIÓN · NO pisa si ya existe
 ========================================================== */
-
-
-/* ==========================================================
-🟣 SUBPASO 1.8 — Registrar PRIMERA SESIÓN
-Acción 1.1 — Guardar firstSessionDate si no existe
-(Formato requerido: dd/mm/yyyy)
-========================================================== */
-
 (function () {
   try {
-    // Cargar stats globales
-    let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+    const stats = loadStatsSafe();
 
-    // Convertir hoy a formato dd/mm/yyyy
-    const d = new Date();
-    const dd = String(d.getDate()).padStart(2, "0");
-    const mm = String(d.getMonth() + 1).padStart(2, "0");
-    const yyyy = d.getFullYear();
-    const todayFormatted = `${dd}/${mm}/${yyyy}`;
-
-    // Si no existe firstSessionDate, la creamos
     if (!stats.firstSessionDate) {
-      stats.firstSessionDate = todayFormatted;
+      const d = new Date();
+      const dd = String(d.getDate()).padStart(2, "0");
+      const mm = String(d.getMonth() + 1).padStart(2, "0");
+      const yyyy = d.getFullYear();
+      stats.firstSessionDate = `${dd}/${mm}/${yyyy}`;
 
-      // Guardar nuevamente
-      localStorage.setItem("CFC_stats", JSON.stringify(stats));
-
-      console.log("📌 firstSessionDate registrado:", todayFormatted);
+      saveStatsSafe(stats);
+      console.log("📌 SAFE → firstSessionDate registrado");
     } else {
-      console.log("📎 firstSessionDate ya existía:", stats.firstSessionDate);
+      console.log("📎 SAFE → firstSessionDate preservado:", stats.firstSessionDate);
     }
 
   } catch (err) {
-    console.error("⚠️ Error registrando firstSessionDate:", err);
+    console.error("⚠️ SAFE Error firstSessionDate:", err);
   }
 })();
 
 /* ==========================================================
-🟣 SUBPASO 2.8 — Registrar ÚLTIMA SESIÓN
-Acción 1.1 — Guardar lastSessionDate SIEMPRE al cargar el Campus
-(AGREGADO SIN ALTERAR NADA DEL ARCHIVO ORIGINAL)
+   4) Registrar ÚLTIMA SESIÓN · Solo actualiza ese campo
 ========================================================== */
-
 (function () {
   try {
-    // Cargar stats globales
-    let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+    const stats = loadStatsSafe();
 
-    // Convertir fecha actual a dd/mm/aaaa
     const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    const todayFormatted = `${day}/${month}/${year}`;
+    const dd = String(now.getDate()).padStart(2, "0");
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const yyyy = now.getFullYear();
 
-    // Registrar SIEMPRE la última sesión
-    stats.lastSessionDate = todayFormatted;
+    stats.lastSessionDate = `${dd}/${mm}/${yyyy}`;
 
-    // Guardar cambios
-    localStorage.setItem("CFC_stats", JSON.stringify(stats));
-
-    console.log("📌 lastSessionDate actualizada:", todayFormatted);
+    saveStatsSafe(stats);
+    console.log("📌 SAFE → lastSessionDate actualizado");
 
   } catch (err) {
-    console.error("⚠️ Error registrando lastSessionDate:", err);
+    console.error("⚠️ SAFE Error lastSessionDate:", err);
   }
 })();
 
 /* ==========================================================
-🟣 SUBPASO 3.8 — Registrar DÍAS TOTALES DE ESTUDIO
-Acciones 1.3 / 2.3 / 3.3
+   5) Registrar día estudiado · NO toca nada más
 ========================================================== */
-
 (function () {
   try {
-    // Cargar stats globales
-    let stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
+    const stats = loadStatsSafe();
 
-    // Convertir fecha actual a dd/mm/yyyy
     const now = new Date();
-    const day = String(now.getDate()).padStart(2, "0");
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const year = now.getFullYear();
-    const today = `${day}/${month}/${year}`;
+    const dd = String(now.getDate()).padStart(2, "0");
+    const mm = String(now.getMonth() + 1).padStart(2, "0");
+    const yyyy = now.getFullYear();
+    const today = `${dd}/${mm}/${yyyy}`;
 
-    // Si el campo no existe aún, inicializarlo
     if (!stats.lastStudyDay) {
       stats.lastStudyDay = today;
-      localStorage.setItem("CFC_stats", JSON.stringify(stats));
-      console.log("📌 lastStudyDay creado:", today);
+      saveStatsSafe(stats);
+      console.log("📌 SAFE → lastStudyDay inicializado");
       return;
     }
 
-    // Si es un día nuevo Y se estudió realmente
     if (stats.lastStudyDay !== today && stats.activeTodayMinutes > 0) {
       stats.daysStudiedTotal = (stats.daysStudiedTotal || 0) + 1;
       stats.lastStudyDay = today;
-
-      // Guardar cambios
-      localStorage.setItem("CFC_stats", JSON.stringify(stats));
-
-      console.log("🟢 Día estudiado registrado (+1) →", stats.daysStudiedTotal);
+      saveStatsSafe(stats);
+      console.log("🟢 SAFE → Día de estudio +1:", stats.daysStudiedTotal);
     } else {
-      console.log("ℹ️ Día NO sumado → mismo día o sin estudio.");
+      console.log("ℹ️ SAFE → Día no sumado");
     }
 
   } catch (err) {
-    console.error("⚠️ Error SUBPASO 3.8 (días estudio):", err);
+    console.error("⚠️ SAFE Error days:", err);
   }
 })();
