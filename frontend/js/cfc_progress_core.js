@@ -2,7 +2,7 @@
    CFC_PROGRESS_CORE.JS — SISTEMA NUEVO DE PROGRESO V3
    ---------------------------------------------------------------------------
    FASE 2/5 — SUBPASO 1.4 + SUBPASO 2.4 + SUBPASO 3.4 + SUBPASO 4.4
-   ============================================================================ 
+   ============================================================================
 */
 
 (function() {
@@ -88,33 +88,46 @@
 
         /* =============================================================
            SUBPASO 2.4 — CÁLCULO DE MÓDULOS
+           - AHORA USANDO progressData.completed (igual que la barra 5%)
            ============================================================= */
 
-        let modulesCompleted = 0;
-        let highestPassed = 0;
+        const progressData = safeParseJSON(localStorage.getItem("progressData") || "{}", {});
+        const completedRaw = Array.isArray(progressData.completed) ? progressData.completed : [];
 
-        for (let i = 1; i <= 20; i++) {
-            const raw = localStorage.getItem(`mod${i}_score`);
-            const score = raw ? parseInt(raw, 10) : 0;
+        // Normalizar a números 1..20 (acepta ["mod1", "mod2"] o [1,2])
+        const completedModules = completedRaw
+            .map(item => {
+                if (typeof item === "number") return item;
+                if (typeof item === "string") {
+                    const match = item.match(/(\d+)/);
+                    return match ? parseInt(match[1], 10) : null;
+                }
+                return null;
+            })
+            .filter(n => typeof n === "number" && n >= 1 && n <= 20);
 
-            if (score >= 3) {
-                modulesCompleted++;
-                highestPassed = i;
-            }
-        }
-
+        const modulesCompleted = completedModules.length;
         CFC_PROGRESS_V3.modulesCompleted = modulesCompleted;
 
+        let highestPassed = 0;
+        if (modulesCompleted > 0) {
+            highestPassed = Math.max.apply(null, completedModules);
+        }
+
+        // Último módulo completado
         if (highestPassed > 0) {
-            CFC_PROGRESS_V3.lastCompletedModule = MODULES_FULL[highestPassed];
+            CFC_PROGRESS_V3.lastCompletedModule = MODULES_FULL[highestPassed] || "—";
         } else {
             CFC_PROGRESS_V3.lastCompletedModule = "—";
         }
 
-        let nextModule = highestPassed + 1;
-        if (nextModule > 20) nextModule = 20;
-        CFC_PROGRESS_V3.currentModule = MODULES_FULL[nextModule];
+        // Módulo actual sugerido (el siguiente al último aprobado, mínimo 1, máximo 20)
+        let nextModuleIndex = highestPassed + 1;
+        if (nextModuleIndex < 1) nextModuleIndex = 1;
+        if (nextModuleIndex > 20) nextModuleIndex = 20;
+        CFC_PROGRESS_V3.currentModule = MODULES_FULL[nextModuleIndex] || "—";
 
+        // Porcentaje global
         CFC_PROGRESS_V3.percent = Math.floor((modulesCompleted / 20) * 100);
 
         /* =============================================================
@@ -134,7 +147,7 @@
         CFC_PROGRESS_V3.activeTodayMinutes = activeTodayMinutes;
 
         let avg = 0;
-        if (modulesCompleted > 0) {
+        if (modulesCompleted > 0 && activeTotalMinutes > 0) {
             avg = Math.round(activeTotalMinutes / modulesCompleted);
         }
         CFC_PROGRESS_V3.averageTimePerModule = avg;
@@ -150,6 +163,7 @@
 
         /* =============================================================
            SUBPASO 4.4 — FECHAS Y DÍAS DE ESTUDIO
+           - Compatibilidad con CFC_stats y claves antiguas
            ============================================================= */
 
         const rawStats = localStorage.getItem("CFC_stats");
@@ -162,20 +176,36 @@
         const yyyy = today.getFullYear();
         const todayStr = `${dd}/${mm}/${yyyy}`;
 
+        // Legacy: última fecha usada antes (por si CFC_stats aún no está completo)
+        const legacyLastDate = localStorage.getItem("CFC_lastDate") || null;
+        const legacyTotalDaysRaw = localStorage.getItem("CFC_totalDays");
+
         // Primera sesión
-        CFC_PROGRESS_V3.firstSessionDate =
-            stats.firstSessionDate ? stats.firstSessionDate : todayStr;
+        if (stats.firstSessionDate) {
+            CFC_PROGRESS_V3.firstSessionDate = stats.firstSessionDate;
+        } else if (legacyLastDate) {
+            // Si no tenemos firstSessionDate, al menos usamos alguna fecha conocida
+            CFC_PROGRESS_V3.firstSessionDate = legacyLastDate;
+        } else {
+            CFC_PROGRESS_V3.firstSessionDate = todayStr;
+        }
 
         // Última sesión
-        CFC_PROGRESS_V3.lastSessionDate =
-            stats.lastSessionDate ? stats.lastSessionDate : CFC_PROGRESS_V3.firstSessionDate;
+        if (stats.lastSessionDate) {
+            CFC_PROGRESS_V3.lastSessionDate = stats.lastSessionDate;
+        } else if (legacyLastDate) {
+            CFC_PROGRESS_V3.lastSessionDate = legacyLastDate;
+        } else {
+            CFC_PROGRESS_V3.lastSessionDate = CFC_PROGRESS_V3.firstSessionDate;
+        }
 
-        // Días de estudio
+        // Días de estudio (prioridad: stats.daysStudiedTotal > CFC_totalDays > estimación mínima)
         if (typeof stats.daysStudiedTotal === "number") {
             CFC_PROGRESS_V3.daysStudiedTotal = stats.daysStudiedTotal;
+        } else if (legacyTotalDaysRaw !== null && !isNaN(parseInt(legacyTotalDaysRaw, 10))) {
+            CFC_PROGRESS_V3.daysStudiedTotal = parseInt(legacyTotalDaysRaw, 10);
         } else {
-            CFC_PROGRESS_V3.daysStudiedTotal =
-                activeTotalMinutes > 0 ? 1 : 0;
+            CFC_PROGRESS_V3.daysStudiedTotal = activeTotalMinutes > 0 ? 1 : 0;
         }
 
         return CFC_PROGRESS_V3;
