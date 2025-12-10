@@ -81,6 +81,10 @@
   <script src="../js/stats_v1.js" defer></script>
   <script src="../js/activity_tracker.js?v=20251106" defer></script>
 
+  <!-- ✅ NUEVO: Motor de progreso V3 + Overlay PREMIUM -->
+  <script src="../js/cfc_progress_core.js" defer></script>
+  <script src="../js/cfc_progress_overlay.js" defer></script>
+
   <!-- =========================================================
        ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración independiente modo claro/oscuro
        ========================================================= -->
@@ -162,73 +166,20 @@
        ✅ CFC_FUNC_11_3_V41.34 — Panel “Mi progreso” unificado
        ========================================================= -->
   <script>
+  // Ahora el botón "📊 Mi progreso" usa el overlay PREMIUM V3 (barra + 10 datos + botón cerrar)
   document.getElementById("btnStats").addEventListener("click", () => {
-    const prev = document.querySelector("#miProgresoOverlay");
-    if (prev) prev.remove();
-
-    const totalSeconds = parseFloat(localStorage.getItem("CFC_time_total") || 0);
-    const minutes = Math.floor(totalSeconds / 60);
-    const hours = Math.floor(minutes / 60);
-    const remMin = minutes % 60;
-
-    const data = JSON.parse(localStorage.getItem("progressData") || "{}");
-    const completed = (data.completed || []).length;
-    const percent = Math.floor((completed / 20) * 100);
-
-    let lastDate = localStorage.getItem("CFC_lastDate");
-    if (!lastDate || lastDate === "—") {
-      const today = new Date().toLocaleDateString("es-AR");
-      localStorage.setItem("CFC_lastDate", today);
-      lastDate = today;
+    if (typeof CFC_showProgressOverlayV3 === "function") {
+      CFC_showProgressOverlayV3();
+    } else {
+      alert("⚠️ El sistema de progreso no está disponible en este momento. Actualizá la página e intentá de nuevo.");
     }
-
-    const consecutive = localStorage.getItem("CFC_days") || 0;
-    const totalDays = localStorage.getItem("CFC_totalDays") || 0;
-
-    const overlay = document.createElement("div");
-    overlay.id = "miProgresoOverlay";
-    overlay.style = `
-      position:fixed;inset:0;z-index:99999;
-      background:rgba(0,0,0,0.88);color:#FFD700;
-      font-family:'Poppins',sans-serif;display:flex;
-      justify-content:center;align-items:center;flex-direction:column;
-      text-align:center;line-height:1.6;opacity:0;
-      transition:opacity .6s ease-in-out;
-    `;
-
-    overlay.innerHTML = `
-      <div style="max-width:480px;padding:30px;
-        background:rgba(40,40,40,0.85);
-        backdrop-filter:blur(10px);
-        border:1px solid #FFD700;border-radius:14px;
-        box-shadow:0 0 25px rgba(255,215,0,0.5);
-        text-align:left;">
-        <h2 style="text-align:center;">📊 Tu progreso</h2>
-        <ul style="list-style:none;padding-left:0;font-size:0.95rem;line-height:1.8;">
-          <li>📘 <b>Módulos completados:</b> ${completed}/20 (${percent}%)</li>
-          <li>⏱️ <b>Horas activas:</b> ${hours} h ${remMin} min</li>
-          <li>📅 <b>Última sesión:</b> ${lastDate}</li>
-          <li>🔁 <b>Días consecutivos de estudio:</b> ${consecutive}</li>
-          <li>🗓️ <b>Días totales de estudio:</b> ${totalDays}</li>
-        </ul>
-        <div style="text-align:center;margin-top:20px;">
-          <button id="cerrarProgreso" class="btn-main">Cerrar</button>
-        </div>
-      </div>
-    `;
-    document.body.appendChild(overlay);
-    setTimeout(() => (overlay.style.opacity = 1), 50);
-    document.getElementById("cerrarProgreso").addEventListener("click", () => {
-      overlay.style.opacity = 0;
-      setTimeout(() => overlay.remove(), 300);
-    });
   });
   </script>
 
-<!-- 🔒 CFC-LOCK V72 -->
-<script src="../js/domain_lock_v72.js" defer></script> 
+  <!-- 🔒 CFC-LOCK V72 -->
+  <script src="../js/domain_lock_v72.js" defer></script> 
 
-<!-- 🔥 CFC-BUNDLE -->
-<script src="../js/bundle_core.min.js" defer></script> 
+  <!-- 🔥 CFC-BUNDLE -->
+  <script src="../js/bundle_core.min.js" defer></script> 
 </body>
 </html>
