@@ -114,18 +114,18 @@
 
 /* =========================================================
    🟣 SUBPASO 5.10 — Registrar MÓDULO ACTUAL AUTOMÁTICO AL APROBAR  
-   🔥 CFC_STATS_V6.0_SUBPASO_5.10_REAL — 2025-12-10
+   🔥 CFC_STATS_V6.0_SUBPASO_5.10_REAL_B — 2025-12-10
    ---------------------------------------------------------
-   ✔ No modifica ninguna función de exam.js
-   ✔ No altera gradeExam()
-   ✔ No toca saveHistory()
-   ✔ No toca unlockNext()
-   ✔ Totalmente seguro y aislado
+   ✔ Opción B activada (por pedido de Cristian)
+   ✔ currentModule = siguiente módulo (nextModuleNumber)
+   ✔ No depende de la URL
+   ✔ No interfiere con unlockNext ni recalcProgress
+   ✔ Totalmente seguro y aislado del motor del examen
 ========================================================= */
 
 (function () {
   try {
-    // Hook suave: observar cambios del DOM del mensaje del examen
+
     const msgBox = document.querySelector('.cfc-exam-msg');
     if (!msgBox) return;
 
@@ -133,14 +133,17 @@
       const text = msgBox.textContent || "";
       if (!text.includes("Aprobaste")) return;  // Solo si aprobó
 
-      // Obtenemos módulo actual
+      // Obtener módulo APROBADO (desde localStorage)
       const parts = window.location.pathname.split('/').filter(Boolean);
       const idx = parts.indexOf('modules');
       if (idx < 0 || !parts[idx + 1]) return;
 
-      const currentModuleNumber = parseInt(parts[idx + 1], 10);
+      const approvedModuleNumber = parseInt(parts[idx + 1], 10);
 
-      // Definir tabla completa
+      // Calcular siguiente módulo
+      const nextModuleNumber = approvedModuleNumber + 1;
+
+      // Tabla completa oficial
       const CFC_MODULES_FULL = {
         1: "Módulo 1 – Introducción a la Psicología del Trader",
         2: "Módulo 2 – Neurociencia del Trading",
@@ -164,27 +167,24 @@
         20:"Módulo 20 – Legado Final del Trader Consciente"
       };
 
-      // Calcular siguiente módulo
-      const nextModuleNumber = currentModuleNumber + 1;
-
-      // Cargar stats
+      // Leer CFC_stats
       let stats = {};
       try {
         stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
       } catch {}
 
-      // Si hay siguiente módulo → actualizar currentModule
+      // Guardar siguiente módulo (Opción B)
       if (CFC_MODULES_FULL[nextModuleNumber]) {
         stats.currentModule = CFC_MODULES_FULL[nextModuleNumber];
       } else {
-        stats.currentModule = CFC_MODULES_FULL[currentModuleNumber];
+        stats.currentModule = CFC_MODULES_FULL[approvedModuleNumber];
       }
 
       // Guardar
       localStorage.setItem("CFC_stats", JSON.stringify(stats));
 
       console.log(
-        "📌 CFC_STATS_V6.0_SUBPASO_5.10 → currentModule actualizado automáticamente a:",
+        "📌 CFC_STATS_V6.0_SUBPASO_5.10_B → currentModule actualizado a:",
         stats.currentModule
       );
     });
@@ -192,6 +192,6 @@
     observer.observe(msgBox, { childList: true, subtree: true });
 
   } catch (err) {
-    console.error("❌ Error SUBPASO 5.10 (currentModule auto):", err);
+    console.error("❌ Error SUBPASO 5.10_B (currentModule auto):", err);
   }
 })();
