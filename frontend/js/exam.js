@@ -115,14 +115,7 @@
 /* =========================================================
    🟣 SUBPASO 5.10 — Registrar MÓDULO ACTUAL AUTOMÁTICO AL APROBAR  
    🔥 CFC_STATS_V6.0_SUBPASO_5.10_REAL_B — 2025-12-10
-   ---------------------------------------------------------
-   ✔ Opción B activada (por pedido de Cristian)
-   ✔ currentModule = siguiente módulo (nextModuleNumber)
-   ✔ No depende de la URL
-   ✔ No interfiere con unlockNext ni recalcProgress
-   ✔ Totalmente seguro y aislado del motor del examen
 ========================================================= */
-
 (function () {
   try {
 
@@ -131,29 +124,25 @@
 
     const observer = new MutationObserver(() => {
       const text = msgBox.textContent || "";
-      if (!text.includes("Aprobaste")) return;  // Solo si aprobó
+      if (!text.includes("Aprobaste")) return;
 
-      // Obtener módulo APROBADO (desde localStorage)
       const parts = window.location.pathname.split('/').filter(Boolean);
       const idx = parts.indexOf('modules');
       if (idx < 0 || !parts[idx + 1]) return;
 
       const approvedModuleNumber = parseInt(parts[idx + 1], 10);
-
-      // Calcular siguiente módulo
       const nextModuleNumber = approvedModuleNumber + 1;
 
-      // Tabla completa oficial
       const CFC_MODULES_FULL = {
-        1: "Módulo 1 – Introducción a la Psicología del Trader",
-        2: "Módulo 2 – Neurociencia del Trading",
-        3: "Módulo 3 – Fundamentos de Psicología Profunda",
-        4: "Módulo 4 – Modelo Mental del Trader Profesional",
-        5: "Módulo 5 – Herramientas Avanzadas de Regulación Emocional",
-        6: "Módulo 6 – Psicología de la Gestión del Capital",
-        7: "Módulo 7 – Estrategias Psicológicas por Etapas",
-        8: "Módulo 8 – Integración Estrategia–Psicología",
-        9: "Módulo 9 – Casos de Estudio y Simulaciones Reales",
+        1:"Módulo 1 – Introducción a la Psicología del Trader",
+        2:"Módulo 2 – Neurociencia del Trading",
+        3:"Módulo 3 – Fundamentos de Psicología Profunda",
+        4:"Módulo 4 – Modelo Mental del Trader Profesional",
+        5:"Módulo 5 – Herramientas Avanzadas de Regulación Emocional",
+        6:"Módulo 6 – Psicología de la Gestión del Capital",
+        7:"Módulo 7 – Estrategias Psicológicas por Etapas",
+        8:"Módulo 8 – Integración Estrategia–Psicología",
+        9:"Módulo 9 – Casos de Estudio y Simulaciones Reales",
         10:"Módulo 10 – Optimización Mental y Rendimiento Peak",
         11:"Módulo 11 – Ecosistema de Apoyo y Herramientas",
         12:"Módulo 12 – Maestría Continua y Legado",
@@ -167,31 +156,106 @@
         20:"Módulo 20 – Legado Final del Trader Consciente"
       };
 
-      // Leer CFC_stats
       let stats = {};
-      try {
-        stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
-      } catch {}
+      try { stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}"); } catch {}
 
-      // Guardar siguiente módulo (Opción B)
       if (CFC_MODULES_FULL[nextModuleNumber]) {
         stats.currentModule = CFC_MODULES_FULL[nextModuleNumber];
       } else {
         stats.currentModule = CFC_MODULES_FULL[approvedModuleNumber];
       }
 
-      // Guardar
       localStorage.setItem("CFC_stats", JSON.stringify(stats));
 
-      console.log(
-        "📌 CFC_STATS_V6.0_SUBPASO_5.10_B → currentModule actualizado a:",
-        stats.currentModule
-      );
+      console.log("📌 SUBPASO 5.10 → currentModule:", stats.currentModule);
     });
 
     observer.observe(msgBox, { childList: true, subtree: true });
 
   } catch (err) {
-    console.error("❌ Error SUBPASO 5.10_B (currentModule auto):", err);
+    console.error("❌ Error SUBPASO 5.10_B:", err);
+  }
+})();
+
+/* =========================================================
+   🟣 SUBPASO 5.11 — Registrar MÓDULOS COMPLETADOS (OPCIÓN C)
+   🔥 CFC_STATS_V6.0_SUBPASO_5.11_REAL — 2025-12-10
+   ---------------------------------------------------------
+   ✔ Cuenta todos los módulos aprobados (sin importar orden)
+   ✔ lastCompletedModule = módulo aprobado MÁS ALTO
+   ✔ Compatible con tu lógica 4.10 y 5.10 (NO pisado)
+   ✔ No rompe nada del examen ni del Campus
+========================================================= */
+
+(function () {
+  try {
+
+    const msgBox = document.querySelector('.cfc-exam-msg');
+    if (!msgBox) return;
+
+    const observer = new MutationObserver(() => {
+      const text = msgBox.textContent || "";
+      if (!text.includes("Aprobaste")) return;
+
+      // Cargar stats
+      let stats = {};
+      try { stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}"); } catch {}
+
+      const MODULES_FULL = {
+        1:"Módulo 1 – Introducción a la Psicología del Trader",
+        2:"Módulo 2 – Neurociencia del Trading",
+        3:"Módulo 3 – Fundamentos de Psicología Profunda",
+        4:"Módulo 4 – Modelo Mental del Trader Profesional",
+        5:"Módulo 5 – Herramientas Avanzadas de Regulación Emocional",
+        6:"Módulo 6 – Psicología de la Gestión del Capital",
+        7:"Módulo 7 – Estrategias Psicológicas por Etapas",
+        8:"Módulo 8 – Integración Estrategia–Psicología",
+        9:"Módulo 9 – Casos de Estudio y Simulaciones Reales",
+        10:"Módulo 10 – Optimización Mental y Rendimiento Peak",
+        11:"Módulo 11 – Ecosistema de Apoyo y Herramientas",
+        12:"Módulo 12 – Maestría Continua y Legado",
+        13:"Módulo 13 – Psicología del Error y Reprogramación Mental",
+        14:"Módulo 14 – El Mapa del Autocontrol Extremo",
+        15:"Módulo 15 – Arquitectura del Trading Mental Automático",
+        16:"Módulo 16 – Reversión Psicológica y Superación del Burnout",
+        17:"Módulo 17 – Psicología del Trader de Alto Impacto",
+        18:"Módulo 18 – La Mentalidad del Mentor Trader",
+        19:"Módulo 19 – Integración Total Cuerpo–Mente–Mercado",
+        20:"Módulo 20 – Legado Final del Trader Consciente"
+      };
+
+      // 📌 Detectar módulo aprobado actual
+      const parts = window.location.pathname.split('/').filter(Boolean);
+      const idx = parts.indexOf('modules');
+      if (idx < 0 || !parts[idx + 1]) return;
+      const approvedModule = parseInt(parts[idx + 1], 10);
+
+      // 📌 Contar cuántos módulos aprobados existen
+      let count = 0;
+      let highest = 0;
+
+      for (let i = 1; i <= 20; i++) {
+        const sc = parseInt(localStorage.getItem(`mod${i}_score`) || "0", 10);
+        if (sc >= 3) {
+          count++;
+          if (i > highest) highest = i;
+        }
+      }
+
+      // Actualizar stats
+      stats.modulesCompleted = count;
+      stats.lastCompletedModule = MODULES_FULL[highest] || `Módulo ${highest}`;
+
+      localStorage.setItem("CFC_stats", JSON.stringify(stats));
+
+      console.log(`📌 SUBPASO 5.11 → lastCompletedModule: ${stats.lastCompletedModule}`);
+      console.log(`📌 SUBPASO 5.11 → modulesCompleted: ${stats.modulesCompleted}`);
+
+    });
+
+    observer.observe(msgBox, { childList: true, subtree: true });
+
+  } catch (err) {
+    console.error("❌ Error SUBPASO 5.11:", err);
   }
 })();
