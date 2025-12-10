@@ -1,8 +1,8 @@
 /* ============================================================================
    CFC_PROGRESS_CORE.JS — SISTEMA NUEVO DE PROGRESO V3
    ---------------------------------------------------------------------------
-   FASE 2/5 — SUBPASO 1.4 + SUBPASO 2.4 + SUBPASO 3.4 (tiempos)
-   ============================================================================
+   FASE 2/5 — SUBPASO 1.4 + SUBPASO 2.4 + SUBPASO 3.4 + SUBPASO 4.4
+   ============================================================================ 
 */
 
 (function() {
@@ -74,7 +74,7 @@
 
         percent: 0,
 
-        // Versiones con texto (tiempos)
+        // Versiones con texto
         timeTotalText: "0 h 00 min",
         timeTodayText: "0 h 00 min",
         avgPerModuleText: "0 h 00 min",
@@ -121,7 +121,6 @@
            SUBPASO 3.4 — CÁLCULO DE TIEMPOS
            ============================================================= */
 
-        // Leer tiempos del LocalStorage
         const rawTotal = localStorage.getItem("CFC_time_total");
         const rawToday = localStorage.getItem("CFC_time_today");
 
@@ -134,27 +133,50 @@
         CFC_PROGRESS_V3.activeTotalMinutes = activeTotalMinutes;
         CFC_PROGRESS_V3.activeTodayMinutes = activeTodayMinutes;
 
-        // Promedio por módulo
         let avg = 0;
         if (modulesCompleted > 0) {
             avg = Math.round(activeTotalMinutes / modulesCompleted);
         }
         CFC_PROGRESS_V3.averageTimePerModule = avg;
 
-        // Tiempo estimado restante
         const remaining = 20 - modulesCompleted;
         const estimated = remaining * avg;
         CFC_PROGRESS_V3.estimatedTimeToFinish = estimated;
 
-        // Versiones texto
         CFC_PROGRESS_V3.timeTotalText = fmtMinutesToText(activeTotalMinutes);
         CFC_PROGRESS_V3.timeTodayText = fmtMinutesToText(activeTodayMinutes);
         CFC_PROGRESS_V3.avgPerModuleText = fmtMinutesToText(avg);
         CFC_PROGRESS_V3.estimatedText = fmtMinutesToText(estimated);
 
-        // =============================================================
-        // FECHAS (Subpaso 4.4) se hará más adelante
-        // =============================================================
+        /* =============================================================
+           SUBPASO 4.4 — FECHAS Y DÍAS DE ESTUDIO
+           ============================================================= */
+
+        const rawStats = localStorage.getItem("CFC_stats");
+        const stats = rawStats ? safeParseJSON(rawStats, {}) : {};
+
+        // Fecha actual formateada dd/mm/yyyy
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, "0");
+        const mm = String(today.getMonth() + 1).padStart(2, "0");
+        const yyyy = today.getFullYear();
+        const todayStr = `${dd}/${mm}/${yyyy}`;
+
+        // Primera sesión
+        CFC_PROGRESS_V3.firstSessionDate =
+            stats.firstSessionDate ? stats.firstSessionDate : todayStr;
+
+        // Última sesión
+        CFC_PROGRESS_V3.lastSessionDate =
+            stats.lastSessionDate ? stats.lastSessionDate : CFC_PROGRESS_V3.firstSessionDate;
+
+        // Días de estudio
+        if (typeof stats.daysStudiedTotal === "number") {
+            CFC_PROGRESS_V3.daysStudiedTotal = stats.daysStudiedTotal;
+        } else {
+            CFC_PROGRESS_V3.daysStudiedTotal =
+                activeTotalMinutes > 0 ? 1 : 0;
+        }
 
         return CFC_PROGRESS_V3;
     };
