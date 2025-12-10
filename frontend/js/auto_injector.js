@@ -137,37 +137,3 @@
     console.error("❌ Error SUBPASO 4.10 (currentModule):", err);
   }
 })();
-
-/* =============================
-   🟣 SUBPASO 5.10 — Registrar ÚLTIMO MÓDULO COMPLETADO  
-   🔥 CFC_STATS_V6.0_SUBPASO_5.10_REAL — 2025-12-10
-   ============================= */
-
-if (passed === true) {
-    let stats = {};
-    try {
-        stats = JSON.parse(localStorage.getItem("CFC_stats") || "{}");
-    } catch {
-        stats = {};
-    }
-
-    // Aumentar módulos completados
-    stats.modulesCompleted = (stats.modulesCompleted || 0) + 1;
-
-    // Guardar nombre del módulo aprobado
-    stats.lastCompletedModule = CFC_MODULES_FULL[currentModuleNumber];
-
-    // 🔥 REGISTRAR EL MÓDULO ACTUAL AUTOMÁTICO (el siguiente)
-    const nextModuleNumber = currentModuleNumber + 1;
-
-    if (CFC_MODULES_FULL[nextModuleNumber]) {
-        stats.currentModule = CFC_MODULES_FULL[nextModuleNumber];
-    } else {
-        // Si ya es el último módulo
-        stats.currentModule = CFC_MODULES_FULL[currentModuleNumber];
-    }
-
-    localStorage.setItem("CFC_stats", JSON.stringify(stats));
-
-    console.log("📌 CFC_STATS_V6.0_SUBPASO_5.10 → Examen aprobado — Módulo actualizado a:", stats.currentModule);
-}
