@@ -1,7 +1,7 @@
 /* ============================================================================
    CFC_PROGRESS_CORE.JS — SISTEMA NUEVO DE PROGRESO V3
    ---------------------------------------------------------------------------
-   FASE 2/5 — SUBPASO 1.4 + SUBPASO 2.4 (solo módulos)
+   FASE 2/5 — SUBPASO 1.4 + SUBPASO 2.4 + SUBPASO 3.4 (tiempos)
    ============================================================================
 */
 
@@ -32,7 +32,7 @@
     // TABLA COMPLETA DE MÓDULOS (NOMBRES EXACTOS DEL CAMPUS V41)
     // =========================================================================
     const MODULES_FULL = [
-        "", // posición 0 vacía para usar índices del 1 al 20
+        "",
         "Módulo 1 – Introducción a la Psicología del Trader",
         "Módulo 2 – Neurociencia del Trading",
         "Módulo 3 – Fundamentos de Psicología Profunda",
@@ -56,7 +56,7 @@
     ];
 
     // =========================================================================
-    // OBJETO CENTRAL DEL SISTEMA (se irá llenando)
+    // OBJETO CENTRAL DEL SISTEMA
     // =========================================================================
     const CFC_PROGRESS_V3 = {
         modulesCompleted: 0,
@@ -72,7 +72,13 @@
         averageTimePerModule: 0,
         estimatedTimeToFinish: 0,
 
-        percent: 0
+        percent: 0,
+
+        // Versiones con texto (tiempos)
+        timeTotalText: "0 h 00 min",
+        timeTodayText: "0 h 00 min",
+        avgPerModuleText: "0 h 00 min",
+        estimatedText: "0 h 00 min"
     };
 
     // =========================================================================
@@ -87,7 +93,6 @@
         let modulesCompleted = 0;
         let highestPassed = 0;
 
-        // Leer mod1_score a mod20_score
         for (let i = 1; i <= 20; i++) {
             const raw = localStorage.getItem(`mod${i}_score`);
             const score = raw ? parseInt(raw, 10) : 0;
@@ -98,26 +103,57 @@
             }
         }
 
-        // Guardar cantidad
         CFC_PROGRESS_V3.modulesCompleted = modulesCompleted;
 
-        // Determinar último módulo completado
         if (highestPassed > 0) {
             CFC_PROGRESS_V3.lastCompletedModule = MODULES_FULL[highestPassed];
         } else {
             CFC_PROGRESS_V3.lastCompletedModule = "—";
         }
 
-        // Determinar módulo actual
         let nextModule = highestPassed + 1;
-        if (nextModule > 20) nextModule = 20; // límite superior
+        if (nextModule > 20) nextModule = 20;
         CFC_PROGRESS_V3.currentModule = MODULES_FULL[nextModule];
 
-        // Calcular barra de progreso
         CFC_PROGRESS_V3.percent = Math.floor((modulesCompleted / 20) * 100);
 
+        /* =============================================================
+           SUBPASO 3.4 — CÁLCULO DE TIEMPOS
+           ============================================================= */
+
+        // Leer tiempos del LocalStorage
+        const rawTotal = localStorage.getItem("CFC_time_total");
+        const rawToday = localStorage.getItem("CFC_time_today");
+
+        const totalSeconds = rawTotal ? parseInt(rawTotal, 10) : 0;
+        const todaySeconds = rawToday ? parseInt(rawToday, 10) : 0;
+
+        const activeTotalMinutes = Math.floor(totalSeconds / 60);
+        const activeTodayMinutes = Math.floor(todaySeconds / 60);
+
+        CFC_PROGRESS_V3.activeTotalMinutes = activeTotalMinutes;
+        CFC_PROGRESS_V3.activeTodayMinutes = activeTodayMinutes;
+
+        // Promedio por módulo
+        let avg = 0;
+        if (modulesCompleted > 0) {
+            avg = Math.round(activeTotalMinutes / modulesCompleted);
+        }
+        CFC_PROGRESS_V3.averageTimePerModule = avg;
+
+        // Tiempo estimado restante
+        const remaining = 20 - modulesCompleted;
+        const estimated = remaining * avg;
+        CFC_PROGRESS_V3.estimatedTimeToFinish = estimated;
+
+        // Versiones texto
+        CFC_PROGRESS_V3.timeTotalText = fmtMinutesToText(activeTotalMinutes);
+        CFC_PROGRESS_V3.timeTodayText = fmtMinutesToText(activeTodayMinutes);
+        CFC_PROGRESS_V3.avgPerModuleText = fmtMinutesToText(avg);
+        CFC_PROGRESS_V3.estimatedText = fmtMinutesToText(estimated);
+
         // =============================================================
-        // AÚN NO CALCULAMOS TIEMPOS NI FECHAS (OTROS SUBPASOS)
+        // FECHAS (Subpaso 4.4) se hará más adelante
         // =============================================================
 
         return CFC_PROGRESS_V3;
