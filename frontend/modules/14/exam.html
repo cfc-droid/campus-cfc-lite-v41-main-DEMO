@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen — Módulo 14 — El Mapa del Autocontrol Extremo</title>
+
+  <!-- ✅ CFC_FUNC_1_01_FIXRUTAS_2025-10-30 -->
+  <link rel="stylesheet" href="../../css/premium.css">
+  <link rel="stylesheet" href="../../css/exam-extra.css">
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
+
+  <!-- ✅ Motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Botón tema fijo (negro-dorado) -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+
+<body data-module="14">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Examen — Módulo 14: El Mapa del Autocontrol Extremo</h1>
+    <p><em>Reflexioná antes de responder. Este examen evalúa tu dominio del autocontrol mental y emocional, clave para sostener la claridad operativa y la coherencia interna en entornos de alta presión.</em></p>
+
+    <form id="exam14">
+      <!-- Pregunta 1 -->
+      <fieldset>
+        <legend>1) Según el Capítulo 1, ¿qué representa el autocontrol extremo en el desarrollo del trader?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q1" type="radio" value="A"> A) La capacidad de eliminar las emociones negativas del trading por completo.</label><br>
+        <label><input name="q1" type="radio" value="B"> B) La habilidad de mantener la mente estable y consciente incluso en la presión del mercado, transformando el estrés en foco.</label><br>
+        <label><input name="q1" type="radio" value="C"> C) El dominio técnico total sobre los indicadores y patrones de entrada.</label><br>
+        <label><input name="q1" type="radio" value="D"> D) Una forma de operar únicamente cuando las condiciones son seguras y predecibles.</label>
+      </fieldset>
+
+      <!-- Pregunta 2 -->
+      <fieldset>
+        <legend>2) En el Capítulo 2, la mente antifrágil se define como aquella que...</legend>
+        <!-- Correcta: C -->
+        <label><input name="q2" type="radio" value="A"> A) Busca evitar la incomodidad y protegerse del estrés emocional del mercado.</label><br>
+        <label><input name="q2" type="radio" value="B"> B) Depende de la motivación externa para mantener la disciplina operativa.</label><br>
+        <label><input name="q2" type="radio" value="C"> C) Crece y se fortalece con la presión, transformando la incertidumbre y la frustración en oportunidades de expansión mental.</label><br>
+        <label><input name="q2" type="radio" value="D"> D) Reacciona automáticamente ante las pérdidas para evitar mayores daños financieros.</label>
+      </fieldset>
+
+      <!-- Pregunta 3 -->
+      <fieldset>
+        <legend>3) De acuerdo con el Capítulo 3, ¿qué significa practicar el silencio operativo?</legend>
+        <!-- Correcta: D -->
+        <label><input name="q3" type="radio" value="A"> A) Mantener silencio físico para mejorar la concentración durante la sesión.</label><br>
+        <label><input name="q3" type="radio" value="B"> B) No operar cuando el mercado se encuentra en rango lateral.</label><br>
+        <label><input name="q3" type="radio" value="C"> C) Reprimir las emociones y pensamientos negativos para evitar distracciones.</label><br>
+        <label><input name="q3" type="radio" value="D"> D) Entrenar la mente para observar sin reaccionar, controlando la atención y transformando el ruido mental en claridad operativa.</label>
+      </fieldset>
+
+      <!-- Pregunta 4 -->
+      <fieldset>
+        <legend>4) En el Capítulo 4, el “eje mental” se describe como...</legend>
+        <!-- Correcta: B -->
+        <label><input name="q4" type="radio" value="A"> A) Una técnica avanzada de análisis técnico que mejora el control de riesgo.</label><br>
+        <label><input name="q4" type="radio" value="B"> B) El estado de coherencia entre mente, cuerpo y emoción que permite mantener estabilidad, presencia y claridad sin importar el entorno del mercado.</label><br>
+        <label><input name="q4" type="radio" value="C"> C) Un conjunto de ejercicios de respiración previos a la sesión operativa.</label><br>
+        <label><input name="q4" type="radio" value="D"> D) Un tipo de autocontrol rígido que evita sentir emociones durante las operaciones.</label>
+      </fieldset>
+
+      <button type="button" onclick="enviarExamen()">Enviar respuestas</button>
+    </form>
+  </main>
+
+  <footer class="firma-cfc">
+    <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
+  </footer>
+
+  <!-- 🔙 Botón volver -->
+  <script src="../../js/backButton.js"></script>
+
+  <!-- ✅ Progress global -->
+  <script src="../../js/progress_v2.js?v=9.8C" defer></script>
+  <!-- ✅ Motor examen unificado -->
+  <script src="../../js/exam_v2.js"></script>
+  <!-- ✅ Auto-Injector Global -->
+  <script src="../../js/auto_injector.js?v=20251102" defer></script>
+  <!-- ✅ Tracker de actividad -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+
+  <!-- ✅ Narrador IA Integrado -->
+  <button class="tts-btn-fixed" title="Escuchar este examen 🎧">🎧</button>
+  <link rel="stylesheet" href="../../css/voiceReader.css?v=20251105">
+  <script src="../../js/core/voiceReader.js?v=20251105" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro persistente -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      console.log("🌗 Tema cambiado a:", newTheme);
+    });
+  });
+  </script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
