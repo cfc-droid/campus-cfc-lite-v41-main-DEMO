@@ -174,14 +174,22 @@
         const legacyLastDate = localStorage.getItem("CFC_lastDate");
         const legacyTotalDaysRaw = localStorage.getItem("CFC_totalDays");
 
-        // Primera sesión
-        if (stats.firstSessionDate) {
-            CFC_PROGRESS_V3.firstSessionDate = stats.firstSessionDate;
-        } else if (legacyLastDate) {
-            CFC_PROGRESS_V3.firstSessionDate = legacyLastDate;
-        } else {
-            CFC_PROGRESS_V3.firstSessionDate = todayStr;
-        }
+// ==============================================
+// PRIMERA SESIÓN — SISTEMA INMUTABLE REAL
+// ==============================================
+
+// Leer clave fija
+let fixedFirst = localStorage.getItem("CFC_firstSessionDate");
+
+// Si no existe → guardar la primera vez
+if (!fixedFirst) {
+    fixedFirst = todayStr;
+    localStorage.setItem("CFC_firstSessionDate", fixedFirst);
+}
+
+// Usar siempre esta clave inmutable
+CFC_PROGRESS_V3.firstSessionDate = fixedFirst;
+}
 
         // Última sesión
         CFC_PROGRESS_V3.lastSessionDate =
