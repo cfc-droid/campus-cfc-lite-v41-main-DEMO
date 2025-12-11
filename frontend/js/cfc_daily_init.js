@@ -18,13 +18,23 @@
     const lastDate = localStorage.getItem("CFC_lastDate");
     let totalDays = parseInt(localStorage.getItem("CFC_totalDays") || "0", 10);
 
-    // ---- Si es la primera vez que entra al Campus ----
-    if (!lastDate) {
-        localStorage.setItem("CFC_lastDate", todayStr);
-        localStorage.setItem("CFC_totalDays", "1");
-        localStorage.setItem("CFC_time_today", "0");
-        return;
+if (!lastDate) {
+
+    // 🔹 NO TOCAR LA PRIMERA SESIÓN SI YA EXISTE (SISTEMA NUEVO)
+    let fixedFirst = localStorage.getItem("CFC_firstSessionDate");
+    if (!fixedFirst) {
+        // Primera vez real → fijar fecha inicial
+        fixedFirst = todayStr;
+        localStorage.setItem("CFC_firstSessionDate", fixedFirst);
     }
+
+    // 🔹 Inicializar el sistema diario sin romper la primera sesión
+    localStorage.setItem("CFC_lastDate", todayStr);
+    localStorage.setItem("CFC_totalDays", "1");
+    localStorage.setItem("CFC_time_today", "0");
+
+    return;
+}
 
     // ---- Día nuevo detectado ----
     if (lastDate !== todayStr) {
