@@ -174,9 +174,9 @@
         const legacyLastDate = localStorage.getItem("CFC_lastDate");
         const legacyTotalDaysRaw = localStorage.getItem("CFC_totalDays");
 
-// ==============================================
+// =============================================
 // PRIMERA SESIÓN — SISTEMA INMUTABLE REAL
-// ==============================================
+// =============================================
 
 // Leer clave fija
 let fixedFirst = localStorage.getItem("CFC_firstSessionDate");
