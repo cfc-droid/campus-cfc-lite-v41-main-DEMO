@@ -95,12 +95,18 @@
 
     if (diff >= SYNC_PERIOD - SYNC_TOLERANCE) {
       const elapsed = (now - startTime) / 1000;
-      totalSeconds += elapsed;
-      startTime = now;
-      lastSync = now;
+totalSeconds += elapsed;
+startTime = now;
+lastSync = now;
 
-      localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
-      localStorage.setItem(LAST_SYNC_KEY, now);
+localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
+
+// --- TIEMPO ACTIVO HOY (sumar solo dentro del día actual)
+let todaySec = parseInt(localStorage.getItem("CFC_time_today") || "0", 10);
+todaySec += elapsed;
+localStorage.setItem("CFC_time_today", todaySec.toString());
+
+localStorage.setItem(LAST_SYNC_KEY, now);
 
       let study = JSON.parse(localStorage.getItem("studyStats") || "{}");
       if (typeof study !== "object") study = {};
