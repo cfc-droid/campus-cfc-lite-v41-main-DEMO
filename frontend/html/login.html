@@ -358,6 +358,7 @@ if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
 
 // ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
+localStorage.setItem("CFC_EMAIL", email); // ← FIX NECESARIO
 
 // ========================================================
 // 🔧 FIX CRÍTICO: evitar redeclaración de "email"
