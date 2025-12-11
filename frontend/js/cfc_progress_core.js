@@ -175,19 +175,25 @@
         const legacyTotalDaysRaw = localStorage.getItem("CFC_totalDays");
 
 // =============================================
-// PRIMERA SESIÓN — SISTEMA INMUTABLE REAL
+// PRIMERA SESIÓN — SISTEMA INMUTABLE REAL + MIGRACIÓN
 // =============================================
 
-// Leer clave fija
+// 1) Intentar leer la clave nueva (inmutable)
 let fixedFirst = localStorage.getItem("CFC_firstSessionDate");
 
-// Si no existe → guardar la primera vez
+// 2) Si NO existe, pero existe la fecha real en el sistema viejo → migrar
+if (!fixedFirst && stats.firstSessionDate) {
+    fixedFirst = stats.firstSessionDate;
+    localStorage.setItem("CFC_firstSessionDate", fixedFirst);
+}
+
+// 3) Si no existe ninguna → usar hoy (solo primera vez real)
 if (!fixedFirst) {
     fixedFirst = todayStr;
     localStorage.setItem("CFC_firstSessionDate", fixedFirst);
 }
 
-// Usar siempre esta clave inmutable
+// 4) Guardar en el objeto final
 CFC_PROGRESS_V3.firstSessionDate = fixedFirst;
 
         // Última sesión
