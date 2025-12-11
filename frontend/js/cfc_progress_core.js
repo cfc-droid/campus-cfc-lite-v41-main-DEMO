@@ -189,7 +189,6 @@ if (!fixedFirst) {
 
 // Usar siempre esta clave inmutable
 CFC_PROGRESS_V3.firstSessionDate = fixedFirst;
-}
 
         // Última sesión
         CFC_PROGRESS_V3.lastSessionDate =
