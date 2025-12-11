@@ -1,9 +1,11 @@
 /* ============================================================================
    CFC_PROGRESS_OVERLAY.JS — OVERLAY PREMIUM NUEVO (Fase 3/5 completa)
    ---------------------------------------------------------------------------
-   Subpaso 1.3 — Estructura base del overlay
-   Subpaso 2.3 — Listado con los 11 datos (colores iguales a tu Campus REAL)
-   Subpaso 3.3 — Animaciones + cierre seguro + tecla ESC
+   Versión B3 — Opción A (todo el texto en color dorado #FFD700)
+   Subpasos mantenidos:
+   - 1.3 — Estructura base del overlay
+   - 2.3 — Listado con los 11 datos
+   - 3.3 — Animaciones + cierre seguro + tecla ESC
    ============================================================================ */
 (function () {
 
@@ -40,7 +42,7 @@
             width: "420px",
             maxWidth: "90%",
             fontFamily: "Poppins, sans-serif",
-            color: "#FFD700",
+            color: "#FFD700", /* ← COLOR DORADO GLOBAL */
             textAlign: "left",
             transform: "translateY(20px)",
             transition: "transform .35s ease-in-out"
@@ -50,6 +52,7 @@
         title.textContent = "📊 Tu Progreso";
         title.style.textAlign = "center";
         title.style.marginBottom = "22px";
+        title.style.color = "#FFD700";
         box.appendChild(title);
 
         const barContainer = document.createElement("div");
@@ -71,25 +74,29 @@
         barContainer.appendChild(barFill);
         box.appendChild(barContainer);
 
-        // LISTA CON COLORES EXACTOS DE TU CAPTURA
+        // =======================================================
+        // LISTA — TODO DORADO (OPCIÓN A)
+        // Se eliminan los colores individuales.
+        // =======================================================
         const ul = document.createElement("ul");
         ul.style.listStyle = "none";
         ul.style.padding = "0";
         ul.style.margin = "0";
         ul.style.lineHeight = "1.75";
         ul.style.fontSize = "0.93rem";
+        ul.style.color = "#FFD700"; // ← aseguramos dorado total
 
         ul.innerHTML = `
-            <li style="color:#53A7FF">📘 <b>Módulos completados:</b> ${data.modulesCompleted}/20 (${data.percent}%)</li>
-            <li style="color:#FF5A5A">🎯 <b>Último módulo completado:</b> ${data.lastCompletedModule}</li>
-            <li style="color:#FFD54A">📚 <b>Módulo actual:</b> ${data.currentModule}</li>
-            <li style="color:#5CFF4A">🟢 <b>Primera sesión:</b> ${data.firstSessionDate}</li>
-            <li style="color:#4AC3FF">🔵 <b>Última sesión:</b> ${data.lastSessionDate}</li>
-            <li style="color:#FF5A5A">📅 <b>Días totales de estudio:</b> ${data.daysStudiedTotal}</li>
-            <li style="color:#FFD54A">⏱️ <b>Horas activas:</b> ${data.timeTotalText}</li>
-            <li style="color:#FFA53B">⚡ <b>Tiempo activo hoy:</b> ${data.timeTodayText}</li>
-            <li style="color:#FFD700">⏳ <b>Tiempo promedio por módulo:</b> ${data.avgPerModuleText}</li>
-            <li style="color:#5CFF4A">🚀 <b>Tiempo estimado para terminar:</b> ${data.estimatedText}</li>
+            <li>📘 <b>Módulos completados:</b> ${data.modulesCompleted}/20 (${data.percent}%)</li>
+            <li>🎯 <b>Último módulo completado:</b> ${data.lastCompletedModule}</li>
+            <li>📚 <b>Módulo actual:</b> ${data.currentModule}</li>
+            <li>🟢 <b>Primera sesión:</b> ${data.firstSessionDate}</li>
+            <li>🔵 <b>Última sesión:</b> ${data.lastSessionDate}</li>
+            <li>📅 <b>Días totales de estudio:</b> ${data.daysStudiedTotal}</li>
+            <li>⏱️ <b>Horas activas:</b> ${data.timeTotalText}</li>
+            <li>⚡ <b>Tiempo activo hoy:</b> ${data.timeTodayText}</li>
+            <li>⏳ <b>Tiempo promedio por módulo:</b> ${data.avgPerModuleText}</li>
+            <li>🚀 <b>Tiempo estimado para terminar:</b> ${data.estimatedText}</li>
         `;
 
         box.appendChild(ul);
