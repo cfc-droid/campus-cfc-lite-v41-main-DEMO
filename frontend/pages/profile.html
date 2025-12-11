@@ -7,9 +7,6 @@
   <link rel="stylesheet" href="../css/premium.css?v=20251106" />
 
   <style>
-    /* =========================================================
-       ✅ CFC_FUNC_5_1C_FIX_V47_PROFILE — Modo claro/oscuro independiente y sincronizado
-       ========================================================= */
     #theme-toggle {
       position: fixed;
       top: 18px;
@@ -33,7 +30,6 @@
       transform: scale(1.05);
     }
 
-    /* Adaptaciones visuales del perfil */
     main {
       text-align: center;
       padding: 40px 20px;
@@ -48,7 +44,6 @@
     <h2>👤 Perfil del Usuario</h2>
   </header>
 
-  <!-- 🌗 Botón modo claro/oscuro -->
   <button id="theme-toggle" title="Cambiar tema">🌙</button>
 
   <main>
@@ -81,16 +76,13 @@
   <script src="../js/stats_v1.js" defer></script>
   <script src="../js/activity_tracker.js?v=20251106" defer></script>
 
-<!-- ✅ Debe ejecutarse ANTES del motor V3 -->
-<script src="../js/cfc_daily_init.js" defer></script>
-  
-  <!-- ✅ NUEVO: Motor de progreso V3 + Overlay PREMIUM -->
+  <!-- ✅ DAILY INIT DEBE IR AQUÍ -->
+  <script src="../js/cfc_daily_init.js" defer></script>
+
+  <!-- ✅ MOTOR DE PROGRESO V3 -->
   <script src="../js/cfc_progress_core.js" defer></script>
   <script src="../js/cfc_progress_overlay.js" defer></script>
 
-  <!-- =========================================================
-       ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración independiente modo claro/oscuro
-       ========================================================= -->
   <script>
   document.addEventListener("DOMContentLoaded", () => {
     const btn = document.getElementById("theme-toggle");
@@ -107,13 +99,11 @@
   });
   </script>
 
-  <!-- =========================================================
-       ✅ CFC_FUNC_10_4_V41.16 — Estado emocional
-       ========================================================= -->
   <script>
   const scoreRaw = localStorage.getItem("emotionScore");
   const box = document.getElementById("emotionScore");
   const msg = document.getElementById("emotionMessage");
+
   if (scoreRaw && !isNaN(parseInt(scoreRaw))) {
     const val = parseInt(scoreRaw, 10);
     let emoji="🙂",mensaje="Buen enfoque mental.";
@@ -129,13 +119,11 @@
   }
   </script>
 
-  <!-- =========================================================
-       ✅ CFC_PROFILE_V9.8_EXAM_RELINK_REAL — Último examen completado
-       ========================================================= -->
   <script>
   function mostrarUltimoExamen() {
     try {
       let examResults = JSON.parse(localStorage.getItem("examResults") || "[]");
+
       if (!examResults.length) {
         const backup = JSON.parse(localStorage.getItem("examResults_backup") || "[]");
         if (backup.length) {
@@ -146,10 +134,13 @@
       }
 
       if (!examResults.length) return;
+
       const ultimo = examResults.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
       const contenedor = document.querySelector("main");
       const bloque = document.createElement("div");
       bloque.className = "ultimo-examen";
+
       bloque.innerHTML = `
         <h3>📘 Último examen completado</h3>
         <p>
@@ -157,19 +148,17 @@
           Puntaje: <b style="color:var(--color-accent);">${ultimo.score}%</b> — ${ultimo.status}<br>
           ⏱️ ${ultimo.duration || "-"} &nbsp;|&nbsp; 📅 ${ultimo.date || "-"} ${ultimo.time || ""}
         </p>`;
+
       contenedor.appendChild(bloque);
     } catch (err) {
       console.warn("⚠️ Error al mostrar último examen:", err);
     }
   }
+
   document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
   </script>
 
-  <!-- =========================================================
-       ✅ CFC_FUNC_11_3_V41.34 — Panel “Mi progreso” unificado
-       ========================================================= -->
   <script>
-  // Ahora el botón "📊 Mi progreso" usa el overlay PREMIUM V3 (barra + 10 datos + botón cerrar)
   document.getElementById("btnStats").addEventListener("click", () => {
     if (typeof CFC_showProgressOverlayV3 === "function") {
       CFC_showProgressOverlayV3();
@@ -178,11 +167,9 @@
     }
   });
   </script>
-  
-  <!-- 🔒 CFC-LOCK V72 -->
-  <script src="../js/domain_lock_v72.js" defer></script> 
 
-  <!-- 🔥 CFC-BUNDLE -->
-  <script src="../js/bundle_core.min.js" defer></script> 
+  <script src="../js/domain_lock_v72.js" defer></script>
+  <script src="../js/bundle_core.min.js" defer></script>
+
 </body>
 </html>
