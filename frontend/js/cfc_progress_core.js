@@ -1,23 +1,12 @@
 /* ============================================================================
-   CFC_PROGRESS_CORE.JS — SISTEMA NUEVO DE PROGRESO V3 (Versión B2 CORREGIDA)
+   CFC_PROGRESS_CORE.JS — SISTEMA NUEVO DE PROGRESO V3 (Versión B2)
    ---------------------------------------------------------------------------
-   FIX CRÍTICO: Aislamiento por usuario (progreso independiente para 200 users)
+   FASE 2/5 — SUBPASO 1.4 + SUBPASO 2.4 + SUBPASO 3.4 + SUBPASO 4.4
+   + REPARACIÓN PRUEBA 2 (Tiempo hoy + Días totales real)
    ============================================================================ 
 */
 
 (function() {
-
-    // =========================================================================
-    // IDENTIFICADOR ÚNICO DE USUARIO (prefix seguro)
-    // =========================================================================
-    const USER_KEY = (() => {
-        const email = localStorage.getItem("CFC_EMAIL") || "guest";
-        return email.replace(/[^a-zA-Z0-9]/g, "_");
-    })();
-
-    function userKey(key) {
-        return `${USER_KEY}_${key}`;
-    }
 
     // =========================================================================
     // HELPER: Lectura segura de JSON almacenado en LocalStorage
@@ -98,10 +87,10 @@
     window.CFC_getProgressV3 = function () {
 
         /* =============================================================
-           SUBPASO 2.4 — CÁLCULO DE MÓDULOS
+           SUBPASO 2.4 — CÁLCULO DE MÓDULOS (idéntico a V41 real)
            ============================================================= */
 
-        const progressData = safeParseJSON(localStorage.getItem(userKey("progressData")) || "{}", {});
+        const progressData = safeParseJSON(localStorage.getItem("progressData") || "{}", {});
         const completedRaw = Array.isArray(progressData.completed) ? progressData.completed : [];
 
         const completedModules = completedRaw
@@ -133,12 +122,14 @@
         CFC_PROGRESS_V3.percent = Math.floor((modulesCompleted / 20) * 100);
 
         /* =============================================================
-           SUBPASO 3.4 — CÁLCULO DE TIEMPOS
+           SUBPASO 3.4 — CÁLCULO DE TIEMPOS ( + REPARACIÓN PRUEBA 2 )
            ============================================================= */
 
-        const rawTotal = parseInt(localStorage.getItem(userKey("CFC_time_total")) || "0", 10);
-        const rawToday = parseInt(localStorage.getItem(userKey("CFC_time_today")) || "0", 10);
-        const savedDate = localStorage.getItem(userKey("CFC_today_date"));
+        const rawTotal = parseInt(localStorage.getItem("CFC_time_total") || "0", 10);
+
+        // --- NUEVO SISTEMA: Tiempo HOY real ---
+        const rawToday = parseInt(localStorage.getItem("CFC_time_today") || "0", 10);
+        const savedDate = localStorage.getItem("CFC_today_date");
 
         const now = new Date();
         const dd = String(now.getDate()).padStart(2, "0");
@@ -146,12 +137,13 @@
         const yyyy = now.getFullYear();
         const todayStr = `${dd}/${mm}/${yyyy}`;
 
+        // Si el día cambió → resetear tiempo diario
         if (savedDate !== todayStr) {
-            localStorage.setItem(userKey("CFC_today_date"), todayStr);
-            localStorage.setItem(userKey("CFC_time_today"), "0");
+            localStorage.setItem("CFC_today_date", todayStr);
+            localStorage.setItem("CFC_time_today", "0");
         }
 
-        const todaySeconds = parseInt(localStorage.getItem(userKey("CFC_time_today")) || "0", 10);
+        const todaySeconds = parseInt(localStorage.getItem("CFC_time_today") || "0", 10);
 
         const activeTotalMinutes = Math.floor(rawTotal / 60);
         const activeTodayMinutes = Math.floor(todaySeconds / 60);
@@ -174,39 +166,49 @@
         CFC_PROGRESS_V3.estimatedText = fmtMinutesToText(CFC_PROGRESS_V3.estimatedTimeToFinish);
 
         /* =============================================================
-           SUBPASO 4.4 — FECHAS Y DÍAS DE ESTUDIO
+           SUBPASO 4.4 — FECHAS Y DÍAS DE ESTUDIO (REPARACIÓN PRUEBA 2)
            ============================================================= */
 
-        const stats = safeParseJSON(localStorage.getItem(userKey("CFC_stats")) || "{}", {});
+        const stats = safeParseJSON(localStorage.getItem("CFC_stats") || "{}", {});
 
-        const legacyLastDate = localStorage.getItem(userKey("CFC_lastDate"));
-        const legacyTotalDaysRaw = localStorage.getItem(userKey("CFC_totalDays"));
+        const legacyLastDate = localStorage.getItem("CFC_lastDate");
+        const legacyTotalDaysRaw = localStorage.getItem("CFC_totalDays");
 
-        let fixedFirst = localStorage.getItem(userKey("CFC_firstSessionDate"));
+// =============================================
+// PRIMERA SESIÓN — SISTEMA INMUTABLE REAL + MIGRACIÓN
+// =============================================
 
-        if (!fixedFirst && stats.firstSessionDate) {
-            fixedFirst = stats.firstSessionDate;
-            localStorage.setItem(userKey("CFC_firstSessionDate"), fixedFirst);
-        }
+// 1) Intentar leer la clave nueva (inmutable)
+let fixedFirst = localStorage.getItem("CFC_firstSessionDate");
 
-        if (!fixedFirst) {
-            fixedFirst = todayStr;
-            localStorage.setItem(userKey("CFC_firstSessionDate"), fixedFirst);
-        }
+// 2) Si NO existe, pero existe la fecha real en el sistema viejo → migrar
+if (!fixedFirst && stats.firstSessionDate) {
+    fixedFirst = stats.firstSessionDate;
+    localStorage.setItem("CFC_firstSessionDate", fixedFirst);
+}
 
-        CFC_PROGRESS_V3.firstSessionDate = fixedFirst;
+// 3) Si no existe ninguna → usar hoy (solo primera vez real)
+if (!fixedFirst) {
+    fixedFirst = todayStr;
+    localStorage.setItem("CFC_firstSessionDate", fixedFirst);
+}
 
+// 4) Guardar en el objeto final
+CFC_PROGRESS_V3.firstSessionDate = fixedFirst;
+
+        // Última sesión
         CFC_PROGRESS_V3.lastSessionDate =
             stats.lastSessionDate || legacyLastDate || todayStr;
 
+        // --- NUEVO SISTEMA: reconstrucción real de días totales ---
         let totalDays = parseInt(legacyTotalDaysRaw || "0", 10);
         const lastDay = legacyLastDate;
 
         if (!isNaN(totalDays)) {
             if (lastDay !== todayStr) {
                 totalDays += 1;
-                localStorage.setItem(userKey("CFC_totalDays"), totalDays.toString());
-                localStorage.setItem(userKey("CFC_lastDate"), todayStr);
+                localStorage.setItem("CFC_totalDays", totalDays.toString());
+                localStorage.setItem("CFC_lastDate", todayStr);
             }
         } else {
             totalDays = activeTotalMinutes > 0 ? 1 : 0;
