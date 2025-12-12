@@ -1,13 +1,9 @@
 /* ============================================================================
- 🎧 CFC-VOICE READER PRO — V22 REAL DEFINITIVO
- ✔ 100% Chrome PC + ANDROID Chrome compatible
- ✔ Voces masculinas reales ES-LA detectadas correctamente
- ✔ Micro-segmentación 5–7 palabras (ideal Android)
- ✔ Resume EXACTO palabra por palabra
- ✔ Velocidad dinámica REAL (reconstrucción inteligente)
- ✔ Highlight profesional sin modificar HTML
- ✔ Panel compacto premium (1/4 en móvil)
- ✔ Botón fijo premium abajo izquierda
+ 🎧 CFC-VOICE READER PRO — V23 REAL DEFINITIVO
+ ✔ Highlight de frase completa
+ ✔ Resume exacto
+ ✔ Android Chrome OK
+✔ PC Chrome OK
 ============================================================================ */
 
 (() => {
