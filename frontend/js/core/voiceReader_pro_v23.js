@@ -28,7 +28,7 @@ let highlightBox = null;
 /* =========================
    LOG
 ========================= */
-const log = (...m) => console.log("🎧 V22:", ...m);
+const log = (...m) => console.log("🎧 V23:", ...m);
 
 /* ============================================================================
    1) AUDIO UNLOCK PARA ANDROID (OBLIGATORIO)
