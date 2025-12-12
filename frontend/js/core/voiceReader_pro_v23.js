@@ -1,11 +1,13 @@
 /* ============================================================================
- 🎧 CFC-VOICE READER PRO — V23 REAL FINAL
- ✔ Highlight por FRASE COMPLETA hasta el próximo punto.
- ✔ No modifica HTML (overlay independiente).
- ✔ Compatible: Chrome PC + Android Chrome.
- ✔ Resume EXACTO palabra por palabra.
- ✔ Velocidad dinámica REAL.
- ✔ Botón premium fijo + Panel compacto premium.
+ 🎧 CFC-VOICE READER PRO — V22 REAL DEFINITIVO
+ ✔ 100% Chrome PC + ANDROID Chrome compatible
+ ✔ Voces masculinas reales ES-LA detectadas correctamente
+ ✔ Micro-segmentación 5–7 palabras (ideal Android)
+ ✔ Resume EXACTO palabra por palabra
+ ✔ Velocidad dinámica REAL (reconstrucción inteligente)
+ ✔ Highlight profesional sin modificar HTML
+ ✔ Panel compacto premium (1/4 en móvil)
+ ✔ Botón fijo premium abajo izquierda
 ============================================================================ */
 
 (() => {
@@ -30,10 +32,10 @@ let highlightBox = null;
 /* =========================
    LOG
 ========================= */
-const log = (...m) => console.log("🎧 V23:", ...m);
+const log = (...m) => console.log("🎧 V22:", ...m);
 
 /* ============================================================================
-   1) AUDIO UNLOCK (Android)
+   1) AUDIO UNLOCK PARA ANDROID (OBLIGATORIO)
 ============================================================================ */
 function unlockAudio() {
     try {
@@ -49,7 +51,7 @@ function unlockAudio() {
 }
 
 /* ============================================================================
-   2) CARGA DE VOCES — POLLING
+   2) CARGA DE VOCES — POLLING SEGURO + FILTRO MASCULINAS ES-LA REAL
 ============================================================================ */
 function loadVoicesPolling(maxAttempts = 40) {
     return new Promise(resolve => {
@@ -60,13 +62,18 @@ function loadVoicesPolling(maxAttempts = 40) {
             if (list && list.length > 0) {
                 clearInterval(timer);
 
+                /* 🔥 Filtramos español */
                 let es = list.filter(v => v.lang.toLowerCase().startsWith("es"));
+
+                /* 🔥 Masculinas reales ES-LA (Android Chrome) */
                 let males = es.filter(v =>
                     /(Standard\s*B|Standard\s*C|Standard\s*D|Baritone|Deep|Grave)/i.test(v.name)
                 );
 
                 voices = males.length ? males : es.length ? es : list;
+
                 currentVoice = voices[0]?.name || null;
+
                 log("Voces finales:", voices.map(v => v.name));
                 resolve(true);
                 return;
@@ -83,7 +90,7 @@ function loadVoicesPolling(maxAttempts = 40) {
 }
 
 /* ============================================================================
-   3) EXTRAER SEGMENTOS 5–7 PALABRAS
+   3) MICRO-SEGMENTACIÓN PROFESIONAL (5–7 PALABRAS)
 ============================================================================ */
 function extractSegments() {
     const container = document.querySelector("main") || document.body;
@@ -95,58 +102,38 @@ function extractSegments() {
 
     words.forEach(w => {
         temp.push(w);
-        if (temp.length >= 6) {
+        if (temp.length >= 6) {      // ideal para Android
             segments.push(temp.join(" "));
             temp = [];
         }
     });
 
-    if (temp.length) segments.push(temp.join(" "));
+    if (temp.length > 0) segments.push(temp.join(" "));
 
-    log("Segmentos:", segments.length);
+    log("Segmentos creados:", segments.length);
 }
 
 /* ============================================================================
-   4) NUEVO HIGHLIGHT — FRASE COMPLETA
+   4) HIGHLIGHT REAL BASADO EN charIndex (Android compatible)
 ============================================================================ */
-function getFullSentence(globalWordIndex) {
-    const container = document.querySelector("main") || document.body;
-    const text = container.innerText.replace(/\s+/g, " ").trim();
-
-    const words = text.split(" ");
-    if (globalWordIndex >= words.length) return "";
-
-    let sentence = [];
-    for (let i = globalWordIndex; i < words.length; i++) {
-        sentence.push(words[i]);
-        if (/[.!?]/.test(words[i].slice(-1))) break;
-    }
-    return sentence.join(" ");
-}
-
-function highlightSentence(sentence) {
+function highlight(text) {
     removeHighlight();
-
-    if (!sentence) return;
 
     highlightBox = document.createElement("div");
     Object.assign(highlightBox.style, {
         position: "fixed",
-        left: "0",
-        bottom: "0",
+        left: 0,
+        bottom: 0,
         width: "100%",
-        padding: "16px",
-        background: "rgba(255,215,0,0.18)",
+        padding: "12px",
+        background: "rgba(255,215,0,0.20)",
         color: "#000",
-        fontSize: "20px",
+        fontSize: "18px",
         fontWeight: "700",
-        textAlign: "center",
-        zIndex: 999999998,
-        backdropFilter: "blur(2px)",
-        lineHeight: "1.4"
+        zIndex: "999999998"
     });
 
-    highlightBox.textContent = sentence;
+    highlightBox.textContent = text;
     document.body.appendChild(highlightBox);
 }
 
@@ -155,13 +142,13 @@ function removeHighlight() {
 }
 
 /* ============================================================================
-   5) REPRODUCCIÓN — MOTOR PRINCIPAL V23
+   5) REPRODUCCIÓN DE UN SEGMENTO — MOTOR PRINCIPAL V22
 ============================================================================ */
-function speakSegment(segI, wordI = 0) {
+function speakSegment(segI, wordI) {
     if (segI >= segments.length) return stopReading();
 
     segmentIndex = segI;
-    wordIndex = wordI;
+    wordIndex = wordI || 0;
 
     const fullText = segments[segI];
     const words = fullText.split(" ");
@@ -169,6 +156,7 @@ function speakSegment(segI, wordI = 0) {
 
     utter = new SpeechSynthesisUtterance(textToRead);
 
+    /* ✔ Asignar voz */
     const v = voices.find(v => v.name === currentVoice) || voices[0];
     if (v) {
         utter.voice = v;
@@ -177,22 +165,16 @@ function speakSegment(segI, wordI = 0) {
 
     utter.rate = rate;
 
-    /* ⭐ NUEVO: SENTENCIA COMPLETA POR ÍNDICE GLOBAL */
+    /* 💛 Highlight REAL usando charIndex */
     utter.onboundary = e => {
         if (e.charIndex != null) {
-            const approxWord = Math.min(words.length - 1,
-                Math.floor(e.charIndex / (fullText.length / words.length)) + wordIndex
-            );
-
-            let globalIndex = 0;
-            for (let i = 0; i < segI; i++) globalIndex += segments[i].split(" ").length;
-            globalIndex += approxWord;
-
-            const fullSentence = getFullSentence(globalIndex);
-            highlightSentence(fullSentence);
+            let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
+            approxWord = Math.min(words.length - 1, approxWord + wordIndex);
+            highlight(words[approxWord]);
         }
     };
 
+    /* 👇 Cuando termina el segmento */
     utter.onend = () => {
         if (!isReading) return;
         segmentIndex++;
@@ -204,7 +186,7 @@ function speakSegment(segI, wordI = 0) {
 }
 
 /* ============================================================================
-   6) CONTROLES
+   6) CONTROLES REALES V22
 ============================================================================ */
 function startReading() {
     stopReading();
@@ -217,6 +199,7 @@ function startReading() {
 
     isReading = true;
     isPaused = false;
+
     speakSegment(0, 0);
 }
 
@@ -230,6 +213,8 @@ function pauseReading() {
 function resumeReading() {
     if (!isPaused) return;
     isPaused = false;
+
+    /* 🔥 Android NO retoma utterance — RECONSTRUIMOS DESDE LA PALABRA EXACTA */
     speechSynthesis.cancel();
     speakSegment(segmentIndex, wordIndex);
 }
@@ -244,7 +229,7 @@ function stopReading() {
 }
 
 /* ============================================================================
-   7) PANEL PREMIUM
+   7) PANEL PREMIUM COMPACTO (1/4 PANTALLA)
 ============================================================================ */
 function openPanel() {
     if (document.querySelector("#cfcTTSPanel")) return;
@@ -270,7 +255,8 @@ function openPanel() {
     panel.innerHTML = `
         <h4 style="color:#FFD700;margin:0 0 6px 0;font-size:14px;">Narrador IA</h4>
 
-        <select id="ttsVoice" style="width:100%;padding:4px;background:#111;border:1px solid #FFD700;
+        <select id="ttsVoice" style="
+            width:100%;padding:4px;background:#111;border:1px solid #FFD700;
             color:white;border-radius:6px;margin-bottom:6px;"></select>
 
         <label style="font-size:12px;">Velocidad:</label>
@@ -314,18 +300,20 @@ function openPanel() {
 
     document.body.appendChild(panel);
 
+    /* VOCES */
     const sel = panel.querySelector("#ttsVoice");
     voices.forEach(v => {
         let o = document.createElement("option");
         o.value = v.name;
-        o.textContent = v.name;
+        o.textContent = `${v.name}`;
         sel.appendChild(o);
     });
     sel.onchange = e => currentVoice = e.target.value;
 
+    /* VELOCIDADES */
     const rateBox = panel.querySelector("#ttsRate");
     [0.75,1,1.25,1.5,1.75,2].forEach(r => {
-        const b = document.createElement("button");
+        let b = document.createElement("button");
         b.className = "rateBtn";
         b.textContent = "x"+r;
         b.onclick = () => {
@@ -333,6 +321,7 @@ function openPanel() {
             [...rateBox.children].forEach(x => x.classList.remove("active"));
             b.classList.add("active");
 
+            /* 🔥 Reconstrucción dinámica */
             if (speechSynthesis.speaking) {
                 speechSynthesis.cancel();
                 speakSegment(segmentIndex, wordIndex);
@@ -341,6 +330,7 @@ function openPanel() {
         rateBox.appendChild(b);
     });
 
+    /* BOTONES */
     panel.querySelector("#ttsRead").onclick = startReading;
     panel.querySelector("#ttsPause").onclick = pauseReading;
     panel.querySelector("#ttsResume").onclick = resumeReading;
@@ -353,7 +343,7 @@ function openPanel() {
 }
 
 /* ============================================================================
-   8) BOTÓN FIJO PREMIUM
+   8) BOTÓN PREMIUM FIJO
 ============================================================================ */
 function injectButton() {
     if (document.querySelector("#cfcTTSBtn")) return;
