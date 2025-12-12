@@ -189,6 +189,10 @@ utter.onboundary = e => {
         if (sentence.length > 0) {
             highlightSentence(sentence);
         }
+
+        // 🔥 NECESARIO PARA RESUME EXACTO
+        let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
+        wordIndex = Math.min(words.length - 1, approxWord);
     }
 };
  
