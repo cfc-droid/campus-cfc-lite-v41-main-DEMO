@@ -116,24 +116,27 @@ function extractSegments() {
 /* ============================================================================
    4) HIGHLIGHT REAL BASADO EN charIndex (Android compatible)
 ============================================================================ */
-function highlight(text) {
+function highlightSentence(text) {
     removeHighlight();
 
     highlightBox = document.createElement("div");
     Object.assign(highlightBox.style, {
         position: "fixed",
-        left: 0,
-        bottom: 0,
+        left: "0",
+        bottom: "0",
         width: "100%",
-        padding: "12px",
-        background: "rgba(255,215,0,0.20)",
+        padding: "18px",
+        background: "rgba(255,215,0,0.25)",
         color: "#000",
-        fontSize: "18px",
+        fontSize: "20px",
         fontWeight: "700",
-        zIndex: "999999998"
+        lineHeight: "1.4",
+        textAlign: "center",
+        zIndex: "999999998",
+        backdropFilter: "blur(6px)"
     });
 
-    highlightBox.textContent = text;
+    highlightBox.textContent = text.trim();
     document.body.appendChild(highlightBox);
 }
 
