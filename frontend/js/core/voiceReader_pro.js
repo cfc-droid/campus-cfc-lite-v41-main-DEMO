@@ -1,15 +1,33 @@
 /* ==========================================================
-   🎧 CFC-VOICE READER PRO — V8.0 (FINAL REAL)
-   PREMIUM FIX • Resume REAL • Velocidad REAL • Restauración REAL
-   Botón fijo dorado • UI fija dorada • Voces mejoradas
+   🎧 CFC-VOICE READER PRO — V9.0 (LITE REAL)
+   - Lee como lector normal (texto completo, no palabra x palabra)
+   - Velocidad REAL (usa rate seleccionado)
+   - Pause / Resume / Stop nativos
+   - NO modifica el HTML del capítulo (nada que restaurar)
+   - Soporta botón viejo .tts-btn-fixed o crea uno dorado fijo
    ========================================================== */
 
+let voicesList = [];
+let currentVoice = null;
+let rate = 1;
+let utter = null;
+
+/* ==========================================================
+   INIT
+   ========================================================== */
 document.addEventListener("DOMContentLoaded", () => {
-  injectFloatingButton();
+  // Si ya existe el botón viejo, lo usamos
+  const oldBtn = document.querySelector(".tts-btn-fixed");
+  if (oldBtn) {
+    oldBtn.addEventListener("click", openTTSPanel);
+  } else {
+    // Si no existe, inyectamos botón dorado premium
+    injectFloatingButton();
+  }
 });
 
 /* ==========================================================
-   1) BOTÓN FIJO PREMIUM (SOLUCIONA PUNTOS 2 Y 3)
+   BOTÓN DORADO PREMIUM (fallback)
    ========================================================== */
 function injectFloatingButton() {
   if (document.querySelector("#tts-btn-cfc")) return;
@@ -29,27 +47,19 @@ function injectFloatingButton() {
     `
   );
 
-  document.querySelector("#tts-btn-cfc").onclick = openPanel;
+  const btn = document.querySelector("#tts-btn-cfc");
+  if (btn) btn.addEventListener("click", openTTSPanel);
 }
 
 /* ==========================================================
-   VARIABLES DEL SISTEMA
+   PANEL PREMIUM
    ========================================================== */
-let voicesList = [];
-let currentVoice = null;
-let rate = 1;
-let paused = false;
-let stopped = false;
-let index = 0;
-let blocks = [];
-let originalHTML = "";
-let container = null;
-let utter = null;
+function openTTSPanel() {
+  if (!("speechSynthesis" in window)) {
+    alert("Tu navegador no soporta lectura en voz alta.");
+    return;
+  }
 
-/* ==========================================================
-   2) PANEL PREMIUM ORIGINAL FIJO (SOLUCIONA 6)
-   ========================================================== */
-function openPanel() {
   if (document.querySelector("#cfc-tts-panel")) return;
 
   unlockAndroid();
@@ -118,7 +128,7 @@ function openPanel() {
 }
 
 /* ==========================================================
-   3) ANDROID UNLOCK
+   ANDROID UNLOCK
    ========================================================== */
 function unlockAndroid() {
   try {
@@ -129,25 +139,37 @@ function unlockAndroid() {
 }
 
 /* ==========================================================
-   4) EVENTOS + VELOCIDAD (SOLUCIONA 4)
+   EVENTOS (velocidad, controles)
    ========================================================== */
 function setEvents() {
+  // Velocidad
   document.querySelectorAll(".tts-rate").forEach(btn => {
-    btn.onclick = () => (rate = parseFloat(btn.dataset.v));
+    btn.onclick = () => {
+      rate = parseFloat(btn.dataset.v);
+      // opcional: marcar botón activo
+      document.querySelectorAll(".tts-rate").forEach(b => {
+        b.style.background = "#111";
+        b.style.color = "#FFD700";
+      });
+      btn.style.background = "#FFD700";
+      btn.style.color = "#000";
+      console.log("🔊 CFC-TTS rate =", rate);
+    };
   });
 
-  document.querySelector("#tts-voice").onchange = e => {
-    currentVoice = e.target.value;
-  };
+  // Voz
+  const sel = document.querySelector("#tts-voice");
+  if (sel) {
+    sel.onchange = e => {
+      currentVoice = e.target.value;
+      console.log("🔊 CFC-TTS voice =", currentVoice);
+    };
+  }
 
+  // Controles
   document.querySelector("#tts-read").onclick = startReading;
-  document.querySelector("#tts-pause").onclick = () => paused = true;
-
-  document.querySelector("#tts-resume").onclick = () => {
-    paused = false;
-    readNextWord(); // resume EXACTAMENTE
-  };
-
+  document.querySelector("#tts-pause").onclick = pauseReading;
+  document.querySelector("#tts-resume").onclick = resumeReading;
   document.querySelector("#tts-stop").onclick = stopReading;
 
   document.querySelector("#tts-close").onclick = () => {
@@ -157,7 +179,7 @@ function setEvents() {
 }
 
 /* ==========================================================
-   5) CARGA REAL DE VOCES (SOLUCIONA 5)
+   CARGA DE VOCES
    ========================================================== */
 async function loadVoices() {
   let tries = 0;
@@ -168,20 +190,14 @@ async function loadVoices() {
 
   voicesList = speechSynthesis.getVoices();
 
-  // fuerza voz masculina si existe
-  const masc = voicesList.filter(v =>
-    /Pablo|Carlos|Jorge|Male|Hombre|Google Español Estados/.test(v.name)
-  );
-
-  const fem = voicesList.filter(v =>
-    /Helena|Laura|Female|Mujer|Google español/.test(v.name)
-  );
-
-  let final = masc.length || fem.length ? [...masc, ...fem] : voicesList;
+  // Preferir voces en español; si no hay, usar todas
+  const spanish = voicesList.filter(v => v.lang && v.lang.toLowerCase().startsWith("es"));
+  const final = spanish.length ? spanish : voicesList;
 
   const sel = document.querySelector("#tts-voice");
-  sel.innerHTML = "";
+  if (!sel) return;
 
+  sel.innerHTML = "";
   final.forEach(v => {
     const o = document.createElement("option");
     o.value = v.name;
@@ -189,96 +205,74 @@ async function loadVoices() {
     sel.appendChild(o);
   });
 
-  currentVoice = final[0]?.name || null;
+  currentVoice = final[0] ? final[0].name : null;
 }
 
 /* ==========================================================
-   6) INICIAR LECTURA
+   LECTURA NORMAL (NO palabra x palabra)
    ========================================================== */
 function startReading() {
+  // Siempre reinicia desde el inicio del capítulo
   stopReading();
 
-  container = document.querySelector("main") || document.body;
-  originalHTML = container.innerHTML;
+  const container = document.querySelector("main") || document.body;
+  if (!container) return;
 
-  let text = container.innerText;
+  const text = container.innerText || "";
+  if (!text.trim()) return;
 
-  // NUEVO: cortar por PALABRA → resume EXACTO (solución punto 7)
-  blocks = text.split(/\s+/);
-
-  index = 0;
-  paused = false;
-  stopped = false;
-
-  container.innerHTML = blocks
-    .map((w, i) => `<span class="tts-word" data-i="${i}" 
-                      style="transition:background 0.12s;">${w} </span>`)
-    .join("");
-
-  readNextWord();
-}
-
-/* ==========================================================
-   7) LECTURA PALABRA POR PALABRA (Resume REAL)
-   ========================================================== */
-function readNextWord() {
-  if (paused || stopped || index >= blocks.length) return;
-
-  highlight(index);
+  utter = new SpeechSynthesisUtterance(text);
 
   const voices = speechSynthesis.getVoices();
   const chosen =
     voices.find(v => v.name === currentVoice) ||
-    voices.find(v => v.lang.startsWith("es")) ||
+    voices.find(v => v.lang && v.lang.toLowerCase().startsWith("es")) ||
     voices[0];
 
-  utter = new SpeechSynthesisUtterance(blocks[index]);
-  utter.voice = chosen;
-  utter.rate = rate;
-  utter.lang = "es-ES";
+  utter.voice = chosen || null;
+  utter.rate = rate || 1;
+  utter.lang = (chosen && chosen.lang) || "es-ES";
 
   utter.onend = () => {
-    if (!paused && !stopped) {
-      index++;
-      readNextWord();
-    }
+    utter = null;
   };
 
+  console.log("🔊 CFC-TTS start — rate:", utter.rate, "voice:", utter.voice && utter.voice.name);
   speechSynthesis.speak(utter);
 }
 
 /* ==========================================================
-   8) HIGHLIGHT PREMIUM
+   PAUSE / RESUME / STOP NATIVOS
    ========================================================== */
-function highlight(i) {
-  document.querySelectorAll(".tts-word").forEach(el => {
-    el.style.background = "";
-  });
-
-  const el = document.querySelector(`.tts-word[data-i="${i}"]`);
-  if (el) el.style.background = "rgba(255,215,0,0.30)";
+function pauseReading() {
+  if (!utter) return;
+  if (speechSynthesis.speaking && !speechSynthesis.paused) {
+    speechSynthesis.pause();
+  }
 }
 
-/* ==========================================================
-   9) STOP REAL
-   ========================================================== */
+function resumeReading() {
+  if (!utter) return;
+  if (speechSynthesis.paused) {
+    speechSynthesis.resume();
+  }
+}
+
 function stopReading() {
-  stopped = true;
-  paused = false;
-  index = 0;
+  if (!utter && !speechSynthesis.speaking) return;
   speechSynthesis.cancel();
+  utter = null;
 }
 
 /* ==========================================================
-   10) CERRAR + RESTAURACIÓN PERFECTA (soluciona punto 8)
+   CERRAR PANEL
+   (el texto del capítulo NUNCA se modifica, por eso no hay
+   nada que restaurar; sólo se cierra la UI)
    ========================================================== */
 function closePanel() {
-  if (container && originalHTML) container.innerHTML = originalHTML;
-
-  let p = document.querySelector("#cfc-tts-panel");
+  const p = document.querySelector("#cfc-tts-panel");
   if (p) p.remove();
-
-  showToast("Texto restaurado con éxito");
+  showToast("Narrador cerrado");
 }
 
 /* ==========================================================
