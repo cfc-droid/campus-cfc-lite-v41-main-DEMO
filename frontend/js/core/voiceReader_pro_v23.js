@@ -169,14 +169,33 @@ function speakSegment(segI, wordI) {
     utter.rate = rate;
 
     /* 💛 Highlight REAL usando charIndex */
-    utter.onboundary = e => {
-        if (e.charIndex != null) {
-            let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
-            approxWord = Math.min(words.length - 1, approxWord + wordIndex);
-            highlight(words[approxWord]);
-        }
-    };
+utter.onboundary = e => {
+    if (e.charIndex != null) {
 
+        // Texto actual del segmento
+        let before = fullText.slice(0, e.charIndex);
+        let after = fullText.slice(e.charIndex);
+
+        // Buscar inicio de frase (último punto previo)
+        let startIdx = before.lastIndexOf(".") + 1;
+
+        // Buscar final de frase (siguiente punto)
+        let endIdx = after.indexOf(".");
+        if (endIdx !== -1) {
+            endIdx = e.charIndex + endIdx + 1;
+        } else {
+            endIdx = fullText.length;
+        }
+
+        // Extraer frase completa
+        const sentence = fullText.slice(startIdx, endIdx).trim();
+
+        if (sentence.length > 0) {
+            highlightSentence(sentence);
+        }
+    }
+};
+ 
     /* 👇 Cuando termina el segmento */
     utter.onend = () => {
         if (!isReading) return;
