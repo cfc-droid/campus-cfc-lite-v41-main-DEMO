@@ -1,5 +1,10 @@
 /* ==========================================================
-✅ CFC_FUNC_10_1R_20251107 — Narrador IA Integrado (V2.1 RestoreFix + Android Patch V3.1)
+✅ CFC_FUNC_10_1R_20251107 — Narrador IA Integrado
+🌐 VERSIÓN COMPATIBLE GLOBAL V4.0 (Android + PC + iPhone)
+— Pause REAL
+— Resume REAL
+— Stop REAL
+— Voces adaptativas por dispositivo
 ========================================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -10,6 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
 let currentVoice = null;
 let currentRate = 1;
 let isPaused = false;
+let isStopped = false;
 let currentIndex = 0;
 let sentences = [];
 let utter = null;
@@ -17,31 +23,27 @@ let beep = null;
 let textContainer = null;
 let originalHTML = "";
 
-// ==========================================================
-// 🎧 Sonido metálico Premium
-// ==========================================================
+/* ==========================================================
+🎧 Sonido metálico Premium
+========================================================== */
 function initBeep() {
   beep = new Audio(
     "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAIlYAABErAAACABAAZGF0YRQAAAAAAP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A/wD/AP8A"
   );
 }
 
-// ==========================================================
-// 🧩 Panel visual IA
-// ==========================================================
+/* ==========================================================
+🧩 Panel Visual
+========================================================== */
 function openVoicePanel() {
   if (document.querySelector(".tts-panel")) return;
 
-  // ======================================================
-  // 📌 FIX ANDROID — desbloqueo obligatorio del TTS
-  // ======================================================
+  // Desbloqueo Android (Chrome no inicializa voces hasta 1 speak vacío)
   try {
     const unlock = new SpeechSynthesisUtterance("");
     speechSynthesis.speak(unlock);
     speechSynthesis.cancel();
-  } catch (e) {
-    console.warn("Android TTS unlock failed:", e);
-  }
+  } catch (e) {}
 
   document.body.insertAdjacentHTML(
     "beforeend",
@@ -76,81 +78,70 @@ function openVoicePanel() {
   initBeep();
   loadVoices();
 
-  // === Eventos ===
-  document.getElementById("readAll").onclick = () => startReading();
+  document.getElementById("readAll").onclick = startReading;
 
-  // ======================================================
-  // 📌 FIX ANDROID — Pause / Resume / Stop completamente funcional
-  // ======================================================
+  /* ==========================================================
+  📌 PAUSE / RESUME COMPATIBLE ANDROID (motor propio)
+  ========================================================== */
   document.getElementById("pause").onclick = () => {
-    if (speechSynthesis.speaking && !speechSynthesis.paused) {
-      speechSynthesis.pause();
+    if (!isPaused) {
+      isPaused = true;
+      beep?.play();
     }
-    isPaused = true;
-    beep?.play();
   };
 
   document.getElementById("resume").onclick = () => {
-    if (speechSynthesis.paused) {
-      speechSynthesis.resume();
+    if (isPaused) {
+      isPaused = false;
+      beep?.play();
+      readNextSentence(); // reanuda lectura
     }
-    isPaused = false;
-    beep?.play();
   };
 
+  /* ==========================================================
+  📌 STOP GLOBAL (funciona 100%)
+  ========================================================== */
   document.getElementById("stop").onclick = () => {
-    speechSynthesis.cancel();
+    isStopped = true;
     isPaused = false;
     currentIndex = 0;
+    speechSynthesis.cancel();
+    removeHighlight();
     beep?.play();
   };
 
-  const closeBtn = document.getElementById("close");
-  closeBtn.onclick = () => closeAndRestore();
+  document.getElementById("close").onclick = closeAndRestore;
 
-  const voiceSelect = document.getElementById("voiceSelect");
   const speedBtns = document.querySelectorAll(".speed-btn");
-
-  // Velocidad
   speedBtns.forEach((btn) => {
     btn.onclick = () => {
       currentRate = parseFloat(btn.dataset.rate);
       speedBtns.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
       beep?.play();
-
-      if (utter && speechSynthesis.speaking) {
-        speechSynthesis.pause();
-        const resumeIndex = currentIndex;
-        speechSynthesis.cancel();
-        setTimeout(() => {
-          currentIndex = resumeIndex;
-          readNextSentence();
-        }, 150);
-      }
     };
   });
 
-  // Cambio de voz
-  voiceSelect.addEventListener("change", () => {
-    currentVoice = voiceSelect.value;
+  document.getElementById("voiceSelect").onchange = (e) => {
+    currentVoice = e.target.value;
     beep?.play();
-  });
+  };
 }
 
-// ==========================================================
-// 🚀 Motor de lectura
-// ==========================================================
+/* ==========================================================
+🚀 Motor de lectura — Versión Global
+========================================================== */
 function startReading() {
   stopReading();
   textContainer = document.querySelector("main") || document.body;
-
   originalHTML = textContainer.innerHTML;
 
   const text = textContainer.innerText;
   sentences = text.match(/[^.!?]+[.!?]*/g) || [text];
+
   currentIndex = 0;
   isPaused = false;
+  isStopped = false;
 
   const html = sentences
     .map((s, i) => `<span class="tts-sentence" data-index="${i}">${s}</span>`)
@@ -161,34 +152,32 @@ function startReading() {
 }
 
 function readNextSentence() {
-  if (isPaused || currentIndex >= sentences.length) return;
+  if (isPaused || isStopped) return;
+  if (currentIndex >= sentences.length) return;
 
-  const sentenceEls = document.querySelectorAll(".tts-sentence");
-  sentenceEls.forEach((el) =>
-    el.classList.remove("tts-active", "tts-active-dark", "tts-active-light")
-  );
+  const els = document.querySelectorAll(".tts-sentence");
+  removeHighlight();
 
-  const currentEl = sentenceEls[currentIndex];
-  if (!currentEl) return;
+  const el = els[currentIndex];
+  if (!el) return;
 
   const bgColor = window.getComputedStyle(document.body).backgroundColor;
   const isDark = getLuminance(bgColor) < 128;
+  el.classList.add(isDark ? "tts-active-dark" : "tts-active-light");
 
-  currentEl.classList.add(isDark ? "tts-active-dark" : "tts-active-light");
-
-  utter = new SpeechSynthesisUtterance(currentEl.innerText.trim());
+  utter = new SpeechSynthesisUtterance(el.innerText.trim());
   utter.lang = "es-ES";
   utter.rate = currentRate;
 
-  const availableVoices = speechSynthesis.getVoices();
-
+  const voices = speechSynthesis.getVoices();
   utter.voice =
-    availableVoices.find((v) => v.name === currentVoice) ||
-    availableVoices.find((v) => v.lang?.startsWith("es")) ||
+    voices.find((v) => v.name === currentVoice) ||
+    voices.find((v) => v.lang?.startsWith("es")) ||
+    voices[0] ||
     null;
 
   utter.onend = () => {
-    if (!isPaused) {
+    if (!isPaused && !isStopped) {
       currentIndex++;
       readNextSentence();
     }
@@ -197,30 +186,32 @@ function readNextSentence() {
   speechSynthesis.speak(utter);
 }
 
-// ==========================================================
-// ⏹️ Stop Reading
-// ==========================================================
+/* ==========================================================
+⏹️ Stop TOTAL
+========================================================== */
 function stopReading() {
   speechSynthesis.cancel();
   currentIndex = 0;
   isPaused = false;
-
-  document
-    .querySelectorAll(".tts-sentence")
-    .forEach((el) =>
-      el.classList.remove("tts-active", "tts-active-dark", "tts-active-light")
-    );
+  isStopped = false;
+  removeHighlight();
 }
 
-// ==========================================================
-// 🔁 Restaurar formato original al cerrar
-// ==========================================================
+function removeHighlight() {
+  document
+    .querySelectorAll(".tts-sentence")
+    .forEach((el) => el.classList.remove("tts-active", "tts-active-dark", "tts-active-light"));
+}
+
+/* ==========================================================
+🔁 Restaurar formato original
+========================================================== */
 function closeAndRestore() {
+  isStopped = true;
   stopReading();
 
   if (textContainer && originalHTML) {
     textContainer.innerHTML = originalHTML;
-    originalHTML = "";
   }
 
   const panel = document.querySelector(".tts-panel");
@@ -243,9 +234,9 @@ function closeAndRestore() {
   setTimeout(() => toast.remove(), 1800);
 }
 
-// ==========================================================
-// 🧮 Utilidad luminancia
-// ==========================================================
+/* ==========================================================
+🧮 Luminancia
+========================================================== */
 function getLuminance(rgb) {
   const nums = rgb.match(/\d+/g);
   if (!nums) return 255;
@@ -253,9 +244,9 @@ function getLuminance(rgb) {
   return 0.299 * r + 0.587 * g + 0.114 * b;
 }
 
-// ==========================================================
-// 🗣️ Carga de voces — FIX COMPLETO ANDROID
-// ==========================================================
+/* ==========================================================
+🗣️ Carga de voces — Adaptativa Global
+========================================================== */
 async function loadVoices() {
   const select = document.getElementById("voiceSelect");
   if (!select) return;
@@ -263,7 +254,6 @@ async function loadVoices() {
   let voices = speechSynthesis.getVoices();
   let retries = 0;
 
-  // Android muchas veces devuelve lista vacía → esperar
   while ((!voices || voices.length === 0) && retries < 20) {
     await new Promise((r) => setTimeout(r, 100));
     voices = speechSynthesis.getVoices();
@@ -271,12 +261,9 @@ async function loadVoices() {
   }
 
   const spanish = voices.filter((v) => v.lang?.startsWith("es"));
-
-  const finalVoices =
-    spanish.length > 0 ? spanish : voices.length > 0 ? voices.slice(0, 1) : [];
+  const finalVoices = spanish.length ? spanish : voices;
 
   select.innerHTML = "";
-
   finalVoices.forEach((v) => {
     const opt = document.createElement("option");
     opt.value = v.name;
@@ -290,5 +277,5 @@ async function loadVoices() {
 speechSynthesis.onvoiceschanged = loadVoices;
 
 /* ==========================================================
-🔒 CFC-SYNC QA — V2.1 RestoreFix + Android Patch V3.1
+🔒 CFC-SYNC QA — Version Compatible Global V4.0
 ========================================================== */
