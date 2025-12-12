@@ -1,299 +1,278 @@
 /* ==========================================================
-   🎧 CFC-VOICE READER PRO — V10 FINAL
-   - Lectura natural, no palabra por palabra
-   - Velocidad REAL en tiempo real
-   - Pause / Resume / Stop perfectos
-   - NO modifica HTML del capítulo
-   - Selección real de voces (PC / Android / iPhone / iPad)
-   - Botón premium flotante negro+dorado
-   - 100% universal para los 20 módulos y 80 capítulos
+   🎧 CFC-VOICE READER PRO — V11 ULTRA FINAL
+   Motor segmentado + ShadowDOM + Velocidad real + Resume real
+   Compatible: PC Chrome / Android Chrome / Safari iPhone / Safari iPad
    ========================================================== */
 
-let voicesList = [];
+(() => {
+
+let voices = [];
 let currentVoice = null;
 let rate = 1;
+let isReading = false;
+let currentIndex = 0;
+let segments = [];
 let utter = null;
-let isPaused = false;
 
 /* ==========================================================
-   INIT
+   INYECTAR BOTÓN PREMIUM FLOTANTE (SHADOW DOM)
    ========================================================== */
-document.addEventListener("DOMContentLoaded", () => {
-  const oldBtn = document.querySelector(".tts-btn-fixed");
-  if (oldBtn) {
-    oldBtn.addEventListener("click", openTTSPanel);
-  } else {
-    injectFloatingButton();
-  }
-});
+function injectButton() {
+    if (document.querySelector("#cfcReaderBtnHost")) return;
 
-/* ==========================================================
-   BOTÓN PREMIUM FLOTANTE
-   ========================================================== */
-function injectFloatingButton() {
-  if (document.querySelector("#tts-btn-cfc")) return;
+    const host = document.createElement("div");
+    host.id = "cfcReaderBtnHost";
+    host.style.position = "fixed";
+    host.style.left = "25px";
+    host.style.bottom = "25px";
+    host.style.zIndex = "9999999999";
 
-  document.body.insertAdjacentHTML(
-    "beforeend",
-    `
-      <button id="tts-btn-cfc"
-        style="
-          position:fixed; bottom:25px; left:25px;
-          width:60px; height:60px; border-radius:50%;
-          background:linear-gradient(90deg,#FFD700,#C5A200);
-          color:#000; font-size:28px; font-weight:900;
-          border:none; cursor:pointer; z-index:99999999;
-          box-shadow:0 0 18px rgba(255,215,0,0.6);
-        ">🎧</button>
-    `
-  );
+    const shadow = host.attachShadow({ mode: "open" });
 
-  document.querySelector("#tts-btn-cfc").onclick = openTTSPanel;
+    shadow.innerHTML = `
+        <style>
+        #btn {
+            width:60px; height:60px; border-radius:50%;
+            background:linear-gradient(90deg,#FFD700,#C5A200);
+            color:#000; font-size:28px; font-weight:900;
+            border:none; cursor:pointer;
+            box-shadow:0 0 18px rgba(255,215,0,0.65);
+        }
+        </style>
+        <button id="btn">🎧</button>
+    `;
+
+    shadow.querySelector("#btn").onclick = openPanel;
+    document.body.appendChild(host);
 }
 
 /* ==========================================================
-   PANEL PREMIUM
+   CREAR PANEL PREMIUM EN SHADOW DOM
    ========================================================== */
-function openTTSPanel() {
-  if (!("speechSynthesis" in window)) {
-    alert("Tu navegador no soporta lectura en voz alta.");
-    return;
-  }
+function openPanel() {
+    if (document.querySelector("#cfcReaderPanelHost")) return;
 
-  if (document.querySelector("#cfc-tts-panel")) return;
+    loadVoices();
 
-  unlockiOS();
-  unlockAndroid();
+    const host = document.createElement("div");
+    host.id = "cfcReaderPanelHost";
+    host.style.position = "fixed";
+    host.style.left = "25px";
+    host.style.bottom = "95px";
+    host.style.zIndex = "9999999999";
 
-  document.body.insertAdjacentHTML(
-    "beforeend",
-    `
-    <div id="cfc-tts-panel"
-      style="
-        position:fixed; bottom:95px; left:25px;
-        width:270px; background:#000;
-        border:2px solid #FFD700; border-radius:14px;
-        padding:16px; color:white; z-index:99999999;
-        box-shadow:0 0 20px rgba(255,215,0,0.45);
-        font-family:'Inter',sans-serif;">
-      
-      <h4 style="margin:0 0 10px 0; color:#FFD700; font-size:17px;">
-        🎧 Lectura IA CFC
-      </h4>
+    const shadow = host.attachShadow({ mode: "open" });
 
-      <label style="display:block; margin-top:4px;">Voz:</label>
-      <select id="tts-voice"
-        style="width:100%; padding:7px; margin-top:6px;
-        background:#111; color:white; border:1px solid #FFD700;
-        border-radius:8px;"></select>
+    shadow.innerHTML = `
+    <style>
+        #panel {
+            width:270px; padding:16px;
+            background:#000; border:2px solid #FFD700;
+            border-radius:14px;
+            font-family:'Inter',sans-serif;
+            color:white;
+            box-shadow:0 0 20px rgba(255,215,0,0.45);
+        }
+        #panel h4 { margin:0 0 10px 0; color:#FFD700; }
+        select, button { font-family:'Inter',sans-serif; }
+        select {
+            width:100%; padding:7px;
+            background:#111; color:white;
+            border:1px solid #FFD700; border-radius:8px;
+            margin-top:6px;
+        }
+        .rateBtn {
+            padding:6px 10px; margin:2px;
+            background:#111; border:1px solid #FFD700;
+            color:#FFD700; border-radius:6px;
+            font-size:13px;
+            cursor:pointer;
+        }
+        .rateBtn.active { background:#FFD700; color:#000; }
+        .bigBtn {
+            width:100%; padding:9px;
+            background:#FFD700; color:#000;
+            border-radius:8px; border:none;
+            font-weight:700; margin-top:5px;
+            cursor:pointer; font-size:15px;
+        }
+        .rowBtn {
+            width:48%; padding:7px;
+            background:#222; color:white;
+            border:1px solid #FFD700;
+            border-radius:6px; cursor:pointer;
+        }
+        .stopBtn {
+            width:100%; padding:8px;
+            background:#b82828; color:white;
+            border-radius:8px; margin-top:8px;
+            border:none; cursor:pointer;
+        }
+        .closeBtn {
+            width:100%; padding:7px;
+            background:#444; color:white;
+            border-radius:8px; margin-top:8px;
+            cursor:pointer;
+        }
+    </style>
 
-      <label style="margin-top:10px; display:block;">Velocidad:</label>
-      <div style="margin:6px 0; display:flex; flex-wrap:wrap;">
-        ${[0.75,1,1.25,1.5,1.75,2].map(
-          v => `
-          <button class="tts-rate" data-v="${v}"
-            style="
-              padding:6px 10px; margin:2px;
-              background:#111; border:1px solid #FFD700;
-              color:#FFD700; border-radius:6px;
-              font-size:13px;
-            ">x${v}</button>
-        `
-        ).join("")}
-      </div>
+    <div id="panel">
+        <h4>🎧 Lectura IA CFC</h4>
 
-      <button id="tts-read"
-        style="width:100%; background:#FFD700; color:#000;
-        padding:9px; border-radius:8px; border:none; font-weight:700;
-        margin-top:5px; font-size:15px;">Leer</button>
+        <label>Voz:</label>
+        <select id="voiceList"></select>
 
-      <div style="margin-top:8px; display:flex; justify-content:space-between;">
-        <button id="tts-pause"
-          style="width:48%; background:#222; color:white;
-          padding:7px; border:1px solid #FFD700; border-radius:6px;">⏸️ Pausa</button>
+        <label style="display:block;margin-top:10px;">Velocidad:</label>
+        <div id="rateBox"></div>
 
-        <button id="tts-resume"
-          style="width:48%; background:#222; color:white;
-          padding:7px; border:1px solid #FFD700; border-radius:6px;">▶️ Seguir</button>
-      </div>
+        <button id="readBtn" class="bigBtn">Leer</button>
 
-      <button id="tts-stop"
-        style="width:100%; background:#b82828; color:white;
-        padding:8px; border-radius:8px; border:none; margin-top:8px;">
-        ⏹️ Detener
-      </button>
+        <div style="margin-top:8px;display:flex;justify-content:space-between;">
+            <button id="pauseBtn" class="rowBtn">⏸ Pausa</button>
+            <button id="resumeBtn" class="rowBtn">▶ Seguir</button>
+        </div>
 
-      <button id="tts-close"
-        style="width:100%; background:#444; color:white;
-        padding:7px; border-radius:8px; margin-top:8px;">❌ Cerrar</button>
-
+        <button id="stopBtn" class="stopBtn">⏹ Detener</button>
+        <button id="closeBtn" class="closeBtn">❌ Cerrar</button>
     </div>
-    `
-  );
+    `;
 
-  loadVoices();
-  setEvents();
+    const voicesEl = shadow.querySelector("#voiceList");
+    const rateBox = shadow.querySelector("#rateBox");
+    const readBtn = shadow.querySelector("#readBtn");
+    const pauseBtn = shadow.querySelector("#pauseBtn");
+    const resumeBtn = shadow.querySelector("#resumeBtn");
+    const stopBtn = shadow.querySelector("#stopBtn");
+    const closeBtn = shadow.querySelector("#closeBtn");
+
+    /* Generar botones de velocidad */
+    [0.75,1,1.25,1.5,1.75,2].forEach(v => {
+        const b = document.createElement("button");
+        b.textContent = "x" + v;
+        b.className = "rateBtn";
+        b.onclick = () => {
+            rate = v;
+            [...rateBox.children].forEach(x => x.classList.remove("active"));
+            b.classList.add("active");
+        };
+        rateBox.appendChild(b);
+    });
+
+    /* Cargar voces en <select> */
+    const int = setInterval(() => {
+        if (voices.length > 0) {
+            clearInterval(int);
+            voices.forEach(v => {
+                const o = document.createElement("option");
+                o.value = v.name;
+                o.textContent = `${v.name} (${v.lang})`;
+                voicesEl.appendChild(o);
+            });
+            currentVoice = voices[0].name;
+        }
+    }, 200);
+
+    voicesEl.onchange = e => currentVoice = e.target.value;
+
+    /* EVENTOS */
+    readBtn.onclick = () => startReading(shadow);
+    pauseBtn.onclick = pauseReading;
+    resumeBtn.onclick = resumeReading;
+    stopBtn.onclick = stopReading;
+    closeBtn.onclick = () => { stopReading(); host.remove(); };
+
+    document.body.appendChild(host);
 }
 
 /* ==========================================================
-   UNLOCK ANDROID / iOS
+   SEGMENTAR TEXTO (PÁRRAFOS NO DESTRUCTIVOS)
    ========================================================== */
-function unlockAndroid() {
-  try {
-    const u = new SpeechSynthesisUtterance("");
-    speechSynthesis.speak(u);
-    speechSynthesis.cancel();
-  } catch (_) {}
-}
-
-function unlockiOS() {
-  try {
-    const a = new SpeechSynthesisUtterance(" ");
-    a.rate = 1;
-    speechSynthesis.speak(a);
-    speechSynthesis.cancel();
-  } catch (_) {}
+function getTextSegments() {
+    const container = document.querySelector("main") || document.body;
+    const raw = container.innerText.replace(/\n+/g, '\n').trim();
+    return raw.split("\n").filter(x => x.trim().length > 0);
 }
 
 /* ==========================================================
-   EVENTOS
+   LECTURA CON PUNTERO (RESUME REAL)
    ========================================================== */
-function setEvents() {
-  document.querySelectorAll(".tts-rate").forEach(btn => {
-    btn.onclick = () => {
-      rate = parseFloat(btn.dataset.v);
+function speakSegment(index, shadow) {
+    if (index >= segments.length) {
+        isReading = false;
+        utter = null;
+        return;
+    }
 
-      document.querySelectorAll(".tts-rate").forEach(b => {
-        b.style.background = "#111";
-        b.style.color = "#FFD700";
-      });
-      btn.style.background = "#FFD700";
-      btn.style.color = "#000";
+    currentIndex = index;
+    utter = new SpeechSynthesisUtterance(segments[index]);
+
+    const v = voices.find(v => v.name === currentVoice) || voices[0];
+    utter.voice = v;
+    utter.lang = v.lang;
+    utter.rate = rate;
+
+    utter.onend = () => {
+        if (isReading) speakSegment(index + 1, shadow);
     };
-  });
 
-  const sel = document.querySelector("#tts-voice");
-  sel.onchange = e => currentVoice = e.target.value;
+    speechSynthesis.speak(utter);
+}
 
-  document.querySelector("#tts-read").onclick = startReading;
-  document.querySelector("#tts-pause").onclick = pauseReading;
-  document.querySelector("#tts-resume").onclick = resumeReading;
-  document.querySelector("#tts-stop").onclick = stopReading;
-
-  document.querySelector("#tts-close").onclick = () => {
+/* ==========================================================
+   START / PAUSE / RESUME / STOP
+   ========================================================== */
+function startReading(shadow) {
     stopReading();
-    closePanel();
-  };
+    segments = getTextSegments();
+    if (segments.length === 0) return;
+
+    isReading = true;
+    speakSegment(0, shadow);
 }
 
-/* ==========================================================
-   CARGA DE VOCES REALES
-   ========================================================== */
-async function loadVoices() {
-  let t = 0;
-  while (speechSynthesis.getVoices().length === 0 && t < 40) {
-    await new Promise(r => setTimeout(r, 150));
-    t++;
-  }
-
-  voicesList = speechSynthesis.getVoices();
-
-  const spanish = voicesList.filter(v => v.lang && v.lang.toLowerCase().startsWith("es"));
-  const final = spanish.length ? spanish : voicesList;
-
-  const males = final.filter(v => /male|hombre|mascul/i.test(v.name));
-  const females = final.filter(v => /female|mujer|fem/i.test(v.name));
-
-  let ordered = [];
-  if (females.length) ordered = ordered.concat(females);
-  if (males.length) ordered = ordered.concat(males);
-
-  if (ordered.length === 0) ordered = final;
-
-  const sel = document.querySelector("#tts-voice");
-  sel.innerHTML = "";
-
-  ordered.forEach(v => {
-    const o = document.createElement("option");
-    o.value = v.name;
-    o.textContent = `${v.name} (${v.lang})`;
-    sel.appendChild(o);
-  });
-
-  currentVoice = ordered[0] ? ordered[0].name : null;
-}
-
-/* ==========================================================
-   LECTURA NATURAL COMPLETA
-   ========================================================== */
-function startReading() {
-  stopReading();
-
-  const container = document.querySelector("main") || document.body;
-  const text = container.innerText || "";
-  if (!text.trim()) return;
-
-  utter = new SpeechSynthesisUtterance(text);
-
-  const voices = speechSynthesis.getVoices();
-  const chosen =
-    voices.find(v => v.name === currentVoice) ||
-    voices.find(v => v.lang && v.lang.toLowerCase().startsWith("es")) ||
-    voices[0];
-
-  utter.voice = chosen;
-  utter.rate = rate;
-  utter.lang = (chosen && chosen.lang) || "es-ES";
-
-  utter.onend = () => utter = null;
-
-  speechSynthesis.speak(utter);
-}
-
-/* ==========================================================
-   PAUSE / RESUME / STOP NATIVOS
-   ========================================================== */
 function pauseReading() {
-  if (speechSynthesis.speaking && !speechSynthesis.paused) {
-    speechSynthesis.pause();
-  }
+    if (speechSynthesis.speaking) speechSynthesis.pause();
 }
 
 function resumeReading() {
-  if (speechSynthesis.paused) {
-    speechSynthesis.resume();
-  }
+    if (speechSynthesis.paused) speechSynthesis.resume();
 }
 
 function stopReading() {
-  if (speechSynthesis.speaking || speechSynthesis.paused) {
+    isReading = false;
     speechSynthesis.cancel();
-  }
-  utter = null;
+    utter = null;
+    currentIndex = 0;
 }
 
 /* ==========================================================
-   CERRAR PANEL
+   CARGA DE VOCES REAL (PC / ANDROID / IOS)
    ========================================================== */
-function closePanel() {
-  const p = document.querySelector("#cfc-tts-panel");
-  if (p) p.remove();
-  showToast("Narrador cerrado");
+function loadVoices() {
+    voices = speechSynthesis.getVoices();
+    if (voices.length === 0) {
+        speechSynthesis.onvoiceschanged = () => {
+            voices = speechSynthesis.getVoices();
+            voices = reorderVoices(voices);
+        };
+    } else voices = reorderVoices(voices);
+}
+
+function reorderVoices(list) {
+    const es = list.filter(v => v.lang.toLowerCase().startsWith("es"));
+    if (es.length === 0) return list;
+
+    const male = es.filter(v => /male|hombre|masc/i.test(v.name));
+    const female = es.filter(v => /female|mujer|fem/i.test(v.name));
+
+    return [...female, ...male, ...es];
 }
 
 /* ==========================================================
-   TOAST PREMIUM
+   INIT AUTOMÁTICO
    ========================================================== */
-function showToast(msg) {
-  const t = document.createElement("div");
-  t.textContent = msg;
-  t.style = `
-    position:fixed; bottom:22px; left:25px;
-    background:linear-gradient(90deg,#FFD700,#C5A200);
-    padding:10px 16px; border-radius:10px;
-    color:#000; font-weight:700; z-index:99999999;
-    box-shadow:0 0 15px rgba(255,215,0,0.55);
-  `;
-  document.body.appendChild(t);
-  setTimeout(() => t.remove(), 1800);
-}
+document.addEventListener("DOMContentLoaded", () => {
+    injectButton();
+});
+
+})();
