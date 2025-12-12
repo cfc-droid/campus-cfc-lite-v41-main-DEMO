@@ -1,9 +1,9 @@
 /* ============================================================================
  🎧 CFC-VOICE READER PRO — V23 REAL DEFINITIVO
- ✔ Highlight de frase completa
+ ✔ Highlight de frase completa (CORREGIDO)
  ✔ Resume exacto
  ✔ Android Chrome OK
-✔ PC Chrome OK
+ ✔ PC Chrome OK
 ============================================================================ */
 
 (() => {
@@ -58,10 +58,7 @@ function loadVoicesPolling(maxAttempts = 40) {
             if (list && list.length > 0) {
                 clearInterval(timer);
 
-                /* 🔥 Filtramos español */
                 let es = list.filter(v => v.lang.toLowerCase().startsWith("es"));
-
-                /* 🔥 Masculinas reales ES-LA (Android Chrome) */
                 let males = es.filter(v =>
                     /(Standard\s*B|Standard\s*C|Standard\s*D|Baritone|Deep|Grave)/i.test(v.name)
                 );
@@ -98,7 +95,7 @@ function extractSegments() {
 
     words.forEach(w => {
         temp.push(w);
-        if (temp.length >= 6) {      // ideal para Android
+        if (temp.length >= 6) {
             segments.push(temp.join(" "));
             temp = [];
         }
@@ -110,7 +107,7 @@ function extractSegments() {
 }
 
 /* ============================================================================
-   4) HIGHLIGHT REAL BASADO EN charIndex (Android compatible)
+   4) HIGHLIGHT REAL — CORREGIDO
 ============================================================================ */
 function highlightSentence(text) {
     removeHighlight();
@@ -141,7 +138,7 @@ function removeHighlight() {
 }
 
 /* ============================================================================
-   5) REPRODUCCIÓN DE UN SEGMENTO — MOTOR PRINCIPAL V22
+   5) REPRODUCCIÓN DE UN SEGMENTO — MOTOR PRINCIPAL
 ============================================================================ */
 function speakSegment(segI, wordI) {
     if (segI >= segments.length) return stopReading();
@@ -155,7 +152,6 @@ function speakSegment(segI, wordI) {
 
     utter = new SpeechSynthesisUtterance(textToRead);
 
-    /* ✔ Asignar voz */
     const v = voices.find(v => v.name === currentVoice) || voices[0];
     if (v) {
         utter.voice = v;
@@ -164,39 +160,38 @@ function speakSegment(segI, wordI) {
 
     utter.rate = rate;
 
-    /* 💛 Highlight REAL usando charIndex */
-utter.onboundary = e => {
-    if (e.charIndex != null) {
+    /* ============================================================
+       💛 Highlight REAL usando frase local dentro del segmento
+       CORRECCIÓN: función robusta que detecta frase aunque no
+       existan puntos en el segmento original.
+    ============================================================ */
+    utter.onboundary = e => {
+        if (e.charIndex != null) {
 
-        // Texto actual del segmento
-        let before = fullText.slice(0, e.charIndex);
-        let after = fullText.slice(e.charIndex);
+            let before = fullText.slice(0, e.charIndex);
+            let after = fullText.slice(e.charIndex);
 
-        // Buscar inicio de frase (último punto previo)
-        let startIdx = before.lastIndexOf(".") + 1;
+            // detectamos inicio por punto o inicio del texto
+            let startIdx = before.lastIndexOf(".");
+            startIdx = startIdx !== -1 ? startIdx + 1 : 0;
 
-        // Buscar final de frase (siguiente punto)
-        let endIdx = after.indexOf(".");
-        if (endIdx !== -1) {
-            endIdx = e.charIndex + endIdx + 1;
-        } else {
-            endIdx = fullText.length;
-        }
+            // detectamos fin por punto o final del texto
+            let nextDot = after.indexOf(".");
+            let endIdx = nextDot !== -1 ? e.charIndex + nextDot + 1 : fullText.length;
 
-        // Extraer frase completa
-        const sentence = fullText.slice(startIdx, endIdx).trim();
+            let sentence = fullText.slice(startIdx, endIdx).trim();
 
-        if (sentence.length > 0) {
+            // ✔ Garantizamos que SIEMPRE haya una frase válida
+            if (!sentence || sentence.length < 3) sentence = fullText;
+
             highlightSentence(sentence);
-        }
 
-        // 🔥 NECESARIO PARA RESUME EXACTO
-        let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
-        wordIndex = Math.min(words.length - 1, approxWord);
-    }
-};
- 
-    /* 👇 Cuando termina el segmento */
+            // resume exacto
+            let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
+            wordIndex = Math.min(words.length - 1, approxWord);
+        }
+    };
+
     utter.onend = () => {
         if (!isReading) return;
         segmentIndex++;
@@ -208,7 +203,7 @@ utter.onboundary = e => {
 }
 
 /* ============================================================================
-   6) CONTROLES REALES V22
+   6) CONTROLES REALES
 ============================================================================ */
 function startReading() {
     stopReading();
@@ -236,7 +231,6 @@ function resumeReading() {
     if (!isPaused) return;
     isPaused = false;
 
-    /* 🔥 Android NO retoma utterance — RECONSTRUIMOS DESDE LA PALABRA EXACTA */
     speechSynthesis.cancel();
     speakSegment(segmentIndex, wordIndex);
 }
@@ -251,7 +245,7 @@ function stopReading() {
 }
 
 /* ============================================================================
-   7) PANEL PREMIUM COMPACTO (1/4 PANTALLA)
+   7) PANEL PREMIUM (igual que original)
 ============================================================================ */
 function openPanel() {
     if (document.querySelector("#cfcTTSPanel")) return;
@@ -322,7 +316,6 @@ function openPanel() {
 
     document.body.appendChild(panel);
 
-    /* VOCES */
     const sel = panel.querySelector("#ttsVoice");
     voices.forEach(v => {
         let o = document.createElement("option");
@@ -332,7 +325,6 @@ function openPanel() {
     });
     sel.onchange = e => currentVoice = e.target.value;
 
-    /* VELOCIDADES */
     const rateBox = panel.querySelector("#ttsRate");
     [0.75,1,1.25,1.5,1.75,2].forEach(r => {
         let b = document.createElement("button");
@@ -343,7 +335,6 @@ function openPanel() {
             [...rateBox.children].forEach(x => x.classList.remove("active"));
             b.classList.add("active");
 
-            /* 🔥 Reconstrucción dinámica */
             if (speechSynthesis.speaking) {
                 speechSynthesis.cancel();
                 speakSegment(segmentIndex, wordIndex);
@@ -352,7 +343,6 @@ function openPanel() {
         rateBox.appendChild(b);
     });
 
-    /* BOTONES */
     panel.querySelector("#ttsRead").onclick = startReading;
     panel.querySelector("#ttsPause").onclick = pauseReading;
     panel.querySelector("#ttsResume").onclick = resumeReading;
