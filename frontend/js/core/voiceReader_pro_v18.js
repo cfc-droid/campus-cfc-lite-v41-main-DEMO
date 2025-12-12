@@ -1,8 +1,8 @@
 /* ============================================================================
-   🎧 CFC-VOICE READER PRO — V18 ULTRA REAL (FINAL)
-   Motor WordBoundary Engine + Highlight + Resume exacto + Velocidad dinámica
-   Funciona perfecto en Chrome PC / Chrome Android.
-   No modifica HTML, no afecta scripts del Campus, no rompe nada.
+   🎧 CFC-VOICE READER PRO — V18 ULTRA REAL (FIX FINAL)
+   Motor WordBoundary + Highlight + Resume + Velocidad dinámica
+   Especial para CHROME (PC / Android).
+   Con detección de errores y logs claros en consola.
    ============================================================================ */
 
 (() => {
@@ -20,12 +20,21 @@ let highlightBox = null;
 
 let voices = [];
 let currentVoice = null;
+let ttsReady = false;
+
+/* Pequeño helper */
+function log(...args) {
+    console.log("🎧 CFC-TTS V18:", ...args);
+}
 
 /* ============================================================================
    1) BOTÓN PREMIUM FLOTANTE
 ============================================================================ */
 function injectFloatingButton() {
-    if (document.querySelector("#cfcTTSButtonHost")) return;
+    if (document.querySelector("#cfcTTSButtonHost")) {
+        log("Botón ya existe, no se duplica");
+        return;
+    }
 
     const host = document.createElement("div");
     host.id = "cfcTTSButtonHost";
@@ -49,7 +58,11 @@ function injectFloatingButton() {
         <button id="btn">🎧</button>
     `;
 
-    shadow.querySelector("#btn").onclick = openPanel;
+    shadow.querySelector("#btn").onclick = () => {
+        log("Click en botón flotante");
+        openPanel();
+    };
+
     document.body.appendChild(host);
 }
 
@@ -57,9 +70,10 @@ function injectFloatingButton() {
    2) PANEL PREMIUM (1/4 DE PANTALLA)
 ============================================================================ */
 function openPanel() {
-    if (document.querySelector("#cfcTTSPanelHost")) return;
-
-    loadVoices();
+    if (document.querySelector("#cfcTTSPanelHost")) {
+        log("Panel ya abierto");
+        return;
+    }
 
     const host = document.createElement("div");
     host.id = "cfcTTSPanelHost";
@@ -81,9 +95,7 @@ function openPanel() {
             }
             h4 { margin:0 0 8px 0;color:#FFD700;font-size:16px; }
 
-            select,button {
-                font-family:'Inter';
-            }
+            select,button { font-family:'Inter'; }
 
             .rateBtn {
                 padding:5px 8px;margin:2px;
@@ -134,27 +146,55 @@ function openPanel() {
 }
 
 /* ============================================================================
-   3) CARGAR VOCES (INCLUYE VOZ MASCULINA PARA ANDROID)
+   3) CARGAR VOCES (INCLUYE MÁXIMO POSIBLE DE MASCULINAS)
 ============================================================================ */
 function loadVoices() {
-    const load = () => {
-        let vs = speechSynthesis.getVoices();
+    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
+        log("TTS NO soportado por este navegador");
+        ttsReady = false;
+        return;
+    }
 
-        // Voces españolas primero
-        voices = vs.filter(v => v.lang.toLowerCase().startsWith("es"));
+    const doLoad = () => {
+        let vs = window.speechSynthesis.getVoices() || [];
+        log("Voices detectadas brutales:", vs.length);
 
-        // Forzar inclusión de voces masculinas de Android Chrome:
-        const maleAndroid = vs.find(v =>
-            /standard-b|standard-d|male|hombre/i.test(v.name)
+        // Voces en español primero
+        let es = vs.filter(v => v.lang && v.lang.toLowerCase().startsWith("es"));
+
+        // Intentar detectar masculinas por nombre (Android suele poner Standard-B/D como “masculino”)
+        const posiblesMasculinas = vs.filter(v =>
+            /standard-b|standard-d|male|hombre|masculino/i.test(v.name)
         );
-        if (maleAndroid && !voices.includes(maleAndroid)) voices.push(maleAndroid);
 
-        if (voices.length === 0) voices = vs;
-        currentVoice = voices[0]?.name || null;
+        // Mezclamos: primero esp, luego posibles masculinas únicas, luego resto
+        voices = [
+            ...es,
+            ...posiblesMasculinas.filter(v => !es.includes(v)),
+            ...vs.filter(v => !es.includes(v) && !posiblesMasculinas.includes(v))
+        ];
+
+        // Limpiar duplicados por nombre
+        const byName = {};
+        voices.forEach(v => { byName[v.name] = v; });
+        voices = Object.values(byName);
+
+        log("Voces filtradas finales:", voices.map(v => `${v.name} (${v.lang})`));
+
+        if (voices.length === 0) {
+            ttsReady = false;
+            return;
+        }
+
+        currentVoice = voices[0].name;
+        ttsReady = true;
     };
 
-    load();
-    speechSynthesis.onvoiceschanged = load;
+    doLoad();
+    window.speechSynthesis.onvoiceschanged = () => {
+        log("onvoiceschanged fired");
+        doLoad();
+    };
 }
 
 /* ============================================================================
@@ -162,8 +202,13 @@ function loadVoices() {
 ============================================================================ */
 function extractWords() {
     const container = document.querySelector("main") || document.body;
+    if (!container) {
+        log("No se encontró contenedor principal");
+        return;
+    }
     text = container.innerText.trim().replace(/\s+/g, " ");
-    words = text.split(" ");
+    words = text.length ? text.split(" ") : [];
+    log("Palabras a leer:", words.length);
 }
 
 /* ============================================================================
@@ -189,70 +234,127 @@ function showHighlight(word) {
 }
 
 function removeHighlight() {
-    if (highlightBox) highlightBox.remove();
+    if (highlightBox) {
+        highlightBox.remove();
+        highlightBox = null;
+    }
 }
 
 /* ============================================================================
-   6) MOTOR WORD-BOUNDARY (PLAY / PAUSE / RESUME PERFECTO)
+   6) MOTOR WORD-BOUNDARY
 ============================================================================ */
 function speakWordFrom(indexStart) {
+    if (!ttsReady) {
+        alert("Tu navegador no tiene activo el motor de voz (TTS). Revisa ajustes de Chrome / sistema.");
+        log("Abortando speakWordFrom: ttsReady = false");
+        return;
+    }
+
     if (indexStart >= words.length) {
+        log("Texto terminado");
         stopReading();
         return;
     }
 
     index = indexStart;
     const textToRead = words.slice(index).join(" ");
+    if (!textToRead.trim()) {
+        log("Texto vacío, se detiene");
+        stopReading();
+        return;
+    }
 
     utter = new SpeechSynthesisUtterance(textToRead);
 
-    const v = voices.find(v => v.name === currentVoice) || voices[0];
-    if (v) {
-        utter.voice = v;
-        utter.lang = v.lang;
+    const voiceObj = voices.find(v => v.name === currentVoice) || voices[0];
+    if (voiceObj) {
+        utter.voice = voiceObj;
+        utter.lang = voiceObj.lang;
     }
-
     utter.rate = playbackRate;
 
-    // Cuando avanza palabra por palabra
+    log("Iniciando lectura desde índice", index, "voz:", voiceObj ? voiceObj.name : "DEFAULT", "rate:", playbackRate);
+
+    utter.onstart = () => {
+        log("onstart disparado");
+    };
+
     utter.onboundary = ev => {
-        if (ev.name === "word") {
-            index++;
+        // No todos los navegadores etiquetan 'word', pero al menos avanzamos
+        index++;
+        if (index - 1 >= 0 && index - 1 < words.length) {
             showHighlight(words[index - 1]);
         }
     };
 
+    utter.onerror = (e) => {
+        log("❌ Error en utter:", e.error || e.message);
+    };
+
     utter.onend = () => {
+        log("onend disparado, isReading:", isReading);
         if (isReading) stopReading();
     };
 
-    speechSynthesis.speak(utter);
+    window.speechSynthesis.speak(utter);
 }
 
 /* ============================================================================
    7) CONTROLES
 ============================================================================ */
 function startReading() {
-    stopReading();
+    log("startReading() llamado");
+
+    if (!("speechSynthesis" in window) || typeof SpeechSynthesisUtterance === "undefined") {
+        alert("Tu navegador no soporta síntesis de voz (Web Speech API).");
+        log("Abortando: Web Speech API no soportada");
+        return;
+    }
+
+    if (!ttsReady) {
+        // Intento extra: recargar voces una vez más
+        loadVoices();
+        if (!ttsReady) {
+            alert("No se encontraron voces disponibles en este dispositivo.");
+            log("Abortando: ttsReady sigue en false");
+            return;
+        }
+    }
+
+    stopReading(); // limpia cualquier lectura previa
+
     extractWords();
-    if (words.length === 0) return;
+    if (!words.length) {
+        alert("No se encontró texto para leer en este capítulo.");
+        log("Abortando: 0 palabras encontradas");
+        return;
+    }
 
     isReading = true;
     speakWordFrom(index);
 }
 
 function pauseReading() {
-    if (speechSynthesis.speaking) speechSynthesis.pause();
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
+        log("Pausa TTS");
+        window.speechSynthesis.pause();
+    }
 }
 
 function resumeReading() {
-    if (speechSynthesis.paused) speechSynthesis.resume();
+    if (window.speechSynthesis && window.speechSynthesis.paused) {
+        log("Resume TTS");
+        window.speechSynthesis.resume();
+    }
 }
 
 function stopReading() {
+    log("stopReading()");
     isReading = false;
     index = 0;
-    speechSynthesis.cancel();
+    if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+    }
     removeHighlight();
 }
 
@@ -263,18 +365,31 @@ function setupPanel(shadow) {
     const voiceList = shadow.querySelector("#voiceList");
     const rateBox = shadow.querySelector("#rateBox");
 
+    // Poblar voces un poco después para darle tiempo a Chrome Android
     setTimeout(() => {
-        voices.forEach(v => {
-            const opt = document.createElement("option");
-            opt.value = v.name;
-            opt.textContent = `${v.name} (${v.lang})`;
-            voiceList.appendChild(opt);
-        });
-        currentVoice = voices[0]?.name;
-    }, 350);
+        log("Poblando combo de voces. voices.length:", voices.length);
+
+        voiceList.innerHTML = "";
+        if (!voices.length) {
+            const o = document.createElement("option");
+            o.value = "default";
+            o.textContent = "Voz por defecto del sistema";
+            voiceList.appendChild(o);
+            currentVoice = "default";
+        } else {
+            voices.forEach(v => {
+                const opt = document.createElement("option");
+                opt.value = v.name;
+                opt.textContent = `${v.name} (${v.lang})`;
+                voiceList.appendChild(opt);
+            });
+            currentVoice = voices[0].name;
+        }
+    }, 400);
 
     voiceList.onchange = e => {
         currentVoice = e.target.value;
+        log("Voz seleccionada:", currentVoice);
     };
 
     [0.75,1,1.25,1.5,1.75,2].forEach(r => {
@@ -286,22 +401,37 @@ function setupPanel(shadow) {
             [...rateBox.children].forEach(x => x.classList.remove("active"));
             b.classList.add("active");
 
-            // Cambiar velocidad MIENTRAS LEE:
-            if (speechSynthesis.speaking && utter) {
-                speechSynthesis.pause();
+            // Cambiar velocidad mientras lee (en la práctica, Chrome lo respeta a medias)
+            if (window.speechSynthesis && window.speechSynthesis.speaking && utter) {
+                log("Cambio de velocidad en vivo a", playbackRate);
+                // No hay API directa para cambiar rate en caliente, pero pausamos y reanudamos
+                window.speechSynthesis.pause();
                 utter.rate = playbackRate;
-                speechSynthesis.resume();
+                window.speechSynthesis.resume();
             }
         };
         rateBox.appendChild(b);
     });
 
-    shadow.querySelector("#readBtn").onclick = startReading;
-    shadow.querySelector("#pauseBtn").onclick = pauseReading;
-    shadow.querySelector("#resumeBtn").onclick = resumeReading;
-    shadow.querySelector("#stopBtn").onclick = stopReading;
+    shadow.querySelector("#readBtn").onclick = () => {
+        log("Click en LEER");
+        startReading();
+    };
+    shadow.querySelector("#pauseBtn").onclick = () => {
+        log("Click en PAUSA");
+        pauseReading();
+    };
+    shadow.querySelector("#resumeBtn").onclick = () => {
+        log("Click en SEGUIR");
+        resumeReading();
+    };
+    shadow.querySelector("#stopBtn").onclick = () => {
+        log("Click en DETENER");
+        stopReading();
+    };
 
     shadow.querySelector("#closeBtn").onclick = () => {
+        log("Click en CERRAR");
         stopReading();
         shadow.host.remove();
     };
@@ -311,6 +441,7 @@ function setupPanel(shadow) {
    INIT
 ============================================================================ */
 document.addEventListener("DOMContentLoaded", () => {
+    log("INIT DOMContentLoaded");
     injectFloatingButton();
     loadVoices();
 });
