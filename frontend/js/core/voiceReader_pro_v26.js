@@ -386,8 +386,10 @@ function injectButton(){
     // evitar duplicados
     if(document.querySelector("#cfcTTSBtn")) return;
 
-    const btn = document.createElement("button");
-    btn.id = "cfcTTSBtn";
+const btn = document.createElement("button");
+btn.id = "cfcTTSBtn";
+btn.classList.add("cfc-audio-btn");   // ← AGREGAR ESTA LÍNEA
+btn.textContent = "🎧";
 
     // aplicar clase global que ya corrige la alineación
     btn.classList.add("cfc-audio-btn");
