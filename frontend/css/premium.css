@@ -635,3 +635,30 @@ echo "🧩 CFC_SYNC checkpoint: modal animado y compatible con modo claro/oscuro
 # ✅ CFC_FUNC_9_1_20251105 — CFC-PACK PLUS V1 integrado
 echo "🧩 CFC_SYNC checkpoint: Contenido adicional descargable — P8 actualizado"
 ========================================================== */
+
+/* ============================================================
+  FIN DEL ARCHIVO PREMIUM.CSS
+============================================================ */
+
+/* FIX GLOBAL — Alineación perfecta del ícono de audio */
+.cfc-audio-btn,
+.tts-btn-fixed {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 48px !important;
+  height: 48px !important;
+  padding: 0 !important;
+  line-height: 0 !important;
+  font-size: 1.45rem !important;
+}
+
+.cfc-audio-btn svg,
+.cfc-audio-btn i,
+.cfc-audio-btn span,
+.tts-btn-fixed svg,
+.tts-btn-fixed i,
+.tts-btn-fixed span {
+  display: block !important;
+  line-height: 1 !important;
+}
