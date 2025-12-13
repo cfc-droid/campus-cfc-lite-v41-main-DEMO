@@ -176,6 +176,24 @@
     footer { text-align: center; margin-top: 35px; font-size: 0.8rem; opacity: 0.8; transition: color 0.3s ease; }
     body.light-mode footer { color: #333; }
     body.dark-mode footer { color: #bbb; }
+
+/* 💥 FIX DEFINITIVO DE ALINEACIÓN PARA PREGUNTAS LARGAS */
+.faq-item h3 {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  text-indent: 0 !important;
+  padding-left: 0 !important;
+}
+
+/* ⚡ Fuerza que el texto no se mueva aunque el ícono "＋" crezca */
+.faq-item h3 span.qtext {
+  flex: 1;
+  padding-right: 12px;
+  display: block;
+}
+    
   </style>
 </head>
 
@@ -365,7 +383,7 @@
 </div>
 
 <div class="faq-item">
-<h3>42. ⏱️ ¿Por qué la pestaña "Perfil" - botón "Mi progreso" - opción “Tiempo activo hoy”, puede mostrar un desfasaje de ±2 minutos?</h3>
+<h3><span class="qtext">42. ⏱️ ¿Por qué la pestaña "Perfil" - botón "Mi progreso" - opción “Tiempo activo hoy”, puede mostrar un desfasaje de ±2 minutos?</span></h3>
 <div class="faq-answer">
     El contador de actividad registra tu tiempo real mientras navegás por el Campus.  
     Sin embargo, puede presentar una variación aproximada de <b>±2 minutos</b> debido a:
@@ -381,7 +399,7 @@
 <h4 class="section-title">🟣 SECCIÓN 9 — NAVEGADOR DE AUDIO (PC Y CELULAR)</h4>
 
 <div class="faq-item">
-<h3>43. 🎧 ¿Por qué en la PC (cuando seleccionás una voz nueva), la voz cambia automáticamente, al finalizar una oración y no antes?</h3>
+<h3><span class="qtext">43. 🎧 ¿Por qué en la PC (cuando seleccionás una voz nueva), la voz cambia automáticamente, al finalizar una oración y no antes?</span></h3>
   <div class="faq-answer">
     En Google Chrome (PC), cuando seleccionás una voz nueva (masculina o femenina),  
     el cambio se aplica recién al finalizar la oración actual.  
@@ -391,7 +409,7 @@
 </div>
 
 <div class="faq-item">
-<h3>44. 📱 ¿Por qué en el celular, al pausar la lectura (y luego seguir), vuelve al inicio de la última oración resaltada?</h3>
+<h3><span class="qtext">44. 📱 ¿Por qué en el celular, al pausar la lectura (y luego seguir), vuelve al inicio de la última oración resaltada?</span></h3>
   <div class="faq-answer">
     En Chrome Android, la función <code>speechSynthesis.pause()</code> no conserva la  
     posición exacta dentro de la oración.  
