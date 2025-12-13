@@ -1,6 +1,6 @@
 /* ============================================================================
- 🎧 CFC-VOICE READER PRO — V23 REAL + HIGHLIGHT INLINE DEFINITIVO
- ✔ Highlight REAL directamente en el texto original (inline)
+ 🎧 CFC-VOICE READER PRO — V24 ORACIÓN COMPLETA (PUNTO → PUNTO)
+ ✔ Resalta oración completa REAL dentro del texto original
  ✔ Funciona en Android y PC
  ✔ Fallback por tiempo si onboundary falla
  ✔ Resume exacto
@@ -24,13 +24,13 @@ let rate = 1;
 let isReading = false;
 let isPaused = false;
 
-let inlineMarks = [];   // <mark> generados
+let inlineMarks = [];  
 let highlightTimer = null;
 
 /* =========================
    LOG
 ========================= */
-const log = (...m) => console.log("🎧 V23-INLINE:", ...m);
+const log = (...m) => console.log("🎧 V24:", ...m);
 
 /* ============================================================================
    1) AUDIO UNLOCK
@@ -57,7 +57,7 @@ function loadVoicesPolling(maxAttempts = 40) {
 
         const timer = setInterval(() => {
             const list = speechSynthesis.getVoices();
-            if (list && list.length > 0) {
+            if (list.length > 0) {
                 clearInterval(timer);
 
                 let es = list.filter(v => v.lang.toLowerCase().startsWith("es"));
@@ -68,7 +68,6 @@ function loadVoicesPolling(maxAttempts = 40) {
                 voices = males.length ? males : es.length ? es : list;
                 currentVoice = voices[0]?.name || null;
 
-                log("Voces OK:", voices.map(v => v.name));
                 resolve(true);
                 return;
             }
@@ -106,32 +105,28 @@ function extractSegments() {
 }
 
 /* ============================================================================
-   4) LIMPIAR HIGHLIGHT INLINE
+   4) LIMPIAR INLINE
 ============================================================================ */
 function clearInlineMarks() {
     inlineMarks.forEach(m => {
         const parent = m.parentNode;
-        if (!parent) return;
-        parent.replaceChild(document.createTextNode(m.textContent), m);
+        if (parent) parent.replaceChild(document.createTextNode(m.textContent), m);
     });
     inlineMarks = [];
 }
 
 /* ============================================================================
-   5) APLICAR HIGHLIGHT INLINE EN EL TEXTO REAL
+   5) HIGHLIGHT INLINE EN EL TEXTO REAL
 ============================================================================ */
 function highlightInline(sentence) {
     clearInlineMarks();
-
     if (!sentence) return;
 
     const container = document.querySelector("main") || document.body;
     const html = container.innerHTML;
 
-    // escapamos caracteres especiales para buscar bien
     const escaped = sentence.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-    const regex = new RegExp(escaped, "i"); // primera coincidencia
+    const regex = new RegExp(escaped, "i");
 
     const newHTML = html.replace(regex, match => {
         return `<mark class="cfcInlineHL">${match}</mark>`;
@@ -139,11 +134,10 @@ function highlightInline(sentence) {
 
     container.innerHTML = newHTML;
 
-    // guardar referencias
     inlineMarks = Array.from(document.querySelectorAll(".cfcInlineHL"));
 }
 
-/* CSS para highlight inline */
+/* CSS highlight */
 const style = document.createElement("style");
 style.innerHTML = `
 .cfcInlineHL {
@@ -156,7 +150,31 @@ style.innerHTML = `
 document.head.appendChild(style);
 
 /* ============================================================================
-   6) FALLBACK ANDROID POR TIEMPO
+   6) EXTRAER ORACIÓN COMPLETA (PUNTO → PUNTO)
+============================================================================ */
+function extractSentence(fullText, index) {
+    const delimiters = /[.!?¿¡…—–]/g;
+
+    let start = 0;
+    let end = fullText.length;
+
+    // inicio de oración
+    let match;
+    while ((match = delimiters.exec(fullText)) !== null) {
+        if (match.index < index) start = match.index + match[0].length;
+        else break;
+    }
+
+    // fin de oración
+    delimiters.lastIndex = index;
+    const forward = delimiters.exec(fullText);
+    if (forward) end = forward.index + forward[0].length;
+
+    return fullText.slice(start, end).trim();
+}
+
+/* ============================================================================
+   7) FALLBACK ANDROID POR TIEMPO
 ============================================================================ */
 function highlightFallback(sentence) {
     clearInterval(highlightTimer);
@@ -164,13 +182,11 @@ function highlightFallback(sentence) {
 
     const ms = Math.max(1500, sentence.split(" ").length * (350 / rate));
 
-    highlightTimer = setTimeout(() => {
-        clearInlineMarks();
-    }, ms);
+    highlightTimer = setTimeout(() => clearInlineMarks(), ms);
 }
 
 /* ============================================================================
-   7) MOTOR DE LECTURA
+   8) MOTOR DE LECTURA
 ============================================================================ */
 function speakSegment(segI, wordI) {
     if (segI >= segments.length) return stopReading();
@@ -190,43 +206,12 @@ function speakSegment(segI, wordI) {
 
     let boundaryTriggered = false;
 
-    /* ---- PC: boundary ---- */
+    /* PC */
     utter.onboundary = e => {
         boundaryTriggered = true;
 
-// Extraer la oración REAL completa de un punto a otro
-let sentence = extractSentence(fullText, e.charIndex);
-if (!sentence || sentence.length < 3) sentence = fullText;
-
-highlightInline(sentence);
-
-      /* ================================
-   FUNCIÓN PROFESIONAL: detectar oración completa
-   desde cualquier delimitador
-================================ */
-function extractSentence(fullText, index) {
-    const delimiters = /[.!?¿¡…—–]/g;
-
-    let start = 0;
-    let end = fullText.length;
-
-    // Buscar inicio de oración
-    let match;
-    while ((match = delimiters.exec(fullText)) !== null) {
-        if (match.index < index) start = match.index + match[0].length;
-        else break;
-    }
-
-    // Buscar fin de oración desde index hacia adelante
-    delimiters.lastIndex = index;
-    const forward = delimiters.exec(fullText);
-    if (forward) end = forward.index + forward[0].length;
-
-    return fullText.slice(start, end).trim();
-}
- 
-        let sentence = fullText.slice(startIdx, endIdx).trim();
-        if (!sentence) sentence = fullText;
+        let sentence = extractSentence(fullText, e.charIndex);
+        if (!sentence || sentence.length < 3) sentence = fullText;
 
         highlightInline(sentence);
 
@@ -234,7 +219,7 @@ function extractSentence(fullText, index) {
         wordIndex = Math.min(words.length - 1, approxWord);
     };
 
-    /* ---- ANDROID: fallback ---- */
+    /* ANDROID */
     utter.onstart = () => {
         setTimeout(() => {
             if (!boundaryTriggered) highlightFallback(fullText);
@@ -256,14 +241,13 @@ function extractSentence(fullText, index) {
 }
 
 /* ============================================================================
-   8) CONTROLES
+   9) CONTROLES
 ============================================================================ */
 function startReading() {
     stopReading();
     extractSegments();
     if (!segments.length) return alert("No hay texto para leer.");
     isReading = true;
-    isPaused = false;
     speakSegment(0, 0);
 }
 
@@ -294,7 +278,7 @@ function stopReading() {
 }
 
 /* ============================================================================
-   9) PANEL PREMIUM (NO TOCADO)
+   10) PANEL PREMIUM (NO TOCADO)
 ============================================================================ */
 function openPanel() {
     if (document.querySelector("#cfcTTSPanel")) return;
@@ -312,16 +296,19 @@ function openPanel() {
         border: "2px solid #FFD700",
         borderRadius: "12px",
         color: "#fff",
-        fontFamily: "Inter,sans-serif",
         zIndex: 999999997,
         boxShadow: "0 0 18px rgba(255,215,0,0.4)"
     });
 
     panel.innerHTML = `
         <h4 style="color:#FFD700;margin:0 0 6px 0;font-size:14px;">Narrador IA</h4>
-        <select id="ttsVoice" style="width:100%;padding:4px;background:#111;border:1px solid #FFD700;color:white;border-radius:6px;margin-bottom:6px;"></select>
+        <select id="ttsVoice" style="width:100%;padding:4px;background:#111;
+        border:1px solid #FFD700;color:white;border-radius:6px;margin-bottom:6px;">
+        </select>
+
         <label style="font-size:12px;">Velocidad:</label>
         <div id="ttsRate" style="margin-bottom:6px;"></div>
+
         <button id="ttsRead" class="cfcBtn">▶ Leer</button>
 
         <div style="display:flex;justify-content:space-between;margin-top:6px;">
@@ -333,11 +320,16 @@ function openPanel() {
         <button id="ttsClose" class="cfcClose">❌</button>
 
         <style>
-            .cfcBtn{width:100%;padding:6px;background:#FFD700;color:#000;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
-            .cfcRow{width:48%;padding:6px;background:#222;border:1px solid #FFD700;color:white;border-radius:6px;cursor:pointer;font-size:12px;}
-            .cfcStop{width:100%;padding:6px;background:#b82828;color:white;font-weight:700;border:none;border-radius:8px;margin-top:6px;}
-            .cfcClose{width:100%;padding:6px;background:#444;color:white;border-radius:6px;cursor:pointer;margin-top:6px;}
-            .rateBtn{padding:4px 6px;margin:2px;background:#111;color:#FFD700;border:1px solid #FFD700;border-radius:6px;cursor:pointer;font-size:11px;}
+            .cfcBtn{width:100%;padding:6px;background:#FFD700;color:#000;
+                font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+            .cfcRow{width:48%;padding:6px;background:#222;border:1px solid #FFD700;
+                color:white;border-radius:6px;cursor:pointer;font-size:12px;}
+            .cfcStop{width:100%;padding:6px;background:#b82828;color:white;
+                font-weight:700;border:none;border-radius:8px;margin-top:6px;}
+            .cfcClose{width:100%;padding:6px;background:#444;color:white;
+                border-radius:6px;cursor:pointer;margin-top:6px;}
+            .rateBtn{padding:4px 6px;margin:2px;background:#111;color:#FFD700;
+                border:1px solid #FFD700;border-radius:6px;cursor:pointer;font-size:11px;}
             .rateBtn.active{background:#FFD700;color:#000;}
         </style>
     `;
@@ -351,6 +343,7 @@ function openPanel() {
         o.textContent = v.name;
         sel.appendChild(o);
     });
+
     sel.onchange = e => currentVoice = e.target.value;
 
     const rateBox = panel.querySelector("#ttsRate");
@@ -358,6 +351,7 @@ function openPanel() {
         const b = document.createElement("button");
         b.className = "rateBtn";
         b.textContent = "x" + r;
+
         b.onclick = () => {
             rate = r;
             [...rateBox.children].forEach(x => x.classList.remove("active"));
@@ -368,6 +362,7 @@ function openPanel() {
                 speakSegment(segmentIndex, wordIndex);
             }
         };
+
         rateBox.appendChild(b);
     });
 
@@ -383,7 +378,7 @@ function openPanel() {
 }
 
 /* ============================================================================
-   10) BOTÓN
+   11) BOTÓN
 ============================================================================ */
 function injectButton() {
     if (document.querySelector("#cfcTTSBtn")) return;
