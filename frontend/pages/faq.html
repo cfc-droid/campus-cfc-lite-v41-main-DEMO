@@ -176,6 +176,30 @@
     footer { text-align: center; margin-top: 35px; font-size: 0.8rem; opacity: 0.8; transition: color 0.3s ease; }
     body.light-mode footer { color: #333; }
     body.dark-mode footer { color: #bbb; }
+
+/* FIX V41.23 — Alineación perfecta para FAQ largas */
+.faq-item h3 {
+  text-align: left !important;
+}
+
+.faq-item .faq-answer {
+  padding-left: 0 !important;
+}
+
+/* Quita sangría de listas internas */
+.faq-item ul, 
+.faq-item li {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  list-style-position: inside !important;
+}
+
+/* Alineación de bloques especiales */
+.faq-item code {
+  margin-left: 0 !important;
+  padding-left: 4px !important;
+}
+ 
   </style>
 </head>
 
