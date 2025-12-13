@@ -1,7 +1,6 @@
 /* ============================================================================
- 🎧 CFC-VOICE READER PRO — V23 REAL + ORACIÓN COMPLETA DEFINITIVA
+ 🎧 CFC-VOICE READER PRO — V23 REAL + HIGHLIGHT INLINE DEFINITIVO
  ✔ Highlight REAL directamente en el texto original (inline)
- ✔ Detección de oración completa (., ?, !, …, —, –)
  ✔ Funciona en Android y PC
  ✔ Fallback por tiempo si onboundary falla
  ✔ Resume exacto
@@ -25,13 +24,13 @@ let rate = 1;
 let isReading = false;
 let isPaused = false;
 
-let inlineMarks = [];   
+let inlineMarks = [];   // <mark> generados
 let highlightTimer = null;
 
 /* =========================
    LOG
 ========================= */
-const log = (...m) => console.log("🎧 V23-ORACION:", ...m);
+const log = (...m) => console.log("🎧 V23-INLINE:", ...m);
 
 /* ============================================================================
    1) AUDIO UNLOCK
@@ -85,7 +84,7 @@ function loadVoicesPolling(maxAttempts = 40) {
 }
 
 /* ============================================================================
-   3) SEGMENTOS (igual que antes)
+   3) SEGMENTOS
 ============================================================================ */
 function extractSegments() {
     const container = document.querySelector("main") || document.body;
@@ -107,7 +106,7 @@ function extractSegments() {
 }
 
 /* ============================================================================
-   4) LIMPIAR INLINE
+   4) LIMPIAR HIGHLIGHT INLINE
 ============================================================================ */
 function clearInlineMarks() {
     inlineMarks.forEach(m => {
@@ -119,7 +118,7 @@ function clearInlineMarks() {
 }
 
 /* ============================================================================
-   5) APPLY INLINE
+   5) APLICAR HIGHLIGHT INLINE EN EL TEXTO REAL
 ============================================================================ */
 function highlightInline(sentence) {
     clearInlineMarks();
@@ -129,8 +128,10 @@ function highlightInline(sentence) {
     const container = document.querySelector("main") || document.body;
     const html = container.innerHTML;
 
+    // escapamos caracteres especiales para buscar bien
     const escaped = sentence.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(escaped, "i");
+
+    const regex = new RegExp(escaped, "i"); // primera coincidencia
 
     const newHTML = html.replace(regex, match => {
         return `<mark class="cfcInlineHL">${match}</mark>`;
@@ -138,10 +139,11 @@ function highlightInline(sentence) {
 
     container.innerHTML = newHTML;
 
+    // guardar referencias
     inlineMarks = Array.from(document.querySelectorAll(".cfcInlineHL"));
 }
 
-/* CSS */
+/* CSS para highlight inline */
 const style = document.createElement("style");
 style.innerHTML = `
 .cfcInlineHL {
@@ -154,7 +156,7 @@ style.innerHTML = `
 document.head.appendChild(style);
 
 /* ============================================================================
-   6) FALLBACK
+   6) FALLBACK ANDROID POR TIEMPO
 ============================================================================ */
 function highlightFallback(sentence) {
     clearInterval(highlightTimer);
@@ -162,38 +164,13 @@ function highlightFallback(sentence) {
 
     const ms = Math.max(1500, sentence.split(" ").length * (350 / rate));
 
-    highlightTimer = setTimeout(() => clearInlineMarks(), ms);
+    highlightTimer = setTimeout(() => {
+        clearInlineMarks();
+    }, ms);
 }
 
 /* ============================================================================
-   *** 7) NUEVA FUNCIÓN: EXTRAER ORACIÓN COMPLETA REAL ***
-============================================================================ */
-function getFullSentence(text, index) {
-
-    const delimiters = /[\.!?…—–]/g;
-
-    let start = 0;
-    let end = text.length;
-
-    let match;
-
-    // buscar último delimitador ANTES del charIndex
-    while ((match = delimiters.exec(text)) !== null) {
-        if (match.index < index) start = match.index + match[0].length;
-        else break;
-    }
-
-    // buscar primer delimitador DESPUÉS del charIndex
-    delimiters.lastIndex = index;
-    const next = delimiters.exec(text);
-    if (next) end = next.index + next[0].length;
-
-    const sentence = text.slice(start, end).trim();
-    return sentence.length ? sentence : text;
-}
-
-/* ============================================================================
-   8) MOTOR DE LECTURA (solo cambia la detección de oración)
+   7) MOTOR DE LECTURA
 ============================================================================ */
 function speakSegment(segI, wordI) {
     if (segI >= segments.length) return stopReading();
@@ -213,24 +190,32 @@ function speakSegment(segI, wordI) {
 
     let boundaryTriggered = false;
 
-    /* -------- PC: boundary -------- */
+    /* ---- PC: boundary ---- */
     utter.onboundary = e => {
         boundaryTriggered = true;
 
-        const sentence = getFullSentence(fullText, e.charIndex);
+        let before = fullText.slice(0, e.charIndex);
+        let after = fullText.slice(e.charIndex);
+
+        let startIdx = before.lastIndexOf(".");
+        startIdx = startIdx !== -1 ? startIdx + 1 : 0;
+
+        let nextDot = after.indexOf(".");
+        let endIdx = nextDot !== -1 ? e.charIndex + nextDot + 1 : fullText.length;
+
+        let sentence = fullText.slice(startIdx, endIdx).trim();
+        if (!sentence) sentence = fullText;
+
         highlightInline(sentence);
 
         let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
         wordIndex = Math.min(words.length - 1, approxWord);
     };
 
-    /* -------- ANDROID fallback -------- */
+    /* ---- ANDROID: fallback ---- */
     utter.onstart = () => {
         setTimeout(() => {
-            if (!boundaryTriggered) {
-                const sentence = getFullSentence(fullText, 0);
-                highlightFallback(sentence);
-            }
+            if (!boundaryTriggered) highlightFallback(fullText);
         }, 350);
     };
 
@@ -242,7 +227,6 @@ function speakSegment(segI, wordI) {
 
         segmentIndex++;
         wordIndex = 0;
-
         speakSegment(segmentIndex, 0);
     };
 
@@ -250,7 +234,7 @@ function speakSegment(segI, wordI) {
 }
 
 /* ============================================================================
-   9) CONTROLES (sin tocar)
+   8) CONTROLES
 ============================================================================ */
 function startReading() {
     stopReading();
@@ -262,7 +246,7 @@ function startReading() {
 }
 
 function pauseReading() {
-    if (speechSynthesis.sspeaking) {
+    if (speechSynthesis.speaking) {
         isPaused = true;
         speechSynthesis.pause();
     }
@@ -288,15 +272,96 @@ function stopReading() {
 }
 
 /* ============================================================================
-   10) PANEL (sin tocar)
+   9) PANEL PREMIUM (NO TOCADO)
 ============================================================================ */
 function openPanel() {
-    /** tu panel original completo aquí sin cambios **/
-    /* (idéntico al archivo que pegaste) */
+    if (document.querySelector("#cfcTTSPanel")) return;
+
+    const panel = document.createElement("div");
+    panel.id = "cfcTTSPanel";
+
+    Object.assign(panel.style, {
+        position: "fixed",
+        left: "20px",
+        bottom: "100px",
+        width: "160px",
+        padding: "12px",
+        background: "#000",
+        border: "2px solid #FFD700",
+        borderRadius: "12px",
+        color: "#fff",
+        fontFamily: "Inter,sans-serif",
+        zIndex: 999999997,
+        boxShadow: "0 0 18px rgba(255,215,0,0.4)"
+    });
+
+    panel.innerHTML = `
+        <h4 style="color:#FFD700;margin:0 0 6px 0;font-size:14px;">Narrador IA</h4>
+        <select id="ttsVoice" style="width:100%;padding:4px;background:#111;border:1px solid #FFD700;color:white;border-radius:6px;margin-bottom:6px;"></select>
+        <label style="font-size:12px;">Velocidad:</label>
+        <div id="ttsRate" style="margin-bottom:6px;"></div>
+        <button id="ttsRead" class="cfcBtn">▶ Leer</button>
+
+        <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <button id="ttsPause" class="cfcRow">⏸</button>
+            <button id="ttsResume" class="cfcRow">▶</button>
+        </div>
+
+        <button id="ttsStop" class="cfcStop">⏹</button>
+        <button id="ttsClose" class="cfcClose">❌</button>
+
+        <style>
+            .cfcBtn{width:100%;padding:6px;background:#FFD700;color:#000;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+            .cfcRow{width:48%;padding:6px;background:#222;border:1px solid #FFD700;color:white;border-radius:6px;cursor:pointer;font-size:12px;}
+            .cfcStop{width:100%;padding:6px;background:#b82828;color:white;font-weight:700;border:none;border-radius:8px;margin-top:6px;}
+            .cfcClose{width:100%;padding:6px;background:#444;color:white;border-radius:6px;cursor:pointer;margin-top:6px;}
+            .rateBtn{padding:4px 6px;margin:2px;background:#111;color:#FFD700;border:1px solid #FFD700;border-radius:6px;cursor:pointer;font-size:11px;}
+            .rateBtn.active{background:#FFD700;color:#000;}
+        </style>
+    `;
+
+    document.body.appendChild(panel);
+
+    const sel = panel.querySelector("#ttsVoice");
+    voices.forEach(v => {
+        const o = document.createElement("option");
+        o.value = v.name;
+        o.textContent = v.name;
+        sel.appendChild(o);
+    });
+    sel.onchange = e => currentVoice = e.target.value;
+
+    const rateBox = panel.querySelector("#ttsRate");
+    [0.75,1,1.25,1.5,1.75,2].forEach(r => {
+        const b = document.createElement("button");
+        b.className = "rateBtn";
+        b.textContent = "x" + r;
+        b.onclick = () => {
+            rate = r;
+            [...rateBox.children].forEach(x => x.classList.remove("active"));
+            b.classList.add("active");
+
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                speakSegment(segmentIndex, wordIndex);
+            }
+        };
+        rateBox.appendChild(b);
+    });
+
+    panel.querySelector("#ttsRead").onclick = startReading;
+    panel.querySelector("#ttsPause").onclick = pauseReading;
+    panel.querySelector("#ttsResume").onclick = resumeReading;
+    panel.querySelector("#ttsStop").onclick = stopReading;
+
+    panel.querySelector("#ttsClose").onclick = () => {
+        stopReading();
+        panel.remove();
+    };
 }
 
 /* ============================================================================
-   11) BOTÓN
+   10) BOTÓN
 ============================================================================ */
 function injectButton() {
     if (document.querySelector("#cfcTTSBtn")) return;
