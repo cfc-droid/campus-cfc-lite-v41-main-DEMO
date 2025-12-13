@@ -1,49 +1,52 @@
 /* ============================================================================
- 🎧 CFC-VOICE READER PRO — V27 REAL OVERLAY FINAL (CORREGIDO)
+ 🎧 CFC-VOICE READER PRO — V27.5 REAL OVERLAY FINAL (CORREGIDO)
  ✔ Resalta oración COMPLETA punto→punto REAL
+ ✔ Overlay NO se borra hasta terminar la oración
+ ✔ Resume EXACTO desde la palabra correcta
  ✔ Funciona aunque el HTML esté dividido en miles de nodos
- ✔ No modifica el HTML (0% riesgo) — overlay visual
+ ✔ No modifica el HTML (0% riesgo)
  ✔ Android + PC
- ✔ Resume exacto
  ✔ Mantiene botón premium y estilos CFC
 ============================================================================ */
 
-(() => {
+(()=>{
 
 /* =========================
    VARIABLES
 ========================= */
-let segments = [];
-let segmentIndex = 0;
-let wordIndex = 0;
+let segments=[];
+let segmentIndex=0;
+let wordIndex=0;
 
-let utter = null;
-let voices = [];
-let currentVoice = null;
-let rate = 1;
+let utter=null;
+let voices=[];
+let currentVoice=null;
+let rate=1;
 
-let isReading = false;
-let isPaused = false;
+let isReading=false;
+let isPaused=false;
 
-let overlayBox = null;
-let highlightTimer = null;
+let overlayBox=null;
 
 /* =========================
-   FUNCIONES BASE
+   AUDIO
 ========================= */
 function unlockAudio(){
     try{
-        const ctx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-        gain.gain.value = 0.00001;
+        const ctx=new (window.AudioContext||window.webkitAudioContext)();
+        const osc=ctx.createOscillator();
+        const gain=ctx.createGain();
+        gain.gain.value=0.00001;
         osc.connect(gain);
         gain.connect(ctx.destination);
         osc.start();
-        osc.stop(ctx.currentTime + 0.03);
+        osc.stop(ctx.currentTime+0.03);
     }catch(e){}
 }
 
+/* =========================
+   CARGA VOCES
+========================= */
 function loadVoicesPolling(maxAttempts=40){
     return new Promise(resolve=>{
         let attempts=0;
@@ -58,7 +61,7 @@ function loadVoicesPolling(maxAttempts=40){
                 voices = males.length ? males : es.length ? es : list;
                 currentVoice = voices[0]?.name || null;
 
-                resolve(true); 
+                resolve(true);
                 return;
             }
 
@@ -72,33 +75,29 @@ function loadVoicesPolling(maxAttempts=40){
     });
 }
 
-/* ============================================================================
-   CORRECCIÓN FINAL:
-   SEGMENTACIÓN POR ORACIÓN COMPLETA (NO 6 PALABRAS)
-============================================================================ */
+/* =========================
+   SEGMENTACIÓN REAL (PUNTOS)
+========================= */
 function extractSegments(){
     const container=document.querySelector("main")||document.body;
 
-    const raw = container.innerText
+    const raw=container.innerText
         .replace(/\s+/g," ")
         .trim();
 
-    // ⚠️ CORTA POR ORACIONES COMPLETAS
-    segments = raw.split(/(?<=[.!?¡¿…])\s+/g).map(s => s.trim());
-
-    // Filtrar oraciones vacías
-    segments = segments.filter(s => s.length > 0);
+    segments = raw.split(/(?<=[.!?¡¿…])\s+/g).map(s=>s.trim());
+    segments = segments.filter(s=>s.length>0);
 }
 
 /* ============================================================================
-   EXTRAER ORACIÓN COMPLETA (PUNTO → PUNTO)
+   ORACIÓN REAL
 ============================================================================ */
 function extractSentence(fullText, index){
     const delimit=/[.!?¡¿…]/g;
 
     let start=0, end=fullText.length;
-
     let m;
+
     while((m=delimit.exec(fullText))!==null){
         if(m.index<index) start=m.index+m[0].length;
         else break;
@@ -112,7 +111,7 @@ function extractSentence(fullText, index){
 }
 
 /* ============================================================================
-   OVERLAY SIN MODIFICAR HTML
+   OVERLAY VISUAL
 ============================================================================ */
 function removeOverlay(){
     if(overlayBox){
@@ -127,8 +126,7 @@ function highlightOverlay(sentence){
 
     const container=document.querySelector("main")||document.body;
 
-    // Buscar rango mult-nodo
-    const walker=document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+    const walker=document.createTreeWalker(container,NodeFilter.SHOW_TEXT);
 
     let accText="";
     let firstNode=null, lastNode=null;
@@ -136,25 +134,25 @@ function highlightOverlay(sentence){
 
     while(walker.nextNode()){
         const node=walker.currentNode;
-        const combined = accText + node.textContent;
+        const combined=accText+node.textContent;
 
         const idx = combined.toLowerCase().indexOf(sentence.toLowerCase());
-        if(idx >= 0){
+        if(idx>=0){
             let pos=0;
-            const walker2=document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+            const walker2=document.createTreeWalker(container,NodeFilter.SHOW_TEXT);
 
             while(walker2.nextNode()){
-                const n = walker2.currentNode;
-                const len = n.textContent.length;
+                const n=walker2.currentNode;
+                const len=n.textContent.length;
 
-                if(!firstNode && pos+len >= idx){
+                if(!firstNode && pos+len>=idx){
                     firstNode=n;
-                    startOffset=idx - pos;
+                    startOffset=idx-pos;
                 }
 
-                if(pos+len >= idx + sentence.length){
+                if(pos+len>=idx+sentence.length){
                     lastNode=n;
-                    endOffset=(idx + sentence.length) - pos;
+                    endOffset=(idx+sentence.length)-pos;
                     break;
                 }
 
@@ -162,17 +160,17 @@ function highlightOverlay(sentence){
             }
             break;
         }
-        accText += node.textContent;
+        accText+=node.textContent;
     }
 
-    if(!firstNode || !lastNode) return;
+    if(!firstNode||!lastNode) return;
 
     const range=document.createRange();
-    range.setStart(firstNode, startOffset);
-    range.setEnd(lastNode, endOffset);
+    range.setStart(firstNode,startOffset);
+    range.setEnd(lastNode,endOffset);
 
-    const rect = range.getBoundingClientRect();
-    if(rect.width<2 || rect.height<2) return;
+    const rect=range.getBoundingClientRect();
+    if(rect.width<2||rect.height<2) return;
 
     overlayBox=document.createElement("div");
     Object.assign(overlayBox.style,{
@@ -191,18 +189,7 @@ function highlightOverlay(sentence){
 }
 
 /* ============================================================================
-   FALLBACK ANDROID
-============================================================================ */
-function highlightFallback(sentence){
-    removeOverlay();
-    highlightOverlay(sentence);
-
-    const ms=Math.max(1500, sentence.split(" ").length*(350/rate));
-    highlightTimer=setTimeout(()=>removeOverlay(), ms);
-}
-
-/* ============================================================================
-   MOTOR DE LECTURA
+   MOTOR DE LECTURA — CORREGIDO PARA RESUME EXACTO
 ============================================================================ */
 function speakSegment(segI, wordI){
     if(segI>=segments.length) return stopReading();
@@ -213,33 +200,38 @@ function speakSegment(segI, wordI){
     const fullText=segments[segI];
     const words=fullText.split(" ");
 
-    utter=new SpeechSynthesisUtterance(fullText);
+    // ⚠️ CORRECCIÓN CLAVE: leer desde la palabra exacta
+    const remaining=words.slice(wordIndex).join(" ");
+    utter=new SpeechSynthesisUtterance(remaining);
 
+    // conservar voz
     const v=voices.find(v=>v.name===currentVoice)||voices[0];
     if(v){ utter.voice=v; utter.lang=v.lang; }
     utter.rate=rate;
 
     let boundaryTriggered=false;
 
-    utter.onboundary = e =>{
+    utter.onboundary = e=>{
         boundaryTriggered=true;
 
-        const sentence=extractSentence(fullText, e.charIndex);
+        const globalIndex = e.charIndex + fullText.indexOf(remaining);
+
+        const sentence = extractSentence(fullText, globalIndex);
         highlightOverlay(sentence);
 
-        const approx=Math.floor(e.charIndex/(fullText.length/words.length));
-        wordIndex=Math.min(words.length-1, approx);
+        // actualizar palabra exacta
+        const approx = Math.floor(globalIndex / (fullText.length / words.length));
+        wordIndex = Math.min(words.length - 1, approx);
     };
 
-    utter.onstart = ()=>{
-        setTimeout(()=>{
-            if(!boundaryTriggered) highlightFallback(fullText);
-        },350);
+    utter.onstart=()=>{
+        if(!boundaryTriggered){
+            setTimeout(()=>highlightOverlay(fullText),300);
+        }
     };
 
-    utter.onend = ()=>{
+    utter.onend=()=>{
         removeOverlay();
-        clearInterval(highlightTimer);
 
         if(!isReading) return;
 
@@ -272,7 +264,10 @@ function pauseReading(){
 function resumeReading(){
     if(!isPaused) return;
     isPaused=false;
+
     speechSynthesis.cancel();
+
+    // ⚠️ Ahora continúa desde wordIndex exacto
     speakSegment(segmentIndex, wordIndex);
 }
 
@@ -281,13 +276,12 @@ function stopReading(){
     isPaused=false;
     speechSynthesis.cancel();
     removeOverlay();
-    clearInterval(highlightTimer);
     segmentIndex=0;
     wordIndex=0;
 }
 
 /* ============================================================================
-   PANEL Y BOTÓN (SIN CAMBIOS)
+   PANEL & BOTÓN — SIN CAMBIOS
 ============================================================================ */
 function openPanel(){
     if(document.querySelector("#cfcTTSPanel")) return;
@@ -310,64 +304,57 @@ function openPanel(){
         boxShadow:"0 0 18px rgba(255,215,0,0.4)"
     });
 
-    panel.innerHTML = `
+    panel.innerHTML=`
         <h4 style="color:#FFD700;margin:0 0 6px 0;font-size:14px;">Narrador IA</h4>
-
-        <select id="ttsVoice" style="
-            width:100%;padding:4px;background:#111;border:1px solid #FFD700;
-            color:white;border-radius:6px;margin-bottom:6px;"></select>
-
+        <select id="ttsVoice" style="width:100%;padding:4px;background:#111;
+        border:1px solid #FFD700;color:white;border-radius:6px;margin-bottom:6px;"></select>
         <label style="font-size:12px;">Velocidad:</label>
         <div id="ttsRate" style="margin-bottom:6px;"></div>
-
         <button id="ttsRead" class="cfcBtn">▶ Leer</button>
-
         <div style="display:flex;justify-content:space-between;margin-top:6px;">
             <button id="ttsPause" class="cfcRow">⏸</button>
             <button id="ttsResume" class="cfcRow">▶</button>
         </div>
-
         <button id="ttsStop" class="cfcStop">⏹</button>
         <button id="ttsClose" class="cfcClose">❌</button>
 
         <style>
-            .cfcBtn{
-                width:100%;padding:6px;background:#FFD700;color:#000;
-                font-weight:700;border:none;border-radius:8px;cursor:pointer;
-            }
-            .cfcRow{
-                width:48%;padding:6px;background:#222;border:1px solid #FFD700;
-                color:white;border-radius:6px;cursor:pointer;font-size:12px;
-            }
-            .cfcStop{
-                width:100%;padding:6px;background:#b82828;color:white;
-                font-weight:700;border:none;border-radius:8px;margin-top:6px;
-            }
-            .cfcClose{
-                width:100%;padding:6px;background:#444;color:white;
-                border-radius:6px;cursor:pointer;margin-top:6px;
-            }
-            .rateBtn{
-                padding:4px 6px;margin:2px;background:#111;color:#FFD700;
-                border:1px solid #FFD700;border-radius:6px;cursor:pointer;
-                font-size:11px;
-            }
-            .rateBtn.active{ background:#FFD700;color:#000; }
+        .cfcBtn{
+            width:100%;padding:6px;background:#FFD700;color:#000;font-weight:700;
+            border:none;border-radius:8px;cursor:pointer;
+        }
+        .cfcRow{
+            width:48%;padding:6px;background:#222;border:1px solid #FFD700;
+            color:white;border-radius:6px;cursor:pointer;font-size:12px;
+        }
+        .cfcStop{
+            width:100%;padding:6px;background:#b82828;color:white;font-weight:700;
+            border:none;border-radius:8px;margin-top:6px;
+        }
+        .cfcClose{
+            width:100%;padding:6px;background:#444;color:white;border-radius:6px;
+            cursor:pointer;margin-top:6px;
+        }
+        .rateBtn{
+            padding:4px 6px;margin:2px;background:#111;color:#FFD700;
+            border:1px solid #FFD700;border-radius:6px;cursor:pointer;font-size:11px;
+        }
+        .rateBtn.active{background:#FFD700;color:#000;}
         </style>
     `;
 
     document.body.appendChild(panel);
 
-    const sel = panel.querySelector("#ttsVoice");
+    const sel=panel.querySelector("#ttsVoice");
     voices.forEach(v=>{
         const o=document.createElement("option");
         o.value=v.name;
         o.textContent=v.name;
         sel.appendChild(o);
     });
-    sel.onchange = e => currentVoice = e.target.value;
+    sel.onchange=e=>currentVoice=e.target.value;
 
-    const rateBox = panel.querySelector("#ttsRate");
+    const rateBox=panel.querySelector("#ttsRate");
     [0.75,1,1.25,1.5,1.75,2].forEach(r=>{
         const b=document.createElement("button");
         b.className="rateBtn";
@@ -385,11 +372,11 @@ function openPanel(){
         rateBox.appendChild(b);
     });
 
-    panel.querySelector("#ttsRead").onclick = startReading;
-    panel.querySelector("#ttsPause").onclick = pauseReading;
-    panel.querySelector("#ttsResume").onclick = resumeReading;
-    panel.querySelector("#ttsStop").onclick = stopReading;
-    panel.querySelector("#ttsClose").onclick = ()=>{
+    panel.querySelector("#ttsRead").onclick=startReading;
+    panel.querySelector("#ttsPause").onclick=pauseReading;
+    panel.querySelector("#ttsResume").onclick=resumeReading;
+    panel.querySelector("#ttsStop").onclick=stopReading;
+    panel.querySelector("#ttsClose").onclick=()=>{
         stopReading();
         panel.remove();
     };
@@ -426,7 +413,7 @@ function injectButton(){
 /* ============================================================================
    INIT
 ============================================================================ */
-document.addEventListener("DOMContentLoaded", async ()=>{
+document.addEventListener("DOMContentLoaded", async()=>{
     injectButton();
     unlockAudio();
     await loadVoicesPolling();
