@@ -194,15 +194,37 @@ function speakSegment(segI, wordI) {
     utter.onboundary = e => {
         boundaryTriggered = true;
 
-        let before = fullText.slice(0, e.charIndex);
-        let after = fullText.slice(e.charIndex);
+// Extraer la oración REAL completa de un punto a otro
+let sentence = extractSentence(fullText, e.charIndex);
+if (!sentence || sentence.length < 3) sentence = fullText;
 
-        let startIdx = before.lastIndexOf(".");
-        startIdx = startIdx !== -1 ? startIdx + 1 : 0;
+highlightInline(sentence);
 
-        let nextDot = after.indexOf(".");
-        let endIdx = nextDot !== -1 ? e.charIndex + nextDot + 1 : fullText.length;
+      /* ================================
+   FUNCIÓN PROFESIONAL: detectar oración completa
+   desde cualquier delimitador
+================================ */
+function extractSentence(fullText, index) {
+    const delimiters = /[.!?¿¡…—–]/g;
 
+    let start = 0;
+    let end = fullText.length;
+
+    // Buscar inicio de oración
+    let match;
+    while ((match = delimiters.exec(fullText)) !== null) {
+        if (match.index < index) start = match.index + match[0].length;
+        else break;
+    }
+
+    // Buscar fin de oración desde index hacia adelante
+    delimiters.lastIndex = index;
+    const forward = delimiters.exec(fullText);
+    if (forward) end = forward.index + forward[0].length;
+
+    return fullText.slice(start, end).trim();
+}
+ 
         let sentence = fullText.slice(startIdx, endIdx).trim();
         if (!sentence) sentence = fullText;
 
