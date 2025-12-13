@@ -383,28 +383,30 @@ function openPanel(){
 }
 
 function injectButton(){
-    // evitar duplicados
     if(document.querySelector("#cfcTTSBtn")) return;
 
-const btn = document.createElement("button");
-btn.id = "cfcTTSBtn";
-btn.classList.add("cfc-audio-btn");   // ← AGREGAR ESTA LÍNEA
-btn.textContent = "🎧";
+    const btn=document.createElement("button");
+    btn.id="cfcTTSBtn";
 
-    // aplicar clase global que ya corrige la alineación
-    btn.classList.add("cfc-audio-btn");
-
-    // solo estilos mínimos, lo demás lo maneja tu CSS
-    Object.assign(btn.style, {
-        position: "fixed",
-        left: "20px",
-        bottom: "20px",
-        zIndex: 999999999
+    Object.assign(btn.style,{
+        position:"fixed",
+        left:"20px",
+        bottom:"20px",
+        width:"55px",
+        height:"55px",
+        borderRadius:"50%",
+        background:"linear-gradient(90deg,#FFD700,#C5A200)",
+        border:"none",
+        color:"#000",
+        fontSize:"26px",
+        fontWeight:"900",
+        cursor:"pointer",
+        boxShadow:"0 0 18px rgba(255,215,0,0.6)",
+        zIndex:999999999
     });
 
-    btn.textContent = "🎧";
-    btn.onclick = () => { unlockAudio(); openPanel(); };
-
+    btn.textContent="🎧";
+    btn.onclick=()=>{ unlockAudio(); openPanel(); };
     document.body.appendChild(btn);
 }
 
