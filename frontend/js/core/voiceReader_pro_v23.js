@@ -1,6 +1,6 @@
 /* ============================================================================
- 🎧 CFC-VOICE READER PRO — V24 ORACIÓN COMPLETA (PUNTO → PUNTO)
- ✔ Resalta oración completa REAL dentro del texto original
+ 🎧 CFC-VOICE READER PRO — V25 MULTILÍNEA (PUNTO → PUNTO REAL)
+ ✔ Resalta oración completa REAL aunque esté dividida en múltiples líneas/nodos
  ✔ Funciona en Android y PC
  ✔ Fallback por tiempo si onboundary falla
  ✔ Resume exacto
@@ -24,16 +24,16 @@ let rate = 1;
 let isReading = false;
 let isPaused = false;
 
-let inlineMarks = [];  
 let highlightTimer = null;
+let activeMarks = [];
 
 /* =========================
    LOG
 ========================= */
-const log = (...m) => console.log("🎧 V24:", ...m);
+const log = (...m) => console.log("🎧 V25:", ...m);
 
 /* ============================================================================
-   1) AUDIO UNLOCK
+   AUDIO UNLOCK
 ============================================================================ */
 function unlockAudio() {
     try {
@@ -49,7 +49,7 @@ function unlockAudio() {
 }
 
 /* ============================================================================
-   2) VOCES
+   CARGA VOCES
 ============================================================================ */
 function loadVoicesPolling(maxAttempts = 40) {
     return new Promise(resolve => {
@@ -83,7 +83,7 @@ function loadVoicesPolling(maxAttempts = 40) {
 }
 
 /* ============================================================================
-   3) SEGMENTOS
+   SEGMENTOS
 ============================================================================ */
 function extractSegments() {
     const container = document.querySelector("main") || document.body;
@@ -105,88 +105,103 @@ function extractSegments() {
 }
 
 /* ============================================================================
-   4) LIMPIAR INLINE
+   LIMPIAR HIGHLIGHT INLINE
 ============================================================================ */
-function clearInlineMarks() {
-    inlineMarks.forEach(m => {
-        const parent = m.parentNode;
-        if (parent) parent.replaceChild(document.createTextNode(m.textContent), m);
+function clearMarks() {
+    activeMarks.forEach(mark => {
+        const parent = mark.parentNode;
+        if (parent) parent.replaceChild(document.createTextNode(mark.textContent), mark);
     });
-    inlineMarks = [];
+    activeMarks = [];
 }
 
 /* ============================================================================
-   5) HIGHLIGHT INLINE EN EL TEXTO REAL
+   NORMALIZAR TEXTO PARA MATCH MULTILÍNEA
 ============================================================================ */
-function highlightInline(sentence) {
-    clearInlineMarks();
+function normalizeForSearch(str) {
+    return str
+        .replace(/\s+/g, " ")
+        .replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+        .trim();
+}
+
+/* ============================================================================
+   RESALTAR ORACIÓN MULTILÍNEA EN EL HTML REAL
+============================================================================ */
+function highlightSentenceHTML(sentence) {
+    clearMarks();
     if (!sentence) return;
 
     const container = document.querySelector("main") || document.body;
-    const html = container.innerHTML;
+    let html = container.innerHTML;
 
-    const escaped = sentence.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(escaped, "i");
+    const normalized = normalizeForSearch(sentence);
 
-    const newHTML = html.replace(regex, match => {
-        return `<mark class="cfcInlineHL">${match}</mark>`;
-    });
+    // Expresión que tolera saltos, <br>, etiquetas, nodos intermedios
+    const flexibleRegex = new RegExp(
+        normalized.replace(/ /g, "[\\s\\S]{0,40}?"),
+        "i"
+    );
 
-    container.innerHTML = newHTML;
+    const match = html.match(flexibleRegex);
+    if (!match) return;
 
-    inlineMarks = Array.from(document.querySelectorAll(".cfcInlineHL"));
+    const found = match[0];
+
+    const marked = `<mark class="cfcInlineHL">${found}</mark>`;
+    html = html.replace(flexibleRegex, marked);
+
+    container.innerHTML = html;
+    activeMarks = Array.from(document.querySelectorAll(".cfcInlineHL"));
 }
 
-/* CSS highlight */
+/* CSS HIGHLIGHT */
 const style = document.createElement("style");
 style.innerHTML = `
 .cfcInlineHL {
-    background: rgba(255,215,0,0.35);
+    background: rgba(255,215,0,0.45);
     padding: 2px 4px;
     border-radius: 6px;
-    box-shadow: 0 0 10px rgba(255,215,0,0.75);
+    box-shadow: 0 0 12px rgba(255,215,0,0.9);
 }
 `;
 document.head.appendChild(style);
 
 /* ============================================================================
-   6) EXTRAER ORACIÓN COMPLETA (PUNTO → PUNTO)
+   EXTRAER ORACIÓN REAL (PUNTO → PUNTO)
 ============================================================================ */
 function extractSentence(fullText, index) {
-    const delimiters = /[.!?¿¡…—–]/g;
+    const delimit = /[.!?¡¿…]/g;
 
     let start = 0;
     let end = fullText.length;
 
-    // inicio de oración
-    let match;
-    while ((match = delimiters.exec(fullText)) !== null) {
-        if (match.index < index) start = match.index + match[0].length;
+    let m;
+    while ((m = delimit.exec(fullText)) !== null) {
+        if (m.index < index) start = m.index + m[0].length;
         else break;
     }
 
-    // fin de oración
-    delimiters.lastIndex = index;
-    const forward = delimiters.exec(fullText);
-    if (forward) end = forward.index + forward[0].length;
+    delimit.lastIndex = index;
+    const fwd = delimit.exec(fullText);
+    if (fwd) end = fwd.index + fwd[0].length;
 
     return fullText.slice(start, end).trim();
 }
 
 /* ============================================================================
-   7) FALLBACK ANDROID POR TIEMPO
+   FALLBACK ANDROID
 ============================================================================ */
 function highlightFallback(sentence) {
     clearInterval(highlightTimer);
-    highlightInline(sentence);
+    highlightSentenceHTML(sentence);
 
     const ms = Math.max(1500, sentence.split(" ").length * (350 / rate));
-
-    highlightTimer = setTimeout(() => clearInlineMarks(), ms);
+    highlightTimer = setTimeout(() => clearMarks(), ms);
 }
 
 /* ============================================================================
-   8) MOTOR DE LECTURA
+   MOTOR DE LECTURA
 ============================================================================ */
 function speakSegment(segI, wordI) {
     if (segI >= segments.length) return stopReading();
@@ -196,9 +211,8 @@ function speakSegment(segI, wordI) {
 
     const fullText = segments[segI];
     const words = fullText.split(" ");
-    const textToRead = words.slice(wordIndex).join(" ");
 
-    utter = new SpeechSynthesisUtterance(textToRead);
+    utter = new SpeechSynthesisUtterance(words.slice(wordIndex).join(" "));
 
     const v = voices.find(v => v.name === currentVoice) || voices[0];
     if (v) { utter.voice = v; utter.lang = v.lang; }
@@ -206,20 +220,18 @@ function speakSegment(segI, wordI) {
 
     let boundaryTriggered = false;
 
-    /* PC */
+    /* PC → boundary OK */
     utter.onboundary = e => {
         boundaryTriggered = true;
 
-        let sentence = extractSentence(fullText, e.charIndex);
-        if (!sentence || sentence.length < 3) sentence = fullText;
+        const sentence = extractSentence(fullText, e.charIndex);
+        highlightSentenceHTML(sentence);
 
-        highlightInline(sentence);
-
-        let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
-        wordIndex = Math.min(words.length - 1, approxWord);
+        const approx = Math.floor(e.charIndex / (fullText.length / words.length));
+        wordIndex = Math.min(words.length - 1, approx);
     };
 
-    /* ANDROID */
+    /* ANDROID fallback */
     utter.onstart = () => {
         setTimeout(() => {
             if (!boundaryTriggered) highlightFallback(fullText);
@@ -228,7 +240,7 @@ function speakSegment(segI, wordI) {
 
     utter.onend = () => {
         clearInterval(highlightTimer);
-        clearInlineMarks();
+        clearMarks();
 
         if (!isReading) return;
 
@@ -241,7 +253,7 @@ function speakSegment(segI, wordI) {
 }
 
 /* ============================================================================
-   9) CONTROLES
+   CONTROLES
 ============================================================================ */
 function startReading() {
     stopReading();
@@ -269,16 +281,16 @@ function stopReading() {
     isReading = false;
     isPaused = false;
 
-    speechSynthesis.cancel();
     clearInterval(highlightTimer);
-    clearInlineMarks();
+    clearMarks();
+    speechSynthesis.cancel();
 
     segmentIndex = 0;
     wordIndex = 0;
 }
 
 /* ============================================================================
-   10) PANEL PREMIUM (NO TOCADO)
+   PANEL PREMIUM (NO TOCADO)
 ============================================================================ */
 function openPanel() {
     if (document.querySelector("#cfcTTSPanel")) return;
@@ -302,9 +314,9 @@ function openPanel() {
 
     panel.innerHTML = `
         <h4 style="color:#FFD700;margin:0 0 6px 0;font-size:14px;">Narrador IA</h4>
-        <select id="ttsVoice" style="width:100%;padding:4px;background:#111;
-        border:1px solid #FFD700;color:white;border-radius:6px;margin-bottom:6px;">
-        </select>
+        <select id="ttsVoice"
+            style="width:100%;padding:4px;background:#111;border:1px solid #FFD700;
+            color:white;border-radius:6px;margin-bottom:6px;"></select>
 
         <label style="font-size:12px;">Velocidad:</label>
         <div id="ttsRate" style="margin-bottom:6px;"></div>
@@ -320,8 +332,8 @@ function openPanel() {
         <button id="ttsClose" class="cfcClose">❌</button>
 
         <style>
-            .cfcBtn{width:100%;padding:6px;background:#FFD700;color:#000;
-                font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+            .cfcBtn{width:100%;padding:6px;background:#FFD700;color:#000;font-weight:700;
+                border:none;border-radius:8px;cursor:pointer;}
             .cfcRow{width:48%;padding:6px;background:#222;border:1px solid #FFD700;
                 color:white;border-radius:6px;cursor:pointer;font-size:12px;}
             .cfcStop{width:100%;padding:6px;background:#b82828;color:white;
@@ -378,7 +390,7 @@ function openPanel() {
 }
 
 /* ============================================================================
-   11) BOTÓN
+   BOTÓN FIJO
 ============================================================================ */
 function injectButton() {
     if (document.querySelector("#cfcTTSBtn")) return;
