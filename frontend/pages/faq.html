@@ -363,6 +363,61 @@
     El Campus seguirá funcionando en otros navegadores, pero algunas funciones avanzadas pueden no comportarse igual debido a limitaciones propias del navegador.
   </div>
 </div>
+
+<div class="faq-item">
+  <h3>42. ⏱️ ¿Por qué la opción “Horas activas hoy” puede mostrar un desfasaje de ±2 minutos?</h3>
+  <div class="faq-answer">
+    El contador de actividad registra tu tiempo real mientras navegás por el Campus.  
+    Sin embargo, puede presentar una variación aproximada de <b>±2 minutos</b> debido a:
+    <ul>
+      <li>⏳ Sincronización interna entre pestañas.</li>
+      <li>🔄 Actualización del reloj al cambiar de sección.</li>
+      <li>🧩 Tiempo de inactividad breve que Chrome no informa de manera exacta.</li>
+    </ul>
+    Este comportamiento es completamente normal y no afecta tu progreso global.
+  </div>
+</div>
+
+<h4 class="section-title">🟣 SECCIÓN 9 — NAVEGADOR DE AUDIO (PC Y CELULAR)</h4>
+
+<div class="faq-item">
+  <h3>43. 🎧 ¿Por qué en la PC (cuando seleccionás una voz nueva), la voz cambia automáticamente, al finalizar una oración y no antes?</h3>
+  <div class="faq-answer">
+    En Google Chrome (PC), cuando seleccionás una voz nueva (masculina o femenina),  
+    el cambio se aplica recién al finalizar la oración actual.  
+    Esto ocurre porque Chrome completa la frase pendiente antes de actualizar la voz,  
+    asegurando una transición estable.
+  </div>
+</div>
+
+<div class="faq-item">
+  <h3>44. 📱 ¿Por qué en el celular, al pausar la lectura (Y luego seguir), vuelve al inicio de la ultima oración resaltada?</h3>
+  <div class="faq-answer">
+    En Chrome Android, la función <code>speechSynthesis.pause()</code> no conserva la  
+    posición exacta dentro de la oración.  
+    Por limitación del navegador, al reanudar vuelve al comienzo de la frase resaltada.  
+    Este comportamiento es propio de Chrome móvil.
+  </div>
+</div>
+
+<div class="faq-item">
+  <h3>45. 👤 ¿Por qué en el celular solo hay voz disponible (Sexo femenino solamente)?</h3>
+  <div class="faq-answer">
+    Chrome Android actualmente no habilita voces masculinas en español latino.  
+    El navegador solo expone 1–2 voces femeninas y no permite cargar voces adicionales.  
+    En PC sí es posible usar voces masculinas.
+  </div>
+</div>
+
+<div class="faq-item">
+  <h3>46. ⚡ ¿Por qué al cambiar la velocidad en el celular, la oración se reinicia?</h3>
+  <div class="faq-answer">
+    En Chrome Android, al modificar la velocidad el motor de voz reinicia la oración  
+    desde el principio.  
+    Esto se debe a una limitación del motor TTS móvil: el navegador no permite  
+    ajustar <code>rate</code> en tiempo real sin reiniciar la frase actual.
+  </div>
+</div>
     
     <!-- 🔚 BOTÓN VOLVER -->
     <div style="text-align:center;margin-top:40px;">
