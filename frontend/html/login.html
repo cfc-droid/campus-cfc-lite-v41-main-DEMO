@@ -1155,10 +1155,18 @@ if (!CFC_USERS.hasOwnProperty(email) || CFC_USERS[email] !== license) {
 
     console.log("✅ Credenciales válidas — acceso permitido");
 
-// 🧩 INSERTAR AQUÍ
-localStorage.clear();
-localStorage.setItem("CFC_USER_EMAIL", email);
-localStorage.setItem("CFC_USER_KEY", email.replace(/[^a-zA-Z0-9]/g, "_"));
+// ❌ NO borrar todo el localStorage
+// localStorage.clear();
+
+// ✅ CLAVE ÚNICA QUE EL ROUTER USA
+localStorage.setItem("CFC_EMAIL", email);
+
+// (opcional, solo informativo)
+localStorage.setItem(
+  "CFC_USER_KEY",
+  email.replace(/[^a-zA-Z0-9]/g, "_")
+);
+
 // 🧩 FIN DEL INSERT    
 
 // ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
