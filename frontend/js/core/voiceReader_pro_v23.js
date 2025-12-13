@@ -1,10 +1,10 @@
 /* ============================================================================
- 🎧 CFC-VOICE READER PRO — V23 DOM-HIGHLIGHT PREMIUM
- ✔ Resaltado dentro del texto real (no panel)
- ✔ Oración completa → desde mayúscula hasta punto
- ✔ Android OK (timer inteligente)
- ✔ PC OK (onboundary + DOM highlight)
- ✔ No altera nada del Campus
+ 🎧 CFC-VOICE READER PRO — V23 REAL + HIGHLIGHT INLINE DEFINITIVO
+ ✔ Highlight REAL directamente en el texto original (inline)
+ ✔ Funciona en Android y PC
+ ✔ Fallback por tiempo si onboundary falla
+ ✔ Resume exacto
+ ✔ Sin alterar nada relevante del Campus
 ============================================================================ */
 
 (() => {
@@ -24,13 +24,13 @@ let rate = 1;
 let isReading = false;
 let isPaused = false;
 
-let activeSpan = null;
+let inlineMarks = [];   // <mark> generados
 let highlightTimer = null;
 
 /* =========================
    LOG
 ========================= */
-const log = (...m) => console.log("🎧 V23 DOM:", ...m);
+const log = (...m) => console.log("🎧 V23-INLINE:", ...m);
 
 /* ============================================================================
    1) AUDIO UNLOCK
@@ -53,7 +53,6 @@ function unlockAudio() {
 ============================================================================ */
 function loadVoicesPolling(maxAttempts = 40) {
     return new Promise(resolve => {
-
         let attempts = 0;
 
         const timer = setInterval(() => {
@@ -69,6 +68,7 @@ function loadVoicesPolling(maxAttempts = 40) {
                 voices = males.length ? males : es.length ? es : list;
                 currentVoice = voices[0]?.name || null;
 
+                log("Voces OK:", voices.map(v => v.name));
                 resolve(true);
                 return;
             }
@@ -76,6 +76,7 @@ function loadVoicesPolling(maxAttempts = 40) {
             attempts++;
             if (attempts >= maxAttempts) {
                 clearInterval(timer);
+                alert("⚠️ No se pudieron cargar las voces.");
                 resolve(false);
             }
         }, 200);
@@ -83,12 +84,10 @@ function loadVoicesPolling(maxAttempts = 40) {
 }
 
 /* ============================================================================
-   3) EXTRAER TEXTO SIN DESTRUIR HTML
+   3) SEGMENTOS
 ============================================================================ */
 function extractSegments() {
     const container = document.querySelector("main") || document.body;
-
-    // mantener HTML intacto
     const raw = container.innerText.replace(/\s+/g, " ").trim();
     const words = raw.split(" ");
 
@@ -103,69 +102,75 @@ function extractSegments() {
         }
     });
 
-    if (temp.length > 0) segments.push(temp.join(" "));
+    if (temp.length) segments.push(temp.join(" "));
 }
 
 /* ============================================================================
-   4) RESALTAR ORACIÓN EN EL DOM
+   4) LIMPIAR HIGHLIGHT INLINE
 ============================================================================ */
-function highlightSentenceDOM(sentence) {
-    removeDOMHighlight();
-
-    const container = document.querySelector("main") || document.body;
-    let html = container.innerHTML;
-
-    // Escapamos caracteres especiales
-    const escaped = sentence.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-
-    // reemplazar primera aparición de la oración
-    html = html.replace(
-        new RegExp(escaped),
-        `<span class="cfcHighlightSentence">${sentence}</span>`
-    );
-
-    container.innerHTML = html;
-}
-
-/* eliminar highlight anterior */
-function removeDOMHighlight() {
-    const container = document.querySelector("main") || document.body;
-    const spans = container.querySelectorAll(".cfcHighlightSentence");
-
-    spans.forEach(s => {
-        s.outerHTML = s.innerText;
+function clearInlineMarks() {
+    inlineMarks.forEach(m => {
+        const parent = m.parentNode;
+        if (!parent) return;
+        parent.replaceChild(document.createTextNode(m.textContent), m);
     });
+    inlineMarks = [];
 }
 
-/* estilos */
+/* ============================================================================
+   5) APLICAR HIGHLIGHT INLINE EN EL TEXTO REAL
+============================================================================ */
+function highlightInline(sentence) {
+    clearInlineMarks();
+
+    if (!sentence) return;
+
+    const container = document.querySelector("main") || document.body;
+    const html = container.innerHTML;
+
+    // escapamos caracteres especiales para buscar bien
+    const escaped = sentence.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    const regex = new RegExp(escaped, "i"); // primera coincidencia
+
+    const newHTML = html.replace(regex, match => {
+        return `<mark class="cfcInlineHL">${match}</mark>`;
+    });
+
+    container.innerHTML = newHTML;
+
+    // guardar referencias
+    inlineMarks = Array.from(document.querySelectorAll(".cfcInlineHL"));
+}
+
+/* CSS para highlight inline */
 const style = document.createElement("style");
-style.textContent = `
-.cfcHighlightSentence {
+style.innerHTML = `
+.cfcInlineHL {
     background: rgba(255,215,0,0.35);
-    padding: 3px 2px;
-    border-radius: 4px;
-    transition: all 0.12s ease-in-out;
+    padding: 2px 4px;
+    border-radius: 6px;
+    box-shadow: 0 0 10px rgba(255,215,0,0.75);
 }
 `;
 document.head.appendChild(style);
 
 /* ============================================================================
-   5) FALLBACK ANDROID — TIMER
+   6) FALLBACK ANDROID POR TIEMPO
 ============================================================================ */
 function highlightFallback(sentence) {
-    clearTimeout(highlightTimer);
+    clearInterval(highlightTimer);
+    highlightInline(sentence);
 
-    highlightSentenceDOM(sentence);
-
-    const est = Math.max(1200, sentence.split(" ").length * (350 / rate));
+    const ms = Math.max(1500, sentence.split(" ").length * (350 / rate));
 
     highlightTimer = setTimeout(() => {
-        removeDOMHighlight();
-    }, est);
+        clearInlineMarks();
+    }, ms);
 }
 
 /* ============================================================================
-   6) MOTOR DE REPRODUCCIÓN
+   7) MOTOR DE LECTURA
 ============================================================================ */
 function speakSegment(segI, wordI) {
     if (segI >= segments.length) return stopReading();
@@ -181,51 +186,47 @@ function speakSegment(segI, wordI) {
 
     const v = voices.find(v => v.name === currentVoice) || voices[0];
     if (v) { utter.voice = v; utter.lang = v.lang; }
-
     utter.rate = rate;
 
-    let boundary = false;
+    let boundaryTriggered = false;
 
-    // PC funciona
+    /* ---- PC: boundary ---- */
     utter.onboundary = e => {
-        boundary = true;
+        boundaryTriggered = true;
 
         let before = fullText.slice(0, e.charIndex);
         let after = fullText.slice(e.charIndex);
 
-        let start = before.lastIndexOf(".");
-        start = start !== -1 ? start + 1 : 0;
+        let startIdx = before.lastIndexOf(".");
+        startIdx = startIdx !== -1 ? startIdx + 1 : 0;
 
         let nextDot = after.indexOf(".");
-        let end = nextDot !== -1 ? e.charIndex + nextDot + 1 : fullText.length;
+        let endIdx = nextDot !== -1 ? e.charIndex + nextDot + 1 : fullText.length;
 
-        let sentence = fullText.slice(start, end).trim();
-        if (sentence.length < 3) sentence = fullText;
+        let sentence = fullText.slice(startIdx, endIdx).trim();
+        if (!sentence) sentence = fullText;
 
-        highlightSentenceDOM(sentence);
+        highlightInline(sentence);
 
-        let approx = Math.floor(e.charIndex / (fullText.length / words.length));
-        wordIndex = Math.min(words.length - 1, approx);
+        let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
+        wordIndex = Math.min(words.length - 1, approxWord);
     };
 
-    // Android fallback
+    /* ---- ANDROID: fallback ---- */
     utter.onstart = () => {
         setTimeout(() => {
-            if (!boundary) {
-                highlightFallback(fullText);
-            }
-        }, 300);
+            if (!boundaryTriggered) highlightFallback(fullText);
+        }, 350);
     };
 
     utter.onend = () => {
-        clearTimeout(highlightTimer);
-        removeDOMHighlight();
+        clearInterval(highlightTimer);
+        clearInlineMarks();
 
         if (!isReading) return;
 
         segmentIndex++;
         wordIndex = 0;
-
         speakSegment(segmentIndex, 0);
     };
 
@@ -233,20 +234,14 @@ function speakSegment(segI, wordI) {
 }
 
 /* ============================================================================
-   7) CONTROLES
+   8) CONTROLES
 ============================================================================ */
 function startReading() {
     stopReading();
     extractSegments();
-
-    if (!segments.length) {
-        alert("No hay texto para leer.");
-        return;
-    }
-
+    if (!segments.length) return alert("No hay texto para leer.");
     isReading = true;
     isPaused = false;
-
     speakSegment(0, 0);
 }
 
@@ -259,7 +254,6 @@ function pauseReading() {
 
 function resumeReading() {
     if (!isPaused) return;
-
     isPaused = false;
     speechSynthesis.cancel();
     speakSegment(segmentIndex, wordIndex);
@@ -269,27 +263,136 @@ function stopReading() {
     isReading = false;
     isPaused = false;
 
-    clearTimeout(highlightTimer);
-    removeDOMHighlight();
+    speechSynthesis.cancel();
+    clearInterval(highlightTimer);
+    clearInlineMarks();
 
     segmentIndex = 0;
     wordIndex = 0;
-
-    speechSynthesis.cancel();
 }
 
 /* ============================================================================
-   8) PANEL — NO MODIFICADO
+   9) PANEL PREMIUM (NO TOCADO)
 ============================================================================ */
 function openPanel() {
-    // tu panel original, intacto
+    if (document.querySelector("#cfcTTSPanel")) return;
+
+    const panel = document.createElement("div");
+    panel.id = "cfcTTSPanel";
+
+    Object.assign(panel.style, {
+        position: "fixed",
+        left: "20px",
+        bottom: "100px",
+        width: "160px",
+        padding: "12px",
+        background: "#000",
+        border: "2px solid #FFD700",
+        borderRadius: "12px",
+        color: "#fff",
+        fontFamily: "Inter,sans-serif",
+        zIndex: 999999997,
+        boxShadow: "0 0 18px rgba(255,215,0,0.4)"
+    });
+
+    panel.innerHTML = `
+        <h4 style="color:#FFD700;margin:0 0 6px 0;font-size:14px;">Narrador IA</h4>
+        <select id="ttsVoice" style="width:100%;padding:4px;background:#111;border:1px solid #FFD700;color:white;border-radius:6px;margin-bottom:6px;"></select>
+        <label style="font-size:12px;">Velocidad:</label>
+        <div id="ttsRate" style="margin-bottom:6px;"></div>
+        <button id="ttsRead" class="cfcBtn">▶ Leer</button>
+
+        <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <button id="ttsPause" class="cfcRow">⏸</button>
+            <button id="ttsResume" class="cfcRow">▶</button>
+        </div>
+
+        <button id="ttsStop" class="cfcStop">⏹</button>
+        <button id="ttsClose" class="cfcClose">❌</button>
+
+        <style>
+            .cfcBtn{width:100%;padding:6px;background:#FFD700;color:#000;font-weight:700;border:none;border-radius:8px;cursor:pointer;}
+            .cfcRow{width:48%;padding:6px;background:#222;border:1px solid #FFD700;color:white;border-radius:6px;cursor:pointer;font-size:12px;}
+            .cfcStop{width:100%;padding:6px;background:#b82828;color:white;font-weight:700;border:none;border-radius:8px;margin-top:6px;}
+            .cfcClose{width:100%;padding:6px;background:#444;color:white;border-radius:6px;cursor:pointer;margin-top:6px;}
+            .rateBtn{padding:4px 6px;margin:2px;background:#111;color:#FFD700;border:1px solid #FFD700;border-radius:6px;cursor:pointer;font-size:11px;}
+            .rateBtn.active{background:#FFD700;color:#000;}
+        </style>
+    `;
+
+    document.body.appendChild(panel);
+
+    const sel = panel.querySelector("#ttsVoice");
+    voices.forEach(v => {
+        const o = document.createElement("option");
+        o.value = v.name;
+        o.textContent = v.name;
+        sel.appendChild(o);
+    });
+    sel.onchange = e => currentVoice = e.target.value;
+
+    const rateBox = panel.querySelector("#ttsRate");
+    [0.75,1,1.25,1.5,1.75,2].forEach(r => {
+        const b = document.createElement("button");
+        b.className = "rateBtn";
+        b.textContent = "x" + r;
+        b.onclick = () => {
+            rate = r;
+            [...rateBox.children].forEach(x => x.classList.remove("active"));
+            b.classList.add("active");
+
+            if (speechSynthesis.speaking) {
+                speechSynthesis.cancel();
+                speakSegment(segmentIndex, wordIndex);
+            }
+        };
+        rateBox.appendChild(b);
+    });
+
+    panel.querySelector("#ttsRead").onclick = startReading;
+    panel.querySelector("#ttsPause").onclick = pauseReading;
+    panel.querySelector("#ttsResume").onclick = resumeReading;
+    panel.querySelector("#ttsStop").onclick = stopReading;
+
+    panel.querySelector("#ttsClose").onclick = () => {
+        stopReading();
+        panel.remove();
+    };
 }
 
 /* ============================================================================
-   9) BOTÓN FIJO — NO MODIFICADO
+   10) BOTÓN
 ============================================================================ */
 function injectButton() {
-    // tu botón original
+    if (document.querySelector("#cfcTTSBtn")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "cfcTTSBtn";
+
+    Object.assign(btn.style, {
+        position: "fixed",
+        left: "20px",
+        bottom: "20px",
+        width: "55px",
+        height: "55px",
+        borderRadius: "50%",
+        background: "linear-gradient(90deg,#FFD700,#C5A200)",
+        border: "none",
+        color: "#000",
+        fontSize: "26px",
+        fontWeight: "900",
+        cursor: "pointer",
+        boxShadow: "0 0 18px rgba(255,215,0,0.6)",
+        zIndex: 999999999
+    });
+
+    btn.textContent = "🎧";
+    btn.onclick = () => {
+        unlockAudio();
+        openPanel();
+    };
+
+    document.body.appendChild(btn);
 }
 
 /* ============================================================================
