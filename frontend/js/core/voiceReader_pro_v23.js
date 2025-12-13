@@ -1,9 +1,9 @@
 /* ============================================================================
- 🎧 CFC-VOICE READER PRO — V23 REAL DEFINITIVO
- ✔ Highlight de frase completa (CORREGIDO)
+ 🎧 CFC-VOICE READER PRO — V23 FIX HÍBRIDO DEFINITIVO
+ ✔ Highlight de frase completa en PC
+ ✔ Highlight en Android (timer fallback)
  ✔ Resume exacto
- ✔ Android Chrome OK
- ✔ PC Chrome OK
+ ✔ No altera nada relevante del Campus
 ============================================================================ */
 
 (() => {
@@ -25,13 +25,16 @@ let isPaused = false;
 
 let highlightBox = null;
 
+/* Timer fallback */
+let highlightTimer = null;
+
 /* =========================
    LOG
 ========================= */
-const log = (...m) => console.log("🎧 V23:", ...m);
+const log = (...m) => console.log("🎧 V23-FIX:", ...m);
 
 /* ============================================================================
-   1) AUDIO UNLOCK PARA ANDROID (OBLIGATORIO)
+   1) AUDIO UNLOCK PARA ANDROID
 ============================================================================ */
 function unlockAudio() {
     try {
@@ -47,7 +50,7 @@ function unlockAudio() {
 }
 
 /* ============================================================================
-   2) CARGA DE VOCES — POLLING SEGURO + FILTRO MASCULINAS ES-LA REAL
+   2) VOCES
 ============================================================================ */
 function loadVoicesPolling(maxAttempts = 40) {
     return new Promise(resolve => {
@@ -64,14 +67,12 @@ function loadVoicesPolling(maxAttempts = 40) {
                 );
 
                 voices = males.length ? males : es.length ? es : list;
-
                 currentVoice = voices[0]?.name || null;
 
                 log("Voces finales:", voices.map(v => v.name));
                 resolve(true);
                 return;
             }
-
             attempts++;
             if (attempts >= maxAttempts) {
                 clearInterval(timer);
@@ -83,7 +84,7 @@ function loadVoicesPolling(maxAttempts = 40) {
 }
 
 /* ============================================================================
-   3) MICRO-SEGMENTACIÓN PROFESIONAL (5–7 PALABRAS)
+   3) MICRO–SEGMENTOS
 ============================================================================ */
 function extractSegments() {
     const container = document.querySelector("main") || document.body;
@@ -103,11 +104,11 @@ function extractSegments() {
 
     if (temp.length > 0) segments.push(temp.join(" "));
 
-    log("Segmentos creados:", segments.length);
+    log("Segmentos:", segments.length);
 }
 
 /* ============================================================================
-   4) HIGHLIGHT REAL — CORREGIDO
+   4) HIGHLIGHT UI
 ============================================================================ */
 function highlightSentence(text) {
     removeHighlight();
@@ -138,7 +139,23 @@ function removeHighlight() {
 }
 
 /* ============================================================================
-   5) REPRODUCCIÓN DE UN SEGMENTO — MOTOR PRINCIPAL
+   5) FALLBACK: TIMER PARA ANDROID
+============================================================================ */
+function highlightFallback(text) {
+    clearInterval(highlightTimer);
+
+    // tiempo estimado del segmento (según longitud × velocidad)
+    const ms = Math.max(1200, text.split(" ").length * (350 / rate));
+
+    highlightSentence(text);
+
+    highlightTimer = setTimeout(() => {
+        removeHighlight();
+    }, ms);
+}
+
+/* ============================================================================
+   6) REPRODUCCIÓN — MOTOR PRINCIPAL
 ============================================================================ */
 function speakSegment(segI, wordI) {
     if (segI >= segments.length) return stopReading();
@@ -157,43 +174,54 @@ function speakSegment(segI, wordI) {
         utter.voice = v;
         utter.lang = v.lang;
     }
-
     utter.rate = rate;
 
-    /* ============================================================
-       💛 Highlight REAL usando frase local dentro del segmento
-       CORRECCIÓN: función robusta que detecta frase aunque no
-       existan puntos en el segmento original.
-    ============================================================ */
+    let boundaryTriggered = false;
+
+    /* -------------------------
+       PC: onboundary funciona
+       ANDROID: casi nunca
+       ------------------------- */
     utter.onboundary = e => {
-        if (e.charIndex != null) {
+        boundaryTriggered = true;
 
-            let before = fullText.slice(0, e.charIndex);
-            let after = fullText.slice(e.charIndex);
+        let before = fullText.slice(0, e.charIndex);
+        let after = fullText.slice(e.charIndex);
 
-            // detectamos inicio por punto o inicio del texto
-            let startIdx = before.lastIndexOf(".");
-            startIdx = startIdx !== -1 ? startIdx + 1 : 0;
+        let startIdx = before.lastIndexOf(".");
+        startIdx = startIdx !== -1 ? startIdx + 1 : 0;
 
-            // detectamos fin por punto o final del texto
-            let nextDot = after.indexOf(".");
-            let endIdx = nextDot !== -1 ? e.charIndex + nextDot + 1 : fullText.length;
+        let nextDot = after.indexOf(".");
+        let endIdx = nextDot !== -1 ? e.charIndex + nextDot + 1 : fullText.length;
 
-            let sentence = fullText.slice(startIdx, endIdx).trim();
+        let sentence = fullText.slice(startIdx, endIdx).trim();
+        if (!sentence || sentence.length < 3) sentence = fullText;
 
-            // ✔ Garantizamos que SIEMPRE haya una frase válida
-            if (!sentence || sentence.length < 3) sentence = fullText;
+        highlightSentence(sentence);
 
-            highlightSentence(sentence);
+        let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
+        wordIndex = Math.min(words.length - 1, approxWord);
+    };
 
-            // resume exacto
-            let approxWord = Math.floor(e.charIndex / (fullText.length / words.length));
-            wordIndex = Math.min(words.length - 1, approxWord);
-        }
+    /* -------------------------
+       Fallback Android:
+       Si no hubo boundaries,
+       activamos highlight por tiempo
+       ------------------------- */
+    utter.onstart = () => {
+        setTimeout(() => {
+            if (!boundaryTriggered) {
+                highlightFallback(fullText);
+            }
+        }, 300);
     };
 
     utter.onend = () => {
+        clearInterval(highlightTimer);
+        removeHighlight();
+
         if (!isReading) return;
+
         segmentIndex++;
         wordIndex = 0;
         speakSegment(segmentIndex, 0);
@@ -203,7 +231,7 @@ function speakSegment(segI, wordI) {
 }
 
 /* ============================================================================
-   6) CONTROLES REALES
+   7) CONTROLES
 ============================================================================ */
 function startReading() {
     stopReading();
@@ -229,8 +257,8 @@ function pauseReading() {
 
 function resumeReading() {
     if (!isPaused) return;
-    isPaused = false;
 
+    isPaused = false;
     speechSynthesis.cancel();
     speakSegment(segmentIndex, wordIndex);
 }
@@ -238,14 +266,17 @@ function resumeReading() {
 function stopReading() {
     isReading = false;
     isPaused = false;
+
+    clearInterval(highlightTimer);
+    removeHighlight();
     segmentIndex = 0;
     wordIndex = 0;
+
     speechSynthesis.cancel();
-    removeHighlight();
 }
 
 /* ============================================================================
-   7) PANEL PREMIUM (igual que original)
+   8) PANEL PREMIUM (NO MODIFICADO)
 ============================================================================ */
 function openPanel() {
     if (document.querySelector("#cfcTTSPanel")) return;
@@ -289,10 +320,8 @@ function openPanel() {
         <button id="ttsClose" class="cfcClose">❌</button>
 
         <style>
-            .cfcBtn{
-                width:100%;padding:6px;background:#FFD700;color:#000;
-                font-weight:700;border:none;border-radius:8px;cursor:pointer;
-            }
+            .cfcBtn{ width:100%;padding:6px;background:#FFD700;color:#000;
+                     font-weight:700;border:none;border-radius:8px;cursor:pointer; }
             .cfcRow{
                 width:48%;padding:6px;background:#222;border:1px solid #FFD700;
                 color:white;border-radius:6px;cursor:pointer;font-size:12px;
@@ -323,6 +352,7 @@ function openPanel() {
         o.textContent = `${v.name}`;
         sel.appendChild(o);
     });
+
     sel.onchange = e => currentVoice = e.target.value;
 
     const rateBox = panel.querySelector("#ttsRate");
@@ -330,6 +360,7 @@ function openPanel() {
         let b = document.createElement("button");
         b.className = "rateBtn";
         b.textContent = "x"+r;
+
         b.onclick = () => {
             rate = r;
             [...rateBox.children].forEach(x => x.classList.remove("active"));
@@ -347,7 +378,6 @@ function openPanel() {
     panel.querySelector("#ttsPause").onclick = pauseReading;
     panel.querySelector("#ttsResume").onclick = resumeReading;
     panel.querySelector("#ttsStop").onclick = stopReading;
-
     panel.querySelector("#ttsClose").onclick = () => {
         stopReading();
         panel.remove();
@@ -355,7 +385,7 @@ function openPanel() {
 }
 
 /* ============================================================================
-   8) BOTÓN PREMIUM FIJO
+   9) BOTÓN FIX
 ============================================================================ */
 function injectButton() {
     if (document.querySelector("#cfcTTSBtn")) return;
