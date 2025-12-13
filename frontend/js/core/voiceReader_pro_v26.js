@@ -140,7 +140,6 @@ function highlightOverlay(sentence){
             const globalEnd=idx + sentence.length;
 
             let pos=0;
-            walker.currentNode = container; // restart walker
             const walker2=document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
 
             while(walker2.nextNode()){
@@ -290,10 +289,115 @@ function stopReading(){
 }
 
 /* ============================================================================
-   PANEL PREMIUM (SIN CAMBIOS)
+   PANEL PREMIUM (MISMO QUE VERSIONES ANTERIORES)
 ============================================================================ */
-//// (tu panel original completo se mantiene EXACTO)
-// *(por espacio no lo repito entero aquí, pero en tu archivo final lo incluyo tal cual)*
+function openPanel(){
+    if(document.querySelector("#cfcTTSPanel")) return;
+
+    const panel=document.createElement("div");
+    panel.id="cfcTTSPanel";
+
+    Object.assign(panel.style,{
+        position:"fixed",
+        left:"20px",
+        bottom:"100px",
+        width:"160px",
+        padding:"12px",
+        background:"#000",
+        border:"2px solid #FFD700",
+        borderRadius:"12px",
+        color:"#fff",
+        fontFamily:"Inter,sans-serif",
+        zIndex:999999997,
+        boxShadow:"0 0 18px rgba(255,215,0,0.4)"
+    });
+
+    panel.innerHTML = `
+        <h4 style="color:#FFD700;margin:0 0 6px 0;font-size:14px;">Narrador IA</h4>
+
+        <select id="ttsVoice" style="
+            width:100%;padding:4px;background:#111;border:1px solid #FFD700;
+            color:white;border-radius:6px;margin-bottom:6px;"></select>
+
+        <label style="font-size:12px;">Velocidad:</label>
+        <div id="ttsRate" style="margin-bottom:6px;"></div>
+
+        <button id="ttsRead" class="cfcBtn">▶ Leer</button>
+
+        <div style="display:flex;justify-content:space-between;margin-top:6px;">
+            <button id="ttsPause" class="cfcRow">⏸</button>
+            <button id="ttsResume" class="cfcRow">▶</button>
+        </div>
+
+        <button id="ttsStop" class="cfcStop">⏹</button>
+        <button id="ttsClose" class="cfcClose">❌</button>
+
+        <style>
+            .cfcBtn{
+                width:100%;padding:6px;background:#FFD700;color:#000;
+                font-weight:700;border:none;border-radius:8px;cursor:pointer;
+            }
+            .cfcRow{
+                width:48%;padding:6px;background:#222;border:1px solid #FFD700;
+                color:white;border-radius:6px;cursor:pointer;font-size:12px;
+            }
+            .cfcStop{
+                width:100%;padding:6px;background:#b82828;color:white;
+                font-weight:700;border:none;border-radius:8px;margin-top:6px;
+            }
+            .cfcClose{
+                width:100%;padding:6px;background:#444;color:white;
+                border-radius:6px;cursor:pointer;margin-top:6px;
+            }
+            .rateBtn{
+                padding:4px 6px;margin:2px;background:#111;color:#FFD700;
+                border:1px solid #FFD700;border-radius:6px;cursor:pointer;
+                font-size:11px;
+            }
+            .rateBtn.active{ background:#FFD700;color:#000; }
+        </style>
+    `;
+
+    document.body.appendChild(panel);
+
+    /* VOCES */
+    const sel = panel.querySelector("#ttsVoice");
+    voices.forEach(v=>{
+        const o=document.createElement("option");
+        o.value=v.name;
+        o.textContent=v.name;
+        sel.appendChild(o);
+    });
+    sel.onchange = e => currentVoice = e.target.value;
+
+    /* VELOCIDAD */
+    const rateBox = panel.querySelector("#ttsRate");
+    [0.75,1,1.25,1.5,1.75,2].forEach(r=>{
+        const b=document.createElement("button");
+        b.className="rateBtn";
+        b.textContent="x"+r;
+        b.onclick=()=>{
+            rate=r;
+            [...rateBox.children].forEach(x=>x.classList.remove("active"));
+            b.classList.add("active");
+
+            if(speechSynthesis.speaking){
+                speechSynthesis.cancel();
+                speakSegment(segmentIndex, wordIndex);
+            }
+        };
+        rateBox.appendChild(b);
+    });
+
+    panel.querySelector("#ttsRead").onclick = startReading;
+    panel.querySelector("#ttsPause").onclick = pauseReading;
+    panel.querySelector("#ttsResume").onclick = resumeReading;
+    panel.querySelector("#ttsStop").onclick = stopReading;
+    panel.querySelector("#ttsClose").onclick = ()=>{
+        stopReading();
+        panel.remove();
+    };
+}
 
 /* ============================================================================
    BOTÓN
