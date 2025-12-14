@@ -12,10 +12,20 @@
 
   function getStats() {
     const stats = JSON.parse(localStorage.getItem("studyStats") || "{}");
+
+    // ======== 🕒 HORAS ACTIVAS (TOTAL) ========
     const totalMin = stats.minutesActive || 0;
     const h = Math.floor(totalMin / 60);
     const m = totalMin % 60;
     const hoursDisplay = stats.hoursDisplay || `${h} h ${m} min`;
+
+    // ======== ⏱️ TIEMPO ACTIVO HOY (REAL) ========
+    const todaySeconds = parseFloat(localStorage.getItem("CFC_time_today") || 0);
+    const todayMin = Math.floor(todaySeconds / 60);
+    const todaySec = Math.floor(todaySeconds % 60);
+    const todayDisplay = `${todayMin} min ${todaySec.toString().padStart(2, "0")} s`;
+
+    // ======== 📅 ÚLTIMA SESIÓN ========
     const lastSession =
       stats.lastSession ||
       new Date().toLocaleDateString("es-AR", {
@@ -23,13 +33,14 @@
         month: "2-digit",
         year: "numeric",
       });
-    return { hoursDisplay, lastSession };
+
+    return { hoursDisplay, todayDisplay, lastSession };
   }
 
   function updateUI() {
-    const { hoursDisplay, lastSession } = getStats();
+    const { hoursDisplay, todayDisplay, lastSession } = getStats();
 
-    // Buscar por texto aproximado dentro de <li>, <p> o <div>
+    // Buscar por texto aproximado dentro de <li>, <p>, <div> o <span>
     document.querySelectorAll("li, p, div, span").forEach((el) => {
       const text = el.textContent.trim();
 
@@ -40,6 +51,13 @@
         else el.innerHTML = `🕒 Horas activas: <strong>${hoursDisplay}</strong>`;
       }
 
+      // ⏱️ Tiempo activo hoy
+      if (text.match(/Tiempo\s+activo\s+hoy/i) || text.includes("⏱️")) {
+        const strong = el.querySelector("strong");
+        if (strong) strong.textContent = todayDisplay;
+        else el.innerHTML = `⏱️ Tiempo activo hoy: <strong>${todayDisplay}</strong>`;
+      }
+
       // 📅 Última sesión
       if (text.match(/Última\s+sesión/i) || text.includes("📅")) {
         const strong = el.querySelector("strong");
@@ -48,7 +66,7 @@
       }
     });
 
-    console.log(`🔄 Perfil actualizado → ${hoursDisplay} | ${lastSession}`);
+    console.log(`🔄 Perfil actualizado → Total: ${hoursDisplay} | Hoy: ${todayDisplay}`);
   }
 
   // Primer refresco después del render
