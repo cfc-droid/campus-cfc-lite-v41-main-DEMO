@@ -1,10 +1,9 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V12.3_FIX_TIME_TODAY_REAL_20251113
+✅ CFC_ACTIVITY_V12.2_FIX_PAUSE_REAL_20251110
 ----------------------------------------------------------
-• Tiempo activo HOY basado en fecha real
-• Reset automático al cambiar el día
-• Sin desfase entre Android / PC
-• No depende de timers vivos
+• Pausa automática al cambiar pestaña o cerrar navegador
+• Reanuda desde el tiempo exacto al volver
+• Compatible con LOCK_TOTAL_PERSIST_REAL + stats_v1.js
 ========================================================== */
 
 (function () {
@@ -12,9 +11,6 @@
   const TIME_TOTAL_KEY = "CFC_time_total";
   const LAST_SYNC_KEY = "CFC_last_sync";
   const RESET_FLAG = "CFC_reset_done";
-
-  const TODAY_KEY = "CFC_time_today";
-  const TODAY_DATE_KEY = "CFC_time_today_date";
 
   let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
   let startTime = Date.now();
@@ -25,24 +21,12 @@
   const bell = new Audio("../../assets/audio/bell-gold.wav");
   bell.volume = 0.25;
 
-  // ======== 🧠 Fecha actual ========
-  const todayStr = new Date().toISOString().slice(0, 10);
-  const storedDay = localStorage.getItem(TODAY_DATE_KEY);
-
-  if (storedDay !== todayStr) {
-    localStorage.setItem(TODAY_DATE_KEY, todayStr);
-    localStorage.setItem(TODAY_KEY, "0");
-    console.log("📆 Nuevo día detectado → Tiempo activo HOY reiniciado");
-  }
-
   // ======== 🧠 Reinicio manual seguro ========
   window.CFC_resetTimer = function () {
     localStorage.removeItem(TIME_TOTAL_KEY);
     localStorage.removeItem(LAST_SYNC_KEY);
     localStorage.removeItem("studyStats");
     localStorage.removeItem(RESET_FLAG);
-    localStorage.setItem(TODAY_KEY, "0");
-    localStorage.setItem(TODAY_DATE_KEY, todayStr);
     totalSeconds = 0;
     indicator.textContent = "🕒 0m 00s ✅";
     console.log("🔄 CFC_resetTimer → Temporizador reiniciado a 0 ✅");
@@ -111,19 +95,18 @@
 
     if (diff >= SYNC_PERIOD - SYNC_TOLERANCE) {
       const elapsed = (now - startTime) / 1000;
+totalSeconds += elapsed;
+startTime = now;
+lastSync = now;
 
-      totalSeconds += elapsed;
-      startTime = now;
-      lastSync = now;
+localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
 
-      localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
+// --- TIEMPO ACTIVO HOY (sumar solo dentro del día actual)
+let todaySec = parseInt(localStorage.getItem("CFC_time_today") || "0", 10);
+todaySec += elapsed;
+localStorage.setItem("CFC_time_today", todaySec.toString());
 
-      // ======== ⏱️ TIEMPO ACTIVO HOY (correcto) ========
-      let todaySec = parseFloat(localStorage.getItem(TODAY_KEY) || "0");
-      todaySec += elapsed;
-      localStorage.setItem(TODAY_KEY, todaySec.toFixed(2));
-
-      localStorage.setItem(LAST_SYNC_KEY, now);
+localStorage.setItem(LAST_SYNC_KEY, now);
 
       let study = JSON.parse(localStorage.getItem("studyStats") || "{}");
       if (typeof study !== "object") study = {};
@@ -155,17 +138,13 @@
       const now = Date.now();
       const elapsed = (now - startTime) / 1000;
       totalSeconds += elapsed;
-
-      let todaySec = parseFloat(localStorage.getItem(TODAY_KEY) || "0");
-      todaySec += elapsed;
-      localStorage.setItem(TODAY_KEY, todaySec.toFixed(2));
-
       localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
       localStorage.setItem(LAST_SYNC_KEY, now);
       console.log("⏸️ CFC_TIMER pausado (pestaña oculta o cierre).");
     }
   };
 
+  // ======== 🎯 Control de visibilidad y cierre ========
   document.addEventListener("visibilitychange", () => {
     if (document.hidden) stopLoop();
     else startLoop();
@@ -173,6 +152,7 @@
 
   window.addEventListener("beforeunload", stopLoop);
 
+  // ======== 🚀 Inicio ========
   const initAfterDOM = () => {
     startTime = Date.now();
     lastSync = Date.now();
@@ -187,5 +167,5 @@
 
   setInterval(() => updateIndicator(), 1000);
 
-  console.log(`✅ CFC_ACTIVITY_V12.3_FIX_TIME_TODAY_REAL | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V12.2_FIX_PAUSE_REAL | TAB:${TAB_ID}`);
 })();
