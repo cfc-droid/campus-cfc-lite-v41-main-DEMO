@@ -1,0 +1,637 @@
+/* ==========================
+   PREMIUM.CSS — ESTILO GLOBAL CAMPUS CFC TRADING
+   ========================== */
+
+/* Importamos las variables y efectos base */
+@import url("./variables.css");
+@import url("./glass.css");
+
+/* Configuración general */
+body {
+  background-color: var(--dark);
+  color: var(--text-light);
+  font-family: "Poppins", "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Navegación */
+header, nav {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 15px 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .logo {
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--gold);
+}
+
+/* Botones */
+a, button {
+  background: var(--gold);
+  color: var(--dark);
+  border: none;
+  border-radius: 6px;
+  padding: 10px 18px;
+  font-weight: 600;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+a:hover, button:hover {
+  background: var(--accent);
+  color: var(--text-light);
+}
+
+/* Secciones generales */
+section {
+  margin: 40px auto;
+  width: 90%;
+  max-width: 1000px;
+}
+
+footer {
+  text-align: center;
+  font-size: 0.9rem;
+  opacity: 0.8;
+  margin-top: 40px;
+  padding: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Titulares */
+h1, h2, h3 {
+  color: var(--gold);
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+/* Paneles de contenido tipo glass */
+.panel-premium {
+  composes: glass-box;
+}
+
+/* ==========================================
+   ✅ BITÁCORA CFC — Loader Premium (Subpaso 1.3 / 25-10-2025)
+   ========================================== */
+#loader {
+  position: fixed;
+  inset: 0;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #eaeaea;
+  z-index: 9999;
+  transition: opacity 0.8s ease-in-out;
+}
+
+#loader img {
+  width: 260px;
+  max-width: 80vw;
+  height: auto;
+  margin-bottom: 20px;
+  object-fit: contain;
+  filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.3));
+  animation: pulse 2s infinite;
+}
+
+#loader p {
+  font-size: 1.1rem;
+  color: #d4af37;
+  margin-bottom: 18px;
+  text-align: center;
+  font-weight: 600;
+  opacity: 0.9;
+}
+
+#loader button {
+  background: linear-gradient(90deg, #d4af37, #ffb347);
+  border: none;
+  border-radius: 8px;
+  padding: 10px 24px;
+  font-weight: 700;
+  color: #111;
+  cursor: pointer;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+#loader button:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.5);
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.05); opacity: 1; }
+}
+
+/* ==========================================
+   ✅ BITÁCORA CFC — Header y Footer Global Premium (25-10-2025)
+   ========================================== */
+.navbar {
+  position: sticky;
+  top: 0;
+  background: #0a0a0a;
+  border-bottom: 1px solid #d4af37;
+  padding: 10px 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 1000;
+}
+
+.navbar .menu a {
+  color: #eaeaea;
+  margin: 0 12px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar .menu a:hover {
+  color: #d4af37;
+}
+
+.dynamic-footer {
+  background: #0a0a0a;
+  color: #eaeaea;
+  border-top: 1px solid #d4af37;
+  text-align: center;
+  padding: 20px 0;
+  font-size: 0.9rem;
+  margin-top: 40px;
+  letter-spacing: 0.4px;
+}
+
+/* =====================================================
+   🔒 CFC-SYNC V7.5 — Footer Global (Negro + Dorado)
+   ✅ CFC_FUNC_1_3_20251030 — Estilos aplicados
+   ===================================================== */
+
+.footer-cfc {
+  background: linear-gradient(180deg, #111, #000);
+  color: #f1c40f;
+  text-align: center;
+  padding: 20px 0;
+  font-family: 'Poppins', sans-serif;
+  border-top: 1px solid rgba(255,215,0,0.2);
+  margin-top: 40px;
+}
+
+.footer-links {
+  margin-bottom: 8px;
+}
+
+.footer-link {
+  color: #f1c40f;
+  margin: 0 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color .3s ease;
+}
+
+.footer-link:hover {
+  color: #fff;
+}
+
+.footer-copy {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+/* ========================================== */
+/* =====================================================
+   ✅ CFC_FUNC_2_7_20251030 — Estilo botón “Continuar último módulo”
+   ===================================================== */
+.continue-btn {
+  display: inline-block;
+  margin-top: 25px;
+  padding: 12px 26px;
+  font-size: 1rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, #f5c542, #e0a821);
+  color: #000;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.35);
+  transition: all 0.3s ease-in-out;
+}
+
+.continue-btn:hover {
+  transform: scale(1.04);
+  background: linear-gradient(90deg, #ffd76a, #f3b832);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.6);
+}
+
+.continue-btn:active {
+  transform: scale(0.98);
+}
+/* ✅ CFC_FUNC_2_14_QASYNC_V8.6_20251030_CONFETTI_RESET — Estilo botón Reiniciar (Progresión Premium) */
+.reset-btn {
+  background: linear-gradient(90deg,#0b0b0b 0%,#1a1a1a 100%);
+  color: #ffd700;
+  border: 2px solid #ffd700;
+  border-radius: 10px;
+  padding: 10px 18px;
+  margin-left: 12px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(255,215,0,0.3);
+  transition: all .3s ease-in-out;
+}
+.reset-btn:hover {
+  background: linear-gradient(90deg,#ffd700 0%,#ffec8b 100%);
+  color: #111;
+  transform: scale(1.05);
+  box-shadow: 0 0 22px rgba(255,215,0,0.6);
+}
+
+/* =====================================================
+   ✅ CFC_FUNC_2_9_20251101 — Estilo visual módulos bloqueados
+   ===================================================== */
+.locked {
+  opacity: 0.4;
+  pointer-events: none;
+  filter: grayscale(100%);
+  position: relative;
+  transition: all 0.3s ease-in-out;
+}
+
+.locked::after {
+  content: "🔒";
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 1.2rem;
+  color: #ff4444;
+  text-shadow: 0 0 4px rgba(0,0,0,0.6);
+}
+
+/* =====================================================
+   ✅ CFC_FUNC_4_1_VISUAL_20251031 — Estilo motivador diario
+   ===================================================== */
+.motivation-text {
+  text-align: center;
+  margin: 15px auto 0 auto;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #ffd700;
+  text-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+  animation: fadeIn 1.5s ease;
+  max-width: 800px;
+  line-height: 1.4;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ✅ CFC_FUNC_4_1C_20251101 — Estilo visual motivador diario */
+.motivacion-diaria {
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #ffd700;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+/* =====================================================
+✅ CFC_FUNC_4_3_VISUAL_20251101 — Botón Bitácora Mental
+===================================================== */
+.btn-bitacora {
+  background: linear-gradient(90deg, #ffd700, #e0a821);
+  color: #111;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 20px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform .3s ease, box-shadow .3s ease;
+}
+.btn-bitacora:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 16px rgba(255,215,0,0.4);
+}
+
+/* =========================================================
+   ✅ CFC_FUNC_5_1_VISUAL_FINAL_20251101 — Estilos modo claro/oscuro dinámico
+   ========================================================= */
+
+:root {
+  --color-bg: #000;
+  --color-text: #f5f5f5;
+  --color-accent: #ffd700;
+  --color-panel: #111;
+}
+
+[data-theme="light"] {
+  --color-bg: #f5f5f5;
+  --color-text: #111;
+  --color-accent: #c9a634;
+  --color-panel: #fff;
+}
+
+/* Transición suave global */
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+main, section, footer, header {
+  background-color: var(--color-panel);
+  transition: background-color 0.6s ease, color 0.6s ease;
+}
+
+/* Efecto sutil al presionar el botón de tema */
+#theme-toggle:active {
+  transform: scale(0.92);
+}
+
+/* =========================================================
+✅ CFC_FUNC_5_1_VISUAL_FINAL_20251102 — Estilo botón modo claro/oscuro
+========================================================= */
+#theme-toggle {
+  position: fixed;
+  top: 16px;
+  right: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: #111;
+  color: var(--color-accent, #ffd700);
+  border: 2px solid var(--color-accent, #ffd700);
+  font-size: 1.2rem;
+  font-weight: 700;
+  cursor: pointer;
+  z-index: 99999;
+  transition: all 0.35s ease-in-out;
+  box-shadow: 0 0 10px rgba(255,215,0,0.3);
+}
+#theme-toggle:hover {
+  background: var(--color-accent, #ffd700);
+  color: #000;
+  transform: scale(1.05);
+}
+#theme-toggle:active {
+  transform: scale(0.92);
+}
+
+/* Temas */
+:root {
+  --color-bg: #000;
+  --color-text: #f5f5f5;
+  --color-accent: #ffd700;
+  --color-panel: #111;
+}
+[data-theme="light"] {
+  --color-bg: #f5f5f5;
+  --color-text: #111;
+  --color-accent: #c9a634;
+  --color-panel: #fff;
+}
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  transition: background-color .5s ease, color .5s ease;
+}
+main, section, footer, header {
+  background-color: var(--color-panel);
+  transition: background-color .5s ease, color .5s ease;
+}
+
+/* =========================================================
+   ✅ CFC_FUNC_5BIS_2_20251102 — Estilos principales main.css migrados a premium.css
+   ========================================================= */
+.main-buttons {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 40px;
+  margin-bottom: 24px;
+}
+
+.btn-main {
+  background: #ffd700;
+  color: #000;
+  padding: 12px 28px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  font-family: "Poppins", "Segoe UI", sans-serif;
+  cursor: pointer;
+  transition: background 0.25s ease, color 0.25s ease, transform 0.2s ease;
+  box-shadow: 0 0 8px rgba(255,215,0,0.3);
+}
+
+.btn-main:hover {
+  background: #000;
+  color: #ffd700;
+  transform: scale(1.05);
+  box-shadow: 0 0 12px rgba(255,215,0,0.6);
+}
+
+.btn-main:active {
+  transform: scale(0.96);
+}
+
+/* =========================================================
+   ✅ CFC_FUNC_5BIS_FIX_V41_20251103 — Ajustes navbar + contraste + botones
+   ========================================================= */
+
+/* Colores del navbar según tema */
+.navbar {
+  background: var(--color-panel);
+  transition: background 0.5s ease;
+}
+
+.navbar .logo {
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+
+.navbar .menu a {
+  color: #f5f5f5;
+  font-weight: 600;
+  margin: 0 10px;
+  transition: color 0.3s ease;
+}
+
+.navbar .menu a:hover {
+  color: #ffd700;
+}
+
+/* 🌓 modo claro: texto negro en navbar */
+[data-theme="light"] .navbar .menu a {
+  color: #111;
+}
+[data-theme="light"] .navbar .menu a:hover {
+  color: #c9a634;
+}
+[data-theme="light"] .navbar .logo {
+  color: #000;
+}
+
+/* Mejora visual general de botones principales */
+.btn-main {
+  background: linear-gradient(90deg,#ffd700,#f0c03d);
+  box-shadow: 0 0 10px rgba(255,215,0,0.3);
+}
+.btn-main:hover {
+  background: #000;
+  color: #ffd700;
+  transform: scale(1.05);
+  box-shadow: 0 0 14px rgba(255,215,0,0.6);
+}
+
+/* Sugerencia estética futura */
+.motivation-sub {
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #f1c40f;
+  margin-top: 12px;
+  opacity: 0.9;
+}
+
+/* ============================================================
+✅ CFC_FIX_V42.7 — Contraste botones (modo oscuro/claro)
+============================================================ */
+
+/* 🌙 Modo oscuro: texto claro sobre fondo dorado */
+[data-theme="dark"] .btn-main {
+  background: linear-gradient(90deg,#ffd700,#f0c03d);
+  color: #000;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.3);
+  border: none;
+}
+[data-theme="dark"] .btn-main:hover {
+  background: #ffd700;
+  color: #000;
+  transform: scale(1.05);
+}
+
+/* ☀️ Modo claro: texto oscuro sobre fondo más suave */
+[data-theme="light"] .btn-main {
+  background: linear-gradient(90deg, #fff1a6, #ffe15a);
+  color: #111;
+  box-shadow: 0 0 8px rgba(200, 160, 0, 0.4);
+}
+[data-theme="light"] .btn-main:hover {
+  background: #000;
+  color: #ffd700;
+}
+
+/* ============================================================
+✅ CFC_FIX_V42.8 — Texto negro en botones (modo oscuro)
+============================================================ */
+[data-theme="dark"] .btn-main {
+  color: #000 !important;
+}
+
+/* ==========================================================
+✅ CFC_FUNC_8_1_20251105 — Estilo visual del panel de progreso (QA-FIX)
+========================================================== */
+.stats-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(15, 15, 15, 0.96);
+  color: #ffd700;
+  padding: 28px 32px;
+  border-radius: 18px;
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.45);
+  z-index: 99999;
+  text-align: center;
+  width: 90%;
+  max-width: 420px;
+  font-family: "Poppins", sans-serif;
+  animation: fadeInStats 0.4s ease;
+}
+.stats-modal h3 {
+  font-size: 1.45rem;
+  color: #ffd700;
+  margin-bottom: 12px;
+}
+.stats-modal p {
+  margin: 6px 0;
+  font-size: 1rem;
+  color: #fff;
+}
+.stats-modal button {
+  margin-top: 18px;
+  background: linear-gradient(90deg, #ffd700, #f0c03d);
+  border: none;
+  border-radius: 10px;
+  color: #000;
+  font-weight: 700;
+  padding: 10px 26px;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+}
+.stats-modal button:hover {
+  transform: scale(1.06);
+  box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+}
+@keyframes fadeInStats {
+  from { opacity: 0; transform: translate(-50%, -60%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+/* ==========================================================
+🔒 CFC-SYNC
+# ✅ CFC_FUNC_8_1_20251105 — CSS verificado QA-V41 dorado premium
+echo "🧩 CFC_SYNC checkpoint: modal animado y compatible con modo claro/oscuro"
+========================================================== */
+
+/* ==========================================================
+✅ CFC_FUNC_9_1_20251105 — Estilo botón Contenido Adicional Premium (CFC-PACK PLUS V1)
+========================================================== */
+.btn-premium {
+  background: linear-gradient(90deg, #FFD700, #B8860B);
+  color: #000;
+  font-weight: 600;
+  padding: 10px 22px;
+  border-radius: 12px;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 0 0 12px rgba(255,215,0,0.3);
+  transition: all 0.3s ease-in-out;
+  margin-top: 10px;
+}
+.btn-premium:hover {
+  filter: brightness(1.15);
+  transform: scale(1.05);
+  box-shadow: 0 0 18px rgba(255,215,0,0.6);
+}
+[data-theme="light"] .btn-premium {
+  background: linear-gradient(90deg, #FFE15A, #FFD700);
+  color: #111;
+}
+[data-theme="light"] .btn-premium:hover {
+  filter: brightness(1.1);
+  transform: scale(1.05);
+}
+/* 🔒 CFC-SYNC
+# ✅ CFC_FUNC_9_1_20251105 — CFC-PACK PLUS V1 integrado
+echo "🧩 CFC_SYNC checkpoint: Contenido adicional descargable — P8 actualizado"
+========================================================== */
