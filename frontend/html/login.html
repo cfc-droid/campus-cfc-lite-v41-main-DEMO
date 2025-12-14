@@ -1179,9 +1179,6 @@ const loginData = await CFC_login(email, license);
 const device_id = loginData.device_id;
 const session_id = loginData.session_id;
 // ========================================================
-
-// 🔑 PRUEBA 6 — ID de sesión ACTIVA
-localStorage.setItem("CFC_SESSION_ID", session_id);
     
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 window.location.href = "../index.html";
