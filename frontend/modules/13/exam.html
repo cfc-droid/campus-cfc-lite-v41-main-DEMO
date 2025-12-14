@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen — Módulo 13 — Psicología del Error y Reprogramación Mental</title>
+
+  <!-- ✅ CFC_FUNC_1_01_FIXRUTAS_2025-10-30 -->
+  <link rel="stylesheet" href="../../css/premium.css">
+  <link rel="stylesheet" href="../../css/exam-extra.css">
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
+
+  <!-- ✅ Motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Reposicionamiento visual del botón de tema -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+
+<body data-module="13">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Examen — Módulo 13: Psicología del Error y Reprogramación Mental</h1>
+    <p><em>Reflexioná antes de responder. Este examen evalúa tu comprensión sobre cómo transformar los errores operativos en herramientas de crecimiento y consolidar una mente emocionalmente resiliente.</em></p>
+
+    <form id="exam13">
+      <!-- Pregunta 1 -->
+      <fieldset>
+        <legend>1) Según el Capítulo 1, ¿cuál es el verdadero origen de los errores en el trading según el método CFC?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q1" type="radio" value="A"> A) Falta de dominio técnico o mala elección de estrategia.</label><br>
+        <label><input name="q1" type="radio" value="B"> B) Programaciones subconscientes y respuestas emocionales automáticas no observadas.</label><br>
+        <label><input name="q1" type="radio" value="C"> C) Desconocimiento de los indicadores de volatilidad en sesión de Nueva York.</label><br>
+        <label><input name="q1" type="radio" value="D"> D) Exceso de confianza tras una racha ganadora.</label>
+      </fieldset>
+
+      <!-- Pregunta 2 -->
+      <fieldset>
+        <legend>2) En el Capítulo 2, ¿cuál es la clave fundamental del proceso de reeducación mental que propone el método CFC?</legend>
+        <!-- Correcta: C -->
+        <label><input name="q2" type="radio" value="A"> A) Cambiar constantemente de estrategia hasta hallar una rentable.</label><br>
+        <label><input name="q2" type="radio" value="B"> B) Aumentar el número de operaciones para vencer el miedo a perder.</label><br>
+        <label><input name="q2" type="radio" value="C"> C) Introducir la pausa consciente entre el estímulo y la reacción para actuar con claridad.</label><br>
+        <label><input name="q2" type="radio" value="D"> D) Evitar operar en entornos de alta volatilidad para reducir la carga emocional.</label>
+      </fieldset>
+
+      <!-- Pregunta 3 -->
+      <fieldset>
+        <legend>3) De acuerdo al Capítulo 3, ¿qué representa el miedo para el trader consciente?</legend>
+        <!-- Correcta: D -->
+        <label><input name="q3" type="radio" value="A"> A) Un defecto psicológico que debe ser completamente eliminado.</label><br>
+        <label><input name="q3" type="radio" value="B"> B) Una respuesta natural que solo debe reprimirse mediante fuerza de voluntad.</label><br>
+        <label><input name="q3" type="radio" value="C"> C) Un obstáculo inevitable que solo puede controlarse con técnicas de relajación.</label><br>
+        <label><input name="q3" type="radio" value="D"> D) Una señal o mapa que revela las áreas internas donde la mente necesita evolución y entrenamiento.</label>
+      </fieldset>
+
+      <!-- Pregunta 4 -->
+      <fieldset>
+        <legend>4) Según el Capítulo 4, ¿qué define la verdadera maestría mental del trader CFC?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q4" type="radio" value="A"> A) Ejecutar operaciones sin cometer ningún error técnico o emocional.</label><br>
+        <label><input name="q4" type="radio" value="B"> B) Integrar el error como parte del proceso de crecimiento y actuar desde el desapego emocional.</label><br>
+        <label><input name="q4" type="radio" value="C"> C) Eliminar toda emoción durante la operativa para mantener frialdad total.</label><br>
+        <label><input name="q4" type="radio" value="D"> D) Obtener consistencia únicamente mediante una estrategia estadísticamente favorable.</label>
+      </fieldset>
+
+      <button type="button" onclick="enviarExamen()">Enviar respuestas</button>
+    </form>
+  </main>
+
+  <footer class="firma-cfc">
+    <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
+  </footer>
+
+  <!-- 🔙 Botón volver -->
+  <script src="../../js/backButton.js"></script>
+
+  <!-- ✅ Progress global -->
+  <script src="../../js/progress_v2.js?v=9.8C" defer></script>
+  <!-- ✅ Motor examen unificado -->
+  <script src="../../js/exam_v2.js"></script>
+  <!-- ✅ Auto-Injector Global -->
+  <script src="../../js/auto_injector.js?v=20251102" defer></script>
+  <!-- ✅ Tracker de actividad -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+  
+<!- 🎧 CFC-VOICE READER PRO V26.0 ->
+<script src="../../js/core/voiceReader_pro_v26.js?v=20251214" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro independiente -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    // Cargar estado previo
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    // Evento de cambio
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      console.log("🌗 Tema cambiado a:", newTheme);
+    });
+  });
+  </script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
+
