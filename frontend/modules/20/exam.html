@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen — Módulo 20 — Legado Final del Trader Consciente</title>
+
+  <!-- ✅ CFC_FUNC_1_01_FIXRUTAS_2025-10-30 -->
+  <link rel="stylesheet" href="../../css/premium.css">
+  <link rel="stylesheet" href="../../css/exam-extra.css">
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
+
+  <!-- ✅ Motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Botón tema fijo negro-dorado -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active { transform: scale(0.92); }
+
+    /* 🎓 Overlay de graduación */
+    #graduacion-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9998;
+      animation: fadeIn 0.6s ease forwards;
+    }
+    #graduacion-overlay.activo { display: flex; }
+
+    .grad-card {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,215,0,0.4);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      text-align: center;
+      padding: 2rem;
+      border-radius: 1.5rem;
+      max-width: 480px;
+      animation: popIn 0.6s ease forwards;
+      box-shadow: 0 0 20px rgba(255,215,0,0.2);
+    }
+    .grad-card h2 {
+      color: var(--color-accent, #ffd700);
+      margin-bottom: 1rem;
+    }
+    .grad-card button {
+      margin-top: 1rem;
+      padding: 0.6rem 1.4rem;
+      background: var(--color-accent, #ffd700);
+      border: none;
+      border-radius: 0.5rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .grad-card button:hover { background: #fff; color: #000; }
+    @keyframes fadeIn { from {opacity: 0;} to {opacity: 1;} }
+    @keyframes popIn { from {transform: scale(0.9);opacity:0;} to {transform: scale(1);opacity:1;} }
+  </style>
+</head>
+
+<body data-module="20">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Examen — Módulo 20: Legado Final del Trader Consciente</h1>
+    <p><em>Reflexioná antes de responder. Este examen evalúa tu grado de integración entre propósito, servicio y coherencia interior, pilares del legado del trader consciente.</em></p>
+
+    <form id="exam20">
+      <!-- Pregunta 1 -->
+      <fieldset>
+        <legend>1) Según el Capítulo 1, ¿cuál es la verdadera medida del legado de un trader consciente?</legend>
+        <!-- Correcta: C -->
+        <label><input name="q1" type="radio" value="A"> A) La cantidad de operaciones ganadoras y la rentabilidad acumulada.</label><br>
+        <label><input name="q1" type="radio" value="B"> B) La capacidad para identificar oportunidades técnicas con precisión milimétrica.</label><br>
+        <label><input name="q1" type="radio" value="C"> C) La serenidad interior, la coherencia entre mente y acción, y la capacidad de servir con propósito.</label><br>
+        <label><input name="q1" type="radio" value="D"> D) La habilidad para operar sin emociones y mantener el control absoluto del mercado.</label>
+      </fieldset>
+
+      <!-- Pregunta 2 -->
+      <fieldset>
+        <legend>2) En el Capítulo 2, ¿qué representa el “silencio interior” en la práctica del trader consciente?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q2" type="radio" value="A"> A) Un estado en el que el trader ignora completamente sus emociones para mantener la objetividad.</label><br>
+        <label><input name="q2" type="radio" value="B"> B) Un estado de atención plena en el que el trader observa sin reaccionar y actúa desde la presencia consciente.</label><br>
+        <label><input name="q2" type="radio" value="C"> C) El momento exacto en que se logra eliminar todo pensamiento negativo antes de operar.</label><br>
+        <label><input name="q2" type="radio" value="D"> D) Una técnica de relajación que se aplica solo después de finalizar la jornada operativa.</label>
+      </fieldset>
+
+      <!-- Pregunta 3 -->
+      <fieldset>
+        <legend>3) En el Capítulo 3 se menciona que “servir” es el nivel más alto del camino del trader consciente. ¿Qué significa esto en la práctica?</legend>
+        <!-- Correcta: D -->
+        <label><input name="q3" type="radio" value="A"> A) Enseñar a otros traders solo cuando se alcanzan resultados consistentemente rentables.</label><br>
+        <label><input name="q3" type="radio" value="B"> B) Compartir señales de entrada y salida con la comunidad para ganar prestigio.</label><br>
+        <label><input name="q3" type="radio" value="C"> C) Corregir los errores de los demás para ayudarlos a mejorar sus resultados.</label><br>
+        <label><input name="q3" type="radio" value="D"> D) Inspirar y guiar con el ejemplo, compartiendo desde la humildad y la coherencia sin buscar validación externa.</label>
+      </fieldset>
+
+      <!-- Pregunta 4 -->
+      <fieldset>
+        <legend>4) Según el Capítulo 4, ¿qué significa “vivir lo aprendido” para el trader consciente?</legend>
+        <!-- Correcta: A -->
+        <label><input name="q4" type="radio" value="A"> A) Integrar los principios del Campus en la vida cotidiana, aplicando la disciplina, la gratitud y la coherencia más allá del mercado.</label><br>
+        <label><input name="q4" type="radio" value="B"> B) Memorizar todas las estrategias aprendidas y repetirlas en cada sesión sin cambios.</label><br>
+        <label><input name="q4" type="radio" value="C"> C) Operar más horas al día para reafirmar el compromiso con el proceso de aprendizaje.</label><br>
+        <label><input name="q4" type="radio" value="D"> D) Dejar de operar y dedicarse únicamente a reflexionar sobre los capítulos del Campus.</label>
+      </fieldset>
+
+      <button type="button" id="btnEnviar" onclick="enviarExamen()">Enviar respuestas</button>
+    </form>
+  </main>
+
+  <footer class="firma-cfc">
+    <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
+  </footer>
+
+  <!-- 🔙 Botón volver -->
+  <script src="../../js/backButton.js"></script>
+
+  <!-- ✅ Progress global -->
+  <script src="../../js/progress_v2.js?v=9.8C" defer></script>
+  <!-- ✅ Motor examen unificado -->
+  <script src="../../js/exam_v2.js?v=20251106"></script>
+  <!-- ✅ Auto-Injector Global -->
+  <script src="../../js/auto_injector.js?v=20251102" defer></script>
+  <!-- ✅ Tracker de actividad -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+
+<!- 🎧 CFC-VOICE READER PRO V26.0 ->
+<script src="../../js/core/voiceReader_pro_v26.js?v=20251214" defer></script>
+
+  <!-- 🎓 Overlay de graduación -->
+  <div id="graduacion-overlay">
+    <div class="grad-card">
+      <h2>🎓 ¡Felicidades, Trader Consciente!</h2>
+      <p>Completaste los 20 módulos del <strong>Campus CFC Trading LITE V41</strong>.<br>
+      Tu coherencia, disciplina y constancia te convirtieron en el reflejo de un <em>Trader Consciente</em>.</p>
+      <button id="cerrarGraduacion">Cerrar</button>
+    </div>
+  </div>
+
+ <!-- ✅ Control de graduación + validación del examen -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  /* 🌗 Tema persistente */
+  const btn = document.getElementById("theme-toggle");
+  if (btn) {
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    });
+  }
+
+  /* 🎓 Overlay de graduación con audio + confetti */
+  const overlay = document.getElementById("graduacion-overlay");
+  const cerrar = document.getElementById("cerrarGraduacion");
+
+  // 🎵 Voz de cierre (puede reemplazarse por tu grabación final)
+  const voice = new Audio("../../../assets/audio/voice-final-campus.wav");
+  voice.volume = 0.7;
+
+  // 🎉 Confetti dorado dinámico
+  const lanzarConfetti = () => {
+    const count = 120;
+    for (let i = 0; i < count; i++) {
+      const conf = document.createElement("div");
+      conf.className = "confetti";
+      Object.assign(conf.style, {
+        position: "fixed",
+        left: `${Math.random() * 100}%`,
+        top: "-10px",
+        width: "8px",
+        height: "8px",
+        background: i % 2 ? "#FFD700" : "#FFF4B0",
+        opacity: 0.9,
+        borderRadius: "50%",
+        zIndex: 9999,
+        transform: `rotate(${Math.random() * 360}deg)`,
+        animation: `fall ${2 + Math.random() * 3}s linear forwards`
+      });
+      document.body.appendChild(conf);
+      setTimeout(() => conf.remove(), 5000);
+    }
+  };
+
+  // 🧩 Interceptar resultado del examen
+  const originalAlert = window.alert;
+  window.alert = function (msg) {
+    if (msg.includes("Aprobado")) {
+      const match = msg.match(/(\d+\/\d+)\s*\((\d+)%\)/);
+      const porcentaje = match ? parseInt(match[2]) : 0;
+
+      if (porcentaje >= 75) {
+        setTimeout(() => {
+          overlay.classList.add("activo");
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          lanzarConfetti();
+          voice.play().catch(() => {});
+        }, 500);
+      }
+    }
+    originalAlert(msg);
+  };
+
+  cerrar.addEventListener("click", () => {
+    overlay.classList.remove("activo");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+});
+
+/* ✨ Animación confetti */
+const style = document.createElement("style");
+style.textContent = `
+@keyframes fall {
+  to {
+    transform: translateY(100vh) rotate(720deg);
+    opacity: 0;
+  }
+}
+`;
+document.head.appendChild(style);
+
+console.log("✅ CFC_GRADUATION_V41.25_REAL_FINAL_20251108 — Validación completa de examen final");
+</script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
+
