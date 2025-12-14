@@ -1,57 +1,24 @@
-/* ==========================================================
-   🔐 CFC_STORAGE_ROUTER_V2_SAFE_LOGIN_AWARE
-   • Aislamiento REAL por usuario
-   • NO usa "guest"
-   • Espera CFC_EMAIL válido
-   • Compatible con Campus CFC LITE V41
-   ========================================================== */
+(function() {
 
-(function () {
+  const email = localStorage.getItem("CFC_EMAIL") || "guest";
+  const USER_KEY = email.replace(/[^a-zA-Z0-9]/g, "_") + "_";
 
-  const originalSet = localStorage.setItem.bind(localStorage);
-  const originalGet = localStorage.getItem.bind(localStorage);
-  const originalRemove = localStorage.removeItem.bind(localStorage);
+  const originalSet = localStorage.setItem;
+  const originalGet = localStorage.getItem;
+  const originalRemove = localStorage.removeItem;
 
-  let USER_KEY = null;
-
-  function resolveUserKey() {
-    const email = originalGet("CFC_EMAIL");
-    if (!email || !email.includes("@")) return null;
-    return email.replace(/[^a-zA-Z0-9]/g, "_") + "_";
-  }
-
-  function ensureRouterReady() {
-    if (USER_KEY) return true;
-
-    const key = resolveUserKey();
-    if (!key) return false;
-
-    USER_KEY = key;
-    console.log("🔐 CFC_STORAGE_ROUTER ACTIVADO →", USER_KEY);
-    return true;
-  }
-
-  localStorage.setItem = function (key, value) {
-    if (ensureRouterReady()) {
-      return originalSet(USER_KEY + key, value);
-    }
-    return originalSet(key, value);
+  localStorage.setItem = function(key, value) {
+    return originalSet.call(this, USER_KEY + key, value);
   };
 
-  localStorage.getItem = function (key) {
-    if (ensureRouterReady()) {
-      return originalGet(USER_KEY + key);
-    }
-    return originalGet(key);
+  localStorage.getItem = function(key) {
+    return originalGet.call(this, USER_KEY + key);
   };
 
-  localStorage.removeItem = function (key) {
-    if (ensureRouterReady()) {
-      return originalRemove(USER_KEY + key);
-    }
-    return originalRemove(key);
+  localStorage.removeItem = function(key) {
+    return originalRemove.call(this, USER_KEY + key);
   };
 
-  console.log("🧩 CFC_STORAGE_ROUTER cargado (esperando login)");
+  console.log("🔐 CFC_STORAGE_ROUTER_ACTIVO — aislamiento total por usuario:", USER_KEY);
 
 })();
