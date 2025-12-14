@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen — Módulo 2 — Neurociencia del Trading</title>
+
+  <!-- ✅ CFC_FUNC_1_01_FIXRUTAS_2025-10-30 -->
+  <link rel="stylesheet" href="../../css/premium.css">
+  <link rel="stylesheet" href="../../css/exam-extra.css">
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
+
+  <!-- ✅ motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Reposicionamiento visual del botón de tema -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px; /* 🔧 más pegado al borde */
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+
+<body data-module="2">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Examen — Módulo 2: Neurociencia del Trading</h1>
+    <p><em>Reflexioná antes de responder. Este examen no mide memoria, sino tu comprensión de los mecanismos cerebrales que influyen en la toma de decisiones del trader.</em></p>
+
+    <form id="exam2">
+      <!-- Pregunta 1 -->
+      <fieldset>
+        <legend>1) Según el Capítulo 1, ¿cuál es el verdadero objetivo de la Psicología del Trader?</legend>
+        <!-- Correcta: C -->
+        <label><input name="q1" type="radio" value="A"> A) Aprender a evitar cualquier tipo de pérdida durante la operativa.</label><br>
+        <label><input name="q1" type="radio" value="B"> B) Controlar las emociones para operar sin sentir miedo ni ansiedad.</label><br>
+        <label><input name="q1" type="radio" value="C"> C) Desarrollar una mentalidad consciente y disciplinada que permita interpretar el mercado sin reacciones impulsivas.</label><br>
+        <label><input name="q1" type="radio" value="D"> D) Buscar motivación externa constante para mantener el enfoque en las ganancias.</label>
+      </fieldset>
+
+      <!-- Pregunta 2 -->
+      <fieldset>
+        <legend>2) En el Capítulo 2 se menciona que la dopamina, serotonina y cortisol influyen directamente en el trader. ¿Cuál es la combinación más equilibrada para un desempeño estable?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q2" type="radio" value="A"> A) Alta dopamina y bajo cortisol, ignorando los niveles de serotonina.</label><br>
+        <label><input name="q2" type="radio" value="B"> B) Dopamina moderada, serotonina estable y cortisol controlado mediante pausas y respiración.</label><br>
+        <label><input name="q2" type="radio" value="C"> C) Dopamina alta y serotonina baja para mantener el impulso de riesgo.</label><br>
+        <label><input name="q2" type="radio" value="D"> D) Cortisol elevado para reaccionar más rápido ante movimientos de mercado.</label>
+      </fieldset>
+
+      <!-- Pregunta 3 -->
+      <fieldset>
+        <legend>3) De acuerdo al Capítulo 3, ¿qué representa la neuroplasticidad en el contexto del trading?</legend>
+        <!-- Correcta: D -->
+        <label><input name="q3" type="radio" value="A"> A) La capacidad del cerebro para eliminar las emociones negativas de forma permanente.</label><br>
+        <label><input name="q3" type="radio" value="B"> B) El uso de la fuerza de voluntad para evitar errores en las operaciones.</label><br>
+        <label><input name="q3" type="radio" value="C"> C) Un rasgo innato que solo poseen los traders más experimentados.</label><br>
+        <label><input name="q3" type="radio" value="D"> D) La habilidad del cerebro para reconfigurarse mediante la práctica consciente y reemplazar patrones emocionales limitantes.</label>
+      </fieldset>
+
+      <!-- Pregunta 4 -->
+      <fieldset>
+        <legend>4) En el Capítulo 4 se explica el papel del neurofeedback y el biohacking. ¿Cuál es su principal beneficio para el trader?</legend>
+        <!-- Correcta: A -->
+        <label><input name="q4" type="radio" value="A"> A) Entrenar el cerebro y el cuerpo para mantener coherencia fisiológica y emocional durante la operativa.</label><br>
+        <label><input name="q4" type="radio" value="B"> B) Aumentar la velocidad de reacción ante cualquier cambio del mercado sin descanso.</label><br>
+        <label><input name="q4" type="radio" value="C"> C) Sustituir el análisis técnico por medición biológica en tiempo real.</label><br>
+        <label><input name="q4" type="radio" value="D"> D) Depender de tecnología externa para controlar las emociones.</label>
+      </fieldset>
+
+      <button type="button" onclick="enviarExamen()">Enviar respuestas</button>
+    </form>
+  </main>
+
+  <footer class="firma-cfc">
+    <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
+  </footer>
+
+  <!-- 🔙 Botón volver -->
+  <script src="../../js/backButton.js"></script>
+
+  <!-- ✅ Progress global -->
+  <script src="../../js/progress_v2.js?v=9.8C" defer></script>
+  <!-- ✅ Motor examen unificado -->
+  <script src="../../js/exam_v2.js"></script>
+  <!-- ✅ Auto-Injector Global -->
+  <script src="../../js/auto_injector.js?v=20251102" defer></script>
+  <!-- ✅ Tracker de actividad -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+
+<!- 🎧 CFC-VOICE READER PRO V26.0 ->
+<script src="../../js/core/voiceReader_pro_v26.js?v=20251214" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Restauración botón claro/oscuro independiente -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    // Cargar estado previo
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    // Evento de cambio
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      console.log("🌗 Tema cambiado a:", newTheme);
+    });
+  });
+  </script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
+
