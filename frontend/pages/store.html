@@ -1,0 +1,103 @@
+<!-- ==========================================================
+Archivo: /frontend/pages/store.html
+Versión: V37 FINAL
+Punto: 11/15 — Mini-tienda HTML bloqueada post-venta
+Autor: Cristian F. Choqui (CFC)
+Descripción:
+Simula la sección de tienda Premium sin pagos reales.
+Incluye efectos Ken Burns, paleta Premium y botón bloqueado.
+=========================================================== -->
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tienda CFC Trading LITE</title>
+
+  <!-- Estilos base -->
+  <link rel="stylesheet" href="/frontend/css/premium.css" />
+  <link rel="stylesheet" href="/frontend/css/micro.css" />
+
+  <style>
+    /* Fondo hero con Ken Burns */
+    .hero-store {
+      position: relative;
+      height: 80vh;
+      background: url('/frontend/assets/img/premium-bg.jpg') center/cover no-repeat;
+      animation: kenburns 14s ease-in-out infinite alternate;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
+    }
+
+    /* Contenedor principal */
+    .store-container {
+      text-align: center;
+      padding: 40px 20px;
+      background: rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      max-width: 700px;
+      margin: -100px auto 0 auto;
+    }
+
+    h1 {
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: var(--text-light);
+      margin-bottom: 20px;
+    }
+
+    /* Botón bloqueado */
+    .btn-upgrade {
+      background: linear-gradient(90deg, gold, orange);
+      color: #111;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 22px;
+      cursor: not-allowed;
+      opacity: 0.6;
+      transition: transform 0.3s ease-in-out;
+    }
+
+    .btn-upgrade:hover {
+      transform: scale(1.05);
+    }
+
+    /* Mensaje informativo */
+    .info {
+      margin-top: 20px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    @keyframes kenburns {
+      0% { transform: scale(1) translate(0, 0); }
+      100% { transform: scale(1.1) translate(-8px, -8px); }
+    }
+  </style>
+</head>
+
+<body>
+  <section class="hero-store">
+    <div class="store-container glass-bg">
+      <h1>Campus CFC Premium 🚀</h1>
+      <p>Accedé a la versión completa con módulos exclusivos, mentorías y contenido avanzado.</p>
+      <button class="btn-upgrade" disabled>Upgrade Premium (Bloqueado)</button>
+      <p class="info">🔒 Disponible solo para cuentas Premium verificadas.</p>
+    </div>
+
+    <!-- 🔒 CFC-LOCK V72 -->
+<script src="../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../js/bundle_core.min.js" defer></script> 
+</body>
+</html>

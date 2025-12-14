@@ -1,0 +1,21 @@
+{
+  "name": "Campus CFC Trading LITE",
+  "short_name": "CFC Trading",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#0a0a0a",
+  "theme_color": "#0a0a0a",
+  "description": "Campus CFC Trading LITE – Formación psicológica y técnica del trader moderno.",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}

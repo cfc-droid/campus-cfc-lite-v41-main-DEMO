@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Acceso no autorizado — Campus CFC LITE</title>
+
+  <!-- ✅ Estilos principales del Campus -->
+  <link rel="stylesheet" href="css/variables.css?v=20251112" />
+  <link rel="stylesheet" href="css/premium.min.css?v=20251112" />
+
+  <style>
+    body.cfc-blocked-page {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Poppins, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: radial-gradient(circle at center, #000 0%, #050505 55%, #000 100%);
+      color: #ffd700;
+    }
+
+    .blocked-wrapper {
+      text-align: center;
+      max-width: 460px;
+      padding: 32px 26px 28px;
+      border-radius: 20px;
+      background: rgba(0, 0, 0, 0.82);
+      border: 1px solid rgba(255, 215, 0, 0.6);
+      box-shadow:
+        0 0 18px rgba(255, 215, 0, 0.55),
+        0 0 50px rgba(0, 0, 0, 0.9);
+    }
+
+    .blocked-icon {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
+
+    .blocked-title {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .blocked-subtitle {
+      font-size: 14px;
+      opacity: 0.9;
+      margin-bottom: 18px;
+    }
+
+    .blocked-detail {
+      font-size: 13px;
+      line-height: 1.5;
+      opacity: 0.8;
+      margin-bottom: 22px;
+    }
+
+    .blocked-detail strong {
+      color: #ffd700;
+    }
+
+    .blocked-btn {
+      display: inline-block;
+      padding: 10px 24px;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      background: linear-gradient(90deg, #ffd700, #f5c84a);
+      color: #000;
+      box-shadow: 0 0 14px rgba(255, 215, 0, 0.7);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .blocked-btn:hover {
+      transform: translateY(-1px) scale(1.03);
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.9);
+      background: #000;
+      color: #ffd700;
+    }
+
+    .blocked-footer {
+      margin-top: 18px;
+      font-size: 11px;
+      opacity: 0.55;
+    }
+  </style>
+</head>
+
+<body class="cfc-blocked-page">
+  <div class="blocked-wrapper">
+    <div class="blocked-icon">🚫</div>
+    <h1 class="blocked-title">Acceso no autorizado</h1>
+
+    <p class="blocked-subtitle">
+      Dominio o contexto inválido — <strong>CFC-LOCK ONLINE V72-FINAL</strong>
+    </p>
+
+    <p class="blocked-detail">
+      Este acceso al <strong>Campus CFC LITE</strong> no es válido.<br>
+      Puede deberse a que:
+      <br><br>
+      • Estás intentando abrir el Campus desde un archivo descargado (<strong>file://</strong>)<br>
+      • Estás usando <strong>localhost</strong> o un dominio no autorizado<br>
+      • Se está intentando incrustar el Campus dentro de otra web o aplicación
+    </p>
+
+    <!-- 🔐 Botón único, sin links externos -->
+    <button class="blocked-btn" onclick="window.location.href='html/login.html'">
+      Volver al login oficial
+    </button>
+
+    <div class="blocked-footer">
+      Si compraste acceso y ves esta pantalla, contactá al soporte del Campus CFC.
+    </div>
+  </div>
+</body>
+</html>
