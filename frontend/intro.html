@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Video Guía — Campus CFC Trading</title>
+  <link rel="stylesheet" href="../css/premium.min.css?v=20251103">
+
+  <!-- ✅ CFC_FUNC_7_3E_V43_PREMIUM_REDIRECT — Overlay + Flash + Loader dorado -->
+  <style>
+    body {
+      margin: 0;
+      background: radial-gradient(circle, #1a1a1a, #000);
+      overflow-x: hidden;
+      font-family: "Poppins", sans-serif;
+    }
+
+    .video-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.88);
+      backdrop-filter: blur(6px);
+      z-index: 99999;
+      animation: fadeIn 0.6s ease;
+    }
+    .video-overlay.fade-out { animation: fadeOut 0.6s ease forwards; }
+
+    .video-box {
+      text-align: center;
+      max-width: 900px;
+      width: 90%;
+      background: rgba(20, 20, 20, 0.6);
+      border-radius: 16px;
+      box-shadow: 0 0 25px rgba(255, 215, 0, 0.35);
+      padding: 20px;
+      animation: zoomIn 0.8s ease;
+    }
+
+    #welcomeVideo {
+      width: 100%;
+      border-radius: 12px;
+      box-shadow: 0 0 20px rgba(255, 215, 0, 0.4);
+      margin-bottom: 16px;
+      background: #000;
+    }
+
+    #closeOverlay {
+      background: linear-gradient(90deg, #ffd700, #f0c03d);
+      color: #000;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+    }
+
+    #closeOverlay:hover {
+      background: #000;
+      color: #ffd700;
+      transform: scale(1.05);
+    }
+
+    /* ✨ Efecto dorado */
+    #goldenFlash {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle, rgba(255,215,0,0.9) 0%, rgba(255,215,0,0.1) 60%, transparent 100%);
+      z-index: 999999;
+      opacity: 0;
+      pointer-events: none;
+      animation: none;
+    }
+
+    #goldenFlash.active {
+      animation: goldenFlashAnim 0.6s ease-in-out forwards;
+    }
+
+    @keyframes goldenFlashAnim {
+      0% { opacity: 0; transform: scale(0.8); }
+      40% { opacity: 1; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(2.5); }
+    }
+
+    /* ✅ Loader dorado */
+    #goldenLoader {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle, rgba(255,215,0,0.1) 0%, rgba(0,0,0,0.9) 100%);
+      color: #ffd700;
+      font-size: 1.4rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      z-index: 999999;
+      transition: opacity 0.5s ease;
+      opacity: 0;
+    }
+
+    #goldenLoader.visible {
+      display: flex;
+      opacity: 1;
+    }
+
+    .loaderText {
+      animation: pulseText 1.2s infinite;
+    }
+
+    @keyframes pulseText {
+      0% { opacity: 0.6; transform: scale(0.95); }
+      50% { opacity: 1; transform: scale(1.05); }
+      100% { opacity: 0.6; transform: scale(0.95); }
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
+    @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  </style>
+</head>
+
+<body>
+  <!-- 🎬 Overlay -->
+  <div id="videoOverlay" class="video-overlay">
+    <div class="video-box">
+      <video id="welcomeVideo" src="../media/guia_v81.mp4" controls autoplay playsinline preload="auto">
+        Tu navegador no soporta videos HTML5.
+      </video>
+      <button id="closeOverlay">Entrar al Campus ✅</button>
+    </div>
+  </div>
+
+  <!-- ⚡ Flash -->
+  <div id="goldenFlash"></div>
+
+  <script src="../js/intro.js?v=20251103"></script>
+
+  <!-- 🔒 CFC-SYNC -->
+  <script>
+    console.log("🧩 CFC_SYNC checkpoint:", "intro.html — CFC_FUNC_7_3E_V43_PREMIUM_REDIRECT aplicado", new Date().toLocaleString());
+  </script>
+
+  <!-- 🔒 CFC-LOCK V72 -->
+<script src="js/domain_lock_v72.js" defer></script>
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="/js/bundle_core.min.js" defer></script>
+</body>
+</html>

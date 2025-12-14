@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Perfil — Campus CFC LITE</title>
+  <link rel="stylesheet" href="../css/premium.css?v=20251106" />
+
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 18px;
+      right: 22px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 2px solid var(--color-accent, #ffd700);
+      background: var(--color-panel, #111);
+      color: var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease-in-out;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+
+    main {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .ultimo-examen h3 { color: var(--color-accent, #ffd700); font-size: 1.1rem; }
+    .ultimo-examen p { font-size: 0.95rem; line-height: 1.4; margin-top: 6px; }
+  </style>
+</head>
+
+<body>
+  <header>
+    <h2>👤 Perfil del Usuario</h2>
+  </header>
+
+  <button id="theme-toggle" title="Cambiar tema">🌙</button>
+
+  <main>
+    <p>Esta es la página de Perfil del Campus CFC LITE V41 REAL.</p>
+
+    <div style="margin-top:30px;">
+      <button id="btnStats" class="btn-main">📊 Mi progreso</button>
+    </div>
+
+    <section id="emocion-section" style="margin-top:30px;">
+      <h3>🧠 Estado Emocional Diario</h3>
+      <div id="emotionScore" style="font-size:1.5rem;margin-top:10px;font-weight:bold;color:var(--color-accent);"></div>
+      <p id="emotionMessage" style="font-size:0.9rem;margin-top:8px;opacity:0.8;"></p>
+    </section>
+
+    <div class="bitacora-access" style="margin-top:30px;">
+      <button class="btn-bitacora" onclick="window.location.href='../pages/bitacora_v416.html?v=20251107CFC_FIX4'">
+        🧠 Bitácora Mental del Trader
+      </button>
+      <p style="font-size:0.85rem;margin-top:6px;">Registrá tus reflexiones y aprendizajes del día.</p>
+    </div>
+
+    <div class="return-container" style="margin-top:25px;">
+      <button class="btn-return" onclick="window.location.href='../modules/index.html'">⬅ Volver al Campus</button>
+    </div>
+  </main>
+
+  <div id="footer-placeholder"></div>
+  <script src="../js/footer.js" defer></script>
+  <script src="../js/stats_v1.js" defer></script>
+  <script src="../js/activity_tracker.js?v=20251106" defer></script>
+
+  <!-- ✅ DAILY INIT DEBE IR AQUÍ -->
+  <script src="../js/cfc_daily_init.js" defer></script>
+
+  <!-- ✅ MOTOR DE PROGRESO V3 -->
+  <script src="../js/cfc_progress_core.js" defer></script>
+  <script src="../js/cfc_progress_overlay.js" defer></script>
+
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    const currentTheme = localStorage.getItem("CFC_THEME_STATE") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    btn.addEventListener("click", () => {
+      const newTheme = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("CFC_THEME_STATE", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+    });
+  });
+  </script>
+
+  <script>
+  const scoreRaw = localStorage.getItem("emotionScore");
+  const box = document.getElementById("emotionScore");
+  const msg = document.getElementById("emotionMessage");
+
+  if (scoreRaw && !isNaN(parseInt(scoreRaw))) {
+    const val = parseInt(scoreRaw, 10);
+    let emoji="🙂",mensaje="Buen enfoque mental.";
+    if (val<=3){emoji="😔";mensaje="Momento de reconectar con tu calma.";}
+    else if (val<=6){emoji="😐";mensaje="Estás estable, pero podés mejorar tu enfoque.";}
+    else if (val<=8){emoji="😊";mensaje="Excelente disciplina emocional.";}
+    else if (val<=10){emoji="🔥";mensaje="Máxima claridad mental, seguí así.";}
+    box.textContent=`${emoji} ${val}/10`;
+    msg.textContent=mensaje;
+  } else {
+    box.textContent="⚠️ Aún no registraste tu emoción de hoy.";
+    msg.textContent="Registrá tu autoevaluación al cargar el Campus.";
+  }
+  </script>
+
+  <script>
+  function mostrarUltimoExamen() {
+    try {
+      let examResults = JSON.parse(localStorage.getItem("examResults") || "[]");
+
+      if (!examResults.length) {
+        const backup = JSON.parse(localStorage.getItem("examResults_backup") || "[]");
+        if (backup.length) {
+          examResults = backup;
+          localStorage.setItem("examResults", JSON.stringify(backup));
+          console.log("♻️ Perfil: examResults restaurado desde backup.");
+        }
+      }
+
+      if (!examResults.length) return;
+
+      const ultimo = examResults.sort((a, b) => new Date(b.date) - new Date(a.date))[0];
+
+      const contenedor = document.querySelector("main");
+      const bloque = document.createElement("div");
+      bloque.className = "ultimo-examen";
+
+      bloque.innerHTML = `
+        <h3>📘 Último examen completado</h3>
+        <p>
+          <strong>${ultimo.module}</strong><br>
+          Puntaje: <b style="color:var(--color-accent);">${ultimo.score}%</b> — ${ultimo.status}<br>
+          ⏱️ ${ultimo.duration || "-"} &nbsp;|&nbsp; 📅 ${ultimo.date || "-"} ${ultimo.time || ""}
+        </p>`;
+
+      contenedor.appendChild(bloque);
+    } catch (err) {
+      console.warn("⚠️ Error al mostrar último examen:", err);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", mostrarUltimoExamen);
+  </script>
+
+  <script>
+  document.getElementById("btnStats").addEventListener("click", () => {
+    if (typeof CFC_showProgressOverlayV3 === "function") {
+      CFC_showProgressOverlayV3();
+    } else {
+      alert("⚠️ El sistema de progreso no está disponible en este momento. Actualizá la página e intentá de nuevo.");
+    }
+  });
+  </script>
+
+  <script src="../js/domain_lock_v72.js" defer></script>
+  <script src="../js/bundle_core.min.js" defer></script>
+
+</body>
+</html>
