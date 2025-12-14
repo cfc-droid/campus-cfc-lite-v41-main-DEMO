@@ -1,48 +1,24 @@
-/* ==========================================================
-🔐 CFC_STORAGE_ROUTER_V2_REAL_DYNAMIC
-----------------------------------------------------------
-• NO usa "guest"
-• Espera a que exista CFC_EMAIL
-• Aislamiento real por usuario
-• Compatible con TODO el campus
-========================================================== */
+(function() {
 
-(function () {
+  const email = localStorage.getItem("CFC_EMAIL") || "guest";
+  const USER_KEY = email.replace(/[^a-zA-Z0-9]/g, "_") + "_";
 
-  const originalSet = localStorage.setItem.bind(localStorage);
-  const originalGet = localStorage.getItem.bind(localStorage);
-  const originalRemove = localStorage.removeItem.bind(localStorage);
+  const originalSet = localStorage.setItem;
+  const originalGet = localStorage.getItem;
+  const originalRemove = localStorage.removeItem;
 
-  function getUserPrefix() {
-    const email = originalGet("CFC_EMAIL");
-    if (!email) return null;
-    return email.replace(/[^a-zA-Z0-9]/g, "_") + "_";
-  }
-
-  localStorage.setItem = function (key, value) {
-    const prefix = getUserPrefix();
-    if (!prefix) {
-      return originalSet(key, value);
-    }
-    return originalSet(prefix + key, value);
+  localStorage.setItem = function(key, value) {
+    return originalSet.call(this, USER_KEY + key, value);
   };
 
-  localStorage.getItem = function (key) {
-    const prefix = getUserPrefix();
-    if (!prefix) {
-      return originalGet(key);
-    }
-    return originalGet(prefix + key);
+  localStorage.getItem = function(key) {
+    return originalGet.call(this, USER_KEY + key);
   };
 
-  localStorage.removeItem = function (key) {
-    const prefix = getUserPrefix();
-    if (!prefix) {
-      return originalRemove(key);
-    }
-    return originalRemove(prefix + key);
+  localStorage.removeItem = function(key) {
+    return originalRemove.call(this, USER_KEY + key);
   };
 
-  console.log("🔐 CFC_STORAGE_ROUTER_V2 activo — aislamiento dinámico por usuario");
+  console.log("🔐 CFC_STORAGE_ROUTER_ACTIVO — aislamiento total por usuario:", USER_KEY);
 
 })();
