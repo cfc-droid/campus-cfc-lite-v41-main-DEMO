@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <title>Examen — Módulo 18 — La Mentalidad del Mentor Trader</title>
+
+  <!-- ✅ CFC_FUNC_1_01_FIXRUTAS_2025-10-30 -->
+  <link rel="stylesheet" href="../../css/premium.css">
+  <link rel="stylesheet" href="../../css/exam-extra.css">
+  <link rel="stylesheet" href="../../css/variables.css?v=20251102" />
+  <link rel="stylesheet" href="../../css/premium.min.css?v=20251102" />
+
+  <!-- ✅ Motivación universal -->
+  <script src="../../js/motivation.js" defer></script>
+
+  <!-- ✅ CFC_FIX_V41.23 — Botón tema fijo negro-dorado -->
+  <style>
+    #theme-toggle {
+      position: fixed;
+      top: 16px;
+      right: 8px;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      background: #111;
+      color: var(--color-accent, #ffd700);
+      border: 2px solid var(--color-accent, #ffd700);
+      font-size: 1.2rem;
+      font-weight: 700;
+      cursor: pointer;
+      z-index: 9999;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(255,215,0,0.3);
+    }
+    #theme-toggle:hover {
+      background: var(--color-accent, #ffd700);
+      color: #000;
+      transform: scale(1.05);
+    }
+    #theme-toggle:active {
+      transform: scale(0.92);
+    }
+  </style>
+</head>
+
+<body data-module="18">
+
+  <!-- 🌗 Botón cambio de tema -->
+  <button id="theme-toggle" title="Cambiar modo">🌙</button>
+
+  <main class="contenido">
+    <h1>Examen — Módulo 18: La Mentalidad del Mentor Trader</h1>
+    <p><em>Reflexioná antes de responder. Este examen evalúa tu comprensión sobre la transición del dominio individual a la enseñanza consciente, la empatía y la madurez emocional del mentor trader.</em></p>
+
+    <form id="exam18">
+      <!-- Pregunta 1 -->
+      <fieldset>
+        <legend>1) Según el Capítulo 1, ¿cuál es la principal característica que define la transición del trader individual al mentor consciente?</legend>
+        <!-- Correcta: C -->
+        <label><input name="q1" type="radio" value="A"> A) La habilidad técnica superior en la lectura del mercado.</label><br>
+        <label><input name="q1" type="radio" value="B"> B) La capacidad de transmitir estrategias rentables de forma directa.</label><br>
+        <label><input name="q1" type="radio" value="C"> C) La madurez emocional para guiar sin depender del resultado ni del reconocimiento.</label><br>
+        <label><input name="q1" type="radio" value="D"> D) La búsqueda de formar un grupo de seguidores fieles a su estilo operativo.</label>
+      </fieldset>
+
+      <!-- Pregunta 2 -->
+      <fieldset>
+        <legend>2) En el Capítulo 2, “El Arte de Guiar sin Imponer”, ¿qué actitud representa mejor al mentor trader consciente?</legend>
+        <!-- Correcta: B -->
+        <label><input name="q2" type="radio" value="A"> A) Dar instrucciones precisas para evitar errores del aprendiz.</label><br>
+        <label><input name="q2" type="radio" value="B"> B) Formular preguntas reflexivas que despierten introspección y autonomía.</label><br>
+        <label><input name="q2" type="radio" value="C"> C) Corregir inmediatamente cualquier fallo para acelerar el aprendizaje.</label><br>
+        <label><input name="q2" type="radio" value="D"> D) Priorizar los resultados financieros del aprendiz sobre su equilibrio emocional.</label>
+      </fieldset>
+
+      <!-- Pregunta 3 -->
+      <fieldset>
+        <legend>3) De acuerdo con el Capítulo 3, “La Construcción del Legado Educativo”, ¿cuál es la esencia del legado del mentor trader?</legend>
+        <!-- Correcta: D -->
+        <label><input name="q3" type="radio" value="A"> A) Crear una marca reconocida dentro del mundo del trading.</label><br>
+        <label><input name="q3" type="radio" value="B"> B) Mantener contacto permanente con todos los alumnos formados.</label><br>
+        <label><input name="q3" type="radio" value="C"> C) Elaborar materiales técnicos que otros repitan sin modificar.</label><br>
+        <label><input name="q3" type="radio" value="D"> D) Transmitir valores, hábitos y mentalidad que generen independencia y madurez emocional.</label>
+      </fieldset>
+
+      <!-- Pregunta 4 -->
+      <fieldset>
+        <legend>4) Según el Capítulo 4, “El Maestro que Permanece en Silencio”, ¿qué comunica el mentor cuando elige no intervenir ante el error del aprendiz?</legend>
+        <!-- Correcta: A -->
+        <label><input name="q4" type="radio" value="A"> A) Confianza en la capacidad del otro para descubrir por sí mismo el aprendizaje oculto.</label><br>
+        <label><input name="q4" type="radio" value="B"> B) Falta de interés en los resultados obtenidos por el aprendiz.</label><br>
+        <label><input name="q4" type="radio" value="C"> C) Desacuerdo con la metodología aplicada durante la sesión.</label><br>
+        <label><input name="q4" type="radio" value="D"> D) Deseo de mantener distancia emocional para conservar autoridad.</label>
+      </fieldset>
+
+      <button type="button" onclick="enviarExamen()">Enviar respuestas</button>
+    </form>
+  </main>
+
+  <footer class="firma-cfc">
+    <p>© Campus CFC Trading LITE V41 — Cristian F. Choqui</p>
+  </footer>
+
+  <!-- 🔙 Botón volver -->
+  <script src="../../js/backButton.js"></script>
+
+  <!-- ✅ Progress global -->
+  <script src="../../js/progress_v2.js?v=9.8C" defer></script>
+  <!-- ✅ Motor examen unificado -->
+  <script src="../../js/exam_v2.js"></script>
+  <!-- ✅ Auto-Injector Global -->
+  <script src="../../js/auto_injector.js?v=20251102" defer></script>
+  <!-- ✅ Tracker de actividad -->
+  <script src="../../js/activity_tracker.js?v=20251106" defer></script>
+
+<!- 🎧 CFC-VOICE READER PRO V26.0 ->
+<script src="../../js/core/voiceReader_pro_v26.js?v=20251214" defer></script>
+
+  <!-- ✅ CFC_FUNC_5_1C_FIX_V47 — Sistema persistente claro/oscuro -->
+  <script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("theme-toggle");
+    if (!btn) return;
+
+    const currentTheme = localStorage.getItem("theme") || "dark";
+    document.documentElement.setAttribute("data-theme", currentTheme);
+    btn.textContent = currentTheme === "light" ? "🌙" : "☀️";
+
+    btn.addEventListener("click", () => {
+      const newTheme =
+        document.documentElement.getAttribute("data-theme") === "dark"
+          ? "light"
+          : "dark";
+      document.documentElement.setAttribute("data-theme", newTheme);
+      localStorage.setItem("theme", newTheme);
+      btn.textContent = newTheme === "light" ? "🌙" : "☀️";
+      console.log("🌗 Tema cambiado a:", newTheme);
+    });
+  });
+  </script>
+
+<!-- 🔒 CFC-LOCK V72 -->
+<script src="../../js/domain_lock_v72.js" defer></script> 
+
+<!-- 🔥 CFC-BUNDLE -->
+<script src="../../js/bundle_core.min.js" defer></script> 
+</body>
+</html>
+
