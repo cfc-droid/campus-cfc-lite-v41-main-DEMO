@@ -1,0 +1,27 @@
+
+/* CFC LITE v37 — estilos extra para exámenes y progreso */
+label.cfc-correct { background: #123f12; color:#c9f7c9; border-radius:6px; padding:2px 6px; }
+label.cfc-wrong   { background: #3f1212; color:#f7c9c9; border-radius:6px; padding:2px 6px; }
+a.cfc-locked { opacity: .5; pointer-events: auto; cursor: not-allowed; }
+.cfc-progress-wrap { background:#222; border-radius:10px; height:10px; }
+.cfc-progress-bar  { background: linear-gradient(90deg, gold, orange); height:10px; width:0; border-radius:10px; transition: width .3s ease-in-out; }
+.cfc-progress-text { font-size:.9rem; margin-top:6px; color:#ddd; }
+
+/* FIX SOLO PARA EXAMEN — Centrado perfecto del botón de audio */
+#cfcTTSBtn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    padding: 0 !important;
+    line-height: 0 !important;
+
+    font-size: 1.45rem !important;
+}
+
+#cfcTTSBtn span,
+#cfcTTSBtn i,
+#cfcTTSBtn svg {
+    display: block !important;
+    line-height: 1 !important;
+}

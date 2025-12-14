@@ -1,0 +1,27 @@
+/* ===========================
+   GLASSMORPHISM & SOMBREADO PREMIUM
+   =========================== */
+
+.glass-box {
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px) saturate(150%);
+  -webkit-backdrop-filter: blur(10px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 20px;
+  color: var(--text-light);
+}
+
+/* Efecto hover sutil dorado */
+.glass-box:hover {
+  border-color: var(--gold);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Texto dentro de los paneles */
+.glass-box h1, .glass-box h2, .glass-box h3 {
+  color: var(--gold);
+  text-shadow: 0 0 6px rgba(212, 175, 55, 0.3);
+}
