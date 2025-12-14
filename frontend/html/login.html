@@ -1172,9 +1172,9 @@ localStorage.setItem(
 // ✅ MARCAR LOGIN COMO ACEPTADO PARA ACCIÓN 4/5-A.3
 sessionStorage.setItem("CFC_LOGIN_OK", "1");
 
-// ========================================================
+// =======================================================
 // 🔧 FIX CRÍTICO: evitar redeclaración de "email"
-// ========================================================
+// =======================================================
 const loginData = await CFC_login(email, license);
 const device_id = loginData.device_id;
 const session_id = loginData.session_id;
