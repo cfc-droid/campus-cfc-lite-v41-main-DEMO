@@ -3,7 +3,6 @@
    ---------------------------------------------------------------------------
    FASE 2/5 — SUBPASO 1.4 + SUBPASO 2.4 + SUBPASO 3.4 + SUBPASO 4.4
    + REPARACIÓN PRUEBA 2 (Tiempo hoy + Días totales real)
-   + FIX PRUEBA 4 — RESET DURO DE PROGRESO CUANDO NO EXISTE DATA
    ============================================================================ 
 */
 
@@ -58,34 +57,29 @@
     ];
 
     // =========================================================================
-    // OBJETO CENTRAL DEL SISTEMA (SINGLETON EN MEMORIA)
+    // OBJETO CENTRAL DEL SISTEMA
     // =========================================================================
-    const CFC_PROGRESS_V3 = {};
+    const CFC_PROGRESS_V3 = {
+        modulesCompleted: 0,
+        lastCompletedModule: "—",
+        currentModule: "—",
 
-    // =========================================================================
-    // RESET DURO — FIX PRUEBA 4 (CRÍTICO)
-    // =========================================================================
-    function resetProgressObject() {
-        CFC_PROGRESS_V3.modulesCompleted = 0;
-        CFC_PROGRESS_V3.lastCompletedModule = "—";
-        CFC_PROGRESS_V3.currentModule = MODULES_FULL[1];
+        firstSessionDate: "—",
+        lastSessionDate: "—",
+        daysStudiedTotal: 0,
 
-        CFC_PROGRESS_V3.firstSessionDate = "—";
-        CFC_PROGRESS_V3.lastSessionDate = "—";
-        CFC_PROGRESS_V3.daysStudiedTotal = 0;
+        activeTotalMinutes: 0,
+        activeTodayMinutes: 0,
+        averageTimePerModule: 0,
+        estimatedTimeToFinish: 0,
 
-        CFC_PROGRESS_V3.activeTotalMinutes = 0;
-        CFC_PROGRESS_V3.activeTodayMinutes = 0;
-        CFC_PROGRESS_V3.averageTimePerModule = 0;
-        CFC_PROGRESS_V3.estimatedTimeToFinish = 0;
+        percent: 0,
 
-        CFC_PROGRESS_V3.percent = 0;
-
-        CFC_PROGRESS_V3.timeTotalText = "0 h 00 min";
-        CFC_PROGRESS_V3.timeTodayText = "0 h 00 min";
-        CFC_PROGRESS_V3.avgPerModuleText = "0 h 00 min";
-        CFC_PROGRESS_V3.estimatedText = "0 h 00 min";
-    }
+        timeTotalText: "0 h 00 min",
+        timeTodayText: "0 h 00 min",
+        avgPerModuleText: "0 h 00 min",
+        estimatedText: "0 h 00 min"
+    };
 
     // =========================================================================
     // FUNCIÓN GLOBAL: CFC_getProgressV3()
@@ -93,22 +87,10 @@
     window.CFC_getProgressV3 = function () {
 
         /* =============================================================
-           FIX PRUEBA 4 — DETECCIÓN DE USUARIO SIN PROGRESO
+           SUBPASO 2.4 — CÁLCULO DE MÓDULOS (idéntico a V41 real)
            ============================================================= */
 
-        const rawProgress = localStorage.getItem("progressData");
-
-        if (!rawProgress) {
-            console.warn("⚠️ CFC_PROGRESS_CORE: progreso inexistente → RESET DURO aplicado");
-            resetProgressObject();
-            return CFC_PROGRESS_V3;
-        }
-
-        /* =============================================================
-           SUBPASO 2.4 — CÁLCULO DE MÓDULOS
-           ============================================================= */
-
-        const progressData = safeParseJSON(rawProgress, {});
+        const progressData = safeParseJSON(localStorage.getItem("progressData") || "{}", {});
         const completedRaw = Array.isArray(progressData.completed) ? progressData.completed : [];
 
         const completedModules = completedRaw
@@ -125,23 +107,27 @@
         const modulesCompleted = completedModules.length;
         CFC_PROGRESS_V3.modulesCompleted = modulesCompleted;
 
-        const highestPassed = modulesCompleted > 0
+        let highestPassed = (modulesCompleted > 0)
             ? Math.max.apply(null, completedModules)
             : 0;
 
         CFC_PROGRESS_V3.lastCompletedModule =
             highestPassed > 0 ? MODULES_FULL[highestPassed] : "—";
 
-        const nextModuleIndex = Math.min(Math.max(highestPassed + 1, 1), 20);
+        let nextModuleIndex = highestPassed + 1;
+        if (nextModuleIndex < 1) nextModuleIndex = 1;
+        if (nextModuleIndex > 20) nextModuleIndex = 20;
         CFC_PROGRESS_V3.currentModule = MODULES_FULL[nextModuleIndex];
 
         CFC_PROGRESS_V3.percent = Math.floor((modulesCompleted / 20) * 100);
 
         /* =============================================================
-           SUBPASO 3.4 — TIEMPOS
+           SUBPASO 3.4 — CÁLCULO DE TIEMPOS ( + REPARACIÓN PRUEBA 2 )
            ============================================================= */
 
         const rawTotal = parseInt(localStorage.getItem("CFC_time_total") || "0", 10);
+
+        // --- NUEVO SISTEMA: Tiempo HOY real ---
         const rawToday = parseInt(localStorage.getItem("CFC_time_today") || "0", 10);
         const savedDate = localStorage.getItem("CFC_today_date");
 
@@ -151,6 +137,7 @@
         const yyyy = now.getFullYear();
         const todayStr = `${dd}/${mm}/${yyyy}`;
 
+        // Si el día cambió → resetear tiempo diario
         if (savedDate !== todayStr) {
             localStorage.setItem("CFC_today_date", todayStr);
             localStorage.setItem("CFC_time_today", "0");
@@ -164,12 +151,14 @@
         CFC_PROGRESS_V3.activeTotalMinutes = activeTotalMinutes;
         CFC_PROGRESS_V3.activeTodayMinutes = activeTodayMinutes;
 
-        const avg = (modulesCompleted > 0 && activeTotalMinutes > 0)
-            ? Math.round(activeTotalMinutes / modulesCompleted)
-            : 0;
-
+        let avg = 0;
+        if (modulesCompleted > 0 && activeTotalMinutes > 0) {
+            avg = Math.round(activeTotalMinutes / modulesCompleted);
+        }
         CFC_PROGRESS_V3.averageTimePerModule = avg;
-        CFC_PROGRESS_V3.estimatedTimeToFinish = (20 - modulesCompleted) * avg;
+
+        const remaining = 20 - modulesCompleted;
+        CFC_PROGRESS_V3.estimatedTimeToFinish = remaining * avg;
 
         CFC_PROGRESS_V3.timeTotalText = fmtMinutesToText(activeTotalMinutes);
         CFC_PROGRESS_V3.timeTodayText = fmtMinutesToText(activeTodayMinutes);
@@ -177,32 +166,52 @@
         CFC_PROGRESS_V3.estimatedText = fmtMinutesToText(CFC_PROGRESS_V3.estimatedTimeToFinish);
 
         /* =============================================================
-           SUBPASO 4.4 — FECHAS
+           SUBPASO 4.4 — FECHAS Y DÍAS DE ESTUDIO (REPARACIÓN PRUEBA 2)
            ============================================================= */
 
         const stats = safeParseJSON(localStorage.getItem("CFC_stats") || "{}", {});
-        let firstSession = localStorage.getItem("CFC_firstSessionDate");
 
-        if (!firstSession && stats.firstSessionDate) {
-            firstSession = stats.firstSessionDate;
-            localStorage.setItem("CFC_firstSessionDate", firstSession);
-        }
+        const legacyLastDate = localStorage.getItem("CFC_lastDate");
+        const legacyTotalDaysRaw = localStorage.getItem("CFC_totalDays");
 
-        if (!firstSession) {
-            firstSession = todayStr;
-            localStorage.setItem("CFC_firstSessionDate", firstSession);
-        }
+// =============================================
+// PRIMERA SESIÓN — SISTEMA INMUTABLE REAL + MIGRACIÓN
+// =============================================
 
-        CFC_PROGRESS_V3.firstSessionDate = firstSession;
-        CFC_PROGRESS_V3.lastSessionDate = stats.lastSessionDate || todayStr;
+// 1) Intentar leer la clave nueva (inmutable)
+let fixedFirst = localStorage.getItem("CFC_firstSessionDate");
 
-        let totalDays = parseInt(localStorage.getItem("CFC_totalDays") || "0", 10);
-        const lastDay = localStorage.getItem("CFC_lastDate");
+// 2) Si NO existe, pero existe la fecha real en el sistema viejo → migrar
+if (!fixedFirst && stats.firstSessionDate) {
+    fixedFirst = stats.firstSessionDate;
+    localStorage.setItem("CFC_firstSessionDate", fixedFirst);
+}
 
-        if (lastDay !== todayStr) {
-            totalDays += 1;
-            localStorage.setItem("CFC_totalDays", totalDays.toString());
-            localStorage.setItem("CFC_lastDate", todayStr);
+// 3) Si no existe ninguna → usar hoy (solo primera vez real)
+if (!fixedFirst) {
+    fixedFirst = todayStr;
+    localStorage.setItem("CFC_firstSessionDate", fixedFirst);
+}
+
+// 4) Guardar en el objeto final
+CFC_PROGRESS_V3.firstSessionDate = fixedFirst;
+
+        // Última sesión
+        CFC_PROGRESS_V3.lastSessionDate =
+            stats.lastSessionDate || legacyLastDate || todayStr;
+
+        // --- NUEVO SISTEMA: reconstrucción real de días totales ---
+        let totalDays = parseInt(legacyTotalDaysRaw || "0", 10);
+        const lastDay = legacyLastDate;
+
+        if (!isNaN(totalDays)) {
+            if (lastDay !== todayStr) {
+                totalDays += 1;
+                localStorage.setItem("CFC_totalDays", totalDays.toString());
+                localStorage.setItem("CFC_lastDate", todayStr);
+            }
+        } else {
+            totalDays = activeTotalMinutes > 0 ? 1 : 0;
         }
 
         CFC_PROGRESS_V3.daysStudiedTotal = totalDays;
