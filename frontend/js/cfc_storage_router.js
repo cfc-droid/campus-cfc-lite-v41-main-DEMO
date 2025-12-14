@@ -1,9 +1,19 @@
 (function () {
 
   function resolveUserKey() {
-    const email = localStorage.getItem("CFC_EMAIL");
-    if (!email) return "guest_";
-    return email.replace(/[^a-zA-Z0-9]/g, "_") + "_";
+    try {
+      const raw = localStorage.getItem("CFC_SESSION");
+      if (!raw) return "guest_";
+
+      const session = JSON.parse(raw);
+      if (!session.session_user_email) return "guest_";
+
+      return session.session_user_email
+        .replace(/[^a-zA-Z0-9]/g, "_") + "_";
+
+    } catch (e) {
+      return "guest_";
+    }
   }
 
   const originalSet = localStorage.setItem.bind(localStorage);
@@ -25,6 +35,8 @@
     return originalRemove(USER_KEY + key);
   };
 
-  console.log("🔐 CFC_STORAGE_ROUTER_ACTIVO — aislamiento dinámico por usuario");
+  console.log(
+    "🔐 CFC_STORAGE_ROUTER_ACTIVO — aislamiento por session_user_email"
+  );
 
 })();
