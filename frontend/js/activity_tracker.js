@@ -1,61 +1,45 @@
 /* ==========================================================
-✅ CFC_ACTIVITY_V12.2_FIX_PAUSE_REAL_20251110
+✅ CFC_ACTIVITY_V12.3_USER_SCOPED_DAILY_RESET_REAL
 ----------------------------------------------------------
-• Pausa automática al cambiar pestaña o cerrar navegador
-• Reanuda desde el tiempo exacto al volver
-• Compatible con LOCK_TOTAL_PERSIST_REAL + stats_v1.js
+• Progreso por USUARIO (email)
+• Reset automático diario
+• Sin interferir con otros dispositivos
+• Compatible con profile.js y studyStats
 ========================================================== */
 
 (function () {
-  const TAB_ID = `CFC_TAB_${Date.now()}_${Math.floor(Math.random() * 9999)}`;
-  const TIME_TOTAL_KEY = "CFC_time_total";
-  const LAST_SYNC_KEY = "CFC_last_sync";
-  const RESET_FLAG = "CFC_reset_done";
 
-  let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || 0);
+  const email = localStorage.getItem("CFC_EMAIL");
+  if (!email) {
+    console.warn("⛔ activity_tracker detenido: sin CFC_EMAIL");
+    return;
+  }
+
+  const USER_KEY = email.replace(/[^a-zA-Z0-9]/g, "_");
+
+  const TIME_TOTAL_KEY = `CFC_time_total_${USER_KEY}`;
+  const TIME_TODAY_KEY = `CFC_time_today_${USER_KEY}`;
+  const LAST_DATE_KEY = `CFC_last_date_${USER_KEY}`;
+  const STUDY_STATS_KEY = `studyStats_${USER_KEY}`;
+
+  const todayStr = new Date().toISOString().slice(0, 10);
+
+  // ======== 🔄 RESET DIARIO REAL ========
+  const lastDate = localStorage.getItem(LAST_DATE_KEY);
+  if (lastDate !== todayStr) {
+    localStorage.setItem(TIME_TODAY_KEY, "0");
+    localStorage.setItem(LAST_DATE_KEY, todayStr);
+    console.log("🔄 Reset diario aplicado:", todayStr);
+  }
+
+  let totalSeconds = parseFloat(localStorage.getItem(TIME_TOTAL_KEY) || "0");
+  let todaySeconds = parseFloat(localStorage.getItem(TIME_TODAY_KEY) || "0");
+
   let startTime = Date.now();
-  let lastSync = Date.now();
   let paused = false;
   let rafId = null;
 
-  const bell = new Audio("../../assets/audio/bell-gold.wav");
-  bell.volume = 0.25;
-
-  // ======== 🧠 Reinicio manual seguro ========
-  window.CFC_resetTimer = function () {
-    localStorage.removeItem(TIME_TOTAL_KEY);
-    localStorage.removeItem(LAST_SYNC_KEY);
-    localStorage.removeItem("studyStats");
-    localStorage.removeItem(RESET_FLAG);
-    totalSeconds = 0;
-    indicator.textContent = "🕒 0m 00s ✅";
-    console.log("🔄 CFC_resetTimer → Temporizador reiniciado a 0 ✅");
-  };
-
-  // ======== 🔹 Estado inicial ========
-  let study = {};
-  try {
-    study = JSON.parse(localStorage.getItem("studyStats") || "{}");
-  } catch {
-    study = {};
-  }
-
-  const hasValidStudy =
-    typeof study === "object" &&
-    Object.keys(study).length > 0 &&
-    !isNaN(totalSeconds) &&
-    totalSeconds > 0;
-
-  if (!hasValidStudy) {
-    console.log("🧠 Modo nuevo: inicializando sin estudio previo.");
-    localStorage.setItem("studyStats", JSON.stringify({ minutesActive: 0 }));
-    localStorage.setItem(RESET_FLAG, "true");
-    totalSeconds = 0;
-  } else {
-    console.log("✅ Reanudando sesión previa — tiempo acumulado preservado.");
-  }
-
-  // ======== 🔔 Indicador visual ========
+  // ======== 🔔 Indicador ========
   const indicator = document.createElement("div");
   Object.assign(indicator.style, {
     position: "fixed",
@@ -69,103 +53,76 @@
     fontSize: "0.9rem",
     fontFamily: "Poppins,sans-serif",
     zIndex: "9999",
-    transition: "box-shadow 0.3s ease",
   });
   document.body.appendChild(indicator);
 
-  const updateIndicator = (ping = false) => {
+  const updateIndicator = () => {
     const elapsed = paused ? 0 : (Date.now() - startTime) / 1000;
-    const m = Math.floor((totalSeconds + elapsed) / 60);
-    const s = Math.floor((totalSeconds + elapsed) % 60);
-    indicator.textContent = `🕒 ${m}m ${s.toString().padStart(2, "0")}s ✅`;
-    if (ping) {
-      indicator.style.boxShadow = "0 0 12px 2px #FFD700";
-      setTimeout(() => (indicator.style.boxShadow = "none"), 400);
-    }
+    const total = totalSeconds + elapsed;
+    const m = Math.floor(total / 60);
+    const s = Math.floor(total % 60);
+    indicator.textContent = `🕒 ${m}m ${s.toString().padStart(2, "0")}s`;
   };
 
-  // ======== 🔁 Loop maestro persistente ========
-  const SYNC_PERIOD = 10000;
-  const SYNC_TOLERANCE = 250;
+  // ======== 🔁 LOOP PRINCIPAL ========
+  const LOOP_MS = 10000;
 
-  const forcedLoop = () => {
+  const loop = () => {
     if (paused) return;
+
     const now = Date.now();
-    const diff = now - lastSync;
+    const elapsed = (now - startTime) / 1000;
 
-    if (diff >= SYNC_PERIOD - SYNC_TOLERANCE) {
-      const elapsed = (now - startTime) / 1000;
-totalSeconds += elapsed;
-startTime = now;
-lastSync = now;
+    totalSeconds += elapsed;
+    todaySeconds += elapsed;
+    startTime = now;
 
-localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
+    localStorage.setItem(TIME_TOTAL_KEY, totalSeconds.toString());
+    localStorage.setItem(TIME_TODAY_KEY, todaySeconds.toString());
 
-// --- TIEMPO ACTIVO HOY (sumar solo dentro del día actual)
-let todaySec = parseInt(localStorage.getItem("CFC_time_today") || "0", 10);
-todaySec += elapsed;
-localStorage.setItem("CFC_time_today", todaySec.toString());
+    const study = {
+      minutesActive: Math.floor(totalSeconds / 60),
+      hoursDisplay: `${Math.floor(totalSeconds / 3600)} h ${Math.floor((totalSeconds % 3600) / 60)} min`,
+      lastSession: new Date().toLocaleDateString("es-AR"),
+    };
 
-localStorage.setItem(LAST_SYNC_KEY, now);
+    localStorage.setItem(STUDY_STATS_KEY, JSON.stringify(study));
 
-      let study = JSON.parse(localStorage.getItem("studyStats") || "{}");
-      if (typeof study !== "object") study = {};
-      study.minutesActive = Math.floor(totalSeconds / 60);
-      localStorage.setItem("studyStats", JSON.stringify(study));
+    // 👉 compatibilidad con profile.js
+    localStorage.setItem("studyStats", JSON.stringify(study));
+    window.dispatchEvent(new Event("CFC_STATS_UPDATED"));
 
-      updateIndicator(true);
-      bell.play().catch(() => {});
-      console.log(`CFC_QA_PING → +${(elapsed / 60).toFixed(2)} min | Total ${(totalSeconds / 60).toFixed(2)}`);
-    }
-
-    rafId = requestAnimationFrame(forcedLoop);
+    updateIndicator();
+    rafId = setTimeout(loop, LOOP_MS);
   };
 
-  const startLoop = () => {
+  // ======== ⏸️ CONTROL VISIBILIDAD ========
+  const pause = () => {
+    if (!paused) {
+      paused = true;
+      clearTimeout(rafId);
+    }
+  };
+
+  const resume = () => {
     if (paused) {
       paused = false;
       startTime = Date.now();
-      lastSync = Date.now();
-      rafId = requestAnimationFrame(forcedLoop);
-      console.log("▶️ CFC_TIMER reanudado.");
+      loop();
     }
   };
 
-  const stopLoop = () => {
-    if (!paused) {
-      paused = true;
-      cancelAnimationFrame(rafId);
-      const now = Date.now();
-      const elapsed = (now - startTime) / 1000;
-      totalSeconds += elapsed;
-      localStorage.setItem(TIME_TOTAL_KEY, totalSeconds);
-      localStorage.setItem(LAST_SYNC_KEY, now);
-      console.log("⏸️ CFC_TIMER pausado (pestaña oculta o cierre).");
-    }
-  };
-
-  // ======== 🎯 Control de visibilidad y cierre ========
   document.addEventListener("visibilitychange", () => {
-    if (document.hidden) stopLoop();
-    else startLoop();
+    document.hidden ? pause() : resume();
   });
 
-  window.addEventListener("beforeunload", stopLoop);
+  window.addEventListener("beforeunload", pause);
 
-  // ======== 🚀 Inicio ========
-  const initAfterDOM = () => {
-    startTime = Date.now();
-    lastSync = Date.now();
-    paused = false;
-    rafId = requestAnimationFrame(forcedLoop);
-    console.log("🔁 Loop maestro CFC iniciado (10 s exactos)");
-  };
+  // ======== 🚀 START ========
+  startTime = Date.now();
+  loop();
 
-  if (document.readyState === "complete" || document.readyState === "interactive")
-    initAfterDOM();
-  else document.addEventListener("DOMContentLoaded", initAfterDOM);
+  setInterval(updateIndicator, 1000);
 
-  setInterval(() => updateIndicator(), 1000);
-
-  console.log(`✅ CFC_ACTIVITY_V12.2_FIX_PAUSE_REAL | TAB:${TAB_ID}`);
+  console.log(`✅ CFC_ACTIVITY_V12.3 activo para ${email}`);
 })();
