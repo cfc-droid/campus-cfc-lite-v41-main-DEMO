@@ -1,5 +1,5 @@
 /* ============================================================
-   PEA CATALOGS — INMUTABLE
+   PEA CATALOGS — INMUTABLE (FINAL)
    Sistema: Análisis (PEA)
    Naturaleza: Auditoría operativa (no humana)
    NOTA:
@@ -19,9 +19,9 @@ export const PEA_MOMENTOS = Object.freeze([
 ]);
 
 export const PEA_MOMENTOS_DESC = Object.freeze({
-  ANTES: "Lo que ocurre antes de ejecutar una operación.",
-  DURANTE: "Lo que ocurre mientras la operación está activa.",
-  DESPUÉS: "Lo que ocurre luego de cerrar la operación.",
+  ANTES: "Antes de ejecutar una operación.",
+  DURANTE: "Mientras la operación está activa.",
+  DESPUÉS: "Luego de cerrar la operación."
 });
 
 /* =========================
@@ -29,39 +29,45 @@ export const PEA_MOMENTOS_DESC = Object.freeze({
    ========================= */
 
 export const PEA_PENSAMIENTOS = Object.freeze([
+  // Urgencia / FOMO
   "Si espero pierdo la entrada",
   "Está yendo sin mí",
   "Tengo que entrar sí o sí",
   "Me la voy a perder",
   "No puedo quedarme afuera",
 
+  // Recuperación / presión
   "No puedo volver a perder",
   "Debo recuperar",
   "Necesito recuperar lo perdido",
   "No puedo cerrar en pérdida",
   "Después de todo lo que perdí, esta tiene que salir",
 
+  // Expectativa negativa
   "No lo voy a conseguir",
   "Seguro sale mal",
   "Esto nunca me sale",
   "Otra vez lo mismo",
 
+  // Exceso de confianza
   "Esta vez es distinta",
   "Ahora sí lo tengo claro",
   "Ya entendí el mercado",
   "Hoy estoy fino",
 
+  // Suposiciones
   "Seguro se da vuelta",
   "No puede seguir más",
   "Ya está estirado",
   "Tiene que corregir",
 
+  // Relajación de reglas
   "No hace falta esperar la señal",
   "Puedo adelantarme",
   "No pasa nada si rompo una regla",
   "Después lo compenso",
 
-     // --- Pensamientos operativos funcionales ---
+  // Pensamientos operativos funcionales
   "Estoy siguiendo mi plan",
   "No hay señal, no opero",
   "Mi trabajo es ejecutar, no adivinar",
@@ -71,14 +77,10 @@ export const PEA_PENSAMIENTOS = Object.freeze([
   "Espero mi setup",
   "Ejecuto sin expectativa",
   "El resultado es irrelevante, importa la ejecución",
-
-"Prefiero perder la oportunidad que romper el plan",
-"No necesito este trade",
-"El mercado va a seguir ahí",
-"Mi ventaja está en esperar",
-"Hoy no es un día claro"
-
-
+  "Prefiero perder la oportunidad que romper el plan",
+  "El mercado va a seguir ahí",
+  "Mi ventaja está en esperar",
+  "Hoy no es un día claro"
 ]);
 
 export const PEA_PENSAMIENTOS_DESC = Object.freeze({
@@ -114,28 +116,23 @@ export const PEA_PENSAMIENTOS_DESC = Object.freeze({
   "No pasa nada si rompo una regla": "Minimización del error.",
   "Después lo compenso": "Postergación del impacto.",
 
-  "Estoy siguiendo mi plan": "Enfoque en ejecución según reglas.",
-  "No hay señal, no opero": "Aceptación consciente de no operar.",
-  "Mi trabajo es ejecutar, no adivinar": "Separación entre análisis y resultado.",
-  "Una operación no define el día": "Desacople emocional del resultado individual.",
+  "Estoy siguiendo mi plan": "Ejecución alineada a reglas.",
+  "No hay señal, no opero": "Decisión consciente de no ejecutar.",
+  "Mi trabajo es ejecutar, no adivinar": "Separación entre proceso y resultado.",
+  "Una operación no define el día": "Desacople emocional.",
   "El riesgo está controlado": "Conciencia del riesgo asumido.",
   "No necesito operar ahora": "Ausencia de urgencia.",
   "Espero mi setup": "Paciencia operativa.",
-  "Ejecuto sin expectativa": "Neutralidad respecto al resultado.",
-  "Respeto el proceso": "Prioridad en reglas por sobre resultados.",
-  "El resultado es irrelevante, importa la ejecución": "Foco en conducta, no en PnL.",
-
-"Prefiero perder la oportunidad que romper el plan": "Priorización de reglas.",
-"No necesito este trade": "Desapego de la ejecución inmediata.",
-"El mercado va a seguir ahí": "Reducción de urgencia.",
-"Mi ventaja está en esperar": "Conciencia estratégica.",
-"Hoy no es un día claro": "Evaluación de contexto desfavorable."
-
-
+  "Ejecuto sin expectativa": "Neutralidad frente al resultado.",
+  "El resultado es irrelevante, importa la ejecución": "Foco en conducta.",
+  "Prefiero perder la oportunidad que romper el plan": "Priorización de reglas.",
+  "El mercado va a seguir ahí": "Reducción de urgencia.",
+  "Mi ventaja está en esperar": "Conciencia estratégica.",
+  "Hoy no es un día claro": "Evaluación de contexto desfavorable."
 });
 
 /* =========================
-   ESTADO OPERATIVO (EMOCIÓN)
+   ESTADO OPERATIVO
    ========================= */
 
 export const PEA_ESTADOS_OPERATIVOS = Object.freeze([
@@ -156,26 +153,22 @@ export const PEA_ESTADOS_OPERATIVOS = Object.freeze([
   "Desilusión",
   "Cansancio mental",
 
-     // --- Estados operativos estables ---
   "Estabilidad",
   "Serenidad",
   "Paciencia",
   "Aceptación",
   "Neutralidad operativa",
 
-"Bloqueo",
-"Saturación",
-"Hiperfoco",
-"Desatención",
-"Automatismo"
-
+  "Bloqueo",
+  "Saturación",
+  "Hiperfoco",
+  "Desatención",
+  "Automatismo"
 ]);
 
 export const PEA_ESTADOS_OPERATIVOS_DESC = Object.freeze({
   Calma: "Estado neutro, sin presión.",
   Foco: "Atención alineada al plan.",
-  Confianza: "Seguridad funcional.",
-  Neutralidad: "Sin carga emocional relevante.",
 
   Urgencia: "Sensación de apuro.",
   Ansiedad: "Activación elevada.",
@@ -192,18 +185,16 @@ export const PEA_ESTADOS_OPERATIVOS_DESC = Object.freeze({
   "Cansancio mental": "Fatiga cognitiva.",
 
   Estabilidad: "Estado sin oscilación emocional.",
-  Serenidad: "Calma sostenida durante la ejecución.",
+  Serenidad: "Calma sostenida.",
   Paciencia: "Capacidad de esperar sin urgencia.",
   Aceptación: "Aceptación del riesgo y del resultado.",
   "Neutralidad operativa": "Ausencia de carga emocional.",
 
-Bloqueo: "Dificultad para ejecutar decisiones.",
-Saturación: "Exceso de estímulos o información.",
-Hiperfoco: "Atención excesiva en un solo elemento.",
-Desatención: "Falta de foco en variables clave.",
-Automatismo: "Ejecución sin análisis consciente."
-
-
+  Bloqueo: "Dificultad para ejecutar.",
+  Saturación: "Exceso de estímulos.",
+  Hiperfoco: "Atención excesiva en un solo punto.",
+  Desatención: "Falta de foco en variables clave.",
+  Automatismo: "Ejecución sin análisis consciente."
 });
 
 /* =========================
@@ -216,7 +207,6 @@ export const PEA_ACCIONES = Object.freeze([
   "Entré tarde",
   "Entré antes",
   "Entré sin señal",
-  "No ejecuté",
 
   "Moví stop",
   "Aumenté tamaño",
@@ -231,7 +221,6 @@ export const PEA_ACCIONES = Object.freeze([
   "Sobreoperé",
   "Operé fuera de horario",
 
-     // --- Acciones disciplinadas ---
   "No operé sin señal",
   "Respeté el stop",
   "Respeté el tamaño",
@@ -242,13 +231,8 @@ export const PEA_ACCIONES = Object.freeze([
   "Operé solo en horario",
   "Ejecuté sin interferencia",
 
-"No tomé trade",
-"Esperé y no ejecuté",
-"Aborté entrada",
-
-"Reducí riesgo",
-"Salí por regla externa"
-
+  "Reducí riesgo",
+  "Salí por regla externa"
 ]);
 
 export const PEA_ACCIONES_DESC = Object.freeze({
@@ -257,7 +241,6 @@ export const PEA_ACCIONES_DESC = Object.freeze({
   "Entré tarde": "Entrada fuera del timing.",
   "Entré antes": "Entrada anticipada.",
   "Entré sin señal": "Entrada sin setup.",
-  "No ejecuté": "Oportunidad no tomada.",
 
   "Moví stop": "Modificación del stop.",
   "Aumenté tamaño": "Incremento de riesgo.",
@@ -282,13 +265,8 @@ export const PEA_ACCIONES_DESC = Object.freeze({
   "Operé solo en horario": "Respeto del marco temporal.",
   "Ejecuté sin interferencia": "Ejecución limpia.",
 
-"No tomé trade": "Decisión consciente de no operar.",
-"Esperé y no ejecuté": "El setup no se confirmó.",
-"Aborté entrada": "Entrada cancelada antes de ejecutarse.",
-
-"Reducí riesgo": "Disminución voluntaria del riesgo durante la operación.",
-"Salí por regla externa": "Salida activada por condición objetiva predefinida."
- 
+  "Reducí riesgo": "Disminución voluntaria del riesgo.",
+  "Salí por regla externa": "Salida por condición objetiva predefinida."
 });
 
 /* =========================
@@ -311,9 +289,9 @@ export const PEA_RIESGO_PLANIFICADO = Object.freeze([
 ]);
 
 export const PEA_RIESGO_PLANIFICADO_DESC = Object.freeze({
-"0.25": "Relación beneficio/riesgo muy baja.",
-"0.5": "Relación beneficio/riesgo baja.",
-"0.75": "Relación beneficio/riesgo moderada baja.",
+  "0.25": "Relación beneficio/riesgo muy baja.",
+  "0.5": "Relación beneficio/riesgo baja.",
+  "0.75": "Relación beneficio/riesgo moderada baja.",
   "1": "Riesgo = beneficio.",
   "2": "Beneficio duplica el riesgo.",
   "3": "Beneficio triplica el riesgo.",
