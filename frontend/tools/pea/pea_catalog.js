@@ -21,7 +21,7 @@ export const PEA_MOMENTOS = Object.freeze([
 export const PEA_MOMENTOS_DESC = Object.freeze({
   ANTES: "Lo que ocurre antes de ejecutar una operación.",
   DURANTE: "Lo que ocurre mientras la operación está activa.",
-  DESPUÉS: "Lo que ocurre luego de cerrar la operación."
+  DESPUÉS: "Lo que ocurre luego de cerrar la operación.",
 });
 
 /* =========================
@@ -59,7 +59,7 @@ export const PEA_PENSAMIENTOS = Object.freeze([
   "No hace falta esperar la señal",
   "Puedo adelantarme",
   "No pasa nada si rompo una regla",
-  "Después lo compenso"
+  "Después lo compenso",
 
      // --- Pensamientos operativos funcionales ---
   "Estoy siguiendo mi plan",
@@ -71,7 +71,7 @@ export const PEA_PENSAMIENTOS = Object.freeze([
   "Espero mi setup",
   "Ejecuto sin expectativa",
   "Respeto el proceso",
-  "El resultado es irrelevante, importa la ejecución"
+  "El resultado es irrelevante, importa la ejecución",
 
 ]);
 
@@ -117,7 +117,7 @@ export const PEA_PENSAMIENTOS_DESC = Object.freeze({
   "Espero mi setup": "Paciencia operativa.",
   "Ejecuto sin expectativa": "Neutralidad respecto al resultado.",
   "Respeto el proceso": "Prioridad en reglas por sobre resultados.",
-  "El resultado es irrelevante, importa la ejecución": "Foco en conducta, no en PnL."
+  "El resultado es irrelevante, importa la ejecución": "Foco en conducta, no en PnL.",
 
 });
 
@@ -143,14 +143,14 @@ export const PEA_ESTADOS_OPERATIVOS = Object.freeze([
   "Rabia",
   "Frustración",
   "Desilusión",
-  "Cansancio mental"
+  "Cansancio mental",
 
      // --- Estados operativos estables ---
   "Estabilidad",
   "Serenidad",
   "Paciencia",
   "Aceptación",
-  "Neutralidad operativa"
+  "Neutralidad operativa",
 
 ]);
 
@@ -178,7 +178,7 @@ export const PEA_ESTADOS_OPERATIVOS_DESC = Object.freeze({
   Serenidad: "Calma sostenida durante la ejecución.",
   Paciencia: "Capacidad de esperar sin urgencia.",
   Aceptación: "Aceptación del riesgo y del resultado.",
-  "Neutralidad operativa": "Ausencia de carga emocional."
+  "Neutralidad operativa": "Ausencia de carga emocional.",
 
 });
 
@@ -205,7 +205,7 @@ export const PEA_ACCIONES = Object.freeze([
 
   "Re-entré sin señal",
   "Sobreoperé",
-  "Operé fuera de horario"
+  "Operé fuera de horario",
 
      // --- Acciones disciplinadas ---
   "No operé sin señal",
@@ -216,7 +216,7 @@ export const PEA_ACCIONES = Object.freeze([
   "Cerré según plan",
   "No re-entré",
   "Operé solo en horario",
-  "Ejecuté sin interferencia"
+  "Ejecuté sin interferencia",
 
 ]);
 
@@ -239,7 +239,7 @@ export const PEA_ACCIONES_DESC = Object.freeze({
 
   "Re-entré sin señal": "Nueva entrada sin criterio.",
   "Sobreoperé": "Exceso de operaciones.",
-  "Operé fuera de horario": "Fuera del plan temporal."
+  "Operé fuera de horario": "Fuera del plan temporal.",
 
   "No operé sin señal": "Decisión consciente de no ejecutar.",
   "Respeté el stop": "El stop no fue modificado.",
@@ -249,7 +249,7 @@ export const PEA_ACCIONES_DESC = Object.freeze({
   "Cerré según plan": "Salida definida previamente.",
   "No re-entré": "Evitó sobreoperar.",
   "Operé solo en horario": "Respeto del marco temporal.",
-  "Ejecuté sin interferencia": "Ejecución limpia."
+  "Ejecuté sin interferencia": "Ejecución limpia.",
  
 });
 
@@ -286,7 +286,7 @@ export const PEA_RIESGO_PLANIFICADO_DESC = Object.freeze({
   "8": "Relación extrema.",
   "9": "Relación extrema.",
   "10": "Relación extrema.",
-  ">10": "Fuera de escala habitual."
+  ">10": "Fuera de escala habitual.",
 });
 
 /* ============================================================
