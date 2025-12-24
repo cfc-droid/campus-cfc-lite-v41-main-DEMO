@@ -1,17 +1,3 @@
-campus-cfc-lite-v41-main-DEMO/frontend/tools/pea
-/pea_screen_2.html
-Go to file
-t
-cfc-droid
-cfc-droid
-Create pea_screen_2.html
-ac9aa9c
- · 
-13 minutes ago
-
-Code
-
-Blame
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -106,15 +92,20 @@ Blame
        ========================= -->
   <script type="module">
     import { runPEAEngine } from "./pea_engine.js";
+    import { readPEAView } from "./pea_view_storage.js";
 
-    // ⚠️ TEMPORAL:
-    // En esta etapa leemos el ÚLTIMO registro del log
-    // Luego se conecta con navegación real
     const emailHash = localStorage.getItem("CFC_EMAIL_HASH");
 
     if (!emailHash) {
       document.body.innerHTML = "<p>Identidad no disponible.</p>";
       throw new Error("No emailHash");
+    }
+
+    const view = readPEAView(emailHash);
+
+    if (!view || !view.selectedId) {
+      document.body.innerHTML = "<p>Vista no disponible.</p>";
+      throw new Error("No selectedId");
     }
 
     const rawLog = localStorage.getItem(`CFC_PEA_LOG_${emailHash}`);
@@ -123,31 +114,38 @@ Blame
       throw new Error("No log");
     }
 
-    const log = JSON.parse(rawLog);
-    if (!log.length) {
-      document.body.innerHTML = "<p>No hay registros PEA.</p>";
-      throw new Error("Log vacío");
+    let log;
+    try {
+      log = JSON.parse(rawLog);
+    } catch {
+      document.body.innerHTML = "<p>Error de lectura del log.</p>";
+      throw new Error("Invalid log");
     }
 
-    const record = log[log.length - 1];
+    const record = log.find(r => r.id === view.selectedId);
 
-    // Ejecutar motor
+    if (!record) {
+      document.body.innerHTML = "<p>Registro no encontrado.</p>";
+      throw new Error("Record not found");
+    }
+
+    // Ejecutar motor determinista
     const computed = runPEAEngine(record);
 
-    // =========================
-    // RENDER
-    // =========================
+    /* =========================
+       RENDER
+       ========================= */
 
     // Resumen
     document.getElementById("pea-summary").innerText =
       `Momento: ${record.momento} | ` +
-      `Pensamiento: ${record.P.pensamientoKey} | ` +
-      `Estado: ${record.E.estadoKey} (${record.E.intensidad})`;
+      `Pensamiento: ${record.P?.pensamientoKey || "—"} | ` +
+      `Estado: ${record.E?.estadoKey || "—"} (${record.E?.intensidad ?? "—"})`;
 
     // Patrones
     const patternsEl = document.getElementById("pea-patterns");
     patternsEl.innerHTML = "";
-    if (!computed.patrones.length) {
+    if (!computed.patrones || !computed.patrones.length) {
       patternsEl.innerHTML = `<li class="empty">Sin patrones detectados</li>`;
     } else {
       computed.patrones.forEach(p => {
@@ -159,14 +157,14 @@ Blame
 
     // Riesgo
     document.getElementById("pea-risk").innerText =
-      computed.riesgoLabel
+      typeof computed.riesgoScore === "number"
         ? `${computed.riesgoLabel} (${computed.riesgoScore})`
         : "Evidencia insuficiente";
 
     // Acciones correctivas
     const actionsEl = document.getElementById("pea-actions");
     actionsEl.innerHTML = "";
-    if (!computed.accionesCorrectivas.length) {
+    if (!computed.accionesCorrectivas || !computed.accionesCorrectivas.length) {
       actionsEl.innerHTML = `<li class="empty">Sin reglas aplicables</li>`;
     } else {
       computed.accionesCorrectivas.forEach(a => {
