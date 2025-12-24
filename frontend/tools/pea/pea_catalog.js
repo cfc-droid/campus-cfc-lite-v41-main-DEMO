@@ -71,7 +71,7 @@ export const PEA_PENSAMIENTOS = Object.freeze([
   "Espero mi setup",
   "Ejecuto sin expectativa",
   "Respeto el proceso",
-  "El resultado es irrelevante, importa la ejecución",
+  "El resultado es irrelevante, importa la ejecución"
 
 ]);
 
@@ -273,9 +273,9 @@ export const PEA_RIESGO_PLANIFICADO = Object.freeze([
 ]);
 
 export const PEA_RIESGO_PLANIFICADO_DESC = Object.freeze({
-  "0.25": "Beneficio muy inferior al riesgo.",
-  "0.5": "Beneficio inferior al riesgo.",
-  "0.75": "Beneficio levemente inferior.",
+"0.25": "Relación beneficio/riesgo muy baja.",
+"0.5": "Relación beneficio/riesgo baja.",
+"0.75": "Relación beneficio/riesgo moderada baja.",
   "1": "Riesgo = beneficio.",
   "2": "Beneficio duplica el riesgo.",
   "3": "Beneficio triplica el riesgo.",
@@ -286,7 +286,7 @@ export const PEA_RIESGO_PLANIFICADO_DESC = Object.freeze({
   "8": "Relación extrema.",
   "9": "Relación extrema.",
   "10": "Relación extrema.",
-  ">10": "Fuera de escala habitual.",
+  ">10": "Fuera de escala habitual."
 });
 
 /* ============================================================
