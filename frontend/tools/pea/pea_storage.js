@@ -1,7 +1,7 @@
 /* ============================================================
    PEA STORAGE — OFFLINE / LOCAL
    Sistema: Análisis (PEA)
-   Bloque: 5/14 — STORAGE OFFLINE + BORRADORES
+   Bloque: 6/14 — STORAGE OFFLINE + BORRADORES
    Naturaleza: Persistencia pura (no lógica)
 
    REGLAS:
@@ -17,13 +17,17 @@
    ========================= */
 
 /**
- * Genera clave única por usuario
+ * Genera clave del LOG por usuario
  * @param {string} emailHash
  */
 function getLogKey(emailHash) {
   return `CFC_PEA_LOG_${emailHash}`;
 }
 
+/**
+ * Genera clave del DRAFT por usuario
+ * @param {string} emailHash
+ */
 function getDraftKey(emailHash) {
   return `CFC_PEA_DRAFT_${emailHash}`;
 }
