@@ -3,90 +3,88 @@
 <head>
   <meta charset="UTF-8" />
   <title>Análisis (PEA) — Historial</title>
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #eee;
-      padding: 20px;
-    }
-
-    h1 {
-      color: #ffd700;
-      margin-bottom: 10px;
-    }
-
-    .block {
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 16px;
-      background: #1a1a1a;
-    }
-
-    .label {
-      font-weight: bold;
-      color: #aaa;
-      margin-bottom: 6px;
-    }
-
-    .empty {
-      color: #777;
-      font-style: italic;
-    }
-
-    table tr {
-      cursor: pointer;
-    }
-
-    table tr:hover {
-      background: #222;
-    }
-
-    button {
-      background: #ffd700;
-      color: #000;
-      border: none;
-      padding: 6px 10px;
-      margin-right: 6px;
-      cursor: pointer;
-      border-radius: 4px;
-      font-weight: bold;
-    }
-  </style>
+  <!-- CSS DEL CAMPUS (OBLIGATORIOS) -->
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/premium.min.css">
 </head>
 
-<body>
+<body class="cfc-bg">
 
-  <h1>Análisis (PEA) — Historial</h1>
-  <p>Auditoría operativa. Lectura fría. Sin interpretación.</p>
+  <!-- HEADER CAMPUS -->
+  <header class="cfc-header">
+    <div class="cfc-header-inner">
+      <h1 class="cfc-title">Análisis (PEA)</h1>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="cfc-page">
+    <div class="cfc-container">
+
+      <!-- TÍTULO -->
+      <section class="cfc-section">
+        <h2>Historial y métricas</h2>
+        <p class="cfc-muted">
+          Auditoría operativa basada en registros históricos.
+          Lectura fría. Sin interpretación humana.
+        </p>
+      </section>
+
+      <!-- BLOQUE LEGAL -->
+      <section class="cfc-card cfc-card-warning">
+        <p>
+          Esta pantalla muestra repetición, riesgo y reglas operativas
+          derivadas exclusivamente de los datos registrados.
+        </p>
+      </section>
+
+      <!-- =========================
+           FILTROS
+           ========================= -->
+      <section class="cfc-card">
+        <h3>Filtros</h3>
+        <div id="pea-filters"></div>
+      </section>
+
+      <!-- =========================
+           MÉTRICAS
+           ========================= -->
+      <section class="cfc-card">
+        <h3>Métricas automáticas</h3>
+        <div id="pea-metrics" class="cfc-muted">—</div>
+      </section>
+
+      <!-- =========================
+           HISTORIAL
+           ========================= -->
+      <section class="cfc-card">
+        <h3>Historial</h3>
+        <p class="cfc-muted">Click en una fila para ver el resultado automático</p>
+        <div id="pea-table" class="cfc-muted">Cargando registros…</div>
+      </section>
+
+      <!-- ACCIONES -->
+      <section class="cfc-actions cfc-actions-bottom">
+        <a href="./pea_screen_1.html" class="cfc-btn">
+          Nuevo registro
+        </a>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FOOTER CAMPUS -->
+  <footer class="cfc-footer">
+    Análisis (PEA) — historial determinista, sin interpretación
+  </footer>
 
   <!-- =========================
-       FILTROS
+       SCRIPT (NO TOCAR LÓGICA)
        ========================= -->
-  <div class="block">
-    <div class="label">Filtros</div>
-    <div id="pea-filters"></div>
-  </div>
-
-  <!-- =========================
-       MÉTRICAS
-       ========================= -->
-  <div class="block">
-    <div class="label">Métricas automáticas</div>
-    <div id="pea-metrics" class="empty">—</div>
-  </div>
-
-  <!-- =========================
-       TABLA HISTORIAL
-       ========================= -->
-  <div class="block">
-    <div class="label">Historial (click en una fila)</div>
-    <div id="pea-table" class="empty">Cargando registros…</div>
-  </div>
-
   <script type="module">
     import { renderFiltersUI } from "./pea_filters.js";
     import { getPEAReading } from "./pea_reading.js";
@@ -104,7 +102,7 @@
     let currentFilters = {};
 
     function refresh() {
-      const reading = getPEAReading(emailHash);
+      const reading = getPEAReading(emailHash, currentFilters);
 
       renderPEATable(
         document.getElementById("pea-table"),
