@@ -2,7 +2,7 @@
    PEA METRICS — MÉTRICAS AGREGADAS
    Sistema: Análisis (PEA)
    Bloque: 8/14 — Pantalla 3
-   Rol: Calcular métricas sin interpretación
+   Rol: Calcular y renderizar métricas sin interpretación
    ============================================================ */
 
 /**
@@ -56,6 +56,22 @@ export function calculatePEAMetrics(records) {
     accionMasCostosa: getMaxKey(accionCount),
     riesgoPromedio: riesgoN ? (riesgoTotal / riesgoN).toFixed(2) : "—"
   };
+}
+
+/**
+ * Renderiza métricas en Pantalla 3
+ * @param {HTMLElement} container
+ * @param {Object} metrics
+ */
+export function renderPEAMetrics(container, metrics) {
+  if (!container || !metrics) return;
+
+  container.innerHTML = `
+    <div>Patrón dominante: ${metrics.patronMasRepetido}</div>
+    <div>Estado dominante: ${metrics.estadoDominante}</div>
+    <div>Acción más costosa: ${metrics.accionMasCostosa}</div>
+    <div>Riesgo promedio: ${metrics.riesgoPromedio}</div>
+  `;
 }
 
 /* =========================
