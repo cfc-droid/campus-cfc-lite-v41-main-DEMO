@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Análisis (PEA) — Registro</title>
+
+  <!-- Estilos base del Campus -->
+  <link rel="stylesheet" href="../../css/main.css" />
+
+  <script type="module" src="./pea_ui_logic.js" defer></script>
+</head>
+
+<body class="cfc-bg">
+
+  <!-- 1. HEADER -->
+  <header class="cfc-header">
+    <h1>Análisis (PEA)</h1>
+  </header>
+
+  <!-- 2. BANNER LEGAL FIJO -->
+  <section class="cfc-legal-banner">
+    Auditoría operativa. No es terapia. No es coaching. No ofrece asesoramiento.
+  </section>
+
+  <form id="peaForm">
+
+    <!-- 3. BOTONES PRINCIPALES -->
+    <section class="cfc-actions-top">
+      <button type="button" id="btnSave">Guardar</button>
+      <button type="button" id="btnFinalize" disabled>Finalizar</button>
+      <button type="button" id="btnCancel">Cancelar</button>
+    </section>
+
+    <!-- 4. IDENTIFICACIÓN MÍNIMA -->
+    <section>
+      <label>Momento</label>
+      <select id="momento" required>
+        <option value="">—</option>
+        <option value="ANTES">ANTES</option>
+        <option value="DURANTE">DURANTE</option>
+        <option value="DESPUÉS">DESPUÉS</option>
+      </select>
+
+      <label>Instrumento</label>
+      <input type="text" id="instrumento" maxlength="10" required />
+
+      <label>Dirección</label>
+      <div>
+        <label><input type="radio" name="direccion" value="LONG"> LONG</label>
+        <label><input type="radio" name="direccion" value="SHORT"> SHORT</label>
+        <label><input type="radio" name="direccion" value="ND"> ND</label>
+      </div>
+
+      <div id="resultadoBlock" hidden>
+        <label>Resultado</label>
+        <select id="resultado">
+          <option value="">—</option>
+          <option value="Ganancia">Ganancia</option>
+          <option value="Pérdida">Pérdida</option>
+          <option value="BE">BE</option>
+          <option value="NA">NA</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- 5. P — PENSAMIENTO -->
+    <section>
+      <label>Pensamiento</label>
+      <select id="pensamiento" name="pensamiento" required></select>
+
+      <label>
+        <input type="checkbox" id="planDefinido" />
+        Plan definido
+      </label>
+
+      <div id="reglaBlock" hidden>
+        <label>Regla aplicada</label>
+        <input type="text" id="reglaAplicada" maxlength="50" />
+      </div>
+    </section>
+
+    <!-- 6. E — ESTADO OPERATIVO -->
+    <section>
+      <label>Estado</label>
+      <select id="estado" name="estado" required></select>
+
+      <label>Intensidad</label>
+      <small>Seleccionar intensidad (1–5)</small>
+      <div>
+        <label><input type="radio" name="intensidad" value="1">1</label>
+        <label><input type="radio" name="intensidad" value="2">2</label>
+        <label><input type="radio" name="intensidad" value="3">3</label>
+        <label><input type="radio" name="intensidad" value="4">4</label>
+        <label><input type="radio" name="intensidad" value="5">5</label>
+      </div>
+    </section>
+
+    <!-- 7. A — ACCIONES -->
+    <section>
+      <label>Acciones</label>
+      <div id="acciones"></div>
+
+      <div id="accionCostosaBlock" hidden>
+        <label>Acción más costosa</label>
+        <select id="accionCostosa"></select>
+      </div>
+    </section>
+
+    <!-- 8. NOTA MÍNIMA -->
+    <section>
+      <label>Nota (máx. 180)</label>
+      <input type="text" id="nota" maxlength="180" />
+    </section>
+
+    <!-- 9. FOOTER -->
+    <footer class="cfc-footer">
+      Registro PEA — datos no interpretativos
+    </footer>
+
+  </form>
+
+</body>
+</html>
