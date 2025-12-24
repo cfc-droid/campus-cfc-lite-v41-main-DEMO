@@ -106,7 +106,7 @@ export const PEA_PENSAMIENTOS_DESC = Object.freeze({
   "No hace falta esperar la señal": "Relajación del criterio.",
   "Puedo adelantarme": "Entrada anticipada.",
   "No pasa nada si rompo una regla": "Minimización del error.",
-  "Después lo compenso": "Postergación del impacto."
+  "Después lo compenso": "Postergación del impacto.",
 
   "Estoy siguiendo mi plan": "Enfoque en ejecución según reglas.",
   "No hay señal, no opero": "Aceptación consciente de no operar.",
@@ -172,7 +172,7 @@ export const PEA_ESTADOS_OPERATIVOS_DESC = Object.freeze({
   Rabia: "Reacción emocional intensa.",
   Frustración: "Choque expectativa–resultado.",
   Desilusión: "Caída anímica.",
-  "Cansancio mental": "Fatiga cognitiva."
+  "Cansancio mental": "Fatiga cognitiva.",
 
   Estabilidad: "Estado sin oscilación emocional.",
   Serenidad: "Calma sostenida durante la ejecución.",
