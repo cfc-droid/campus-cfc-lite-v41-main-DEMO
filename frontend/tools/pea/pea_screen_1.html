@@ -2,122 +2,174 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Análisis (PEA) — Registro</title>
+  <title>Análisis (PEA) — Registro operativo</title>
 
-  <!-- Estilos base del Campus -->
-  <link rel="stylesheet" href="../../css/main.css" />
+  <!-- CSS DEL CAMPUS (OBLIGATORIOS) -->
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/premium.min.css">
 
+  <!-- LÓGICA EXISTENTE (NO TOCAR) -->
   <script type="module" src="./pea_ui_logic.js" defer></script>
 </head>
 
 <body class="cfc-bg">
 
-  <!-- 1. HEADER -->
+  <!-- HEADER CAMPUS -->
   <header class="cfc-header">
-    <h1>Análisis (PEA)</h1>
+    <div class="cfc-header-inner">
+      <h1 class="cfc-title">Análisis (PEA)</h1>
+    </div>
   </header>
 
-  <!-- 2. BANNER LEGAL FIJO -->
-  <section class="cfc-legal-banner">
-    Auditoría operativa. No es terapia. No es coaching. No ofrece asesoramiento.
-  </section>
+  <!-- CONTENEDOR PRINCIPAL CAMPUS -->
+  <main class="cfc-page">
+    <div class="cfc-container">
 
-  <form id="peaForm">
+      <!-- TÍTULO -->
+      <section class="cfc-section">
+        <h2>Registro operativo</h2>
+        <p class="cfc-muted">
+          Auditoría operativa psicológica. No es terapia. No es coaching.
+        </p>
+      </section>
 
-    <!-- 3. BOTONES PRINCIPALES -->
-    <section class="cfc-actions-top">
-      <button type="button" id="btnSave">Guardar</button>
-      <button type="button" id="btnFinalize" disabled>Finalizar</button>
-      <button type="button" id="btnCancel">Cancelar</button>
-    </section>
+      <!-- BLOQUE LEGAL -->
+      <section class="cfc-card cfc-card-warning">
+        <p>
+          Este registro es una herramienta educativa de auditoría operativa.
+          No ofrece asesoramiento ni interpretación humana.
+        </p>
+      </section>
 
-    <!-- 4. IDENTIFICACIÓN MÍNIMA -->
-    <section>
-      <label>Momento</label>
-      <select id="momento" required>
-        <option value="">—</option>
-        <option value="ANTES">ANTES</option>
-        <option value="DURANTE">DURANTE</option>
-        <option value="DESPUÉS">DESPUÉS</option>
-      </select>
+      <form id="peaForm">
 
-      <label>Instrumento</label>
-      <input type="text" id="instrumento" maxlength="10" required />
+        <!-- ACCIONES SUPERIORES -->
+        <section class="cfc-actions cfc-actions-top">
+          <button type="button" id="btnSave" class="cfc-btn cfc-btn-secondary">
+            Guardar
+          </button>
+          <button type="button" id="btnFinalize" class="cfc-btn cfc-btn-primary" disabled>
+            Finalizar
+          </button>
+          <button type="button" id="btnCancel" class="cfc-btn">
+            Cancelar
+          </button>
+        </section>
 
-      <label>Dirección</label>
-      <div>
-        <label><input type="radio" name="direccion" value="LONG"> LONG</label>
-        <label><input type="radio" name="direccion" value="SHORT"> SHORT</label>
-        <label><input type="radio" name="direccion" value="ND"> ND</label>
-      </div>
+        <!-- PASO 1 — IDENTIFICACIÓN -->
+        <section class="cfc-card">
+          <h3>Paso 1 — Identificación</h3>
 
-      <div id="resultadoBlock" hidden>
-        <label>Resultado</label>
-        <select id="resultado">
-          <option value="">—</option>
-          <option value="Ganancia">Ganancia</option>
-          <option value="Pérdida">Pérdida</option>
-          <option value="BE">BE</option>
-          <option value="NA">NA</option>
-        </select>
-      </div>
-    </section>
+          <label>Momento</label>
+          <select id="momento" required>
+            <option value="">—</option>
+            <option value="ANTES">ANTES</option>
+            <option value="DURANTE">DURANTE</option>
+            <option value="DESPUÉS">DESPUÉS</option>
+          </select>
 
-    <!-- 5. P — PENSAMIENTO -->
-    <section>
-      <label>Pensamiento</label>
-      <select id="pensamiento" name="pensamiento" required></select>
+          <label>Instrumento</label>
+          <input type="text" id="instrumento" maxlength="10" required />
 
-      <label>
-        <input type="checkbox" id="planDefinido" />
-        Plan definido
-      </label>
+          <label>Dirección</label>
+          <div class="cfc-radio-group">
+            <label><input type="radio" name="direccion" value="LONG"> LONG</label>
+            <label><input type="radio" name="direccion" value="SHORT"> SHORT</label>
+            <label><input type="radio" name="direccion" value="ND"> ND</label>
+          </div>
 
-      <div id="reglaBlock" hidden>
-        <label>Regla aplicada</label>
-        <input type="text" id="reglaAplicada" maxlength="50" />
-      </div>
-    </section>
+          <div id="resultadoBlock" hidden>
+            <label>Resultado</label>
+            <select id="resultado">
+              <option value="">—</option>
+              <option value="Ganancia">Ganancia</option>
+              <option value="Pérdida">Pérdida</option>
+              <option value="BE">BE</option>
+              <option value="NA">NA</option>
+            </select>
+          </div>
+        </section>
 
-    <!-- 6. E — ESTADO OPERATIVO -->
-    <section>
-      <label>Estado</label>
-      <select id="estado" name="estado" required></select>
+        <!-- PASO 2 — PENSAMIENTO -->
+        <section class="cfc-card">
+          <h3>Paso 2 — Pensamiento (P)</h3>
 
-      <label>Intensidad</label>
-      <small>Seleccionar intensidad (1–5)</small>
-      <div>
-        <label><input type="radio" name="intensidad" value="1">1</label>
-        <label><input type="radio" name="intensidad" value="2">2</label>
-        <label><input type="radio" name="intensidad" value="3">3</label>
-        <label><input type="radio" name="intensidad" value="4">4</label>
-        <label><input type="radio" name="intensidad" value="5">5</label>
-      </div>
-    </section>
+          <label>Pensamiento</label>
+          <select id="pensamiento" name="pensamiento" required></select>
 
-    <!-- 7. A — ACCIONES -->
-    <section>
-      <label>Acciones</label>
-      <div id="acciones"></div>
+          <label class="cfc-checkbox">
+            <input type="checkbox" id="planDefinido" />
+            Plan definido
+          </label>
 
-      <div id="accionCostosaBlock" hidden>
-        <label>Acción más costosa</label>
-        <select id="accionCostosa"></select>
-      </div>
-    </section>
+          <div id="reglaBlock" hidden>
+            <label>Regla aplicada</label>
+            <input type="text" id="reglaAplicada" maxlength="50" />
+          </div>
+        </section>
 
-    <!-- 8. NOTA MÍNIMA -->
-    <section>
-      <label>Nota (máx. 180)</label>
-      <input type="text" id="nota" maxlength="180" />
-    </section>
+        <!-- PASO 3 — ESTADO -->
+        <section class="cfc-card">
+          <h3>Paso 3 — Estado operativo (E)</h3>
 
-    <!-- 9. FOOTER -->
-    <footer class="cfc-footer">
-      Registro PEA — datos no interpretativos
-    </footer>
+          <label>Estado</label>
+          <select id="estado" name="estado" required></select>
 
-  </form>
+          <label>Intensidad</label>
+          <p class="cfc-muted">Seleccionar intensidad (1–5)</p>
+          <div class="cfc-radio-group">
+            <label><input type="radio" name="intensidad" value="1">1</label>
+            <label><input type="radio" name="intensidad" value="2">2</label>
+            <label><input type="radio" name="intensidad" value="3">3</label>
+            <label><input type="radio" name="intensidad" value="4">4</label>
+            <label><input type="radio" name="intensidad" value="5">5</label>
+          </div>
+        </section>
+
+        <!-- PASO 4 — ACCIÓN -->
+        <section class="cfc-card">
+          <h3>Paso 4 — Acción (A)</h3>
+
+          <label>Acciones</label>
+          <div id="acciones"></div>
+
+          <div id="accionCostosaBlock" hidden>
+            <label>Acción más costosa</label>
+            <select id="accionCostosa"></select>
+          </div>
+        </section>
+
+        <!-- PASO 5 — NOTA -->
+        <section class="cfc-card">
+          <h3>Paso 5 — Nota factual</h3>
+
+          <label>Nota (máx. 180 caracteres)</label>
+          <input type="text" id="nota" maxlength="180" />
+        </section>
+
+        <!-- ACCIONES INFERIORES -->
+        <section class="cfc-actions cfc-actions-bottom">
+          <button type="button" id="btnSaveBottom" class="cfc-btn cfc-btn-secondary">
+            Guardar
+          </button>
+          <button type="button" id="btnFinalizeBottom" class="cfc-btn cfc-btn-primary" disabled>
+            Finalizar
+          </button>
+          <button type="button" id="btnCancelBottom" class="cfc-btn">
+            Cancelar
+          </button>
+        </section>
+
+      </form>
+
+    </div>
+  </main>
+
+  <!-- FOOTER CAMPUS -->
+  <footer class="cfc-footer">
+    Registro PEA — datos no interpretativos
+  </footer>
 
 </body>
 </html>
