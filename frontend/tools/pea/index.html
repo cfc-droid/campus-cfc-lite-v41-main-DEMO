@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Análisis (PEA) — Campus CFC</title>
+
+  <script>
+    (function () {
+      const isCloudflare = window.location.hostname.includes("pages.dev");
+      const base = isCloudflare ? "/" : "/frontend/";
+      document.write(`<base href="${base}">`);
+    })();
+  </script>
+
+  <link rel="stylesheet" href="css/variables.css" />
+  <link rel="stylesheet" href="css/premium.min.css" />
+</head>
+
+<body>
+
+<!-- 🔒 Verificación de sesión (MISMO criterio que index.html) -->
+<script>
+(function () {
+  const ok = sessionStorage.getItem("CFC_LOGIN_OK");
+  if (!ok) {
+    console.warn("PEA sin sesión — redirigiendo a login");
+    window.location.href = "./html/login.html";
+  }
+})();
+</script>
+
+<!-- 🔁 Redirección controlada a Pantalla 1 -->
+<script>
+  window.location.href = "tools/pea/pea_screen_1.html";
+</script>
+
+</body>
+</html>
