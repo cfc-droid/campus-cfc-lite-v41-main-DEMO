@@ -5,12 +5,12 @@
    Rol: Filtrar registros SIN interpretar
    ============================================================ */
 
-import { savePEAView } from "./pea_reading.js";
+import { savePEAView } from "./pea_view_storage.js";
 
 /**
  * Aplica filtros arbitrarios sobre el log completo
  * @param {string} emailHash
- * @param {Array} log - Array de PEARecord
+ * @param {Array} log - Array de PEARecord (ya con computed)
  * @param {Object} filters - objeto libre de filtros
  * @returns {Array} registros filtrados
  */
@@ -107,7 +107,7 @@ export function applyPEAFilters(emailHash, log, filters = {}) {
        ========================= */
     if (
       filters.riesgoPlan &&
-      record.riesgoPlan !== filters.riesgoPlan
+      record.riesgoPlanificado !== filters.riesgoPlan
     ) {
       return false;
     }
@@ -179,11 +179,19 @@ export function applyPEAFilters(emailHash, log, filters = {}) {
     return true;
   });
 
-  // Guardar vista filtrada (contrato)
+  /* =========================
+     CONTRATO DE VISTA
+     =========================
+     - Se guardan SOLO IDs
+     - No se guardan objetos
+     - selectedId inicia en null
+     ========================= */
+
   savePEAView(emailHash, {
     source: "FILTER",
-    records: result,
-    appliedFilters: filters
+    recordIds: result.map(r => r.id),
+    appliedFilters: filters,
+    selectedId: null
   });
 
   return result;
