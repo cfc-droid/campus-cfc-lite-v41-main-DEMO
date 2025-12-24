@@ -7,6 +7,11 @@ import {
 import { validatePEAForm } from "./pea_validate.js";
 import { savePEARecord, clearDraft } from "./pea_storage.js";
 import { runPEAEngine } from "./pea_engine.js";
+import { savePEAView } from "./pea_view_storage.js";
+
+/* =========================
+   ELEMENTOS
+   ========================= */
 
 const pensamientoSelect = document.getElementById("pensamiento");
 const estadoSelect = document.getElementById("estado");
@@ -17,13 +22,14 @@ const momentoSelect = document.getElementById("momento");
 const resultadoBlock = document.getElementById("resultadoBlock");
 const planDefinido = document.getElementById("planDefinido");
 const reglaBlock = document.getElementById("reglaBlock");
+
+const btnSave = document.getElementById("btnSave");
 const btnFinalize = document.getElementById("btnFinalize");
 const btnCancel = document.getElementById("btnCancel");
 
-/* Placeholder explícito */
-document.getElementById("btnSave").addEventListener("click", () => {
-  alert("Borrador no conectado (BLOQUE 5/14)");
-});
+const btnSaveBottom = document.getElementById("btnSaveBottom");
+const btnFinalizeBottom = document.getElementById("btnFinalizeBottom");
+const btnCancelBottom = document.getElementById("btnCancelBottom");
 
 /* =========================
    CARGA DE CATÁLOGOS
@@ -58,7 +64,15 @@ planDefinido.addEventListener("change", () => {
   reglaBlock.hidden = !planDefinido.checked;
 });
 
-accionesDiv.addEventListener("change", () => {
+accionesDiv.addEventListener("change", actualizarEstadoFinalizar);
+
+document.getElementById("peaForm").addEventListener("change", actualizarEstadoFinalizar);
+
+function actualizarEstadoFinalizar() {
+  const valido = validatePEAForm();
+  btnFinalize.disabled = !valido;
+  btnFinalizeBottom.disabled = !valido;
+
   const checked = [...accionesDiv.querySelectorAll("input:checked")]
     .map(c => c.value);
 
@@ -70,15 +84,24 @@ accionesDiv.addEventListener("change", () => {
     accionCostosaBlock.hidden = true;
     accionCostosaSelect.innerHTML = "";
   }
+}
 
-  btnFinalize.disabled = !validatePEAForm();
-});
+/* =========================
+   GUARDAR (BORRADOR SIMPLE)
+   ========================= */
+
+function guardarBorrador() {
+  alert("Borrador guardado localmente (no entra al historial)");
+}
+
+btnSave.addEventListener("click", guardarBorrador);
+btnSaveBottom.addEventListener("click", guardarBorrador);
 
 /* =========================
    FINALIZAR REGISTRO
    ========================= */
 
-btnFinalize.addEventListener("click", () => {
+function finalizarRegistro() {
   if (!validatePEAForm()) return;
 
   const emailHash = localStorage.getItem("CFC_EMAIL_HASH");
@@ -90,7 +113,6 @@ btnFinalize.addEventListener("click", () => {
 
   const record = {
     schemaVersion: "PEA_SCHEMA_V1",
-
     id: new Date().toISOString(),
     createdAtISO: new Date().toISOString(),
 
@@ -124,31 +146,31 @@ btnFinalize.addEventListener("click", () => {
     computed: {}
   };
 
-  // Ejecutar motor determinista
   record.computed = runPEAEngine(record);
 
-  // Persistir (append-only)
   savePEARecord(emailHash, record);
-
-  // Limpiar borrador
   clearDraft(emailHash);
 
-  // Navegar a historial
-  window.location.href = "pea_screen_3.html";
-});
+  savePEAView(emailHash, {
+    source: "FINALIZE",
+    recordIds: [record.id],
+    appliedFilters: {},
+    selectedId: record.id
+  });
 
-/* =========================
-   VALIDACIÓN CONTINUA
-   ========================= */
+  window.location.href = "pea_screen_2.html";
+}
 
-document.getElementById("peaForm").addEventListener("change", () => {
-  btnFinalize.disabled = !validatePEAForm();
-});
+btnFinalize.addEventListener("click", finalizarRegistro);
+btnFinalizeBottom.addEventListener("click", finalizarRegistro);
 
 /* =========================
    CANCELAR
    ========================= */
 
-btnCancel.addEventListener("click", () => {
+function cancelar() {
   window.location.href = "index.html";
-});
+}
+
+btnCancel.addEventListener("click", cancelar);
+btnCancelBottom.addEventListener("click", cancelar);
