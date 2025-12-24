@@ -2,93 +2,102 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Análisis (PEA) — Resultado</title>
+  <title>Análisis (PEA) — Resultado automático</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- ⚠️ ESTILO MINIMO TEMPORAL -->
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #eee;
-      padding: 20px;
-    }
-
-    h1 {
-      color: #ffd700;
-      margin-bottom: 10px;
-    }
-
-    .block {
-      border: 1px solid #333;
-      border-radius: 6px;
-      padding: 12px;
-      margin-bottom: 14px;
-      background: #1a1a1a;
-    }
-
-    .label {
-      font-weight: bold;
-      color: #aaa;
-      margin-bottom: 4px;
-    }
-
-    ul {
-      margin: 0;
-      padding-left: 18px;
-    }
-
-    .empty {
-      color: #777;
-      font-style: italic;
-    }
-  </style>
+  <!-- CSS DEL CAMPUS (OBLIGATORIOS) -->
+  <link rel="stylesheet" href="../../css/variables.css">
+  <link rel="stylesheet" href="../../css/main.css">
+  <link rel="stylesheet" href="../../css/premium.min.css">
 </head>
 
-<body>
+<body class="cfc-bg">
 
-  <h1>Análisis (PEA)</h1>
-  <p>Auditoría operativa. No es terapia. No es coaching. No ofrece asesoramiento.</p>
+  <!-- HEADER CAMPUS -->
+  <header class="cfc-header">
+    <div class="cfc-header-inner">
+      <h1 class="cfc-title">Análisis (PEA)</h1>
+    </div>
+  </header>
+
+  <!-- CONTENEDOR PRINCIPAL -->
+  <main class="cfc-page">
+    <div class="cfc-container">
+
+      <!-- TÍTULO -->
+      <section class="cfc-section">
+        <h2>Resultado automático</h2>
+        <p class="cfc-muted">
+          Lectura operativa generada automáticamente.
+          No es interpretación humana.
+        </p>
+      </section>
+
+      <!-- BLOQUE LEGAL -->
+      <section class="cfc-card cfc-card-warning">
+        <p>
+          Este resultado expone repetición, riesgo y reglas operativas.
+          No ofrece asesoramiento, coaching ni conclusiones personales.
+        </p>
+      </section>
+
+      <!-- =========================
+           RESUMEN DEL REGISTRO
+           ========================= -->
+      <section class="cfc-card">
+        <h3>Resumen del registro</h3>
+        <div id="pea-summary" class="cfc-muted">Cargando…</div>
+      </section>
+
+      <!-- =========================
+           PATRONES DETECTADOS
+           ========================= -->
+      <section class="cfc-card">
+        <h3>Patrones detectados</h3>
+        <ul id="pea-patterns" class="cfc-list">
+          <li class="cfc-muted">—</li>
+        </ul>
+      </section>
+
+      <!-- =========================
+           RIESGO OPERATIVO
+           ========================= -->
+      <section class="cfc-card">
+        <h3>Riesgo operativo</h3>
+        <div id="pea-risk" class="cfc-muted">—</div>
+      </section>
+
+      <!-- =========================
+           ACCIONES CORRECTIVAS
+           ========================= -->
+      <section class="cfc-card">
+        <h3>Reglas operativas</h3>
+        <ul id="pea-actions" class="cfc-list">
+          <li class="cfc-muted">—</li>
+        </ul>
+      </section>
+
+      <!-- ACCIONES -->
+      <section class="cfc-actions cfc-actions-bottom">
+        <a href="./pea_screen_3.html" class="cfc-btn cfc-btn-primary">
+          Ver historial
+        </a>
+        <a href="./pea_screen_1.html" class="cfc-btn">
+          Nuevo registro
+        </a>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- FOOTER CAMPUS -->
+  <footer class="cfc-footer">
+    Análisis (PEA) — salida determinista, sin interpretación
+  </footer>
 
   <!-- =========================
-       RESUMEN DEL REGISTRO
-       ========================= -->
-  <div class="block">
-    <div class="label">Resumen del registro</div>
-    <div id="pea-summary" class="empty">Cargando…</div>
-  </div>
-
-  <!-- =========================
-       PATRONES DETECTADOS
-       ========================= -->
-  <div class="block">
-    <div class="label">Patrones detectados</div>
-    <ul id="pea-patterns">
-      <li class="empty">—</li>
-    </ul>
-  </div>
-
-  <!-- =========================
-       RIESGO OPERATIVO
-       ========================= -->
-  <div class="block">
-    <div class="label">Riesgo operativo</div>
-    <div id="pea-risk" class="empty">—</div>
-  </div>
-
-  <!-- =========================
-       ACCIONES CORRECTIVAS
-       ========================= -->
-  <div class="block">
-    <div class="label">Acciones correctivas</div>
-    <ul id="pea-actions">
-      <li class="empty">—</li>
-    </ul>
-  </div>
-
-  <!-- =========================
-       SCRIPT DE LECTURA
+       SCRIPT DE LECTURA (NO TOCAR)
        ========================= -->
   <script type="module">
     import { runPEAEngine } from "./pea_engine.js";
@@ -146,7 +155,7 @@
     const patternsEl = document.getElementById("pea-patterns");
     patternsEl.innerHTML = "";
     if (!computed.patrones || !computed.patrones.length) {
-      patternsEl.innerHTML = `<li class="empty">Sin patrones detectados</li>`;
+      patternsEl.innerHTML = `<li class="cfc-muted">Sin patrones detectados</li>`;
     } else {
       computed.patrones.forEach(p => {
         const li = document.createElement("li");
@@ -165,7 +174,7 @@
     const actionsEl = document.getElementById("pea-actions");
     actionsEl.innerHTML = "";
     if (!computed.accionesCorrectivas || !computed.accionesCorrectivas.length) {
-      actionsEl.innerHTML = `<li class="empty">Sin reglas aplicables</li>`;
+      actionsEl.innerHTML = `<li class="cfc-muted">Sin reglas aplicables</li>`;
     } else {
       computed.accionesCorrectivas.forEach(a => {
         const li = document.createElement("li");
