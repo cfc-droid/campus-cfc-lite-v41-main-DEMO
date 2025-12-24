@@ -37,6 +37,14 @@
       font-style: italic;
     }
 
+    table tr {
+      cursor: pointer;
+    }
+
+    table tr:hover {
+      background: #222;
+    }
+
     button {
       background: #ffd700;
       color: #000;
@@ -75,7 +83,7 @@
        TABLA HISTORIAL
        ========================= -->
   <div class="block">
-    <div class="label">Historial</div>
+    <div class="label">Historial (click en una fila)</div>
     <div id="pea-table" class="empty">Cargando registros…</div>
   </div>
 
@@ -84,6 +92,7 @@
     import { getPEAReading } from "./pea_reading.js";
     import { renderPEATable } from "./pea_table.js";
     import { renderPEAMetrics } from "./pea_metrics.js";
+    import { readPEAView, savePEAView } from "./pea_view_storage.js";
 
     const emailHash = localStorage.getItem("CFC_EMAIL_HASH");
 
@@ -95,7 +104,7 @@
     let currentFilters = {};
 
     function refresh() {
-      const reading = getPEAReading(emailHash, currentFilters);
+      const reading = getPEAReading(emailHash);
 
       renderPEATable(
         document.getElementById("pea-table"),
@@ -106,6 +115,31 @@
         document.getElementById("pea-metrics"),
         reading.metrics
       );
+
+      attachRowSelection(reading.registros);
+    }
+
+    function attachRowSelection(records) {
+      const rows = document.querySelectorAll("#pea-table table tbody tr");
+
+      rows.forEach((tr, index) => {
+        tr.addEventListener("click", () => {
+          const record = records[index];
+          if (!record) return;
+
+          const view = readPEAView(emailHash) || {
+            source: "FILTER",
+            recordIds: records.map(r => r.id),
+            appliedFilters: currentFilters,
+            selectedId: null
+          };
+
+          view.selectedId = record.id;
+          savePEAView(emailHash, view);
+
+          window.location.href = "pea_screen_2.html";
+        });
+      });
     }
 
     renderFiltersUI(
