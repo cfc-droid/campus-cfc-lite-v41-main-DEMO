@@ -70,7 +70,7 @@ export const PEA_PENSAMIENTOS = Object.freeze([
   "No necesito operar ahora",
   "Espero mi setup",
   "Ejecuto sin expectativa",
-  "El resultado es irrelevante, importa la ejecución"
+  "El resultado es irrelevante, importa la ejecución",
 
 "Prefiero perder la oportunidad que romper el plan",
 "No necesito este trade",
@@ -141,7 +141,6 @@ export const PEA_PENSAMIENTOS_DESC = Object.freeze({
 export const PEA_ESTADOS_OPERATIVOS = Object.freeze([
   "Calma",
   "Foco",
-  "Confianza",
 
   "Urgencia",
   "Ansiedad",
@@ -169,7 +168,6 @@ export const PEA_ESTADOS_OPERATIVOS = Object.freeze([
 "Hiperfoco",
 "Desatención",
 "Automatismo"
-
 
 ]);
 
@@ -248,6 +246,8 @@ export const PEA_ACCIONES = Object.freeze([
 "Esperé y no ejecuté",
 "Aborté entrada",
 
+"Reducí riesgo",
+"Salí por regla externa"
 
 ]);
 
@@ -284,8 +284,10 @@ export const PEA_ACCIONES_DESC = Object.freeze({
 
 "No tomé trade": "Decisión consciente de no operar.",
 "Esperé y no ejecuté": "El setup no se confirmó.",
-"Aborté entrada": "Entrada cancelada antes de ejecutarse."
+"Aborté entrada": "Entrada cancelada antes de ejecutarse.",
 
+"Reducí riesgo": "Disminución voluntaria del riesgo durante la operación.",
+"Salí por regla externa": "Salida activada por condición objetiva predefinida."
  
 });
 
