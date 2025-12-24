@@ -70,8 +70,14 @@ export const PEA_PENSAMIENTOS = Object.freeze([
   "No necesito operar ahora",
   "Espero mi setup",
   "Ejecuto sin expectativa",
-  "Respeto el proceso",
   "El resultado es irrelevante, importa la ejecución"
+
+"Prefiero perder la oportunidad que romper el plan",
+"No necesito este trade",
+"El mercado va a seguir ahí",
+"Mi ventaja está en esperar",
+"Hoy no es un día claro"
+
 
 ]);
 
@@ -119,6 +125,13 @@ export const PEA_PENSAMIENTOS_DESC = Object.freeze({
   "Respeto el proceso": "Prioridad en reglas por sobre resultados.",
   "El resultado es irrelevante, importa la ejecución": "Foco en conducta, no en PnL.",
 
+"Prefiero perder la oportunidad que romper el plan": "Priorización de reglas.",
+"No necesito este trade": "Desapego de la ejecución inmediata.",
+"El mercado va a seguir ahí": "Reducción de urgencia.",
+"Mi ventaja está en esperar": "Conciencia estratégica.",
+"Hoy no es un día claro": "Evaluación de contexto desfavorable."
+
+
 });
 
 /* =========================
@@ -129,7 +142,6 @@ export const PEA_ESTADOS_OPERATIVOS = Object.freeze([
   "Calma",
   "Foco",
   "Confianza",
-  "Neutralidad",
 
   "Urgencia",
   "Ansiedad",
@@ -151,6 +163,13 @@ export const PEA_ESTADOS_OPERATIVOS = Object.freeze([
   "Paciencia",
   "Aceptación",
   "Neutralidad operativa",
+
+"Bloqueo",
+"Saturación",
+"Hiperfoco",
+"Desatención",
+"Automatismo"
+
 
 ]);
 
@@ -179,6 +198,13 @@ export const PEA_ESTADOS_OPERATIVOS_DESC = Object.freeze({
   Paciencia: "Capacidad de esperar sin urgencia.",
   Aceptación: "Aceptación del riesgo y del resultado.",
   "Neutralidad operativa": "Ausencia de carga emocional.",
+
+Bloqueo: "Dificultad para ejecutar decisiones.",
+Saturación: "Exceso de estímulos o información.",
+Hiperfoco: "Atención excesiva en un solo elemento.",
+Desatención: "Falta de foco en variables clave.",
+Automatismo: "Ejecución sin análisis consciente."
+
 
 });
 
@@ -218,6 +244,11 @@ export const PEA_ACCIONES = Object.freeze([
   "Operé solo en horario",
   "Ejecuté sin interferencia",
 
+"No tomé trade",
+"Esperé y no ejecuté",
+"Aborté entrada",
+
+
 ]);
 
 export const PEA_ACCIONES_DESC = Object.freeze({
@@ -250,6 +281,11 @@ export const PEA_ACCIONES_DESC = Object.freeze({
   "No re-entré": "Evitó sobreoperar.",
   "Operé solo en horario": "Respeto del marco temporal.",
   "Ejecuté sin interferencia": "Ejecución limpia.",
+
+"No tomé trade": "Decisión consciente de no operar.",
+"Esperé y no ejecuté": "El setup no se confirmó.",
+"Aborté entrada": "Entrada cancelada antes de ejecutarse."
+
  
 });
 
