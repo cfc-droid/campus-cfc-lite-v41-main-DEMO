@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Análisis (PEA) — Historial</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+
+    .block {
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 16px;
+      background: #1a1a1a;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #aaa;
+      margin-bottom: 6px;
+    }
+
+    .empty {
+      color: #777;
+      font-style: italic;
+    }
+
+    button {
+      background: #ffd700;
+      color: #000;
+      border: none;
+      padding: 6px 10px;
+      margin-right: 6px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Análisis (PEA) — Historial</h1>
+  <p>Auditoría operativa. Lectura fría. Sin interpretación.</p>
+
+  <!-- =========================
+       FILTROS
+       ========================= -->
+  <div class="block">
+    <div class="label">Filtros</div>
+    <div id="pea-filters"></div>
+  </div>
+
+  <!-- =========================
+       MÉTRICAS
+       ========================= -->
+  <div class="block">
+    <div class="label">Métricas automáticas</div>
+    <div id="pea-metrics" class="empty">—</div>
+  </div>
+
+  <!-- =========================
+       TABLA HISTORIAL
+       ========================= -->
+  <div class="block">
+    <div class="label">Historial</div>
+    <div id="pea-table" class="empty">Cargando registros…</div>
+  </div>
+
+  <script type="module">
+    import { renderFiltersUI } from "./pea_filters.js";
+    import { getPEAReading } from "./pea_reading.js";
+    import { renderPEATable } from "./pea_table.js";
+    import { renderPEAMetrics } from "./pea_metrics.js";
+
+    const emailHash = localStorage.getItem("CFC_EMAIL_HASH");
+
+    if (!emailHash) {
+      document.body.innerHTML = "<p>Identidad no disponible.</p>";
+      throw new Error("No emailHash");
+    }
+
+    let currentFilters = {};
+
+    function refresh() {
+      const reading = getPEAReading(emailHash, currentFilters);
+
+      renderPEATable(
+        document.getElementById("pea-table"),
+        reading.registros
+      );
+
+      renderPEAMetrics(
+        document.getElementById("pea-metrics"),
+        reading.metrics
+      );
+    }
+
+    renderFiltersUI(
+      document.getElementById("pea-filters"),
+      filters => {
+        currentFilters = filters;
+        refresh();
+      }
+    );
+
+    refresh();
+  </script>
+
+</body>
+</html>
