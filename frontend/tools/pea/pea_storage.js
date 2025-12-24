@@ -3,6 +3,7 @@
    Sistema: Análisis (PEA)
    Bloque: 6/14 — STORAGE OFFLINE + BORRADORES
    Naturaleza: Persistencia pura (no lógica)
+   ============================================================
 
    REGLAS:
    - Offline only
@@ -42,10 +43,14 @@ function getDraftKey(emailHash) {
  * @returns {Array}
  */
 export function loadPEALog(emailHash) {
+  if (!emailHash) return [];
+
   const raw = localStorage.getItem(getLogKey(emailHash));
   if (!raw) return [];
+
   try {
-    return JSON.parse(raw);
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
     return [];
   }
@@ -57,8 +62,11 @@ export function loadPEALog(emailHash) {
  * @param {Object} record (PEARecord completo)
  */
 export function savePEARecord(emailHash, record) {
+  if (!emailHash || !record) return;
+
   const log = loadPEALog(emailHash);
   log.push(record);
+
   localStorage.setItem(getLogKey(emailHash), JSON.stringify(log));
 }
 
@@ -72,8 +80,11 @@ export function savePEARecord(emailHash, record) {
  * @returns {Object|null}
  */
 export function loadDraft(emailHash) {
+  if (!emailHash) return null;
+
   const raw = localStorage.getItem(getDraftKey(emailHash));
   if (!raw) return null;
+
   try {
     return JSON.parse(raw);
   } catch {
@@ -87,6 +98,7 @@ export function loadDraft(emailHash) {
  * @param {Object} record (PEARecord incompleto)
  */
 export function saveDraft(emailHash, record) {
+  if (!emailHash || !record) return;
   localStorage.setItem(getDraftKey(emailHash), JSON.stringify(record));
 }
 
@@ -95,6 +107,7 @@ export function saveDraft(emailHash, record) {
  * @param {string} emailHash
  */
 export function clearDraft(emailHash) {
+  if (!emailHash) return;
   localStorage.removeItem(getDraftKey(emailHash));
 }
 
