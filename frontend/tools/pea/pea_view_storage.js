@@ -1,20 +1,20 @@
 /* ============================================================
-   PEA READING — CONTRATO DE LECTURA
+   PEA VIEW STORAGE — CONTRATO DE VISTA
    Sistema: Análisis (PEA)
    Bloque: 8/14 — Pantallas 2 y 3
-   Rol: Leer vista filtrada SIN modificarla
+   Rol: Contrato único de vista (lectura segura)
    ============================================================
 
    REGLAS:
    - NO filtra
-   - NO interpreta
    - NO calcula
-   - NO muta datos
-   - Solo lectura segura
+   - NO interpreta
+   - NO muta registros
+   - Mismo estado → misma lectura
    ============================================================ */
 
 /**
- * Devuelve la vista filtrada actual del usuario
+ * Lee la vista activa del usuario
  * @param {string} emailHash
  * @returns {Object|null}
  */
@@ -23,17 +23,16 @@ export function readPEAView(emailHash) {
 
   const key = `CFC_PEA_VIEW_${emailHash}`;
   const raw = localStorage.getItem(key);
-
   if (!raw) return null;
 
   try {
     const parsed = JSON.parse(raw);
 
-    // Validación mínima estructural
+    // Validación estructural estricta
     if (
       !parsed ||
       parsed.source !== "FILTER" ||
-      !Array.isArray(parsed.records)
+      !Array.isArray(parsed.recordIds)
     ) {
       return null;
     }
@@ -46,12 +45,19 @@ export function readPEAView(emailHash) {
 
 /**
  * Guarda una vista filtrada
- * (usado SOLO por filtros de Pantalla 3)
  * @param {string} emailHash
  * @param {Object} view
+ *  Estructura esperada:
+ *  {
+ *    source: "FILTER",
+ *    recordIds: [id1, id2, ...],
+ *    appliedFilters: {},
+ *    selectedId: string | null
+ *  }
  */
 export function savePEAView(emailHash, view) {
   if (!emailHash || !view) return;
+  if (!Array.isArray(view.recordIds)) return;
 
   const key = `CFC_PEA_VIEW_${emailHash}`;
   localStorage.setItem(key, JSON.stringify(view));
@@ -59,7 +65,6 @@ export function savePEAView(emailHash, view) {
 
 /**
  * Limpia la vista activa
- * (opcional, para reset)
  * @param {string} emailHash
  */
 export function clearPEAView(emailHash) {
