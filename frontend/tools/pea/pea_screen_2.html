@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Análisis (PEA) — Resultado</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- ⚠️ ESTILO MINIMO TEMPORAL -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #eee;
+      padding: 20px;
+    }
+
+    h1 {
+      color: #ffd700;
+      margin-bottom: 10px;
+    }
+
+    .block {
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 14px;
+      background: #1a1a1a;
+    }
+
+    .label {
+      font-weight: bold;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .empty {
+      color: #777;
+      font-style: italic;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Análisis (PEA)</h1>
+  <p>Auditoría operativa. No es terapia. No es coaching. No ofrece asesoramiento.</p>
+
+  <!-- =========================
+       RESUMEN DEL REGISTRO
+       ========================= -->
+  <div class="block">
+    <div class="label">Resumen del registro</div>
+    <div id="pea-summary" class="empty">Cargando…</div>
+  </div>
+
+  <!-- =========================
+       PATRONES DETECTADOS
+       ========================= -->
+  <div class="block">
+    <div class="label">Patrones detectados</div>
+    <ul id="pea-patterns">
+      <li class="empty">—</li>
+    </ul>
+  </div>
+
+  <!-- =========================
+       RIESGO OPERATIVO
+       ========================= -->
+  <div class="block">
+    <div class="label">Riesgo operativo</div>
+    <div id="pea-risk" class="empty">—</div>
+  </div>
+
+  <!-- =========================
+       ACCIONES CORRECTIVAS
+       ========================= -->
+  <div class="block">
+    <div class="label">Acciones correctivas</div>
+    <ul id="pea-actions">
+      <li class="empty">—</li>
+    </ul>
+  </div>
+
+  <!-- =========================
+       SCRIPT DE LECTURA
+       ========================= -->
+  <script type="module">
+    import { runPEAEngine } from "./pea_engine.js";
+
+    // ⚠️ TEMPORAL:
+    // En esta etapa leemos el ÚLTIMO registro del log
+    // Luego se conecta con navegación real
+    const emailHash = localStorage.getItem("CFC_EMAIL_HASH");
+
+    if (!emailHash) {
+      document.body.innerHTML = "<p>Identidad no disponible.</p>";
+      throw new Error("No emailHash");
+    }
+
+    const rawLog = localStorage.getItem(`CFC_PEA_LOG_${emailHash}`);
+    if (!rawLog) {
+      document.body.innerHTML = "<p>No hay registros PEA.</p>";
+      throw new Error("No log");
+    }
+
+    const log = JSON.parse(rawLog);
+    if (!log.length) {
+      document.body.innerHTML = "<p>No hay registros PEA.</p>";
+      throw new Error("Log vacío");
+    }
+
+    const record = log[log.length - 1];
+
+    // Ejecutar motor
+    const computed = runPEAEngine(record);
+
+    // =========================
+    // RENDER
+    // =========================
+
+    // Resumen
+    document.getElementById("pea-summary").innerText =
+      `Momento: ${record.momento} | ` +
+      `Pensamiento: ${record.P.pensamientoKey} | ` +
+      `Estado: ${record.E.estadoKey} (${record.E.intensidad})`;
+
+    // Patrones
+    const patternsEl = document.getElementById("pea-patterns");
+    patternsEl.innerHTML = "";
+    if (!computed.patrones.length) {
+      patternsEl.innerHTML = `<li class="empty">Sin patrones detectados</li>`;
+    } else {
+      computed.patrones.forEach(p => {
+        const li = document.createElement("li");
+        li.textContent = p;
+        patternsEl.appendChild(li);
+      });
+    }
+
+    // Riesgo
+    document.getElementById("pea-risk").innerText =
+      computed.riesgoLabel
+        ? `${computed.riesgoLabel} (${computed.riesgoScore})`
+        : "Evidencia insuficiente";
+
+    // Acciones correctivas
+    const actionsEl = document.getElementById("pea-actions");
+    actionsEl.innerHTML = "";
+    if (!computed.accionesCorrectivas.length) {
+      actionsEl.innerHTML = `<li class="empty">Sin reglas aplicables</li>`;
+    } else {
+      computed.accionesCorrectivas.forEach(a => {
+        const li = document.createElement("li");
+        li.textContent = a;
+        actionsEl.appendChild(li);
+      });
+    }
+  </script>
+
+</body>
+</html>
