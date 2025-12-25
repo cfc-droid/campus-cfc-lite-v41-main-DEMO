@@ -1,0 +1,122 @@
+/* =========================================================
+   PEA — Sistema Visual Heredado del Campus
+   - Sin identidad propia
+   - Sin semántica emocional
+   - Jerarquía > significado
+   ========================================================= */
+
+/* Contenedor raíz del módulo */
+#pea-root,
+.pea-home,
+.pea-screen {
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Tipografía: heredada del Campus */
+#pea-root,
+.pea-home,
+.pea-screen,
+#pea-root * {
+  font-family: var(--font-main);
+}
+
+/* Títulos — jerarquía, no énfasis emocional */
+.pea-home h1,
+.pea-screen h1 {
+  color: var(--text-main);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.pea-home h2,
+.pea-screen h2 {
+  color: var(--text-main);
+  font-weight: 500;
+  margin-top: 1.25rem;
+}
+
+/* Texto descriptivo mínimo */
+.pea-desc {
+  color: var(--text-secondary);
+  margin-bottom: 1rem;
+}
+
+/* Botonera principal: hereda estilos del Campus */
+.pea-actions,
+.pea-access {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Separadores neutros */
+.pea-separator {
+  border-top: 1px solid var(--border-neutral);
+  margin: 1rem 0;
+}
+
+/* =========================
+   JERARQUÍA VISUAL (BLOQUE 8.5)
+   ========================= */
+
+/* ZONA 1 — Lectura primaria (máxima jerarquía) */
+.pea-zone-primary {
+  border: 1px solid var(--border-neutral);
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ZONA 2 — Registros crudos */
+.pea-zone-records {
+  border: 1px solid var(--border-neutral);
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* ZONA 3 — Métricas secundarias */
+.pea-zone-metrics {
+  border: 1px solid var(--border-neutral);
+  padding: 0.75rem;
+}
+
+/* Tablas — lectura fría */
+.pea-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.pea-table th,
+.pea-table td {
+  border: 1px solid var(--border-neutral);
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  color: var(--text-main);
+}
+
+.pea-table th {
+  font-weight: 600;
+}
+
+/* Indicadores de estado (sin juicio) */
+.pea-health-green,
+.pea-health-yellow,
+.pea-health-red {
+  color: var(--text-main);
+}
+
+/* Enlaces neutros */
+.pea-link {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.pea-link:hover {
+  text-decoration: underline;
+}
+
+/* No iconografía emocional */
+.pea-icon {
+  filter: none;
+  opacity: 0.9;
+}
