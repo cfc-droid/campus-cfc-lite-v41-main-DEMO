@@ -5,8 +5,8 @@
   <title>Análisis (PEA) — Registro operativo</title>
 
   <!-- CSS global del Campus (heredado, NO modificar) -->
-  <link rel="stylesheet" href="../../css/main.css" />
-  <link rel="stylesheet" href="../../css/theme.css" />
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/theme.css" />
 
   <!-- CSS específico PEA (estructura, no colores) -->
   <link rel="stylesheet" href="./pea_theme.css" />
@@ -83,11 +83,6 @@
         Intensidad (1–5) (obligatoria)
         <select id="pea-intensidad" required>
           <option value="">—</option>
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
         </select>
       </label>
     </section>
@@ -100,8 +95,7 @@
 
       <label>
         Acción operativa (≥ 1 obligatoria)
-        <select id="pea-accion" multiple required>
-        </select>
+        <select id="pea-accion" multiple required></select>
       </label>
     </section>
 
@@ -171,12 +165,11 @@
 
   </main>
 
-  <!-- ======================================================
-       SCRIPTS (VACÍOS POR AHORA)
-       ====================================================== -->
-  <script src="./pea_catalog.js"></script>
+  <!-- validate global (window.validatePEAForm) -->
   <script src="./pea_validate.js"></script>
-  <script src="./pea_register.js"></script>
+
+  <!-- register como módulo (importa catálogos con export const) -->
+  <script type="module" src="./pea_register.js"></script>
 
 </body>
 </html>
