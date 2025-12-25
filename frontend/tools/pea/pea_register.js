@@ -69,6 +69,26 @@ function loadRecords() {
 
 function saveRecords(records) {
   localStorage.setItem(getStorageKey(), JSON.stringify(records));
+   }
+
+   function getAccionesFromSlots() {
+  return Array.from(document.querySelectorAll(".pea-accion-slot"))
+    .map(s => s.value)
+    .filter(v => v);
+}
+
+function updateAccionesPreview() {
+  const list = $("pea-acciones-preview-list");
+  list.innerHTML = "";
+
+  const acciones = getAccionesFromSlots();
+  acciones.forEach(a => {
+    const li = document.createElement("li");
+    li.textContent = a;
+    list.appendChild(li);
+  });
+}
+
 }
 
 /* =========================
@@ -91,9 +111,12 @@ function setupCatalogsUI() {
   PEA_INTENSIDADES.forEach(n => addOption(intensidadSel, String(n), String(n)));
 
   // Acciones (multiple) -> sin placeholder
-  const accionesSel = $("pea-accion");
-  clearSelect(accionesSel, false);
-  PEA_ACCIONES.forEach(a => addOption(accionesSel, a, a));
+document.querySelectorAll(".pea-accion-slot").forEach(slot => {
+  clearSelect(slot, false);
+  addOption(slot, "", "—");
+  PEA_ACCIONES.forEach(a => addOption(slot, a, a));
+  slot.addEventListener("change", updateAccionesPreview);
+});
 
   // Activos (incluye OTROS)
   const activoSel = $("pea-activo");
@@ -187,7 +210,7 @@ function readFormData() {
     pensamiento_key: $("pea-pensamiento").value,
     estado_key: $("pea-estado").value,
     intensidad: Number($("pea-intensidad").value),
-    acciones_keys: getSelectedOptions($("pea-accion")),
+    acciones_keys: getAccionesFromSlots(),
     direccion: $("pea-direccion").value,        // "COMPRA"|"VENTA"
 
     // opcionales controlados + OTROS
