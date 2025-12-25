@@ -93,11 +93,27 @@
     <section class="pea-section">
       <h2>Acción (A)</h2>
 
-      <label>
-        Acción operativa (≥ 1 obligatoria)
-        <select id="pea-accion" multiple required></select>
-      </label>
-    </section>
+<section class="pea-section">
+  <h2>Acción (A)</h2>
+
+  <p class="pea-help">
+    Seleccioná entre <strong>2 y 5 acciones operativas reales</strong>
+    ocurridas en esta operación.
+  </p>
+
+  <div id="pea-acciones-slots">
+    <select class="pea-accion-slot"></select>
+    <select class="pea-accion-slot"></select>
+    <select class="pea-accion-slot"></select>
+    <select class="pea-accion-slot"></select>
+    <select class="pea-accion-slot"></select>
+  </div>
+
+  <div class="pea-acciones-preview">
+    <strong>Se guardarán:</strong>
+    <ul id="pea-acciones-preview-list"></ul>
+  </div>
+</section>
 
     <!-- =========================
          CONTEXTO OPERATIVO (OPCIONAL)
