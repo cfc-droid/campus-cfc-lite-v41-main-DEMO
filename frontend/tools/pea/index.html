@@ -5,19 +5,51 @@
   <title>Análisis (PEA)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- Estilos base del Campus (si existen, se heredan por CSS global) -->
+  <!-- Estilos heredados del Campus -->
+  <link rel="stylesheet" href="/frontend/css/style.css" />
 </head>
 <body>
 
-  <main id="pea-root">
+  <main class="pea-home">
+
     <h1>Análisis (PEA)</h1>
 
-    <!--
-      Punto de entrada técnico del módulo PEA.
-      La Home real se implementa en BLOQUE 3.
-      Este archivo solo valida navegación y aislamiento del módulo.
-    -->
+    <p class="pea-desc">
+      Registro y análisis de conducta operativa.
+    </p>
+
+    <div class="pea-actions">
+
+      <button id="pea-btn-register" class="btn-main">
+        Cargar registro
+      </button>
+
+      <button id="pea-btn-history" class="btn-main">
+        Historial
+      </button>
+
+      <button id="pea-btn-back" class="btn-main">
+        Volver al Campus
+      </button>
+
+      <button id="pea-btn-theme" class="btn-main">
+        Claro / Oscuro
+      </button>
+
+    </div>
+
+    <div class="pea-access">
+      <button id="pea-btn-views" class="btn-secondary">
+        Vistas guardadas
+      </button>
+
+      <button id="pea-btn-audit" class="btn-secondary">
+        Modo Auditoría
+      </button>
+    </div>
+
   </main>
 
+  <script src="./pea_home.js"></script>
 </body>
 </html>
