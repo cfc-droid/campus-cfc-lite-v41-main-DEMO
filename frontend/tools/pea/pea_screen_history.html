@@ -9,11 +9,44 @@
   <link rel="stylesheet" href="/css/main.css" />
   <link rel="stylesheet" href="/css/theme.css" />
 
-  <!-- CSS específico PEA (estructura, no colores) -->
+  <!-- CSS específico PEA -->
   <link rel="stylesheet" href="./pea_theme.css" />
 </head>
 
 <body>
+
+  <!-- =========================================================
+       🔐 PEA — IDENTIDAD COMPATIBLE CON CAMPUS (OBLIGATORIA)
+       ========================================================= -->
+  <script>
+    (function ensurePEAIdentity() {
+      const email = localStorage.getItem("CFC_EMAIL");
+
+      if (!email) {
+        alert(
+          "PEA no puede iniciarse.\n\n" +
+          "No se detectó una sesión válida del Campus.\n" +
+          "Por favor, ingresá desde el Campus principal."
+        );
+        throw new Error("PEA BLOCKED: CFC_EMAIL no disponible");
+      }
+
+      if (!localStorage.getItem("PEA_EMAIL_HASH")) {
+        const encoder = new TextEncoder();
+        crypto.subtle
+          .digest("SHA-256", encoder.encode(email))
+          .then(buffer => {
+            const hashArray = Array.from(new Uint8Array(buffer));
+            const hashHex = hashArray
+              .map(b => b.toString(16).padStart(2, "0"))
+              .join("")
+              .toUpperCase();
+
+            localStorage.setItem("PEA_EMAIL_HASH", hashHex);
+          });
+      }
+    })();
+  </script>
 
   <!-- HEADER -->
   <header class="pea-header">
@@ -25,13 +58,11 @@
     <p>Sistema de auditoría operativa. No interpreta, no aconseja, no diagnostica.</p>
   </section>
 
-  <!-- CONTENEDOR PRINCIPAL: 3 ZONAS VERTICALES (NO NEGOCIABLE) -->
   <main class="pea-history">
 
-    <!-- ZONA 1 — LECTURA PRIMARIA (BRÚJULA) — placeholder Bloque 8.5 -->
-    <section class="pea-zone pea-zone-primary" aria-label="Lectura primaria">
+    <!-- ZONA 1 -->
+    <section class="pea-zone pea-zone-primary">
       <h2>Lectura primaria (Brújula)</h2>
-
       <div id="pea-primary-reading">
         <div class="pea-empty">
           Evidencia insuficiente para lectura primaria.
@@ -39,81 +70,24 @@
       </div>
     </section>
 
-    <!-- ZONA 2 — FILTROS + REGISTROS CRUDOS -->
-    <section class="pea-zone pea-zone-core" aria-label="Filtros y registros">
+    <!-- ZONA 2 -->
+    <section class="pea-zone pea-zone-core">
 
       <!-- FILTROS -->
       <section class="pea-filters">
         <h2>Filtros</h2>
 
         <div class="pea-filters-grid">
-
-          <label>
-            Fecha desde
-            <input type="date" id="pea-filter-date-from" />
-          </label>
-
-          <label>
-            Fecha hasta
-            <input type="date" id="pea-filter-date-to" />
-          </label>
-
-          <label>
-            Momento
-            <select id="pea-filter-momento">
-              <option value="">—</option>
-            </select>
-          </label>
-
-          <label>
-            Pensamiento
-            <select id="pea-filter-pensamiento">
-              <option value="">—</option>
-            </select>
-          </label>
-
-          <label>
-            Estado
-            <select id="pea-filter-estado">
-              <option value="">—</option>
-            </select>
-          </label>
-
-          <label>
-            Intensidad
-            <select id="pea-filter-intensidad">
-              <option value="">—</option>
-            </select>
-          </label>
-
-          <label>
-            Acción
-            <select id="pea-filter-accion">
-              <option value="">—</option>
-            </select>
-          </label>
-
-          <label>
-            Dirección
-            <select id="pea-filter-direccion">
-              <option value="">—</option>
-            </select>
-          </label>
-
-          <label>
-            Activo
-            <select id="pea-filter-activo">
-              <option value="">—</option>
-            </select>
-          </label>
-
-          <label>
-            Instrumento
-            <select id="pea-filter-instrumento">
-              <option value="">—</option>
-            </select>
-          </label>
-
+          <label>Fecha desde <input type="date" id="pea-filter-date-from" /></label>
+          <label>Fecha hasta <input type="date" id="pea-filter-date-to" /></label>
+          <label>Momento <select id="pea-filter-momento"><option value="">—</option></select></label>
+          <label>Pensamiento <select id="pea-filter-pensamiento"><option value="">—</option></select></label>
+          <label>Estado <select id="pea-filter-estado"><option value="">—</option></select></label>
+          <label>Intensidad <select id="pea-filter-intensidad"><option value="">—</option></select></label>
+          <label>Acción <select id="pea-filter-accion"><option value="">—</option></select></label>
+          <label>Dirección <select id="pea-filter-direccion"><option value="">—</option></select></label>
+          <label>Activo <select id="pea-filter-activo"><option value="">—</option></select></label>
+          <label>Instrumento <select id="pea-filter-instrumento"><option value="">—</option></select></label>
           <label>
             Estado del registro
             <select id="pea-filter-record-state">
@@ -123,23 +97,22 @@
               <option value="CORRECCION">CORRECCION</option>
             </select>
           </label>
-
         </div>
 
         <div class="pea-filter-actions">
-          <button id="pea-filter-apply" type="button">Aplicar filtros</button>
-          <button id="pea-filter-clear" type="button">Quitar filtros</button>
+          <button id="pea-filter-apply">Aplicar filtros</button>
+          <button id="pea-filter-clear">Quitar filtros</button>
         </div>
 
-        <div id="pea-filter-status" class="pea-filter-status" aria-live="polite"></div>
+        <div id="pea-filter-status"></div>
       </section>
 
-      <!-- TABLA — REGISTROS CRUDOS (1 fila = 1 evidencia) -->
+      <!-- TABLA -->
       <section class="pea-table-wrap">
         <h2>Registros</h2>
 
         <div class="pea-table-scroll">
-          <table class="pea-table" aria-label="Tabla de registros PEA">
+          <table class="pea-table">
             <thead>
               <tr>
                 <th>Fecha</th>
@@ -156,10 +129,7 @@
                 <th>ID</th>
               </tr>
             </thead>
-
-            <tbody id="pea-table-body">
-              <!-- Render por pea_table.js -->
-            </tbody>
+            <tbody id="pea-table-body"></tbody>
           </table>
         </div>
 
@@ -170,10 +140,9 @@
 
     </section>
 
-    <!-- ZONA 3 — MÉTRICAS SECUNDARIAS -->
-    <section class="pea-zone pea-zone-secondary" aria-label="Métricas secundarias">
+    <!-- ZONA 3 -->
+    <section class="pea-zone pea-zone-secondary">
       <h2>Métricas secundarias</h2>
-
       <div id="pea-metrics">
         <div class="pea-empty">
           Evidencia insuficiente para calcular métricas.
@@ -181,15 +150,14 @@
       </div>
     </section>
 
-    <!-- ACCIONES -->
     <section class="pea-actions">
-      <button id="pea-export" type="button">Export</button>
-      <button id="pea-back" type="button">Volver</button>
+      <button id="pea-export">Export</button>
+      <button id="pea-back" onclick="history.back()">Volver</button>
     </section>
 
   </main>
 
-  <!-- BLOQUE 8 — HISTORIAL -->
+  <!-- SCRIPTS -->
   <script type="module" src="./pea_filters.js"></script>
   <script type="module" src="./pea_table.js"></script>
   <script type="module" src="./pea_metrics.js"></script>
