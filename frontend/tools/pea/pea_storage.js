@@ -20,20 +20,22 @@
    ========================= */
 
 const STORAGE_KEYS = {
-  LOG: (emailHash) => `CFC_PEA_LOG_${emailHash}`,
-  PREFERENCES: (emailHash) => `CFC_PEA_PREFERENCES_${emailHash}`,
-  SNAPSHOTS: (emailHash) => `CFC_PEA_SNAPSHOTS_${emailHash}`
+  LOG: (hash) => `CFC_PEA_LOG_${hash}`,
+  PREFERENCES: (hash) => `CFC_PEA_PREFERENCES_${hash}`,
+  SNAPSHOTS: (hash) => `CFC_PEA_SNAPSHOTS_${hash}`
 };
 
 /* =========================
    UTILIDADES INTERNAS
    ========================= */
 
-function getEmailHash() {
-  const hash = localStorage.getItem("emailHash");
+function getPEAEmailHash() {
+  const hash = localStorage.getItem("PEA_EMAIL_HASH");
+
   if (!hash) {
-    throw new Error("PEA STORAGE: emailHash no disponible.");
+    throw new Error("PEA STORAGE: PEA_EMAIL_HASH no disponible.");
   }
+
   return hash;
 }
 
@@ -54,8 +56,8 @@ function nowISO() {
    ========================= */
 
 function loadPEALog() {
-  const emailHash = getEmailHash();
-  const key = STORAGE_KEYS.LOG(emailHash);
+  const hash = getPEAEmailHash();
+  const key = STORAGE_KEYS.LOG(hash);
 
   const raw = localStorage.getItem(key);
   if (!raw) return [];
@@ -75,8 +77,8 @@ function savePEARecord(record) {
     throw new Error("PEA STORAGE: registro inválido.");
   }
 
-  const emailHash = getEmailHash();
-  const key = STORAGE_KEYS.LOG(emailHash);
+  const hash = getPEAEmailHash();
+  const key = STORAGE_KEYS.LOG(hash);
 
   const log = loadPEALog();
 
@@ -110,8 +112,8 @@ function markAsAnulado(recordId) {
     throw new Error("PEA STORAGE: recordId requerido.");
   }
 
-  const emailHash = getEmailHash();
-  const key = STORAGE_KEYS.LOG(emailHash);
+  const hash = getPEAEmailHash();
+  const key = STORAGE_KEYS.LOG(hash);
 
   const log = loadPEALog();
 
