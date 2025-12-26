@@ -50,6 +50,25 @@
 
   </main>
 
+  <script>
+    // 🔐 PEA REQUIERE emailHash DEL CAMPUS
+    (function ensureEmailHash() {
+      const emailHash = localStorage.getItem("emailHash");
+
+      if (!emailHash) {
+        alert(
+          "PEA no puede iniciarse.\n\n" +
+          "No se detectó una sesión válida del Campus.\n" +
+          "Por favor, ingresá desde el Campus principal."
+        );
+
+        // Falla segura: no permitir uso sin identidad
+        throw new Error("PEA BLOCKED: emailHash no disponible");
+      }
+    })();
+  </script>
+
   <script src="./pea_home.js"></script>
+
 </body>
 </html>
