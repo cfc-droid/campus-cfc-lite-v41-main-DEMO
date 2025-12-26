@@ -47,24 +47,6 @@ function generatePEAId() {
   return "pea_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
 }
 
-function getStorageKey() {
-  const emailHash = localStorage.getItem("emailHash") || "anonymous";
-  return `PEA_RECORDS_${emailHash}`;
-}
-
-function loadRecords() {
-  const raw = localStorage.getItem(getStorageKey());
-  try {
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveRecords(records) {
-  localStorage.setItem(getStorageKey(), JSON.stringify(records));
-}
-
 /* =========================
    ACCIONES (SLOTS)
    ========================= */
@@ -77,8 +59,9 @@ function getAccionesFromSlots() {
 
 function updateAccionesPreview() {
   const list = $("pea-acciones-preview-list");
-  list.innerHTML = "";
+  if (!list) return;
 
+  list.innerHTML = "";
   getAccionesFromSlots().forEach(a => {
     const li = document.createElement("li");
     li.textContent = a;
@@ -116,7 +99,6 @@ function setupCatalogsUI() {
 
   refreshInstrumentos();
   activoSel.addEventListener("change", refreshInstrumentos);
-
   setupOtrosUX();
 }
 
@@ -167,13 +149,22 @@ function readFormData() {
     direccion: $("pea-direccion").value,
 
     activo: $("pea-activo").value || null,
-    activo_otros: $("pea-activo").value === "OTROS" ? $("pea-activo-otros").value.trim() : null,
+    activo_otros:
+      $("pea-activo").value === "OTROS"
+        ? $("pea-activo-otros").value.trim()
+        : null,
+
     instrumento: $("pea-instrumento").value || null,
-    instrumento_otros: $("pea-instrumento").value === "OTROS" ? $("pea-instrumento-otros").value.trim() : null,
+    instrumento_otros:
+      $("pea-instrumento").value === "OTROS"
+        ? $("pea-instrumento-otros").value.trim()
+        : null,
 
     nota_factual: $("pea-nota").value.trim() || null,
-    created_at: Date.now(),
-    correction_of: null
+
+    meta: {
+      schema_version: "PEA_SCHEMA_V1"
+    }
   };
 }
 
@@ -182,33 +173,38 @@ function readFormData() {
    ========================= */
 
 function handleGuardar() {
-  const data = readFormData();
-  const validator = window.validatePEAForm;
+  try {
+    const data = readFormData();
 
-  if (!validator) {
-    alert("validatePEAForm no disponible");
-    return;
+    if (!window.validatePEAForm) {
+      throw new Error("validatePEAForm no disponible");
+    }
+
+    const result = window.validatePEAForm(data);
+    if (!result.isValid) {
+      alert(result.errors.join("\n"));
+      return;
+    }
+
+    if (!window.PEA_STORAGE) {
+      throw new Error("PEA_STORAGE no disponible");
+    }
+
+    window.PEA_STORAGE.savePEARecord(data);
+
+    alert("Registro guardado correctamente.");
+    window.location.href = "./pea_screen_history.html";
+
+  } catch (e) {
+    alert("ERROR AL GUARDAR:\n" + e.message);
   }
-
-  const result = validator(data);
-  if (!result.isValid) {
-    alert(result.errors.join("\n"));
-    return;
-  }
-
-  const records = loadRecords();
-  records.push(data);
-  saveRecords(records);
-
-  window.location.href = "./pea_screen_history.html";
 }
 
 function handleNuevo() {
   if (!confirm("¿Estás seguro?")) return;
 
   document.querySelectorAll("input, textarea, select").forEach(el => {
-    if (el.tagName === "SELECT") el.value = "";
-    else el.value = "";
+    el.value = "";
   });
 
   updateAccionesPreview();
@@ -221,21 +217,24 @@ function handleModificar() {
   const originalId = prompt("ID del registro a corregir:");
   if (!originalId) return;
 
-  const data = readFormData();
-  data.correction_of = originalId;
+  try {
+    const data = readFormData();
+    data.correction_of = originalId;
 
-  const validator = window.validatePEAForm;
-  const result = validator(data);
-  if (!result.isValid) {
-    alert(result.errors.join("\n"));
-    return;
+    const result = window.validatePEAForm(data);
+    if (!result.isValid) {
+      alert(result.errors.join("\n"));
+      return;
+    }
+
+    window.PEA_STORAGE.createCorrection(originalId, data);
+
+    alert("Corrección guardada correctamente.");
+    window.location.href = "./pea_screen_history.html";
+
+  } catch (e) {
+    alert("ERROR AL CORREGIR:\n" + e.message);
   }
-
-  const records = loadRecords();
-  records.push(data);
-  saveRecords(records);
-
-  window.location.href = "./pea_screen_history.html";
 }
 
 /* =========================
