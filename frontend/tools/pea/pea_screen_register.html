@@ -179,11 +179,14 @@
 
   </main>
 
-  <!-- validate global (window.validatePEAForm) -->
-  <script src="./pea_validate.js"></script>
+<!-- VALIDACIONES (window.validatePEAForm) -->
+<script src="./pea_validate.js"></script>
 
-  <!-- register como módulo (importa catálogos con export const) -->
-  <script type="module" src="./pea_register.js"></script>
+<!-- STORAGE GLOBAL (window.PEA_STORAGE) -->
+<script src="./pea_storage.js"></script>
+
+<!-- REGISTER (usa validate + storage) -->
+<script type="module" src="./pea_register.js"></script>
 
 </body>
 </html>
