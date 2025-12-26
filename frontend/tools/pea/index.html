@@ -51,11 +51,17 @@
   </main>
 
   <script>
-    // 🔐 PEA REQUIERE emailHash DEL CAMPUS
-    (function ensureEmailHash() {
-      const emailHash = localStorage.getItem("emailHash");
+    // =========================================================
+    // 🔐 PEA — IDENTIDAD COMPATIBLE CON CAMPUS (NO INVASIVA)
+    // - NO modifica el Campus
+    // - NO crea email global
+    // - SOLO consume CFC_EMAIL
+    // - Genera hash exclusivo para PEA
+    // =========================================================
+    (function ensurePEAIdentity() {
+      const email = localStorage.getItem("CFC_EMAIL");
 
-      if (!emailHash) {
+      if (!email) {
         alert(
           "PEA no puede iniciarse.\n\n" +
           "No se detectó una sesión válida del Campus.\n" +
@@ -63,7 +69,27 @@
         );
 
         // Falla segura: no permitir uso sin identidad
-        throw new Error("PEA BLOCKED: emailHash no disponible");
+        throw new Error("PEA BLOCKED: CFC_EMAIL no disponible");
+      }
+
+      // 🔐 Hash interno SOLO para PEA (no afecta al Campus)
+      try {
+        const encoder = new TextEncoder();
+        crypto.subtle
+          .digest("SHA-256", encoder.encode(email))
+          .then(buffer => {
+            const hashArray = Array.from(new Uint8Array(buffer));
+            const hashHex = hashArray
+              .map(b => b.toString(16).padStart(2, "0"))
+              .join("")
+              .toUpperCase();
+
+            // Namespace exclusivo PEA
+            localStorage.setItem("PEA_EMAIL_HASH", hashHex);
+          });
+      } catch (e) {
+        console.error("PEA HASH ERROR:", e);
+        throw new Error("PEA BLOCKED: fallo al generar identidad");
       }
     })();
   </script>
