@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Análisis (PEA) — Lectura primaria (Brújula)</title>
+
+  <!-- CSS global del Campus (heredado, NO modificar) -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="/css/theme.css" />
+
+  <!-- CSS específico PEA (estructura, no colores) -->
+  <link rel="stylesheet" href="./pea_theme.css" />
+</head>
+
+<body>
+
+  <header class="pea-header">
+    <h1>Análisis (PEA) — Lectura primaria (Brújula)</h1>
+  </header>
+
+  <section class="pea-legal-banner">
+    <p>Sistema de auditoría operativa. No interpreta, no aconseja, no diagnostica.</p>
+  </section>
+
+  <!-- ======================================================
+       NOTA TÉCNICA CRÍTICA (CIERRE FILOSÓFICO DEL BLOQUE)
+       ====================================================== -->
+  <section class="pea-zone pea-zone-primary" aria-label="Nota técnica">
+    <h2>Nota técnica</h2>
+    <div class="pea-empty">
+      Si el usuario necesita ver una operación completa, PEA no es la herramienta correcta.
+      PEA está diseñado para detectar repetición conductual, no para reconstruir historias.
+    </div>
+  </section>
+
+  <!-- ======================================================
+       BRÚJULA — RENDER DIRECTO
+       ====================================================== -->
+  <main class="pea-history">
+
+    <section class="pea-zone pea-zone-primary" aria-label="Lectura primaria">
+      <h2>Lectura primaria (Brújula)</h2>
+
+      <div id="pea-primary-reading">
+        <div class="pea-empty">
+          Evidencia insuficiente para lectura primaria.
+        </div>
+      </div>
+    </section>
+
+    <section class="pea-actions">
+      <button id="pea-back" type="button">Volver</button>
+    </section>
+
+  </main>
+
+  <!-- ======================================================
+       SCRIPTS — BLOQUE 8.5
+       ====================================================== -->
+  <script type="module">
+    import { loadPEARecordsForPrimary } from "./pea_primary_reading.js";
+    import { renderPrimaryTables } from "./pea_primary_tables.js";
+
+    // Render standalone (sin filtros)
+    document.addEventListener("DOMContentLoaded", () => {
+      const records = loadPEARecordsForPrimary();
+      renderPrimaryTables(records);
+
+      const backBtn = document.getElementById("pea-back");
+      if (backBtn) {
+        backBtn.addEventListener("click", () => {
+          window.location.href = "./index.html";
+        });
+      }
+    });
+  </script>
+
+</body>
+</html>
