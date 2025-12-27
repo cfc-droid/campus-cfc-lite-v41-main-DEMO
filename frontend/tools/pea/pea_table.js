@@ -36,9 +36,11 @@ function renderRow(record) {
       <td>${renderIntensidad(record)}</td>
       <td>${safeText(renderAcciones(record))}</td>
       <td>${safeText(record?.direccion)}</td>
-      <td>${safeText(record?.activo)}</td>
-      <td>${safeText(record?.instrumento)}</td>
-      <td>${safeText(record?.nota_factual)}</td>
+<td>${safeText(record?.activo)}</td>
+<td>${safeText(record?.activo_otros)}</td>
+<td>${safeText(record?.instrumento)}</td>
+<td>${safeText(record?.instrumento_otros)}</td>
+<td>${safeText(record?.nota_factual)}</td>
       <td>${safeText(estadoRegistro)}</td>
       <td>${safeText(record?.id)}</td>
     </tr>
