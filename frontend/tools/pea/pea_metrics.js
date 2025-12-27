@@ -68,18 +68,24 @@ function calculateMetrics(records) {
 /* ============================================================
    TAREA 17 — Estado del sistema (salud del dato)
    Auditoría objetiva. No interpreta. No modifica métricas.
+   Umbral definido:
+   0–2  → Insuficiente
+   3–4  → Parcial
+   ≥5   → Suficiente
    ============================================================ */
 
 function calculateDataHealth(metrics) {
-  if (!metrics || !metrics.total) {
+  if (!metrics || metrics.total <= 2) {
     return {
       level: "INSUFICIENTE",
       icon: "🔴",
-      text: "Datos insuficientes"
+      text: metrics?.total
+        ? `Datos insuficientes (${metrics.total} registros)`
+        : "Datos insuficientes"
     };
   }
 
-  if (metrics.total < 5) {
+  if (metrics.total <= 4) {
     return {
       level: "PARCIAL",
       icon: "🟡",
