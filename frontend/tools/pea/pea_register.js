@@ -190,6 +190,17 @@ function handleGuardar() {
       throw new Error("PEA_STORAGE no disponible");
     }
 
+// 🔒 CONFIRMACIÓN PREVIA AL GUARDADO (UX CRÍTICA)
+const confirmar = confirm(
+  "¿Seguro que querés guardar este registro?\n\n" +
+  "Verificá los datos antes de confirmar."
+);
+
+if (!confirmar) {
+  return; // ❌ el usuario canceló, NO se guarda nada
+}
+
+// ✅ GUARDADO REAL     
 window.PEA_STORAGE.savePEARecord(data);
 
 alert("Registro guardado correctamente.\nPodés cargar otro registro.");
