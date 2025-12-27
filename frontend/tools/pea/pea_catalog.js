@@ -291,12 +291,55 @@ export const PEA_ACTIVOS = Object.freeze([
 ]);
 
 export const PEA_INSTRUMENTOS_POR_ACTIVO = Object.freeze({
-  Cripto: [],
-  Divisa: [],
-  "Materia prima": [],
-  Futuros: [],
-  Acciones: [],
-  Índices: [],
+  Cripto: [
+    "Bitcoin",
+    "Ethereum",
+    "Altcoins"
+  ],
+
+  Divisa: [
+    "EUR/USD",
+    "GBP/USD",
+    "USD/JPY",
+    "AUD/USD",
+    "USD/CAD",
+    "USD/CHF",
+    "OTRAS DIVISAS"
+  ],
+
+  "Materia prima": [
+    "Oro",
+    "Plata",
+    "Petróleo",
+    "Gas natural"
+  ],
+
+  Futuros: [
+    "ES",
+    "NQ",
+    "YM",
+    "RTY",
+    "OTROS FUTUROS"
+  ],
+
+  Acciones: [
+    "AAPL",
+    "MSFT",
+    "AMZN",
+    "GOOGL",
+    "TSLA",
+    "META",
+    "OTRAS ACCIONES"
+  ],
+
+  Índices: [
+    "SP500",
+    "NASDAQ",
+    "DOW JONES",
+    "DAX",
+    "IBEX"
+  ],
+
   OTROS: []
 });
 
