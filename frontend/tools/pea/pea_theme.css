@@ -5,82 +5,119 @@
    - Jerarquía > significado
    ========================================================= */
 
+/* =========================================================
+   BASE GENERAL
+   ========================================================= */
+
 /* Contenedor raíz del módulo */
 #pea-root,
 .pea-home,
-.pea-screen {
+.pea-screen,
+.pea-history {
   background: var(--bg-main);
   color: var(--text-main);
 }
 
-/* Tipografía: heredada del Campus */
+/* Tipografía heredada */
 #pea-root,
 .pea-home,
 .pea-screen,
+.pea-history,
 #pea-root * {
   font-family: var(--font-main);
 }
 
-/* Títulos — jerarquía, no énfasis emocional */
+/* Títulos */
 .pea-home h1,
-.pea-screen h1 {
+.pea-screen h1,
+.pea-history h1 {
   color: var(--text-main);
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
 
 .pea-home h2,
-.pea-screen h2 {
+.pea-screen h2,
+.pea-history h2 {
   color: var(--text-main);
   font-weight: 500;
-  margin-top: 1.25rem;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
 }
 
-/* Texto descriptivo mínimo */
-.pea-desc {
+/* Texto auxiliar */
+.pea-desc,
+.pea-empty {
   color: var(--text-secondary);
-  margin-bottom: 1rem;
 }
 
-/* Botonera principal: hereda estilos del Campus */
+/* Botoneras */
 .pea-actions,
 .pea-access {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
+  margin-top: 0.75rem;
 }
 
-/* Separadores neutros */
-.pea-separator {
-  border-top: 1px solid var(--border-neutral);
-  margin: 1rem 0;
-}
+/* =========================================================
+   BLOQUE 8 — JERARQUÍA VISUAL DEL HISTORIAL
+   ========================================================= */
 
-/* =========================
-   JERARQUÍA VISUAL (BLOQUE 8.5)
-   ========================= */
-
-/* ZONA 1 — Lectura primaria (máxima jerarquía) */
+/* -------------------------
+   ZONA A — LECTURA PRIMARIA
+   ------------------------- */
 .pea-zone-primary {
   border: 1px solid var(--border-neutral);
   padding: 0.75rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-/* ZONA 2 — Registros crudos */
-.pea-zone-records {
+/* Grilla de la brújula (2 columnas) */
+.pea-zone-primary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Columna izquierda: lectura primaria */
+.pea-primary-left {
+  border: 1px dashed var(--border-neutral);
+  padding: 0.75rem;
+}
+
+/* Columna derecha: gráfico resumen (placeholder) */
+.pea-primary-right {
+  border: 1px dashed var(--border-neutral);
+  padding: 0.75rem;
+}
+
+/* -------------------------
+   ZONA B — FILTROS + TABLA
+   ------------------------- */
+.pea-zone-core-inner {
+  margin-bottom: 1rem;
+}
+
+.pea-zone-core {
   border: 1px solid var(--border-neutral);
   padding: 0.75rem;
-  margin-bottom: 0.75rem;
 }
 
-/* ZONA 3 — Métricas secundarias */
-.pea-zone-metrics {
-  border: 1px solid var(--border-neutral);
-  padding: 0.75rem;
+/* Filtros */
+.pea-filters {
+  margin-bottom: 1rem;
 }
 
-/* Tablas — lectura fría */
+.pea-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+/* -------------------------
+   TABLA — REGISTROS CRUDOS
+   ------------------------- */
 .pea-table {
   width: 100%;
   border-collapse: collapse;
@@ -92,11 +129,25 @@
   padding: 0.4rem 0.5rem;
   text-align: left;
   color: var(--text-main);
+  font-size: 0.85rem;
 }
 
 .pea-table th {
   font-weight: 600;
 }
+
+/* -------------------------
+   ZONA C — MÉTRICAS
+   ------------------------- */
+.pea-zone-secondary {
+  border-top: 2px solid var(--border-neutral);
+  padding-top: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* =========================================================
+   ELEMENTOS NEUTROS
+   ========================================================= */
 
 /* Indicadores de estado (sin juicio) */
 .pea-health-green,
@@ -105,7 +156,7 @@
   color: var(--text-main);
 }
 
-/* Enlaces neutros */
+/* Enlaces */
 .pea-link {
   color: var(--accent-primary);
   text-decoration: none;
@@ -115,7 +166,7 @@
   text-decoration: underline;
 }
 
-/* No iconografía emocional */
+/* Iconos */
 .pea-icon {
   filter: none;
   opacity: 0.9;
