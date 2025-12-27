@@ -96,6 +96,12 @@ function readFiltersFromUI() {
   FILTER_STATE.activo = $("pea-filter-activo").value || null;
   FILTER_STATE.instrumento = $("pea-filter-instrumento").value || null;
   FILTER_STATE.recordState = $("pea-filter-record-state").value || null;
+
+  FILTER_STATE.activoOtros =
+    $("pea-filter-activo-otros")?.value.trim() || null;
+
+  FILTER_STATE.instrumentoOtros =
+    $("pea-filter-instrumento-otros")?.value.trim() || null;
 }
 
 /* =========================
@@ -124,6 +130,20 @@ function applyFilters(records) {
     if (FILTER_STATE.direccion && r?.direccion !== FILTER_STATE.direccion) return false;
     if (FILTER_STATE.activo && r?.activo !== FILTER_STATE.activo) return false;
     if (FILTER_STATE.instrumento && r?.instrumento !== FILTER_STATE.instrumento) return false;
+
+    if (FILTER_STATE.activoOtros) {
+      if (
+        !r?.activo_otros ||
+        !r.activo_otros.toLowerCase().includes(FILTER_STATE.activoOtros.toLowerCase())
+      ) return false;
+    }
+
+    if (FILTER_STATE.instrumentoOtros) {
+      if (
+        !r?.instrumento_otros ||
+        !r.instrumento_otros.toLowerCase().includes(FILTER_STATE.instrumentoOtros.toLowerCase())
+      ) return false;
+    }
 
     if (FILTER_STATE.recordState) {
       const estadoRegistro = r?.meta?.estado || "VALIDO";
@@ -160,36 +180,11 @@ function onClear() {
 
   setStatus("Filtros quitados.");
   document.dispatchEvent(new CustomEvent("PEA_FILTERS_UPDATED"));
-
-FILTER_STATE.activoOtros =
-  $("pea-filter-activo-otros")?.value.trim() || null;
-
-FILTER_STATE.instrumentoOtros =
-  $("pea-filter-instrumento-otros")?.value.trim() || null;
-   
 }
 
 /* =========================
    API pública (global)
    ========================= */
-
-if (FILTER_STATE.activoOtros) {
-  if (
-    !r?.activo_otros ||
-    !r.activo_otros
-      .toLowerCase()
-      .includes(FILTER_STATE.activoOtros.toLowerCase())
-  ) return false;
-}
-
-if (FILTER_STATE.instrumentoOtros) {
-  if (
-    !r?.instrumento_otros ||
-    !r.instrumento_otros
-      .toLowerCase()
-      .includes(FILTER_STATE.instrumentoOtros.toLowerCase())
-  ) return false;
-}
 
 window.PEA_FILTERS = {
   apply(records) {
@@ -205,6 +200,4 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilterCatalogs();
   $("pea-filter-apply").addEventListener("click", onApply);
   $("pea-filter-clear").addEventListener("click", onClear);
-  $("pea-filter-activo-otros").value = "";
-  $("pea-filter-instrumento-otros").value = ""; 
 });
