@@ -65,8 +65,12 @@ function loadPEALog() {
   const parsed = safeParse(raw);
   if (!Array.isArray(parsed)) return [];
 
-  return parsed;
-}
+  -  return parsed;
++  return [...parsed].sort((a, b) => {
++    const ta = a?.meta?.created_at_iso || "";
++    const tb = b?.meta?.created_at_iso || "";
++    return tb.localeCompare(ta); // más reciente primero
++  });
 
 /* =========================
    SAVE RECORD (APPEND ONLY)
