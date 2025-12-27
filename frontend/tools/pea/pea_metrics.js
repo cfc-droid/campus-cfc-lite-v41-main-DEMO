@@ -65,13 +65,46 @@ function calculateMetrics(records) {
   };
 }
 
+/* ============================================================
+   TAREA 17 — Estado del sistema (salud del dato)
+   Auditoría objetiva. No interpreta. No modifica métricas.
+   ============================================================ */
+
+function calculateDataHealth(metrics) {
+  if (!metrics || !metrics.total) {
+    return {
+      level: "INSUFICIENTE",
+      icon: "🔴",
+      text: "Datos insuficientes"
+    };
+  }
+
+  if (metrics.total < 5) {
+    return {
+      level: "PARCIAL",
+      icon: "🟡",
+      text: `Datos parciales (${metrics.total} registros)`
+    };
+  }
+
+  return {
+    level: "SUFICIENTE",
+    icon: "🟢",
+    text: `Datos suficientes (${metrics.total} registros)`
+  };
+}
+
 function renderMetrics(metrics) {
   const box = $("pea-metrics");
   if (!box) return;
 
+  const health = calculateDataHealth(metrics);
+
   if (!metrics) {
     box.innerHTML = `
-      <div class="pea-empty">Evidencia insuficiente para calcular métricas.</div>
+      <div class="pea-empty">
+        ${health.icon} ${health.text}
+      </div>
     `;
     return;
   }
@@ -82,6 +115,10 @@ function renderMetrics(metrics) {
     : `<li>—</li>`;
 
   box.innerHTML = `
+    <div class="pea-metric-item">
+      <strong>Estado del sistema:</strong> ${health.icon} ${health.text}
+    </div>
+
     <div class="pea-metric-item">
       <strong>Total de registros:</strong> ${metrics.total}
     </div>
