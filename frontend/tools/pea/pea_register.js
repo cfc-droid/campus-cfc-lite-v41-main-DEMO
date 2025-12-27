@@ -190,9 +190,17 @@ function handleGuardar() {
       throw new Error("PEA_STORAGE no disponible");
     }
 
-    window.PEA_STORAGE.savePEARecord(data);
+window.PEA_STORAGE.savePEARecord(data);
 
-alert("Registro guardado correctamente.\nPodés cargar otro registro o ir al historial cuando quieras.");
+alert("Registro guardado correctamente.\nPodés cargar otro registro.");
+
+// 🔽 LIMPIEZA POST-GUARDADO (PASO 2B)
+document.querySelectorAll("input, textarea, select").forEach(el => {
+  el.value = "";
+});
+
+updateAccionesPreview();
+refreshInstrumentos();
 
   } catch (e) {
     alert("ERROR AL GUARDAR:\n" + e.message);
