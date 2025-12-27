@@ -93,6 +93,23 @@ function onApplyView() {
   applyFiltersFromView(view);
 }
 
+function onDeleteView() {
+  const select = document.getElementById("pea-views-select");
+  if (!select || !select.value) return;
+
+  const views = loadViews();
+  const index = Number(select.value);
+  const view = views[index];
+  if (!view) return;
+
+  const ok = confirm(`¿Eliminar la vista "${view.name}"?`);
+  if (!ok) return;
+
+  views.splice(index, 1);
+  saveViews(views);
+  refreshViewsSelect();
+}
+
 /* =========================
    INIT
    ========================= */
@@ -107,4 +124,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .getElementById("pea-view-apply")
     ?.addEventListener("click", onApplyView);
+
+   document
+  .getElementById("pea-view-delete")
+  ?.addEventListener("click", onDeleteView);
+
 });
