@@ -192,8 +192,7 @@ function handleGuardar() {
 
     window.PEA_STORAGE.savePEARecord(data);
 
-    alert("Registro guardado correctamente.");
-    window.location.href = "./pea_screen_history.html";
+alert("Registro guardado correctamente.\nPodés cargar otro registro o ir al historial cuando quieras.");
 
   } catch (e) {
     alert("ERROR AL GUARDAR:\n" + e.message);
@@ -229,8 +228,7 @@ function handleModificar() {
 
     window.PEA_STORAGE.createCorrection(originalId, data);
 
-    alert("Corrección guardada correctamente.");
-    window.location.href = "./pea_screen_history.html";
+alert("Corrección guardada correctamente.\nPodés seguir trabajando o revisar el historial cuando quieras.");
 
   } catch (e) {
     alert("ERROR AL CORREGIR:\n" + e.message);
