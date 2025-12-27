@@ -9,7 +9,6 @@
    BASE GENERAL
    ========================================================= */
 
-/* Contenedor raíz del módulo */
 #pea-root,
 .pea-home,
 .pea-screen,
@@ -18,7 +17,6 @@
   color: var(--text-main);
 }
 
-/* Tipografía heredada */
 #pea-root,
 .pea-home,
 .pea-screen,
@@ -31,7 +29,6 @@
 .pea-home h1,
 .pea-screen h1,
 .pea-history h1 {
-  color: var(--text-main);
   font-weight: 600;
   margin-bottom: 0.5rem;
 }
@@ -39,7 +36,6 @@
 .pea-home h2,
 .pea-screen h2,
 .pea-history h2 {
-  color: var(--text-main);
   font-weight: 500;
   margin-top: 1rem;
   margin-bottom: 0.5rem;
@@ -61,40 +57,33 @@
 }
 
 /* =========================================================
-   BLOQUE 8 — JERARQUÍA VISUAL DEL HISTORIAL
+   BLOQUE 8 — JERARQUÍA VISUAL HISTORIAL
    ========================================================= */
 
-/* -------------------------
+/* =========================
    ZONA A — LECTURA PRIMARIA
-   ------------------------- */
+   ========================= */
 .pea-zone-primary {
   border: 1px solid var(--border-neutral);
   padding: 0.75rem;
   margin-bottom: 1rem;
 }
 
-/* Grilla de la brújula (2 columnas) */
 .pea-zone-primary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-/* Columna izquierda: lectura primaria */
-.pea-primary-left {
-  border: 1px dashed var(--border-neutral);
-  padding: 0.75rem;
-}
-
-/* Columna derecha: gráfico resumen (placeholder) */
+.pea-primary-left,
 .pea-primary-right {
   border: 1px dashed var(--border-neutral);
   padding: 0.75rem;
 }
 
-/* -------------------------
+/* =========================
    ZONA B — FILTROS + TABLA
-   ------------------------- */
+   ========================= */
 .pea-zone-core-inner {
   margin-bottom: 1rem;
 }
@@ -104,7 +93,6 @@
   padding: 0.75rem;
 }
 
-/* Filtros */
 .pea-filters {
   margin-bottom: 1rem;
 }
@@ -115,9 +103,7 @@
   gap: 0.5rem;
 }
 
-/* -------------------------
-   TABLA — REGISTROS CRUDOS
-   ------------------------- */
+/* Tabla */
 .pea-table {
   width: 100%;
   border-collapse: collapse;
@@ -128,7 +114,6 @@
   border: 1px solid var(--border-neutral);
   padding: 0.4rem 0.5rem;
   text-align: left;
-  color: var(--text-main);
   font-size: 0.85rem;
 }
 
@@ -136,27 +121,44 @@
   font-weight: 600;
 }
 
-/* -------------------------
-   ZONA C — MÉTRICAS
-   ------------------------- */
+/* =========================
+   ZONA C — MÉTRICAS SECUNDARIAS
+   ========================= */
 .pea-zone-secondary {
   border-top: 2px solid var(--border-neutral);
   padding-top: 0.75rem;
   margin-bottom: 1rem;
 }
 
+/* 🔑 GRILLA DE MÉTRICAS (igual concepto que Zona A) */
+.pea-zone-secondary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Columna izquierda: métricas textuales */
+.pea-metrics-left {
+  border: 1px dashed var(--border-neutral);
+  padding: 0.75rem;
+}
+
+/* Columna derecha: gráfico de métricas */
+.pea-metrics-right {
+  border: 1px dashed var(--border-neutral);
+  padding: 0.75rem;
+}
+
 /* =========================================================
    ELEMENTOS NEUTROS
    ========================================================= */
 
-/* Indicadores de estado (sin juicio) */
 .pea-health-green,
 .pea-health-yellow,
 .pea-health-red {
   color: var(--text-main);
 }
 
-/* Enlaces */
 .pea-link {
   color: var(--accent-primary);
   text-decoration: none;
@@ -166,7 +168,6 @@
   text-decoration: underline;
 }
 
-/* Iconos */
 .pea-icon {
   filter: none;
   opacity: 0.9;
