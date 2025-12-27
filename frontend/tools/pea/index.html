@@ -14,9 +14,24 @@
 
     <h1>Análisis (PEA)</h1>
 
+    <!-- EXPLICACIÓN CLARA EN 5 SEGUNDOS -->
     <p class="pea-desc">
-      Registro y análisis de conducta operativa.
+      <strong>PEA</strong> es una herramienta de registro y análisis basada en
+      <strong>Pensamiento – Emoción – Acción</strong>.
+      <br />
+      Su objetivo es ayudarte a <strong>detectar patrones reales</strong> de tu
+      conducta operativa, <strong>sin interpretar ni aconsejar</strong>.
     </p>
+
+    <!-- QUÉ PODÉS HACER ACÁ -->
+    <ul class="pea-help">
+      <li><strong>Cargar registro:</strong> registrar una operación o evento operativo.</li>
+      <li><strong>Historial y estadísticas:</strong> analizar registros y métricas.</li>
+      <li><strong>Volver al Campus:</strong> regresar al contenido principal.</li>
+      <li><strong>Claro / Oscuro:</strong> cambiar el modo visual.</li>
+      <li><strong>Vistas guardadas:</strong> reutilizar filtros (si están habilitadas).</li>
+      <li><strong>Modo Auditoría:</strong> bloquear acciones sensibles (si aplica).</li>
+    </ul>
 
     <div class="pea-actions">
 
@@ -67,12 +82,9 @@
           "No se detectó una sesión válida del Campus.\n" +
           "Por favor, ingresá desde el Campus principal."
         );
-
-        // Falla segura: no permitir uso sin identidad
         throw new Error("PEA BLOCKED: CFC_EMAIL no disponible");
       }
 
-      // 🔐 Hash interno SOLO para PEA (no afecta al Campus)
       try {
         const encoder = new TextEncoder();
         crypto.subtle
@@ -84,7 +96,6 @@
               .join("")
               .toUpperCase();
 
-            // Namespace exclusivo PEA
             localStorage.setItem("PEA_EMAIL_HASH", hashHex);
           });
       } catch (e) {
