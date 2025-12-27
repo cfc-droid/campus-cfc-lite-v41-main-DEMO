@@ -31,7 +31,9 @@ const FILTER_STATE = {
   direccion: null,
   activo: null,
   instrumento: null,
-  recordState: null
+  recordState: null,
+  activoOtros: null,
+  instrumentoOtros: null
 };
 
 /* =========================
@@ -158,11 +160,36 @@ function onClear() {
 
   setStatus("Filtros quitados.");
   document.dispatchEvent(new CustomEvent("PEA_FILTERS_UPDATED"));
+
+FILTER_STATE.activoOtros =
+  $("pea-filter-activo-otros")?.value.trim() || null;
+
+FILTER_STATE.instrumentoOtros =
+  $("pea-filter-instrumento-otros")?.value.trim() || null;
+   
 }
 
 /* =========================
    API pública (global)
    ========================= */
+
+if (FILTER_STATE.activoOtros) {
+  if (
+    !r?.activo_otros ||
+    !r.activo_otros
+      .toLowerCase()
+      .includes(FILTER_STATE.activoOtros.toLowerCase())
+  ) return false;
+}
+
+if (FILTER_STATE.instrumentoOtros) {
+  if (
+    !r?.instrumento_otros ||
+    !r.instrumento_otros
+      .toLowerCase()
+      .includes(FILTER_STATE.instrumentoOtros.toLowerCase())
+  ) return false;
+}
 
 window.PEA_FILTERS = {
   apply(records) {
@@ -178,4 +205,6 @@ document.addEventListener("DOMContentLoaded", () => {
   setupFilterCatalogs();
   $("pea-filter-apply").addEventListener("click", onApply);
   $("pea-filter-clear").addEventListener("click", onClear);
+  $("pea-filter-activo-otros").value = "";
+  $("pea-filter-instrumento-otros").value = ""; 
 });
