@@ -145,11 +145,18 @@ function applyFilters(records) {
       ) return false;
     }
 
-    if (FILTER_STATE.recordState) {
-      const estadoRegistro = r?.meta?.estado || "VALIDO";
-      if (estadoRegistro !== FILTER_STATE.recordState) return false;
-    }
+if (FILTER_STATE.recordState) {
+  const estadoRegistro = r?.meta?.estado || "VALIDO";
 
+  // Normalización por compatibilidad histórica
+  const filtro =
+    FILTER_STATE.recordState === "CORRECCION"
+      ? "CORREGIDO"
+      : FILTER_STATE.recordState;
+
+  if (estadoRegistro !== filtro) return false;
+}
+     
     return true;
   });
 }
