@@ -154,15 +154,21 @@ function markAsCorregido(recordId, extraMeta = {}) {
   const newLog = log.map(record => {
     if (record.id !== recordId) return record;
 
-    return {
-      ...record,
-      meta: {
-        ...(record.meta || {}),
-        estado: "CORREGIDO",
-        corregido_at_iso: nowISO(),
-        ...extraMeta 
-      }
-    };
+ return {
+  ...record,
+
+  // ✅ ACTUALIZA NOTA SI VIENE UNA NUEVA
+  nota_factual:
+    typeof extraMeta?.nota_factual === "string"
+      ? extraMeta.nota_factual
+      : record.nota_factual,
+
+  meta: {
+    ...(record.meta || {}),
+    estado: "CORREGIDO",
+    corregido_at_iso: nowISO()
+  }
+};
   });
 
   localStorage.setItem(key, JSON.stringify(newLog));
