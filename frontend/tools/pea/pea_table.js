@@ -73,13 +73,6 @@ function renderRowActions(record) {
   `;
 }
 
-  if (estado === "CORRECCION") {
-    return `<button onclick="handleVerOriginal('${record.correction_of}')">Ver original</button>`;
-  }
-
-  return "—";
-}
-
 function renderRow(record) {
   const estadoRegistro = record?.meta?.estado || "VALIDO";
 
