@@ -235,12 +235,11 @@ if (IS_CORRECTION_MODE) {
 document.addEventListener("DOMContentLoaded", () => {
   setupCatalogsUI();
 
-  if (IS_CORRECTION_MODE) {
-    preloadCorrectionData(CORRECTION_OF_ID);
-    $("pea-fecha").disabled = true;
-    $("pea-momento").disabled = true;
-    if ($("pea-modificar")) $("pea-modificar").style.display = "none";
-  }
+if (IS_CORRECTION_MODE) {
+  preloadCorrectionData(CORRECTION_OF_ID);
+  // ⚠️ NO deshabilitar fecha ni momento
+  if ($("pea-modificar")) $("pea-modificar").style.display = "none";
+}
 
   $("pea-guardar").addEventListener("click", handleGuardar);
   $("pea-nuevo").addEventListener("click", () => location.reload());
