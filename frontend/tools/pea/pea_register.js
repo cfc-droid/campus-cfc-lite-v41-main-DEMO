@@ -1,7 +1,7 @@
 /* ============================================================
    PEA REGISTER — BLOQUE 6 / 14
    Sistema: Análisis (PEA)
-   Rol: Guardar / Nuevo / Modificar (corrección)
+   Rol: Guardar / Nuevo / Corrección guiada
    ============================================================ */
 
 import {
@@ -14,6 +14,14 @@ import {
   PEA_INSTRUMENTOS_POR_ACTIVO,
   PEA_DIRECCION
 } from "./pea_catalog.js";
+
+/* =========================
+   MODO CORRECCIÓN (URL)
+   ========================= */
+
+const urlParams = new URLSearchParams(window.location.search);
+const CORRECTION_OF_ID = urlParams.get("correction_of");
+const IS_CORRECTION_MODE = Boolean(CORRECTION_OF_ID);
 
 /* =========================
    UTILIDADES
@@ -169,6 +177,42 @@ function readFormData() {
 }
 
 /* =========================
+   PRECARGA DE CORRECCIÓN
+   ========================= */
+
+function preloadCorrectionData(originalId) {
+  if (!window.PEA_STORAGE) return;
+
+  const log = window.PEA_STORAGE.loadPEALog();
+  const original = log.find(r => r.id === originalId);
+  if (!original) {
+    alert("Registro original no encontrado.");
+    return;
+  }
+
+  $("pea-fecha").value = original.fecha || "";
+  $("pea-momento").value = original.momento || "";
+  $("pea-pensamiento").value = original.pensamiento_key || "";
+  $("pea-estado").value = original.estado_key || "";
+  $("pea-intensidad").value = original.intensidad ?? "";
+
+  const slots = document.querySelectorAll(".pea-accion-slot");
+  slots.forEach((slot, i) => {
+    slot.value = original.acciones_keys?.[i] || "";
+  });
+  updateAccionesPreview();
+
+  $("pea-direccion").value = original.direccion || "";
+  $("pea-activo").value = original.activo || "";
+  refreshInstrumentos();
+  $("pea-instrumento").value = original.instrumento || "";
+
+  $("pea-activo-otros").value = original.activo_otros || "";
+  $("pea-instrumento-otros").value = original.instrumento_otros || "";
+  $("pea-nota").value = original.nota_factual || "";
+}
+
+/* =========================
    ACCIONES
    ========================= */
 
@@ -190,28 +234,29 @@ function handleGuardar() {
       throw new Error("PEA_STORAGE no disponible");
     }
 
-// 🔒 CONFIRMACIÓN PREVIA AL GUARDADO (UX CRÍTICA)
-const confirmar = confirm(
-  "¿Seguro que querés guardar este registro?\n\n" +
-  "Verificá los datos antes de confirmar."
-);
+    const confirmar = confirm(
+      "¿Seguro que querés guardar este registro?\n\n" +
+      "Verificá los datos antes de confirmar."
+    );
 
-if (!confirmar) {
-  return; // ❌ el usuario canceló, NO se guarda nada
-}
+    if (!confirmar) return;
 
-// ✅ GUARDADO REAL     
-window.PEA_STORAGE.savePEARecord(data);
+    if (IS_CORRECTION_MODE) {
+      data.correction_of = CORRECTION_OF_ID;
+      window.PEA_STORAGE.createCorrection(CORRECTION_OF_ID, data);
+      alert("Corrección guardada correctamente.");
+      return;
+    }
 
-alert("Registro guardado correctamente.\nPodés cargar otro registro.");
+    window.PEA_STORAGE.savePEARecord(data);
+    alert("Registro guardado correctamente.\nPodés cargar otro registro.");
 
-// 🔽 LIMPIEZA POST-GUARDADO (PASO 2B)
-document.querySelectorAll("input, textarea, select").forEach(el => {
-  el.value = "";
-});
+    document.querySelectorAll("input, textarea, select").forEach(el => {
+      el.value = "";
+    });
 
-updateAccionesPreview();
-refreshInstrumentos();
+    updateAccionesPreview();
+    refreshInstrumentos();
 
   } catch (e) {
     alert("ERROR AL GUARDAR:\n" + e.message);
@@ -231,36 +276,23 @@ function handleNuevo() {
   alert("Datos borrados exitosamente");
 }
 
-function handleModificar() {
-  const originalId = prompt("ID del registro a corregir:");
-  if (!originalId) return;
-
-  try {
-    const data = readFormData();
-    data.correction_of = originalId;
-
-    const result = window.validatePEAForm(data);
-    if (!result.isValid) {
-      alert(result.errors.join("\n"));
-      return;
-    }
-
-    window.PEA_STORAGE.createCorrection(originalId, data);
-
-alert("Corrección guardada correctamente.\nPodés seguir trabajando o revisar el historial cuando quieras.");
-
-  } catch (e) {
-    alert("ERROR AL CORREGIR:\n" + e.message);
-  }
-}
-
 /* =========================
    INIT
    ========================= */
 
 document.addEventListener("DOMContentLoaded", () => {
   setupCatalogsUI();
+
+  if (IS_CORRECTION_MODE) {
+    preloadCorrectionData(CORRECTION_OF_ID);
+    $("pea-fecha").disabled = true;
+    $("pea-momento").disabled = true;
+
+    if ($("pea-modificar")) {
+      $("pea-modificar").style.display = "none";
+    }
+  }
+
   $("pea-guardar").addEventListener("click", handleGuardar);
   $("pea-nuevo").addEventListener("click", handleNuevo);
-  $("pea-modificar").addEventListener("click", handleModificar);
 });
