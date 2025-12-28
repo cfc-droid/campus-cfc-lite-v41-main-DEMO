@@ -1,8 +1,5 @@
 /* =========================================================
    PEA — Sistema Visual Heredado del Campus
-   - Sin identidad propia
-   - Sin semántica emocional
-   - Jerarquía > significado
    ========================================================= */
 
 /* =========================================================
@@ -57,12 +54,10 @@
 }
 
 /* =========================================================
-   BLOQUE 8 — JERARQUÍA VISUAL HISTORIAL
+   BLOQUE 8 — HISTORIAL
    ========================================================= */
 
-/* =========================
-   ZONA A — LECTURA PRIMARIA
-   ========================= */
+/* ZONA A */
 .pea-zone-primary {
   border: 1px solid var(--border-neutral);
   padding: 0.75rem;
@@ -81,9 +76,7 @@
   padding: 0.75rem;
 }
 
-/* =========================
-   ZONA B — FILTROS + TABLA
-   ========================= */
+/* ZONA B */
 .pea-zone-core-inner {
   margin-bottom: 1rem;
 }
@@ -103,9 +96,20 @@
   gap: 0.5rem;
 }
 
-/* Tabla */
+/* =========================================================
+   TABLA
+   ========================================================= */
+
+.pea-table-scroll {
+  /* 🔒 SCROLL SIEMPRE ACTIVO */
+  max-height: 420px;
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
 .pea-table {
   width: 100%;
+  min-width: 1200px; /* fuerza scroll horizontal */
   border-collapse: collapse;
 }
 
@@ -121,29 +125,23 @@
   font-weight: 600;
 }
 
-/* =========================
-   ZONA C — MÉTRICAS SECUNDARIAS
-   ========================= */
+/* =========================================================
+   ZONA C — MÉTRICAS
+   ========================================================= */
+
 .pea-zone-secondary {
   border-top: 2px solid var(--border-neutral);
   padding-top: 0.75rem;
   margin-bottom: 1rem;
 }
 
-/* 🔑 GRILLA DE MÉTRICAS (igual concepto que Zona A) */
 .pea-zone-secondary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
-/* Columna izquierda: métricas textuales */
-.pea-metrics-left {
-  border: 1px dashed var(--border-neutral);
-  padding: 0.75rem;
-}
-
-/* Columna derecha: gráfico de métricas */
+.pea-metrics-left,
 .pea-metrics-right {
   border: 1px dashed var(--border-neutral);
   padding: 0.75rem;
@@ -171,19 +169,4 @@
 .pea-icon {
   filter: none;
   opacity: 0.9;
-}
-
-/* =========================================================
-   PEA — Scroll control tabla de registros
-   TAREA 22c — contenedor fijo con scroll
-   ========================================================= */
-
-.pea-table-scroll {
-  overflow-y: auto;
-  overflow-x: auto;
-}
-
-/* Fuerza scroll horizontal si hay muchas columnas */
-.pea-table {
-  min-width: 1200px;
 }
