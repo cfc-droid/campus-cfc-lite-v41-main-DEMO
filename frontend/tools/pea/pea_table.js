@@ -1,12 +1,12 @@
 /* ============================================================
    PEA TABLE — BLOQUE 8 / 14
-   Rol: Render de registros crudos (1 fila = 1 evidencia)
+   Rol: Render de registros crudos
    ============================================================ */
 
 const $ = (id) => document.getElementById(id);
 
 /* ============================================================
-   TAREA 22c — control REAL de cantidad de registros visibles
+   TAREA 22c — control REAL de registros visibles
    ============================================================ */
 
 let PEA_TABLE_LIMIT = 10;
@@ -20,7 +20,7 @@ function setTableLimit(value) {
 }
 
 /* ============================================================
-   Helpers de render (SIN CAMBIOS DE LÓGICA)
+   Helpers
    ============================================================ */
 
 function safeText(v) {
@@ -69,7 +69,7 @@ function renderRow(record) {
 }
 
 /* ============================================================
-   Render de tabla (🔑 LÍMITE REAL DE DATOS)
+   Render (LÍMITE REAL DE DATOS)
    ============================================================ */
 
 function renderTable(records) {
@@ -89,7 +89,7 @@ function renderTable(records) {
   if (empty) empty.style.display = "none";
 
   const limited = list.slice(0, PEA_TABLE_LIMIT);
-  tbody.innerHTML = limited.map(r => renderRow(r)).join("");
+  tbody.innerHTML = limited.map(renderRow).join("");
 }
 
 /* ============================================================
