@@ -141,7 +141,7 @@ function markAsAnulado(recordId) {
    MARK AS CORREGIDO (SIN CREAR REGISTRO)
    ========================= */
 
-function markAsCorregido(recordId) {
+function markAsCorregido(recordId, extraMeta = {}) {
   if (!recordId) {
     throw new Error("PEA STORAGE: recordId requerido.");
   }
@@ -159,7 +159,8 @@ function markAsCorregido(recordId) {
       meta: {
         ...(record.meta || {}),
         estado: "CORREGIDO",
-        corregido_at_iso: nowISO()
+        corregido_at_iso: nowISO(),
+        ...extraMeta 
       }
     };
   });
