@@ -88,8 +88,7 @@ function renderTable(records) {
 
   if (empty) empty.style.display = "none";
 
-  const limited = list.slice(0, PEA_TABLE_LIMIT);
-  tbody.innerHTML = limited.map(renderRow).join("");
+tbody.innerHTML = list.map(renderRow).join("");
 }
 
 /* ============================================================
