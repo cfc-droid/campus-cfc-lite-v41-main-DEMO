@@ -13,10 +13,22 @@ let PEA_TABLE_LIMIT = 10;
 
 function setTableLimit(value) {
   const v = parseInt(value, 10);
-  if ([10, 15, 20].includes(v)) {
-    PEA_TABLE_LIMIT = v;
-    updateTable();
-  }
+  if (![10, 15, 20].includes(v)) return;
+
+  const container = document.querySelector(".pea-table-scroll");
+  const table = container?.querySelector("table");
+  if (!container || !table) return;
+
+  // Medimos una fila REAL
+  const firstRow = table.querySelector("tbody tr");
+  if (!firstRow) return;
+
+  const rowHeight = firstRow.getBoundingClientRect().height;
+  const headerHeight = table.querySelector("thead").getBoundingClientRect().height;
+
+  const totalHeight = (rowHeight * v) + headerHeight;
+
+  container.style.maxHeight = `${Math.ceil(totalHeight)}px`;
 }
 
 /* ============================================================
