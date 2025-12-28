@@ -152,3 +152,22 @@ document.addEventListener("PEA_FILTERS_UPDATED", updateTable);
 window.PEA_TABLE = {
   setLimit: setTableLimit
 };
+
+// ============================================================
+// Exponer handlers para botones inline (HTML onclick)
+// ============================================================
+
+window.handleAnular = function (recordId) {
+  if (!confirm("¿Anular este registro?")) return;
+  window.PEA_STORAGE.markAsAnulado(recordId);
+  updateTable();
+};
+
+window.handleCorregir = function (recordId) {
+  window.location.href = `./pea_screen_register.html?correction_of=${recordId}`;
+};
+
+window.handleVerOriginal = function (originalId) {
+  alert("ID original: " + originalId);
+};
+
