@@ -66,6 +66,46 @@ function calculateMetrics(records) {
 }
 
 /* ============================================================
+   TAREA 21a — Cobertura del dataset
+   Auditoría de completitud del dato (no interpretativa)
+   ============================================================ */
+
+function calculateDatasetCoverage(records) {
+  const list = onlyForMetrics(records);
+  if (!list.length) return null;
+
+  const total = list.length;
+
+  const fields = {
+    accion: 0,
+    instrumento: 0,
+    activo: 0,
+    pensamiento: 0,
+    estado: 0,
+    intensidad: 0
+  };
+
+  list.forEach(r => {
+    if (Array.isArray(r?.acciones_keys) && r.acciones_keys.length) fields.accion++;
+    if (r?.instrumento_key && r.instrumento_key !== "OTROS") fields.instrumento++;
+    if (r?.activo_key && r.activo_key !== "OTROS") fields.activo++;
+    if (r?.pensamiento) fields.pensamiento++;
+    if (r?.estado_key) fields.estado++;
+    if (typeof r?.intensidad === "number") fields.intensidad++;
+  });
+
+  const percent = {};
+  Object.keys(fields).forEach(k => {
+    percent[k] = Math.round((fields[k] / total) * 100);
+  });
+
+  return {
+    total,
+    percent
+  };
+}
+
+/* ============================================================
    TAREA 17 — Estado del sistema (salud del dato)
    Auditoría objetiva. No interpreta. No modifica métricas.
    Umbral definido:
@@ -98,6 +138,30 @@ function calculateDataHealth(metrics) {
     icon: "🟢",
     text: `Datos suficientes (${metrics.total} registros)`
   };
+}
+
+function renderDatasetCoverage() {
+  if (!window.PEA_STORAGE || !window.PEA_FILTERS) return "";
+
+  const all = window.PEA_STORAGE.loadPEALog();
+  const filtered = window.PEA_FILTERS.apply(all);
+  const coverage = calculateDatasetCoverage(filtered);
+
+  if (!coverage) return "";
+
+  return `
+    <div class="pea-metric-item">
+      <strong>Cobertura del dataset:</strong>
+      <ul>
+        <li>Acción válida: ${coverage.percent.accion}%</li>
+        <li>Instrumento válido: ${coverage.percent.instrumento}%</li>
+        <li>Activo válido: ${coverage.percent.activo}%</li>
+        <li>Pensamiento: ${coverage.percent.pensamiento}%</li>
+        <li>Estado emocional: ${coverage.percent.estado}%</li>
+        <li>Intensidad: ${coverage.percent.intensidad}%</li>
+      </ul>
+    </div>
+  `;
 }
 
 function renderMetrics(metrics) {
@@ -145,6 +209,8 @@ function renderMetrics(metrics) {
       <strong>Distribución por Momento:</strong>
       <ul>${momentoRows}</ul>
     </div>
+
+    ${renderDatasetCoverage()}
   `;
 }
 
