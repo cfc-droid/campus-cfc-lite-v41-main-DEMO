@@ -172,3 +172,19 @@
   filter: none;
   opacity: 0.9;
 }
+
+/* =========================================================
+   PEA — Scroll control tabla de registros
+   TAREA 22c — contenedor fijo con scroll
+   ========================================================= */
+
+.pea-table-scroll {
+  max-height: 420px;   /* altura fija del cuadro */
+  overflow-y: auto;    /* scroll vertical */
+  overflow-x: auto;    /* scroll horizontal */
+}
+
+/* Evita que la tabla se comprima y fuerza scroll horizontal */
+.pea-table {
+  min-width: 1200px;
+}
