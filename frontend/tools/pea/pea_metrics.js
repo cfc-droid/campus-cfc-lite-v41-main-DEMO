@@ -59,35 +59,48 @@ function calculateMetrics(records) {
   /* =========================
      TAREA 22 — Ranking de conductas
      (frecuencia + porcentaje)
+     Base: TOTAL DE ACCIONES
      ========================= */
 
   const accionesCount = countBy(acciones);
+  const totalAcciones = acciones.length;
 
-  const rankingAcciones = Object.entries(accionesCount)
+  const rankingRaw = Object.entries(accionesCount)
     .map(([key, count]) => ({
       key,
       count,
-      percent: Math.round((count / list.length) * 100)
+      percent: Math.round((count / totalAcciones) * 100)
     }))
     .sort((a, b) => b.count - a.count);
 
+  const top3 = rankingRaw.slice(0, 3);
+  const resto = rankingRaw.slice(3);
+
+  let restoCount = 0;
+  resto.forEach(r => (restoCount += r.count));
+
+  if (restoCount > 0) {
+    top3.push({
+      key: "OTRAS",
+      count: restoCount,
+      percent: Math.round((restoCount / totalAcciones) * 100)
+    });
+  }
+
   return {
     total: list.length,
-    accionMasFrecuente: mostFrequent(countBy(acciones)),
+    totalAcciones,
+    accionMasFrecuente: mostFrequent(accionesCount),
     estadoDominante: mostFrequent(countBy(estados)),
     intensidadPromedio: average(intensidades),
     distribucionMomento: countBy(momentos),
-    rankingAcciones
+    rankingAcciones: top3
   };
 }
 
 /* ============================================================
    TAREA 17 — Estado del sistema (salud del dato)
    Auditoría objetiva. No interpreta. No modifica métricas.
-   Umbral definido:
-   0–2  → Insuficiente
-   3–4  → Parcial
-   ≥5   → Suficiente
    ============================================================ */
 
 function calculateDataHealth(metrics) {
@@ -131,16 +144,20 @@ function renderMetrics(metrics) {
     return;
   }
 
-  const momentoEntries = Object.entries(metrics.distribucionMomento || {});
-  const momentoRows = momentoEntries.length
-    ? momentoEntries.map(([k, v]) => `<li>${k}: ${v}</li>`).join("")
-    : `<li>—</li>`;
+  const momentoRows = Object.entries(metrics.distribucionMomento || {})
+    .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
+    .join("") || `<tr><td colspan="2">—</td></tr>`;
 
-  const rankingRows = (metrics.rankingAcciones || []).length
-    ? metrics.rankingAcciones
-        .map(r => `<li>${r.key}: ${r.count} (${r.percent}%)</li>`)
-        .join("")
-    : `<li>—</li>`;
+  const rankingRows = metrics.rankingAcciones
+    .map((r, i) => `
+      <tr>
+        <td>#${i + 1}</td>
+        <td>${r.key}</td>
+        <td>${r.count}</td>
+        <td>${r.percent}%</td>
+      </tr>
+    `)
+    .join("");
 
   box.innerHTML = `
     <div class="pea-metric-item">
@@ -149,6 +166,10 @@ function renderMetrics(metrics) {
 
     <div class="pea-metric-item">
       <strong>Total de registros:</strong> ${metrics.total}
+    </div>
+
+    <div class="pea-metric-item">
+      <strong>Total de Acción(es):</strong> ${metrics.totalAcciones}
     </div>
 
     <div class="pea-metric-item">
@@ -165,12 +186,27 @@ function renderMetrics(metrics) {
 
     <div class="pea-metric-item">
       <strong>Distribución por Momento:</strong>
-      <ul>${momentoRows}</ul>
+      <table class="pea-table">
+        <thead><tr><th>Momento</th><th>Cantidad</th></tr></thead>
+        <tbody>${momentoRows}</tbody>
+      </table>
     </div>
 
     <div class="pea-metric-item">
-      <strong>Ranking de conductas operativas:</strong>
-      <ul>${rankingRows}</ul>
+      <strong>Ranking de conductas operativas: Acción(es)</strong>
+      <table class="pea-table">
+        <thead>
+          <tr>
+            <th>Ranking</th>
+            <th>Acción</th>
+            <th>Cantidad</th>
+            <th>%</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rankingRows}
+        </tbody>
+      </table>
     </div>
   `;
 }
