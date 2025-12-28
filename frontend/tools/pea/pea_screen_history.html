@@ -188,6 +188,16 @@
       <!-- TABLA — REGISTROS CRUDOS (1 fila = 1 evidencia) -->
       <section class="pea-table-wrap">
         <h2>Registros</h2>
+        
+        <div style="margin:6px 0 10px 0;">
+  Mostrar
+  <select onchange="window.PEA_TABLE.setLimit(this.value)">
+    <option value="10" selected>10</option>
+    <option value="15">15</option>
+    <option value="20">20</option>
+  </select>
+  registros
+</div>
 
         <div class="pea-table-scroll">
           <table class="pea-table" aria-label="Tabla de registros PEA">
