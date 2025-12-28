@@ -170,3 +170,30 @@
   filter: none;
   opacity: 0.9;
 }
+
+/* =========================================================
+   FIX DEFINITIVO SCROLL TABLA PEA
+   No altera estructura ni lógica del Campus
+   ========================================================= */
+
+/* El contenedor intermedio NO debe crecer infinito */
+.pea-zone-core-inner {
+  overflow: hidden; /* 🔑 clave */
+}
+
+/* Zona de filtros + tabla: permite que el scroll interno funcione */
+.pea-zone-core {
+  overflow: hidden; /* 🔑 clave */
+}
+
+/* Scroll SIEMPRE controlado acá */
+.pea-table-scroll {
+  max-height: 420px;      /* altura fija real */
+  overflow-y: auto;       /* scroll vertical */
+  overflow-x: auto;       /* scroll horizontal */
+}
+
+/* Fuerza ancho mayor al viewport */
+.pea-table {
+  min-width: 1200px;
+}
