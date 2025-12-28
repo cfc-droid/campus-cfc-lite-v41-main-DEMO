@@ -5,30 +5,22 @@
 
 const $ = (id) => document.getElementById(id);
 
-/* ===== TAREA 22c — control VISUAL del alto del cuadro ===== */
+/* ============================================================
+   TAREA 22c — control REAL de cantidad de registros visibles
+   ============================================================ */
+
 let PEA_TABLE_LIMIT = 10;
 
 function setTableLimit(value) {
   const v = parseInt(value, 10);
   if ([10, 15, 20].includes(v)) {
     PEA_TABLE_LIMIT = v;
-    applyTableHeight();
+    updateTable();
   }
 }
 
-function applyTableHeight() {
-  const box = document.querySelector(".pea-table-scroll");
-  if (!box) return;
-
-  const ROW_HEIGHT = 32;    // altura aproximada por fila (px)
-  const HEADER_HEIGHT = 40; // header tabla
-
-  box.style.maxHeight =
-    (PEA_TABLE_LIMIT * ROW_HEIGHT + HEADER_HEIGHT) + "px";
-}
-
 /* ============================================================
-   Helpers de render (SIN CAMBIOS LÓGICOS)
+   Helpers de render (SIN CAMBIOS DE LÓGICA)
    ============================================================ */
 
 function safeText(v) {
@@ -77,7 +69,7 @@ function renderRow(record) {
 }
 
 /* ============================================================
-   Render de tabla (🔑 SIN LIMITE DE DATOS)
+   Render de tabla (🔑 límite REAL de datos)
    ============================================================ */
 
 function renderTable(records) {
@@ -96,8 +88,8 @@ function renderTable(records) {
 
   if (empty) empty.style.display = "none";
 
-  /* 🔑 Renderiza TODOS los registros filtrados */
-  tbody.innerHTML = list.map(r => renderRow(r)).join("");
+  const limited = list.slice(0, PEA_TABLE_LIMIT);
+  tbody.innerHTML = limited.map(r => renderRow(r)).join("");
 }
 
 /* ============================================================
@@ -111,7 +103,6 @@ function updateTable() {
   const filtered = window.PEA_FILTERS.apply(all);
 
   renderTable(filtered);
-  applyTableHeight();
 }
 
 document.addEventListener("DOMContentLoaded", updateTable);
