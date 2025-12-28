@@ -201,11 +201,17 @@ function handleGuardar() {
 
   if (!confirm("¿Confirmás guardar este registro?")) return;
 
-  if (IS_CORRECTION_MODE) {
-    window.PEA_STORAGE.markAsCorregido(CORRECTION_OF_ID);
-    alert("Registro marcado como CORREGIDO.");
-    return;
-  }
+ if (IS_CORRECTION_MODE) {
+  window.PEA_STORAGE.markAsCorregido(
+    CORRECTION_OF_ID,
+    {
+      nota_corregida: data.nota_factual
+    }
+  );
+  alert("Registro marcado como CORREGIDO.");
+  window.location.href = "./pea_screen_history.html";
+  return;
+}
 
   window.PEA_STORAGE.savePEARecord(data);
   alert("Registro guardado correctamente.");
