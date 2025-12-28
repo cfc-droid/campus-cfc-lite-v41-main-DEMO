@@ -205,7 +205,7 @@ if (IS_CORRECTION_MODE) {
   window.PEA_STORAGE.markAsCorregido(
     CORRECTION_OF_ID,
     {
-      nota_corregida: data.nota_factual
+      nota_factual: data.nota_factual
     }
   );
   alert("Registro marcado como CORREGIDO.");
