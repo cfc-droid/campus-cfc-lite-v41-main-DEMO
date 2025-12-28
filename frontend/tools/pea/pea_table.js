@@ -5,6 +5,17 @@
 
 const $ = (id) => document.getElementById(id);
 
+/* ===== TAREA 22c — control de filas visibles ===== */
+let PEA_TABLE_LIMIT = 10;
+
+function setTableLimit(value) {
+  const v = parseInt(value, 10);
+  if ([10, 15, 20].includes(v)) {
+    PEA_TABLE_LIMIT = v;
+    updateTable();
+  }
+}
+
 function safeText(v) {
   if (v == null) return "";
   return String(v);
@@ -36,11 +47,11 @@ function renderRow(record) {
       <td>${renderIntensidad(record)}</td>
       <td>${safeText(renderAcciones(record))}</td>
       <td>${safeText(record?.direccion)}</td>
-<td>${safeText(record?.activo)}</td>
-<td>${safeText(record?.activo_otros)}</td>
-<td>${safeText(record?.instrumento)}</td>
-<td>${safeText(record?.instrumento_otros)}</td>
-<td>${safeText(record?.nota_factual)}</td>
+      <td>${safeText(record?.activo)}</td>
+      <td>${safeText(record?.activo_otros)}</td>
+      <td>${safeText(record?.instrumento)}</td>
+      <td>${safeText(record?.instrumento_otros)}</td>
+      <td>${safeText(record?.nota_factual)}</td>
       <td>${safeText(estadoRegistro)}</td>
       <td>${safeText(record?.id)}</td>
     </tr>
@@ -63,7 +74,10 @@ function renderTable(records) {
 
   if (empty) empty.style.display = "none";
 
-  const html = list.map(r => renderRow(r)).join("");
+  /* ===== aplicar límite visual ===== */
+  const limited = list.slice(0, PEA_TABLE_LIMIT);
+
+  const html = limited.map(r => renderRow(r)).join("");
   tbody.innerHTML = html;
 }
 
@@ -78,3 +92,8 @@ function updateTable() {
 
 document.addEventListener("DOMContentLoaded", updateTable);
 document.addEventListener("PEA_FILTERS_UPDATED", updateTable);
+
+/* ===== expuesto para selector ===== */
+window.PEA_TABLE = {
+  setLimit: setTableLimit
+};
