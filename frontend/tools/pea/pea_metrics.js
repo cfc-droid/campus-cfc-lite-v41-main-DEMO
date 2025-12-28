@@ -58,7 +58,6 @@ function calculateMetrics(records) {
 
   /* =========================
      TAREA 22 — Ranking de conductas
-     (frecuencia + porcentaje)
      Base: TOTAL DE ACCIONES
      ========================= */
 
@@ -99,8 +98,7 @@ function calculateMetrics(records) {
 }
 
 /* ============================================================
-   TAREA 17 — Estado del sistema (salud del dato)
-   Auditoría objetiva. No interpreta. No modifica métricas.
+   Estado del sistema
    ============================================================ */
 
 function calculateDataHealth(metrics) {
@@ -173,38 +171,36 @@ function renderMetrics(metrics) {
     </div>
 
     <div class="pea-metric-item">
-      <strong>Acción más frecuente:</strong> ${metrics.accionMasFrecuente || "—"}
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Estado dominante:</strong> ${metrics.estadoDominante || "—"}
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Intensidad promedio:</strong> ${metrics.intensidadPromedio ?? "—"}
-    </div>
-
-    <div class="pea-metric-item">
       <strong>Distribución por Momento:</strong>
       <table class="pea-table">
-        <thead><tr><th>Momento</th><th>Cantidad</th></tr></thead>
+        <thead>
+          <tr><th>Momento</th><th>Cantidad</th></tr>
+        </thead>
         <tbody>${momentoRows}</tbody>
       </table>
     </div>
 
     <div class="pea-metric-item">
-      <strong>Ranking de conductas operativas: Acción(es)</strong>
+      <strong>Ranking de conductas operativas: Acción(es)</strong><br>
+      <small>CANTIDAD DE Acción(es) EN TOTAL: ${metrics.totalAcciones}</small>
+
       <table class="pea-table">
         <thead>
           <tr>
             <th>Ranking</th>
             <th>Acción</th>
             <th>Cantidad</th>
-            <th>%</th>
+            <th>PORCENTAJE</th>
           </tr>
         </thead>
         <tbody>
           ${rankingRows}
+          <tr>
+            <td><strong>TOTAL</strong></td>
+            <td>—</td>
+            <td><strong>${metrics.totalAcciones}</strong></td>
+            <td><strong>100%</strong></td>
+          </tr>
         </tbody>
       </table>
     </div>
