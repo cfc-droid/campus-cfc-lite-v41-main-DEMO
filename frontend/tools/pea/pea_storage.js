@@ -154,14 +154,22 @@ function markAsCorregido(recordId, extraMeta = {}) {
   const newLog = log.map(record => {
     if (record.id !== recordId) return record;
 
- return {
+return {
   ...record,
 
-  // ✅ ACTUALIZA NOTA SI VIENE UNA NUEVA
-  nota_factual:
-    typeof extraMeta?.nota_factual === "string"
-      ? extraMeta.nota_factual
-      : record.nota_factual,
+  // ⬇️ Campos permitidos a corregir
+  pensamiento_key: extraMeta.pensamiento_key ?? record.pensamiento_key,
+  estado_key: extraMeta.estado_key ?? record.estado_key,
+  intensidad: extraMeta.intensidad ?? record.intensidad,
+  acciones_keys: Array.isArray(extraMeta.acciones_keys)
+    ? extraMeta.acciones_keys
+    : record.acciones_keys,
+  direccion: extraMeta.direccion ?? record.direccion,
+  activo: extraMeta.activo ?? record.activo,
+  activo_otros: extraMeta.activo_otros ?? record.activo_otros,
+  instrumento: extraMeta.instrumento ?? record.instrumento,
+  instrumento_otros: extraMeta.instrumento_otros ?? record.instrumento_otros,
+  nota_factual: extraMeta.nota_factual ?? record.nota_factual,
 
   meta: {
     ...(record.meta || {}),
