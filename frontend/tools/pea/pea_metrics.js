@@ -205,7 +205,7 @@ function renderMetrics(metrics) {
   box.innerHTML = `
     <div class="pea-metric-item">
       <strong>Cobertura diaria por Momento Operativo:</strong><br>
-      El ${coverage.coveragePercent}% de los días tienen los 3 registros completos.
+      El ${coverage.coveragePercent}% de los días tienen los 3 registros completos (ANTES, DURANTE , DESPUES de una operación).
       ${coverage.incompleteDays.length ? `<div style="margin-top:6px;">
         <strong>Días con cobertura incompleta:</strong><br>
         ${incompleteRows}
