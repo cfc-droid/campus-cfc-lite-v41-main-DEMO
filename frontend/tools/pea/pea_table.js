@@ -63,12 +63,15 @@ function renderRowActions(record) {
 
   if (!id) return "";
 
-  if (estado === "VALIDO") {
-    return `
-      <button onclick="handleAnular('${id}')">Anular</button>
-      <button onclick="handleCorregir('${id}')">Corregir</button>
-    `;
+  if (estado === "ANULADO") {
+    return "—";
   }
+
+  return `
+    <button onclick="handleAnular('${id}')">Anular</button>
+    <button onclick="handleCorregir('${id}')">Corregir</button>
+  `;
+}
 
   if (estado === "CORRECCION") {
     return `<button onclick="handleVerOriginal('${record.correction_of}')">Ver original</button>`;
