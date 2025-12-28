@@ -206,6 +206,8 @@ if (IS_CORRECTION_MODE) {
     CORRECTION_OF_ID,
     {
       // Campos editables reales
+      fecha: data.fecha,
+      momento: data.momento, 
       pensamiento_key: data.pensamiento_key,
       estado_key: data.estado_key,
       intensidad: data.intensidad,
