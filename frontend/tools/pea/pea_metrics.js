@@ -58,6 +58,7 @@ function calculateMetrics(records) {
 
   /* =========================
      TAREA 22 — Ranking de conductas
+     (AGREGADO — NO reemplaza métricas existentes)
      Base: TOTAL DE ACCIONES
      ========================= */
 
@@ -87,18 +88,22 @@ function calculateMetrics(records) {
   }
 
   return {
+    /* ===== MÉTRICAS EXISTENTES (NO TOCAR) ===== */
     total: list.length,
-    totalAcciones,
     accionMasFrecuente: mostFrequent(accionesCount),
     estadoDominante: mostFrequent(countBy(estados)),
     intensidadPromedio: average(intensidades),
     distribucionMomento: countBy(momentos),
+
+    /* ===== MÉTRICAS NUEVAS (AGREGADAS) ===== */
+    totalAcciones,
     rankingAcciones: top3
   };
 }
 
 /* ============================================================
-   Estado del sistema
+   TAREA 17 — Estado del sistema (salud del dato)
+   Auditoría objetiva. No interpreta. No modifica métricas.
    ============================================================ */
 
 function calculateDataHealth(metrics) {
@@ -142,11 +147,12 @@ function renderMetrics(metrics) {
     return;
   }
 
-  const momentoRows = Object.entries(metrics.distribucionMomento || {})
-    .map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`)
-    .join("") || `<tr><td colspan="2">—</td></tr>`;
+  const momentoEntries = Object.entries(metrics.distribucionMomento || {});
+  const momentoRows = momentoEntries.length
+    ? momentoEntries.map(([k, v]) => `<li>${k}: ${v}</li>`).join("")
+    : `<li>—</li>`;
 
-  const rankingRows = metrics.rankingAcciones
+  const rankingRows = (metrics.rankingAcciones || [])
     .map((r, i) => `
       <tr>
         <td>#${i + 1}</td>
@@ -158,6 +164,8 @@ function renderMetrics(metrics) {
     .join("");
 
   box.innerHTML = `
+    <!-- ===== MÉTRICAS EXISTENTES (SIN CAMBIOS) ===== -->
+
     <div class="pea-metric-item">
       <strong>Estado del sistema:</strong> ${health.icon} ${health.text}
     </div>
@@ -167,18 +175,23 @@ function renderMetrics(metrics) {
     </div>
 
     <div class="pea-metric-item">
-      <strong>Total de Acción(es):</strong> ${metrics.totalAcciones}
+      <strong>Acción más frecuente:</strong> ${metrics.accionMasFrecuente || "—"}
+    </div>
+
+    <div class="pea-metric-item">
+      <strong>Estado dominante:</strong> ${metrics.estadoDominante || "—"}
+    </div>
+
+    <div class="pea-metric-item">
+      <strong>Intensidad promedio:</strong> ${metrics.intensidadPromedio ?? "—"}
     </div>
 
     <div class="pea-metric-item">
       <strong>Distribución por Momento:</strong>
-      <table class="pea-table">
-        <thead>
-          <tr><th>Momento</th><th>Cantidad</th></tr>
-        </thead>
-        <tbody>${momentoRows}</tbody>
-      </table>
+      <ul>${momentoRows}</ul>
     </div>
+
+    <!-- ===== NUEVO BLOQUE: RANKING ===== -->
 
     <div class="pea-metric-item">
       <strong>Ranking de conductas operativas: Acción(es)</strong><br>
