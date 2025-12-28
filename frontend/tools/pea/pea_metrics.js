@@ -56,12 +56,28 @@ function calculateMetrics(records) {
     if (r?.momento) momentos.push(r.momento);
   });
 
+  /* =========================
+     TAREA 22 — Ranking de conductas
+     (frecuencia + porcentaje)
+     ========================= */
+
+  const accionesCount = countBy(acciones);
+
+  const rankingAcciones = Object.entries(accionesCount)
+    .map(([key, count]) => ({
+      key,
+      count,
+      percent: Math.round((count / list.length) * 100)
+    }))
+    .sort((a, b) => b.count - a.count);
+
   return {
     total: list.length,
     accionMasFrecuente: mostFrequent(countBy(acciones)),
     estadoDominante: mostFrequent(countBy(estados)),
     intensidadPromedio: average(intensidades),
-    distribucionMomento: countBy(momentos)
+    distribucionMomento: countBy(momentos),
+    rankingAcciones
   };
 }
 
@@ -120,6 +136,12 @@ function renderMetrics(metrics) {
     ? momentoEntries.map(([k, v]) => `<li>${k}: ${v}</li>`).join("")
     : `<li>—</li>`;
 
+  const rankingRows = (metrics.rankingAcciones || []).length
+    ? metrics.rankingAcciones
+        .map(r => `<li>${r.key}: ${r.count} (${r.percent}%)</li>`)
+        .join("")
+    : `<li>—</li>`;
+
   box.innerHTML = `
     <div class="pea-metric-item">
       <strong>Estado del sistema:</strong> ${health.icon} ${health.text}
@@ -144,6 +166,11 @@ function renderMetrics(metrics) {
     <div class="pea-metric-item">
       <strong>Distribución por Momento:</strong>
       <ul>${momentoRows}</ul>
+    </div>
+
+    <div class="pea-metric-item">
+      <strong>Ranking de conductas operativas:</strong>
+      <ul>${rankingRows}</ul>
     </div>
   `;
 }
