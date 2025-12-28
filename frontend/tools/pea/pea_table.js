@@ -69,7 +69,7 @@ function renderRow(record) {
 }
 
 /* ============================================================
-   Render de tabla (🔑 límite REAL de datos)
+   Render de tabla (🔑 LÍMITE REAL DE DATOS)
    ============================================================ */
 
 function renderTable(records) {
@@ -109,7 +109,7 @@ document.addEventListener("DOMContentLoaded", updateTable);
 document.addEventListener("PEA_FILTERS_UPDATED", updateTable);
 
 /* ============================================================
-   API pública (selector 10 / 15 / 20)
+   API pública
    ============================================================ */
 
 window.PEA_TABLE = {
