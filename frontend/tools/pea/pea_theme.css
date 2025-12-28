@@ -101,10 +101,10 @@
    ========================================================= */
 
 .pea-table-scroll {
-  /* 🔒 SCROLL SIEMPRE ACTIVO */
-  max-height: 420px;
-  overflow-y: scroll;
-  overflow-x: scroll;
+  max-height: 420px;        /* 🔑 CLAVE: fija el alto */
+  width: 100%;              /* asegura cálculo horizontal */
+  overflow-y: scroll;       /* scroll vertical SIEMPRE */
+  overflow-x: scroll;       /* scroll horizontal SIEMPRE */
 }
 
 .pea-table {
