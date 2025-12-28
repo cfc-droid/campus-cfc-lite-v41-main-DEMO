@@ -201,7 +201,7 @@ function handleGuardar() {
 
   if (!confirm("¿Confirmás guardar este registro?")) return;
 
- if (IS_CORRECTION_MODE) {
+if (IS_CORRECTION_MODE) {
   window.PEA_STORAGE.markAsCorregido(
     CORRECTION_OF_ID,
     {
