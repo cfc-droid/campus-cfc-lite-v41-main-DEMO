@@ -138,28 +138,43 @@ function markAsAnulado(recordId) {
 }
 
 /* =========================
-   CREATE CORRECTION RECORD
+   MARK AS CORREGIDO (SIN CREAR REGISTRO)
    ========================= */
 
-function createCorrection(originalId, newRecord) {
-  if (!originalId) {
-    throw new Error("PEA STORAGE: originalId requerido.");
-  }
-  if (!newRecord || typeof newRecord !== "object") {
-    throw new Error("PEA STORAGE: newRecord inválido.");
+function markAsCorregido(recordId) {
+  if (!recordId) {
+    throw new Error("PEA STORAGE: recordId requerido.");
   }
 
-  const correctedRecord = {
-    ...newRecord,
-    correction_of: originalId,
-    meta: {
-      ...(newRecord.meta || {}),
-      estado: "CORRECCION",
-      created_at_iso: nowISO()
-    }
-  };
+  const hash = getPEAEmailHash();
+  const key = STORAGE_KEYS.LOG(hash);
 
-  return savePEARecord(correctedRecord);
+  const log = loadPEALog();
+
+  const newLog = log.map(record => {
+    if (record.id !== recordId) return record;
+
+    return {
+      ...record,
+      meta: {
+        ...(record.meta || {}),
+        estado: "CORREGIDO",
+        corregido_at_iso: nowISO()
+      }
+    };
+  });
+
+  localStorage.setItem(key, JSON.stringify(newLog));
+}
+
+/* =========================
+   CREATE CORRECTION RECORD (DESACTIVADO)
+   ========================= */
+
+function createCorrection(originalId) {
+  // Se mantiene por compatibilidad histórica,
+  // pero NO crea nuevos registros.
+  markAsCorregido(originalId);
 }
 
 /* =========================
@@ -170,5 +185,5 @@ window.PEA_STORAGE = Object.freeze({
   loadPEALog,
   savePEARecord,
   markAsAnulado,
-  createCorrection
+  markAsCorregido
 });
