@@ -57,6 +57,26 @@ function renderIntensidad(record) {
     : safeText(record.intensidad);
 }
 
+function renderRowActions(record) {
+  const estado = record?.meta?.estado || "VALIDO";
+  const id = record?.id;
+
+  if (!id) return "";
+
+  if (estado === "VALIDO") {
+    return `
+      <button onclick="handleAnular('${id}')">Anular</button>
+      <button onclick="handleCorregir('${id}')">Corregir</button>
+    `;
+  }
+
+  if (estado === "CORRECCION") {
+    return `<button onclick="handleVerOriginal('${record.correction_of}')">Ver original</button>`;
+  }
+
+  return "—";
+}
+
 function renderRow(record) {
   const estadoRegistro = record?.meta?.estado || "VALIDO";
 
@@ -76,6 +96,7 @@ function renderRow(record) {
       <td>${safeText(record?.nota_factual)}</td>
       <td>${safeText(estadoRegistro)}</td>
       <td>${safeText(record?.id)}</td>
+      <td>${renderRowActions(record)}</td>
     </tr>
   `;
 }
