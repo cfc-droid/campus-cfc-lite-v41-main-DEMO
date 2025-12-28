@@ -34,9 +34,7 @@ function $(id) {
 function clearSelect(selectEl, keepFirst = false) {
   const opts = Array.from(selectEl.options);
   selectEl.innerHTML = "";
-  if (keepFirst && opts.length) {
-    selectEl.appendChild(opts[0]);
-  }
+  if (keepFirst && opts.length) selectEl.appendChild(opts[0]);
 }
 
 function addOption(selectEl, value, label = value) {
@@ -48,7 +46,7 @@ function addOption(selectEl, value, label = value) {
 
 function fillSelect(selectEl, values, { keepFirst = true } = {}) {
   clearSelect(selectEl, keepFirst);
-  values.forEach(v => addOption(selectEl, v, v));
+  values.forEach(v => addOption(selectEl, v));
 }
 
 function generatePEAId() {
@@ -68,7 +66,6 @@ function getAccionesFromSlots() {
 function updateAccionesPreview() {
   const list = $("pea-acciones-preview-list");
   if (!list) return;
-
   list.innerHTML = "";
   getAccionesFromSlots().forEach(a => {
     const li = document.createElement("li");
@@ -78,7 +75,7 @@ function updateAccionesPreview() {
 }
 
 /* =========================
-   UI: POBLADO DE LISTAS
+   UI — CATALOGOS
    ========================= */
 
 function setupCatalogsUI() {
@@ -113,13 +110,9 @@ function setupCatalogsUI() {
 function refreshInstrumentos() {
   const activo = $("pea-activo").value;
   const instSel = $("pea-instrumento");
-
   clearSelect(instSel, true);
   if (!activo) return;
-
-  const list = PEA_INSTRUMENTOS_POR_ACTIVO?.[activo] || [];
-  list.forEach(i => addOption(instSel, i));
-
+  (PEA_INSTRUMENTOS_POR_ACTIVO?.[activo] || []).forEach(i => addOption(instSel, i));
   addOption(instSel, "OTROS");
 }
 
@@ -142,7 +135,7 @@ function setupOtrosUX() {
 }
 
 /* =========================
-   LECTURA DE FORMULARIO
+   LECTURA FORM
    ========================= */
 
 function readFormData() {
@@ -155,49 +148,30 @@ function readFormData() {
     intensidad: Number($("pea-intensidad").value),
     acciones_keys: getAccionesFromSlots(),
     direccion: $("pea-direccion").value,
-
     activo: $("pea-activo").value || null,
-    activo_otros:
-      $("pea-activo").value === "OTROS"
-        ? $("pea-activo-otros").value.trim()
-        : null,
-
+    activo_otros: $("pea-activo").value === "OTROS" ? $("pea-activo-otros").value.trim() : null,
     instrumento: $("pea-instrumento").value || null,
-    instrumento_otros:
-      $("pea-instrumento").value === "OTROS"
-        ? $("pea-instrumento-otros").value.trim()
-        : null,
-
+    instrumento_otros: $("pea-instrumento").value === "OTROS" ? $("pea-instrumento-otros").value.trim() : null,
     nota_factual: $("pea-nota").value.trim() || null,
-
-    meta: {
-      schema_version: "PEA_SCHEMA_V1"
-    }
+    meta: { schema_version: "PEA_SCHEMA_V1" }
   };
 }
 
 /* =========================
-   PRECARGA DE CORRECCIÓN
+   PRECARGA CORRECCIÓN
    ========================= */
 
-function preloadCorrectionData(originalId) {
-  if (!window.PEA_STORAGE) return;
+function preloadCorrectionData(id) {
+  const original = window.PEA_STORAGE.loadPEALog().find(r => r.id === id);
+  if (!original) return alert("Registro original no encontrado.");
 
-  const log = window.PEA_STORAGE.loadPEALog();
-  const original = log.find(r => r.id === originalId);
-  if (!original) {
-    alert("Registro original no encontrado.");
-    return;
-  }
-
-  $("pea-fecha").value = original.fecha || "";
-  $("pea-momento").value = original.momento || "";
-  $("pea-pensamiento").value = original.pensamiento_key || "";
-  $("pea-estado").value = original.estado_key || "";
+  $("pea-fecha").value = original.fecha;
+  $("pea-momento").value = original.momento;
+  $("pea-pensamiento").value = original.pensamiento_key;
+  $("pea-estado").value = original.estado_key;
   $("pea-intensidad").value = original.intensidad ?? "";
 
-  const slots = document.querySelectorAll(".pea-accion-slot");
-  slots.forEach((slot, i) => {
+  document.querySelectorAll(".pea-accion-slot").forEach((slot, i) => {
     slot.value = original.acciones_keys?.[i] || "";
   });
   updateAccionesPreview();
@@ -206,74 +180,32 @@ function preloadCorrectionData(originalId) {
   $("pea-activo").value = original.activo || "";
   refreshInstrumentos();
   $("pea-instrumento").value = original.instrumento || "";
-
   $("pea-activo-otros").value = original.activo_otros || "";
   $("pea-instrumento-otros").value = original.instrumento_otros || "";
   $("pea-nota").value = original.nota_factual || "";
 }
 
 /* =========================
-   ACCIONES
+   GUARDAR
    ========================= */
 
 function handleGuardar() {
-  try {
-    const data = readFormData();
+  const data = readFormData();
+  const result = window.validatePEAForm(data);
+  if (!result.isValid) return alert(result.errors.join("\n"));
 
-    if (!window.validatePEAForm) {
-      throw new Error("validatePEAForm no disponible");
-    }
+  if (!confirm("¿Confirmás guardar este registro?")) return;
 
-    const result = window.validatePEAForm(data);
-    if (!result.isValid) {
-      alert(result.errors.join("\n"));
-      return;
-    }
-
-    if (!window.PEA_STORAGE) {
-      throw new Error("PEA_STORAGE no disponible");
-    }
-
-    const confirmar = confirm(
-      "¿Seguro que querés guardar este registro?\n\n" +
-      "Verificá los datos antes de confirmar."
-    );
-
-    if (!confirmar) return;
-
-    if (IS_CORRECTION_MODE) {
-      data.correction_of = CORRECTION_OF_ID;
-      window.PEA_STORAGE.createCorrection(CORRECTION_OF_ID, data);
-      alert("Corrección guardada correctamente.");
-      return;
-    }
-
-    window.PEA_STORAGE.savePEARecord(data);
-    alert("Registro guardado correctamente.\nPodés cargar otro registro.");
-
-    document.querySelectorAll("input, textarea, select").forEach(el => {
-      el.value = "";
-    });
-
-    updateAccionesPreview();
-    refreshInstrumentos();
-
-  } catch (e) {
-    alert("ERROR AL GUARDAR:\n" + e.message);
+  if (IS_CORRECTION_MODE) {
+    data.correction_of = CORRECTION_OF_ID;
+    window.PEA_STORAGE.createCorrection(CORRECTION_OF_ID, data);
+    window.PEA_STORAGE.markAsCorregido(CORRECTION_OF_ID);
+    alert("Corrección guardada correctamente.");
+    return;
   }
-}
 
-function handleNuevo() {
-  if (!confirm("¿Estás seguro?")) return;
-
-  document.querySelectorAll("input, textarea, select").forEach(el => {
-    el.value = "";
-  });
-
-  updateAccionesPreview();
-  refreshInstrumentos();
-
-  alert("Datos borrados exitosamente");
+  window.PEA_STORAGE.savePEARecord(data);
+  alert("Registro guardado correctamente.");
 }
 
 /* =========================
@@ -287,12 +219,9 @@ document.addEventListener("DOMContentLoaded", () => {
     preloadCorrectionData(CORRECTION_OF_ID);
     $("pea-fecha").disabled = true;
     $("pea-momento").disabled = true;
-
-    if ($("pea-modificar")) {
-      $("pea-modificar").style.display = "none";
-    }
+    if ($("pea-modificar")) $("pea-modificar").style.display = "none";
   }
 
   $("pea-guardar").addEventListener("click", handleGuardar);
-  $("pea-nuevo").addEventListener("click", handleNuevo);
+  $("pea-nuevo").addEventListener("click", () => location.reload());
 });
