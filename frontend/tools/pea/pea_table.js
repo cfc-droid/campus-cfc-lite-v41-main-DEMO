@@ -5,16 +5,31 @@
 
 const $ = (id) => document.getElementById(id);
 
-/* ===== TAREA 22c — control de filas visibles ===== */
+/* ===== TAREA 22c — control VISUAL del alto del cuadro ===== */
 let PEA_TABLE_LIMIT = 10;
 
 function setTableLimit(value) {
   const v = parseInt(value, 10);
   if ([10, 15, 20].includes(v)) {
     PEA_TABLE_LIMIT = v;
-    updateTable();
+    applyTableHeight();
   }
 }
+
+function applyTableHeight() {
+  const box = document.querySelector(".pea-table-scroll");
+  if (!box) return;
+
+  const ROW_HEIGHT = 32;    // altura aproximada por fila (px)
+  const HEADER_HEIGHT = 40; // header tabla
+
+  box.style.maxHeight =
+    (PEA_TABLE_LIMIT * ROW_HEIGHT + HEADER_HEIGHT) + "px";
+}
+
+/* ============================================================
+   Helpers de render (SIN CAMBIOS LÓGICOS)
+   ============================================================ */
 
 function safeText(v) {
   if (v == null) return "";
@@ -22,17 +37,20 @@ function safeText(v) {
 }
 
 function renderAcciones(record) {
-  const aks = Array.isArray(record?.acciones_keys) ? record.acciones_keys : [];
+  const aks = Array.isArray(record?.acciones_keys)
+    ? record.acciones_keys
+    : [];
   return aks.length ? aks.join(", ") : "";
 }
 
 function renderEstadoE(record) {
-  const e = record?.estado_key ? safeText(record.estado_key) : "";
-  return e;
+  return record?.estado_key ? safeText(record.estado_key) : "";
 }
 
 function renderIntensidad(record) {
-  return record?.intensidad == null ? "" : safeText(record.intensidad);
+  return record?.intensidad == null
+    ? ""
+    : safeText(record.intensidad);
 }
 
 function renderRow(record) {
@@ -58,6 +76,10 @@ function renderRow(record) {
   `;
 }
 
+/* ============================================================
+   Render de tabla (🔑 SIN LIMITE DE DATOS)
+   ============================================================ */
+
 function renderTable(records) {
   const tbody = $("pea-table-body");
   const empty = $("pea-table-empty");
@@ -74,12 +96,13 @@ function renderTable(records) {
 
   if (empty) empty.style.display = "none";
 
-  /* ===== aplicar límite visual ===== */
-  const limited = list.slice(0, PEA_TABLE_LIMIT);
-
-  const html = limited.map(r => renderRow(r)).join("");
-  tbody.innerHTML = html;
+  /* 🔑 Renderiza TODOS los registros filtrados */
+  tbody.innerHTML = list.map(r => renderRow(r)).join("");
 }
+
+/* ============================================================
+   Update principal
+   ============================================================ */
 
 function updateTable() {
   if (!window.PEA_STORAGE || !window.PEA_FILTERS) return;
@@ -88,12 +111,16 @@ function updateTable() {
   const filtered = window.PEA_FILTERS.apply(all);
 
   renderTable(filtered);
+  applyTableHeight();
 }
 
 document.addEventListener("DOMContentLoaded", updateTable);
 document.addEventListener("PEA_FILTERS_UPDATED", updateTable);
 
-/* ===== expuesto para selector ===== */
+/* ============================================================
+   API pública (selector 10 / 15 / 20)
+   ============================================================ */
+
 window.PEA_TABLE = {
   setLimit: setTableLimit
 };
