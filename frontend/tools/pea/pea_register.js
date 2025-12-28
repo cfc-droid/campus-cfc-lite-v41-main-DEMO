@@ -205,10 +205,21 @@ if (IS_CORRECTION_MODE) {
   window.PEA_STORAGE.markAsCorregido(
     CORRECTION_OF_ID,
     {
+      // Campos editables reales
+      pensamiento_key: data.pensamiento_key,
+      estado_key: data.estado_key,
+      intensidad: data.intensidad,
+      acciones_keys: data.acciones_keys,
+      direccion: data.direccion,
+      activo: data.activo,
+      activo_otros: data.activo_otros,
+      instrumento: data.instrumento,
+      instrumento_otros: data.instrumento_otros,
       nota_factual: data.nota_factual
     }
   );
-  alert("Registro marcado como CORREGIDO.");
+
+  alert("Registro corregido correctamente.");
   window.location.href = "./pea_screen_history.html";
   return;
 }
