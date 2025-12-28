@@ -188,9 +188,9 @@
 
 /* Scroll SIEMPRE controlado acá */
 .pea-table-scroll {
-   max-height: min(420px, 60vh); /* 🔑 CLAVE */
-  overflow-y: auto;       /* scroll vertical */
-  overflow-x: auto;       /* scroll horizontal */
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
 }
 
 /* Fuerza ancho mayor al viewport */
