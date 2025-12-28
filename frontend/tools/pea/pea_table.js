@@ -101,6 +101,11 @@ function renderTable(records) {
   if (empty) empty.style.display = "none";
 
 tbody.innerHTML = list.map(renderRow).join("");
+
+// 🔑 Recalcula altura visible según límite actual
+setTimeout(() => {
+  setTableLimit(PEA_TABLE_LIMIT);
+}, 0);
 }
 
 /* ============================================================
