@@ -158,6 +158,8 @@ return {
   ...record,
 
   // ⬇️ Campos permitidos a corregir
+  fecha: extraMeta.fecha ?? record.fecha,
+  momento: extraMeta.momento ?? record.momento, 
   pensamiento_key: extraMeta.pensamiento_key ?? record.pensamiento_key,
   estado_key: extraMeta.estado_key ?? record.estado_key,
   intensidad: extraMeta.intensidad ?? record.intensidad,
