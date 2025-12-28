@@ -197,3 +197,22 @@
 .pea-table {
   min-width: 1200px;
 }
+
+/* ============================================================
+   FIX UX — HEADER DE TABLA FIJO EN SCROLL
+   PEA HISTORIAL
+   ============================================================ */
+
+.pea-table-scroll {
+  position: relative;
+  overflow-y: auto;
+}
+
+.pea-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
+  /* Mantiene coherencia visual */
+  background: var(--bg-main, #fff);
+}
