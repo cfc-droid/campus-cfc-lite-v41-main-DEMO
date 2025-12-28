@@ -191,16 +191,19 @@ function preloadCorrectionData(id) {
 
 function handleGuardar() {
   const data = readFormData();
+
+  if (!window.validatePEAForm) {
+    return alert("Validación no disponible.");
+  }
+
   const result = window.validatePEAForm(data);
   if (!result.isValid) return alert(result.errors.join("\n"));
 
   if (!confirm("¿Confirmás guardar este registro?")) return;
 
   if (IS_CORRECTION_MODE) {
-    data.correction_of = CORRECTION_OF_ID;
-    window.PEA_STORAGE.createCorrection(CORRECTION_OF_ID, data);
     window.PEA_STORAGE.markAsCorregido(CORRECTION_OF_ID);
-    alert("Corrección guardada correctamente.");
+    alert("Registro marcado como CORREGIDO.");
     return;
   }
 
