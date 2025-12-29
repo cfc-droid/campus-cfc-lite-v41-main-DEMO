@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Análisis (PEA)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Estilos heredados del Campus -->
+  <link rel="stylesheet" href="/frontend/css/style.css" />
+</head>
+<body>
+
+  <main class="pea-home">
+
+    <h1>Análisis (PEA)</h1>
+
+    <!-- EXPLICACIÓN CLARA EN 5 SEGUNDOS -->
+    <p class="pea-desc">
+      <strong>PEA</strong> es una herramienta de registro y análisis basada en
+      <strong>Pensamiento – Emoción – Acción</strong>.
+      <br />
+      Su objetivo es ayudarte a <strong>detectar patrones reales</strong> de tu
+      conducta operativa, <strong>sin interpretar ni aconsejar</strong>.
+    </p>
+
+    <!-- QUÉ PODÉS HACER ACÁ -->
+    <ul class="pea-help">
+      <li><strong>Cargar registro:</strong> registrar una operación o evento operativo.</li>
+      <li><strong>Historial y estadísticas:</strong> analizar registros y métricas.</li>
+      <li><strong>Volver al Campus:</strong> regresar al contenido principal.</li>
+      <li><strong>Claro / Oscuro:</strong> cambiar el modo visual.</li>
+      <li><strong>Vistas guardadas:</strong> reutilizar filtros (si están habilitadas).</li>
+      <li><strong>Modo Auditoría:</strong> bloquear acciones sensibles (si aplica).</li>
+    </ul>
+
+    <div class="pea-actions">
+
+      <button id="pea-btn-register" class="btn-main">
+        Cargar registro
+      </button>
+
+      <button id="pea-btn-history" class="btn-main">
+        Historial
+      </button>
+
+      <button id="pea-btn-back" class="btn-main">
+        Volver al Campus
+      </button>
+
+      <button id="pea-btn-theme" class="btn-main">
+        Claro / Oscuro
+      </button>
+
+    </div>
+
+    <div class="pea-access">
+      <button id="pea-btn-views" class="btn-secondary">
+        Vistas guardadas
+      </button>
+
+      <button id="pea-btn-audit" class="btn-secondary">
+        Modo Auditoría
+      </button>
+    </div>
+
+  </main>
+
+  <script>
+    // =========================================================
+    // 🔐 PEA — IDENTIDAD COMPATIBLE CON CAMPUS (NO INVASIVA)
+    // - NO modifica el Campus
+    // - NO crea email global
+    // - SOLO consume CFC_EMAIL
+    // - Genera hash exclusivo para PEA
+    // =========================================================
+    (function ensurePEAIdentity() {
+      const email = localStorage.getItem("CFC_EMAIL");
+
+      if (!email) {
+        alert(
+          "PEA no puede iniciarse.\n\n" +
+          "No se detectó una sesión válida del Campus.\n" +
+          "Por favor, ingresá desde el Campus principal."
+        );
+        throw new Error("PEA BLOCKED: CFC_EMAIL no disponible");
+      }
+
+      try {
+        const encoder = new TextEncoder();
+        crypto.subtle
+          .digest("SHA-256", encoder.encode(email))
+          .then(buffer => {
+            const hashArray = Array.from(new Uint8Array(buffer));
+            const hashHex = hashArray
+              .map(b => b.toString(16).padStart(2, "0"))
+              .join("")
+              .toUpperCase();
+
+            localStorage.setItem("PEA_EMAIL_HASH", hashHex);
+          });
+      } catch (e) {
+        console.error("PEA HASH ERROR:", e);
+        throw new Error("PEA BLOCKED: fallo al generar identidad");
+      }
+    })();
+  </script>
+
+  <script src="./pea_home.js"></script>
+
+</body>
+</html>

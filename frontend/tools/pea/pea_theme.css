@@ -1,0 +1,218 @@
+/* =========================================================
+   PEA — Sistema Visual Heredado del Campus
+   ========================================================= */
+
+/* =========================================================
+   BASE GENERAL
+   ========================================================= */
+
+#pea-root,
+.pea-home,
+.pea-screen,
+.pea-history {
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+#pea-root,
+.pea-home,
+.pea-screen,
+.pea-history,
+#pea-root * {
+  font-family: var(--font-main);
+}
+
+/* Títulos */
+.pea-home h1,
+.pea-screen h1,
+.pea-history h1 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.pea-home h2,
+.pea-screen h2,
+.pea-history h2 {
+  font-weight: 500;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* Texto auxiliar */
+.pea-desc,
+.pea-empty {
+  color: var(--text-secondary);
+}
+
+/* Botoneras */
+.pea-actions,
+.pea-access {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.75rem;
+}
+
+/* =========================================================
+   BLOQUE 8 — HISTORIAL
+   ========================================================= */
+
+/* ZONA A */
+.pea-zone-primary {
+  border: 1px solid var(--border-neutral);
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pea-zone-primary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pea-primary-left,
+.pea-primary-right {
+  border: 1px dashed var(--border-neutral);
+  padding: 0.75rem;
+}
+
+/* ZONA B */
+.pea-zone-core-inner {
+  margin-bottom: 1rem;
+}
+
+.pea-zone-core {
+  border: 1px solid var(--border-neutral);
+  padding: 0.75rem;
+}
+
+.pea-filters {
+  margin-bottom: 1rem;
+}
+
+.pea-filters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 0.5rem;
+}
+
+/* =========================================================
+   TABLA
+   ========================================================= */
+
+.pea-table-scroll {
+  max-height: 420px;        /* 🔑 CLAVE: fija el alto */
+  width: 100%;              /* asegura cálculo horizontal */
+  overflow-y: scroll;       /* scroll vertical SIEMPRE */
+  overflow-x: scroll;       /* scroll horizontal SIEMPRE */
+}
+
+.pea-table {
+  width: 100%;
+  min-width: 1200px; /* fuerza scroll horizontal */
+  border-collapse: collapse;
+}
+
+.pea-table th,
+.pea-table td {
+  border: 1px solid var(--border-neutral);
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.pea-table th {
+  font-weight: 600;
+}
+
+/* =========================================================
+   ZONA C — MÉTRICAS
+   ========================================================= */
+
+.pea-zone-secondary {
+  border-top: 2px solid var(--border-neutral);
+  padding-top: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.pea-zone-secondary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.pea-metrics-left,
+.pea-metrics-right {
+  border: 1px dashed var(--border-neutral);
+  padding: 0.75rem;
+}
+
+/* =========================================================
+   ELEMENTOS NEUTROS
+   ========================================================= */
+
+.pea-health-green,
+.pea-health-yellow,
+.pea-health-red {
+  color: var(--text-main);
+}
+
+.pea-link {
+  color: var(--accent-primary);
+  text-decoration: none;
+}
+
+.pea-link:hover {
+  text-decoration: underline;
+}
+
+.pea-icon {
+  filter: none;
+  opacity: 0.9;
+}
+
+/* =========================================================
+   FIX DEFINITIVO SCROLL TABLA PEA
+   No altera estructura ni lógica del Campus
+   ========================================================= */
+
+/* El contenedor intermedio NO debe crecer infinito */
+.pea-zone-core-inner {
+  overflow: hidden; /* 🔑 clave */
+}
+
+/* Zona de filtros + tabla: permite que el scroll interno funcione */
+.pea-zone-core {
+  overflow: hidden; /* 🔑 clave */
+}
+
+/* Scroll SIEMPRE controlado acá */
+.pea-table-scroll {
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+}
+
+/* Fuerza ancho mayor al viewport */
+.pea-table {
+  min-width: 1200px;
+}
+
+/* ============================================================
+   FIX UX — HEADER DE TABLA FIJO EN SCROLL
+   PEA HISTORIAL
+   ============================================================ */
+
+.pea-table-scroll {
+  position: relative;
+  overflow-y: auto;
+}
+
+.pea-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
+  /* Mantiene coherencia visual */
+  background: var(--bg-main, #fff);
+}
