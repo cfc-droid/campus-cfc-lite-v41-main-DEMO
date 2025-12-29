@@ -263,6 +263,7 @@ if (IS_CORRECTION_MODE) {
 
   window.PEA_STORAGE.savePEARecord(data);
   alert("Registro guardado correctamente.");
+  location.reload(); 
 }
 
 /* =========================
