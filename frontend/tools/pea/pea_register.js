@@ -207,6 +207,8 @@ function preloadCorrectionData(id) {
   $("pea-activo-otros").value = original.activo_otros || "";
   $("pea-instrumento-otros").value = original.instrumento_otros || "";
   $("pea-nota").value = original.nota_factual || "";
+
+     updateResultadoOperativoUI();
 }
 
 /* =========================
