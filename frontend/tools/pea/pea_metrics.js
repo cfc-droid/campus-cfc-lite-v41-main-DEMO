@@ -56,13 +56,13 @@ function calculateMetrics(records) {
   const intensidades = [];
   const momentos = [];
 
-    /* ===== RESULTADO OPERATIVO (SOLO DESPUÉS) ===== */
+  /* ===== RESULTADO OPERATIVO (SOLO DESPUÉS) ===== */
   const despues = onlyDespues(records);
   const resultados = despues.map(r => r.resultado_operativo);
-  const resultadoCount = countBy(resultados); 
+  const resultadoCount = countBy(resultados);
 
   /* ===== TAREA 22b — cobertura diaria por momento ===== */
-  const days = {}; // { fecha: Set(momentos) }
+  const days = {};
 
   list.forEach(r => {
     const aks = Array.isArray(r?.acciones_keys) ? r.acciones_keys : [];
@@ -78,7 +78,6 @@ function calculateMetrics(records) {
     }
   });
 
-  /* ===== Ranking acciones (TAREA 22) ===== */
   const accionesCount = countBy(acciones);
   const totalAcciones = acciones.length;
 
@@ -104,7 +103,6 @@ function calculateMetrics(records) {
     });
   }
 
-  /* ===== Cobertura diaria por momento (TAREA 22b) ===== */
   const REQUIRED = ["ANTES", "DURANTE", "DESPUÉS"];
   const daysEntries = Object.entries(days);
 
@@ -116,10 +114,7 @@ function calculateMetrics(records) {
     if (missing.length === 0) {
       completeDays++;
     } else {
-      incompleteDays.push({
-        date,
-        missing
-      });
+      incompleteDays.push({ date, missing });
     }
   });
 
@@ -129,14 +124,12 @@ function calculateMetrics(records) {
     : 0;
 
   return {
-    /* ===== métricas existentes ===== */
     total: list.length,
     accionMasFrecuente: mostFrequent(accionesCount),
     estadoDominante: mostFrequent(countBy(estados)),
     intensidadPromedio: average(intensidades),
     distribucionMomento: countBy(momentos),
 
-    /* ===== métricas nuevas ===== */
     totalAcciones,
     rankingAcciones: top3,
 
@@ -145,13 +138,14 @@ function calculateMetrics(records) {
       completeDays,
       coveragePercent,
       incompleteDays
+    },
+
+    resultadoOperativo: {
+      total: despues.length,
+      distribucion: resultadoCount
     }
   };
 }
-
-/* ============================================================
-   TAREA 17 — Estado del sistema (salud del dato)
-   ============================================================ */
 
 function calculateDataHealth(metrics) {
   if (!metrics || metrics.total <= 2) {
@@ -185,9 +179,6 @@ function renderMetrics(metrics) {
 
   const health = calculateDataHealth(metrics);
 
-  const ro = metrics?.resultadoOperativo;
-  const hasResultado = ro && ro.total > 0;
-   
   if (!metrics) {
     box.innerHTML = `
       <div class="pea-empty">
@@ -196,6 +187,9 @@ function renderMetrics(metrics) {
     `;
     return;
   }
+
+  const ro = metrics.resultadoOperativo;
+  const hasResultado = ro && ro.total > 0;
 
   const momentoRows = Object.entries(metrics.distribucionMomento || {})
     .map(([k, v]) => `<li>${k}: ${v}</li>`)
@@ -222,15 +216,7 @@ function renderMetrics(metrics) {
   box.innerHTML = `
     <div class="pea-metric-item">
       <strong>Cobertura diaria por Momento Operativo:</strong><br>
-      El ${coverage.coveragePercent}% de los días tienen los 3 registros completos (ANTES, DURANTE y DESPUES de una operación).
-${coverage.incompleteDays.length ? `
-  <details style="margin-top:6px;">
-    <summary><strong>Días con cobertura incompleta</strong></summary>
-    <div style="max-height:120px; overflow:auto; padding-left:8px; margin-top:4px;">
-      ${incompleteRows}
-    </div>
-  </details>
-` : ""}
+      El ${coverage.coveragePercent}% de los días tienen los 3 registros completos.
     </div>
 
     <div class="pea-metric-item">
@@ -242,51 +228,12 @@ ${coverage.incompleteDays.length ? `
     </div>
 
     <div class="pea-metric-item">
-      <strong>Acción más frecuente:</strong> ${metrics.accionMasFrecuente || "—"}
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Estado dominante:</strong> ${metrics.estadoDominante || "—"}
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Intensidad promedio:</strong> ${metrics.intensidadPromedio ?? "—"}
-    </div>
-
-    <div class="pea-metric-item">
       <strong>Distribución por Momento:</strong>
       <ul>${momentoRows}</ul>
     </div>
 
     <div class="pea-metric-item">
-      <strong>Ranking de conductas operativas: Acción(es)</strong><br>
-      <small>CANTIDAD DE Acción(es) EN TOTAL: ${metrics.totalAcciones}</small>
-
-      <table class="pea-table">
-        <thead>
-          <tr>
-            <th>Ranking</th>
-            <th>Acción</th>
-            <th>Cantidad</th>
-            <th>PORCENTAJE</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rankingRows}
-          <tr>
-            <td><strong>TOTAL</strong></td>
-            <td>—</td>
-            <td><strong>${metrics.totalAcciones}</strong></td>
-            <td><strong>100%</strong></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  `;
-
-       <div class="pea-metric-item">
       <strong>Resultado operativo (solo DESPUÉS):</strong><br>
-
       ${
         hasResultado
           ? `<ul>
@@ -297,6 +244,7 @@ ${coverage.incompleteDays.length ? `
           : `<em>Evidencia insuficiente para estadísticas de resultado operativo.</em>`
       }
     </div>
+  `;
 }
 
 function updateMetrics() {
@@ -304,9 +252,6 @@ function updateMetrics() {
 
   const all = window.PEA_STORAGE.loadPEALog();
   const filtered = window.PEA_FILTERS.apply(all);
-
-  const ro = metrics?.resultadoOperativo;
-  const hasResultado = ro && ro.total > 0;
 
   const metrics = calculateMetrics(filtered);
   renderMetrics(metrics);
