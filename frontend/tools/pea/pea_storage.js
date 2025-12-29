@@ -86,6 +86,22 @@ function savePEARecord(record) {
 
   const log = loadPEALog();
 
+    // =========================
+  // MOMENTO ESTRUCTURAL — HERENCIA AUTOMÁTICA
+  // =========================
+  let inheritedMomentoEstructural = "SIN_MARCAR";
+
+  const lastValid = log.find(
+    r =>
+      r?.meta?.estado !== "ANULADO" &&
+      r?.momento_estructural &&
+      r.momento_estructural !== "SIN_MARCAR"
+  );
+
+  if (lastValid) {
+    inheritedMomentoEstructural = lastValid.momento_estructural;
+  } 
+
   // Regla absoluta: NO sobrescribir
   const exists = log.some(r => r.id === record.id);
   if (exists) {
@@ -127,22 +143,6 @@ function markAsAnulado(recordId) {
   const key = STORAGE_KEYS.LOG(hash);
 
   const log = loadPEALog();
-
-    // =========================
-  // MOMENTO ESTRUCTURAL — HERENCIA AUTOMÁTICA
-  // =========================
-  let inheritedMomentoEstructural = "SIN_MARCAR";
-
-  const lastValid = log.find(
-    r =>
-      r?.meta?.estado !== "ANULADO" &&
-      r?.momento_estructural &&
-      r.momento_estructural !== "SIN_MARCAR"
-  );
-
-  if (lastValid) {
-    inheritedMomentoEstructural = lastValid.momento_estructural;
-  } 
 
   const newLog = log.map(record => {
     if (record.id !== recordId) return record;
