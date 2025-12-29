@@ -57,6 +57,12 @@ function renderIntensidad(record) {
     : safeText(record.intensidad);
 }
 
+function renderResultadoOperativo(record) {
+  return record?.resultado_operativo
+    ? safeText(record.resultado_operativo)
+    : "";
+}
+
 function renderRowActions(record) {
   const estado = record?.meta?.estado || "VALIDO";
   const id = record?.id;
