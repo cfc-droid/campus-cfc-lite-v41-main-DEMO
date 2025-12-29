@@ -185,6 +185,9 @@ function renderMetrics(metrics) {
 
   const health = calculateDataHealth(metrics);
 
+  const ro = metrics?.resultadoOperativo;
+  const hasResultado = ro && ro.total > 0;
+   
   if (!metrics) {
     box.innerHTML = `
       <div class="pea-empty">
@@ -280,6 +283,20 @@ ${coverage.incompleteDays.length ? `
       </table>
     </div>
   `;
+
+       <div class="pea-metric-item">
+      <strong>Resultado operativo (solo DESPUÉS):</strong><br>
+
+      ${
+        hasResultado
+          ? `<ul>
+              ${Object.entries(ro.distribucion)
+                .map(([k, v]) => `<li>${k}: ${v}</li>`)
+                .join("")}
+            </ul>`
+          : `<em>Evidencia insuficiente para estadísticas de resultado operativo.</em>`
+      }
+    </div>
 }
 
 function updateMetrics() {
@@ -287,6 +304,9 @@ function updateMetrics() {
 
   const all = window.PEA_STORAGE.loadPEALog();
   const filtered = window.PEA_FILTERS.apply(all);
+
+  const ro = metrics?.resultadoOperativo;
+  const hasResultado = ro && ro.total > 0;
 
   const metrics = calculateMetrics(filtered);
   renderMetrics(metrics);
