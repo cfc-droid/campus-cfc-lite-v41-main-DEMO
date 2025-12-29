@@ -237,6 +237,11 @@ function preloadCorrectionData(id) {
   $("pea-instrumento-otros").value = original.instrumento_otros || "";
   $("pea-nota").value = original.nota_factual || "";
 
+const estructuralSel = $("pea-momento-estructural");
+if (estructuralSel) {
+  estructuralSel.value = original.momento_estructural || "SIN_MARCAR";
+}
+
   // 🔧 CARGAR resultado operativo al corregir
 $("pea-resultado-operativo").value = original.resultado_operativo || ""; 
 
