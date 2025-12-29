@@ -160,6 +160,11 @@ return {
   // ⬇️ Campos permitidos a corregir
   fecha: extraMeta.fecha ?? record.fecha,
   momento: extraMeta.momento ?? record.momento, 
+
+  // 🔑 FIX RESULTADO OPERATIVO
+  resultado_operativo:
+    extraMeta.resultado_operativo ?? record.resultado_operativo,
+   
   pensamiento_key: extraMeta.pensamiento_key ?? record.pensamiento_key,
   estado_key: extraMeta.estado_key ?? record.estado_key,
   intensidad: extraMeta.intensidad ?? record.intensidad,
