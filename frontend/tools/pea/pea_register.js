@@ -253,6 +253,7 @@ if (IS_CORRECTION_MODE) {
       instrumento: data.instrumento,
       instrumento_otros: data.instrumento_otros,
       nota_factual: data.nota_factual
+      resultado_operativo: data.resultado_operativo 
     }
   );
 
@@ -276,6 +277,10 @@ if (IS_CORRECTION_MODE) {
   preloadCorrectionData(CORRECTION_OF_ID);
   // ⚠️ NO deshabilitar fecha ni momento
   if ($("pea-modificar")) $("pea-modificar").style.display = "none";
+}
+
+   if ($("pea-resultado-operativo")) {
+  $("pea-resultado-operativo").value = original.resultado_operativo || "";
 }
 
   $("pea-guardar").addEventListener("click", handleGuardar);
