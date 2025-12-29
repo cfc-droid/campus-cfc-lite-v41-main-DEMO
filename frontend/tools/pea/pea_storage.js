@@ -173,6 +173,9 @@ return {
   instrumento_otros: extraMeta.instrumento_otros ?? record.instrumento_otros,
   nota_factual: extraMeta.nota_factual ?? record.nota_factual,
 
+  // ✅ NUEVO CAMPO — Resultado operativo
+  resultado_operativo: extraMeta.resultado_operativo ?? record.resultado_operativo, 
+
   meta: {
     ...(record.meta || {}),
     estado: "CORREGIDO",
