@@ -30,7 +30,7 @@ function validatePEAForm(formData) {
 
   // Resultado operativo (OBLIGATORIO solo si Momento = DESPUÉS)
   if (
-    formData.momento === "DESPUÉS" &&
+    formData.momento === "DESPUES" &&
     isEmpty(formData.resultado_operativo)
   ) {
     errors.push(
