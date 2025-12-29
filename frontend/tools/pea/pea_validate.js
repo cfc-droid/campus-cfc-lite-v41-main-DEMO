@@ -28,6 +28,14 @@ function validatePEAForm(formData) {
     errors.push("Momento operativo faltante.");
   }
 
+// Resultado operativo (OBLIGATORIO solo en DESPUÉS)
+if (
+  formData.momento === "DESPUÉS" &&
+  isEmpty(formData.resultado_operativo)
+) {
+  errors.push("Resultado operativo obligatorio para registros DESPUÉS.");
+}
+
   // Pensamiento
   if (isEmpty(formData.pensamiento_key)) {
     errors.push("Pensamiento faltante.");
