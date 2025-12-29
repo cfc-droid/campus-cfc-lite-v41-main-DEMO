@@ -216,6 +216,9 @@ function preloadCorrectionData(id) {
   $("pea-instrumento-otros").value = original.instrumento_otros || "";
   $("pea-nota").value = original.nota_factual || "";
 
+  // 🔧 CARGAR resultado operativo al corregir
+$("pea-resultado-operativo").value = original.resultado_operativo || ""; 
+
     // Ajustar visibilidad de Resultado operativo al precargar
   updateResultadoOperativoUI(); 
 }
