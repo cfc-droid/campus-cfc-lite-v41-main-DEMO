@@ -108,13 +108,6 @@ function setupCatalogsUI() {
     addOption(slot, "", "—");
     PEA_ACCIONES.forEach(a => addOption(slot, a));
     slot.addEventListener("change", updateAccionesPreview);
-
-  const momentoSel = $("pea-momento");
-  if (momentoSel) {
-    momentoSel.addEventListener("change", updateResultadoOperativoUI);
-  }
-
-  updateResultadoOperativoUI();
      
   });
 
@@ -129,6 +122,14 @@ function setupCatalogsUI() {
   refreshInstrumentos();
   activoSel.addEventListener("change", refreshInstrumentos);
   setupOtrosUX();
+
+  const momentoSel = $("pea-momento");
+  if (momentoSel) {
+    momentoSel.addEventListener("change", updateResultadoOperativoUI);
+  }
+
+  updateResultadoOperativoUI();
+   
 }
 
 function refreshInstrumentos() {
