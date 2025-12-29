@@ -32,6 +32,7 @@ const FILTER_STATE = {
   activo: null,
   instrumento: null,
   recordState: null,
+  resultadoOperativo: null, 
   activoOtros: null,
   instrumentoOtros: null
 };
