@@ -54,6 +54,28 @@ function generatePEAId() {
 }
 
 /* =========================
+   RESULTADO OPERATIVO — VISIBILIDAD POR MOMENTO (PASO B)
+   ========================= */
+
+function updateResultadoOperativoUI() {
+  const momentoSel = $("pea-momento");
+  const resultadoSel = $("pea-resultado-operativo");
+
+  if (!momentoSel || !resultadoSel) return;
+
+  const isDespues = momentoSel.value === "DESPUÉS";
+
+  // Mostrar / ocultar
+  resultadoSel.style.display = isDespues ? "" : "none";
+  resultadoSel.disabled = !isDespues;
+
+  // Limpiar valor si NO es DESPUÉS
+  if (!isDespues) {
+    resultadoSel.value = "";
+  }
+}
+
+/* =========================
    ACCIONES (SLOTS)
    ========================= */
 
@@ -106,6 +128,15 @@ function setupCatalogsUI() {
   activoSel.addEventListener("change", refreshInstrumentos);
   setupOtrosUX();
 }
+
+  // PASO B — Resultado operativo depende de Momento
+  const momentoSel = $("pea-momento");
+  if (momentoSel) {
+    momentoSel.addEventListener("change", updateResultadoOperativoUI);
+  }
+
+  // Estado inicial
+  updateResultadoOperativoUI();
 
 function refreshInstrumentos() {
   const activo = $("pea-activo").value;
@@ -183,6 +214,9 @@ function preloadCorrectionData(id) {
   $("pea-activo-otros").value = original.activo_otros || "";
   $("pea-instrumento-otros").value = original.instrumento_otros || "";
   $("pea-nota").value = original.nota_factual || "";
+
+    // Ajustar visibilidad de Resultado operativo al precargar
+  updateResultadoOperativoUI(); 
 }
 
 /* =========================
