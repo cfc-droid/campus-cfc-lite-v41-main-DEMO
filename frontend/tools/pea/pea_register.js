@@ -12,7 +12,8 @@ import {
   PEA_ACCIONES,
   PEA_ACTIVOS,
   PEA_INSTRUMENTOS_POR_ACTIVO,
-  PEA_DIRECCION
+  PEA_DIRECCION,
+  PEA_RESULTADOS_OPERATIVOS 
 } from "./pea_catalog.js";
 
 /* =========================
