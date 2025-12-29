@@ -282,7 +282,8 @@ if (IS_CORRECTION_MODE) {
       activo_otros: data.activo_otros,
       instrumento: data.instrumento,
       instrumento_otros: data.instrumento_otros,
-      nota_factual: data.nota_factual
+      nota_factual: data.nota_factual,
+      momento_estructural: data.momento_estructural 
     }
   );
 
