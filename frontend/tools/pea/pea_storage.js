@@ -200,6 +200,7 @@ return {
   instrumento: extraMeta.instrumento ?? record.instrumento,
   instrumento_otros: extraMeta.instrumento_otros ?? record.instrumento_otros,
   nota_factual: extraMeta.nota_factual ?? record.nota_factual,
+  momento_estructural: extraMeta.momento_estructural ?? record.momento_estructural,
 
   meta: {
     ...(record.meta || {}),
