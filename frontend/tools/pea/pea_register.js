@@ -115,15 +115,6 @@ function setupCatalogsUI() {
     addOption(slot, "", "—");
     PEA_ACCIONES.forEach(a => addOption(slot, a));
     slot.addEventListener("change", updateAccionesPreview);
-
-   const estructuralSel = $("pea-momento-estructural");
-if (estructuralSel) {
-  clearSelect(estructuralSel, false);
-  PEA_MOMENTOS_ESTRUCTURALES.forEach(v => {
-    const label = v === "SIN_MARCAR"
-      ? "— Sin marcar —"
-      : v.replaceAll("_", " ").toLowerCase().replace(/\b\w/g, l => l.toUpperCase());
-    addOption(estructuralSel, v, label);
      
   });
 
@@ -134,6 +125,24 @@ if (estructuralSel) {
   const dirSel = $("pea-direccion");
   clearSelect(dirSel, true);
   PEA_DIRECCION.forEach(d => addOption(dirSel, d));
+
+ // =========================
+// MOMENTO ESTRUCTURAL (UI)
+// =========================
+const estructuralSel = $("pea-momento-estructural");
+if (estructuralSel) {
+  clearSelect(estructuralSel, false);
+  PEA_MOMENTOS_ESTRUCTURALES.forEach(v => {
+    const label =
+      v === "SIN_MARCAR"
+        ? "— Sin marcar —"
+        : v.replaceAll("_", " ")
+            .toLowerCase()
+            .replace(/\b\w/g, l => l.toUpperCase());
+
+    addOption(estructuralSel, v, label);
+  });
+}
 
   refreshInstrumentos();
   activoSel.addEventListener("change", refreshInstrumentos);
