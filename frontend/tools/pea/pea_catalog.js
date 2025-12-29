@@ -386,3 +386,43 @@ export const PEA_RIESGO_PLANIFICADO_DESC = Object.freeze({
    FIN DE CATÁLOGOS — BLOQUE 4 / 14
    Inmutable | Congelado | Auditable
    ============================================================ */
+
+/* =========================
+   9) MOMENTO ESTRUCTURAL
+   =========================
+   - Evento objetivo
+   - No emocional
+   - No participa en métricas
+   - No participa en rankings
+   - No se interpreta
+*/
+
+export const PEA_MOMENTOS_ESTRUCTURALES = Object.freeze([
+  "SIN_MARCAR",
+  "CAMBIO_DE_REGLAS",
+  "INICIO_CUENTA_NUEVA",
+  "CAMBIO_DE_MERCADO",
+  "CAMBIO_DE_ACTIVO",
+  "CAMBIO_DE_INSTRUMENTO",
+  "NUEVA_ESTRATEGIA",
+  "AJUSTE_ESTRATEGIA",
+  "OPTIMIZACION_RIESGO",
+  "CAMBIO_HORARIO",
+  "CAMBIO_PLATAFORMA",
+  "OTROS"
+]);
+
+export const PEA_MOMENTOS_ESTRUCTURALES_DESC = Object.freeze({
+  SIN_MARCAR: "Sin evento estructural marcado.",
+  CAMBIO_DE_REGLAS: "Cambio objetivo en reglas operativas.",
+  INICIO_CUENTA_NUEVA: "Inicio de una cuenta nueva.",
+  CAMBIO_DE_MERCADO: "Cambio de mercado operado.",
+  CAMBIO_DE_ACTIVO: "Cambio de activo principal.",
+  CAMBIO_DE_INSTRUMENTO: "Cambio de instrumento.",
+  NUEVA_ESTRATEGIA: "Implementación de una nueva estrategia.",
+  AJUSTE_ESTRATEGIA: "Ajuste sobre estrategia existente.",
+  OPTIMIZACION_RIESGO: "Optimización del riesgo.",
+  CAMBIO_HORARIO: "Cambio de horario operativo.",
+  CAMBIO_PLATAFORMA: "Cambio de plataforma.",
+  OTROS: "Otro evento estructural objetivo."
+});
