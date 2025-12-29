@@ -11,7 +11,8 @@ import {
   PEA_ACCIONES,
   PEA_ACTIVOS,
   PEA_INSTRUMENTOS_POR_ACTIVO,
-  PEA_DIRECCION
+  PEA_DIRECCION,
+  PEA_RESULTADOS_OPERATIVOS 
 } from "./pea_catalog.js";
 
 const $ = (id) => document.getElementById(id);
@@ -33,7 +34,9 @@ const FILTER_STATE = {
   instrumento: null,
   recordState: null,
   activoOtros: null,
-  instrumentoOtros: null
+  instrumentoOtros: null,
+  resultadoOperativo: null 
+   
 };
 
 /* =========================
@@ -57,6 +60,7 @@ function setupFilterCatalogs() {
   fillSelect($("pea-filter-accion"), PEA_ACCIONES);
   fillSelect($("pea-filter-direccion"), PEA_DIRECCION);
   fillSelect($("pea-filter-activo"), PEA_ACTIVOS);
+  fillSelect($("pea-filter-resultado-operativo"), PEA_RESULTADOS_OPERATIVOS); 
 
   $("pea-filter-activo").addEventListener("change", refreshInstrumentos);
   refreshInstrumentos();
@@ -102,6 +106,9 @@ function readFiltersFromUI() {
 
   FILTER_STATE.instrumentoOtros =
     $("pea-filter-instrumento-otros")?.value.trim() || null;
+
+   FILTER_STATE.resultadoOperativo =
+  $("pea-filter-resultado-operativo")?.value || null;
 }
 
 /* =========================
@@ -130,6 +137,10 @@ function applyFilters(records) {
     if (FILTER_STATE.direccion && r?.direccion !== FILTER_STATE.direccion) return false;
     if (FILTER_STATE.activo && r?.activo !== FILTER_STATE.activo) return false;
     if (FILTER_STATE.instrumento && r?.instrumento !== FILTER_STATE.instrumento) return false;
+
+     if (FILTER_STATE.resultadoOperativo) {
+  if (r?.resultado_operativo !== FILTER_STATE.resultadoOperativo) return false;
+}
 
     if (FILTER_STATE.activoOtros) {
       if (
