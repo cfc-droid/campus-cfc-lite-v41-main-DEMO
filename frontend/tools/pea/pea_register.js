@@ -242,7 +242,8 @@ if (IS_CORRECTION_MODE) {
     {
       // Campos editables reales
       fecha: data.fecha,
-      momento: data.momento, 
+      momento: data.momento,
+      resultado_operativo: data.resultado_operativo, 
       pensamiento_key: data.pensamiento_key,
       estado_key: data.estado_key,
       intensidad: data.intensidad,
