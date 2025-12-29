@@ -186,6 +186,31 @@ function setupOtrosUX() {
 }
 
 /* =========================
+   MOMENTO ESTRUCTURAL — PRECARGA POR HERENCIA
+   ========================= */
+
+function preloadInheritedMomentoEstructural() {
+  // ❌ No aplicar en modo corrección
+  if (IS_CORRECTION_MODE) return;
+
+  const estructuralSel = $("pea-momento-estructural");
+  if (!estructuralSel) return;
+
+  const log = window.PEA_STORAGE.loadPEALog();
+
+  const lastValid = log.find(
+    r =>
+      r?.meta?.estado !== "ANULADO" &&
+      r?.momento_estructural &&
+      r.momento_estructural !== "SIN_MARCAR"
+  );
+
+  if (lastValid) {
+    estructuralSel.value = lastValid.momento_estructural;
+  }
+}
+
+/* =========================
    LECTURA FORM
    ========================= */
 
