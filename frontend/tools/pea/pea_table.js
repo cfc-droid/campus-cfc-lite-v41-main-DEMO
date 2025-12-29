@@ -80,6 +80,7 @@ function renderRow(record) {
     <tr>
       <td>${safeText(record?.fecha)}</td>
       <td>${safeText(record?.momento)}</td>
+      <td>${safeText(record?.resultado_operativo)}</td>
       <td>${safeText(record?.pensamiento_key)}</td>
       <td>${renderEstadoE(record)}</td>
       <td>${renderIntensidad(record)}</td>
