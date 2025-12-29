@@ -97,7 +97,8 @@ function readFiltersFromUI() {
   FILTER_STATE.activo = $("pea-filter-activo").value || null;
   FILTER_STATE.instrumento = $("pea-filter-instrumento").value || null;
   FILTER_STATE.recordState = $("pea-filter-record-state").value || null;
-
+  FILTER_STATE.resultadoOperativo = $("pea-filter-resultado-operativo").value || null;
+ 
   FILTER_STATE.activoOtros =
     $("pea-filter-activo-otros")?.value.trim() || null;
 
@@ -119,6 +120,8 @@ function applyFilters(records) {
     if (FILTER_STATE.dateTo && fecha && fecha > FILTER_STATE.dateTo) return false;
 
     if (FILTER_STATE.momento && r?.momento !== FILTER_STATE.momento) return false;
+    if (FILTER_STATE.resultadoOperativo && r?.resultado_operativo !== FILTER_STATE.resultadoOperativo) return false;
+ 
     if (FILTER_STATE.pensamiento && r?.pensamiento_key !== FILTER_STATE.pensamiento) return false;
     if (FILTER_STATE.estado && r?.estado_key !== FILTER_STATE.estado) return false;
     if (FILTER_STATE.intensidad && String(r?.intensidad ?? "") !== FILTER_STATE.intensidad) return false;
