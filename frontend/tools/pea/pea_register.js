@@ -329,6 +329,8 @@ location.reload(true);
 document.addEventListener("DOMContentLoaded", () => {
   setupCatalogsUI();
 
+ preloadInheritedMomentoEstructural(); // 👈 PEGAR ESTA LÍNEA  
+
 if (IS_CORRECTION_MODE) {
   preloadCorrectionData(CORRECTION_OF_ID);
   // ⚠️ NO deshabilitar fecha ni momento
