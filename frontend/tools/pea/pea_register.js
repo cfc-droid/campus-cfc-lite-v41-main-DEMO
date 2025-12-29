@@ -174,6 +174,7 @@ function readFormData() {
     id: generatePEAId(),
     fecha: $("pea-fecha").value,
     momento: $("pea-momento").value,
+    resultado_operativo: $("pea-resultado-operativo")?.value || null, // ← NUEVO 
     pensamiento_key: $("pea-pensamiento").value,
     estado_key: $("pea-estado").value,
     intensidad: Number($("pea-intensidad").value),
