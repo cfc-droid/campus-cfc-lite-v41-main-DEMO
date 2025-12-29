@@ -29,10 +29,10 @@ function validatePEAForm(formData) {
   }
 
   // Resultado operativo (OBLIGATORIO solo si Momento = DESPUÉS)
-  if (
-    formData.momento === "DESPUES" &&
-    isEmpty(formData.resultado_operativo)
-  ) {
+ if (
+  formData.momento?.normalize("NFD").replace(/[\u0300-\u036f]/g, "") === "DESPUES" &&
+  isEmpty(formData.resultado_operativo)
+) {
     errors.push(
       "Resultado operativo obligatorio cuando el momento es DESPUÉS."
     );
