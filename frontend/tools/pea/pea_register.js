@@ -205,6 +205,7 @@ function readFormData() {
     instrumento: $("pea-instrumento").value || null,
     instrumento_otros: $("pea-instrumento").value === "OTROS" ? $("pea-instrumento-otros").value.trim() : null,
     nota_factual: $("pea-nota").value.trim() || null,
+    momento_estructural: $("pea-momento-estructural")?.value || "SIN_MARCAR", 
     meta: { schema_version: "PEA_SCHEMA_V1" }
   };
 }
