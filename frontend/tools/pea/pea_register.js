@@ -261,9 +261,9 @@ if (IS_CORRECTION_MODE) {
   return;
 }
 
-  window.PEA_STORAGE.savePEARecord(data);
-  alert("Registro guardado correctamente.");
-  location.reload(); 
+window.PEA_STORAGE.savePEARecord(data);
+alert("Registro guardado correctamente.");
+location.reload(true);
 }
 
 /* =========================
