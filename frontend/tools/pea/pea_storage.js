@@ -92,14 +92,21 @@ function savePEARecord(record) {
     throw new Error("PEA STORAGE: intento de sobrescritura bloqueado.");
   }
 
-  const recordToSave = {
-    ...record,
-    meta: {
-      ...(record.meta || {}),
-      estado: "VALIDO",
-      created_at_iso: nowISO()
-    }
-  };
+const recordToSave = {
+  ...record,
+
+  // 🔒 Congelado automático
+  momento_estructural:
+    record.momento_estructural && record.momento_estructural !== "SIN_MARCAR"
+      ? record.momento_estructural
+      : inheritedMomentoEstructural,
+
+  meta: {
+    ...(record.meta || {}),
+    estado: "VALIDO",
+    created_at_iso: nowISO()
+  }
+};
 
   const newLog = [...log, recordToSave];
   localStorage.setItem(key, JSON.stringify(newLog));
