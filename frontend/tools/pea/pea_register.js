@@ -53,6 +53,22 @@ function generatePEAId() {
   return "pea_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
 }
 
+function updateResultadoOperativoUI() {
+  const momento = $("pea-momento")?.value;
+  const resultadoSel = $("pea-resultado-operativo");
+
+  if (!resultadoSel) return;
+
+  if (momento === "DESPUÉS") {
+    resultadoSel.disabled = false;
+    resultadoSel.parentElement.style.display = "";
+  } else {
+    resultadoSel.value = "";
+    resultadoSel.disabled = true;
+    resultadoSel.parentElement.style.display = "none";
+  }
+}
+
 /* =========================
    ACCIONES (SLOTS)
    ========================= */
@@ -92,6 +108,14 @@ function setupCatalogsUI() {
     addOption(slot, "", "—");
     PEA_ACCIONES.forEach(a => addOption(slot, a));
     slot.addEventListener("change", updateAccionesPreview);
+
+  const momentoSel = $("pea-momento");
+  if (momentoSel) {
+    momentoSel.addEventListener("change", updateResultadoOperativoUI);
+  }
+
+  updateResultadoOperativoUI();
+     
   });
 
   const activoSel = $("pea-activo");
