@@ -11,7 +11,8 @@ import {
   PEA_ACCIONES,
   PEA_ACTIVOS,
   PEA_INSTRUMENTOS_POR_ACTIVO,
-  PEA_DIRECCION
+  PEA_DIRECCION,
+  PEA_MOMENTOS_ESTRUCTURALES 
 } from "./pea_catalog.js";
 
 const $ = (id) => document.getElementById(id);
@@ -34,7 +35,9 @@ const FILTER_STATE = {
   recordState: null,
   resultadoOperativo: null, 
   activoOtros: null,
-  instrumentoOtros: null
+  instrumentoOtros: null,
+  momentoEstructural: null
+ 
 };
 
 /* =========================
@@ -58,6 +61,7 @@ function setupFilterCatalogs() {
   fillSelect($("pea-filter-accion"), PEA_ACCIONES);
   fillSelect($("pea-filter-direccion"), PEA_DIRECCION);
   fillSelect($("pea-filter-activo"), PEA_ACTIVOS);
+  fillSelect($("pea-filter-momento-estructural"), PEA_MOMENTOS_ESTRUCTURALES);
 
   $("pea-filter-activo").addEventListener("change", refreshInstrumentos);
   refreshInstrumentos();
@@ -98,6 +102,8 @@ function readFiltersFromUI() {
   FILTER_STATE.instrumento = $("pea-filter-instrumento").value || null;
   FILTER_STATE.recordState = $("pea-filter-record-state").value || null;
   FILTER_STATE.resultadoOperativo = $("pea-filter-resultado-operativo").value || null;
+  FILTER_STATE.momentoEstructural = $("pea-filter-momento-estructural").value || null;
+ 
  
   FILTER_STATE.activoOtros =
     $("pea-filter-activo-otros")?.value.trim() || null;
@@ -121,6 +127,8 @@ function applyFilters(records) {
 
     if (FILTER_STATE.momento && r?.momento !== FILTER_STATE.momento) return false;
     if (FILTER_STATE.resultadoOperativo && r?.resultado_operativo !== FILTER_STATE.resultadoOperativo) return false;
+
+    if (FILTER_STATE.momentoEstructural && r?.momento_estructural !== FILTER_STATE.momentoEstructural) return false;
  
     if (FILTER_STATE.pensamiento && r?.pensamiento_key !== FILTER_STATE.pensamiento) return false;
     if (FILTER_STATE.estado && r?.estado_key !== FILTER_STATE.estado) return false;
