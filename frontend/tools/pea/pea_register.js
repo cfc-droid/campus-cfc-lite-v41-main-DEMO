@@ -104,6 +104,12 @@ function setupCatalogsUI() {
   clearSelect(intensidadSel, true);
   PEA_INTENSIDADES.forEach(n => addOption(intensidadSel, String(n)));
 
+  const resultadoSel = $("pea-resultado-operativo");
+if (resultadoSel) {
+  clearSelect(resultadoSel, true);
+  PEA_RESULTADOS_OPERATIVOS.forEach(r => addOption(resultadoSel, r));
+}
+ 
   document.querySelectorAll(".pea-accion-slot").forEach(slot => {
     clearSelect(slot, false);
     addOption(slot, "", "—");
@@ -173,6 +179,7 @@ function readFormData() {
     estado_key: $("pea-estado").value,
     intensidad: Number($("pea-intensidad").value),
     acciones_keys: getAccionesFromSlots(),
+    resultado_operativo: $("pea-resultado-operativo")?.value || null, 
     direccion: $("pea-direccion").value,
     activo: $("pea-activo").value || null,
     activo_otros: $("pea-activo").value === "OTROS" ? $("pea-activo-otros").value.trim() : null,
