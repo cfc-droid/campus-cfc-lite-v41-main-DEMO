@@ -91,6 +91,7 @@ function renderRow(record) {
       <td>${safeText(record?.instrumento)}</td>
       <td>${safeText(record?.instrumento_otros)}</td>
       <td>${safeText(record?.nota_factual)}</td>
+      <td>${safeText(record?.momento_estructural)}</td>
       <td>${safeText(estadoRegistro)}</td>
       <td>${safeText(record?.id)}</td>
       <td>${renderRowActions(record)}</td>
