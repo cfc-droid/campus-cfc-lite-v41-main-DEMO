@@ -263,18 +263,23 @@ export const PEA_ACCIONES_DESC = Object.freeze({
   "Salí por regla externa": "Regla objetiva."
 });
 
-
 /* =========================
-   5) RESULTADO
+   5) RESULTADO OPERATIVO
    ========================= */
 
-export const PEA_RESULTADOS = Object.freeze([
-  "Ganancia",
-  "Pérdida",
+export const PEA_RESULTADOS_OPERATIVOS = Object.freeze([
+  "GANANCIA",
+  "PERDIDA",
   "BE",
   "NA"
 ]);
 
+export const PEA_RESULTADOS_OPERATIVOS_DESC = Object.freeze({
+  GANANCIA: "Resultado positivo.",
+  PERDIDA: "Resultado negativo.",
+  BE: "Resultado neutro (break even).",
+  NA: "No aplica o no disponible."
+});
 
 /* =========================
    6) CONTEXTO OPERATIVO
