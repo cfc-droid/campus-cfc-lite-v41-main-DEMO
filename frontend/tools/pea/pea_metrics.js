@@ -38,6 +38,15 @@ function onlyForMetrics(records) {
   return src.filter(r => (r?.meta?.estado || "VALIDO") !== "ANULADO");
 }
 
+function onlyDespues(records) {
+  const src = Array.isArray(records) ? records : [];
+  return src.filter(r =>
+    (r?.meta?.estado || "VALIDO") !== "ANULADO" &&
+    r?.momento === "DESPUÉS" &&
+    r?.resultado_operativo
+  );
+}
+
 function calculateMetrics(records) {
   const list = onlyForMetrics(records);
   if (!list.length) return null;
@@ -46,6 +55,11 @@ function calculateMetrics(records) {
   const estados = [];
   const intensidades = [];
   const momentos = [];
+
+    /* ===== RESULTADO OPERATIVO (SOLO DESPUÉS) ===== */
+  const despues = onlyDespues(records);
+  const resultados = despues.map(r => r.resultado_operativo);
+  const resultadoCount = countBy(resultados); 
 
   /* ===== TAREA 22b — cobertura diaria por momento ===== */
   const days = {}; // { fecha: Set(momentos) }
