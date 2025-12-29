@@ -169,18 +169,42 @@
       </label>
     </section>
 
-    <!-- =========================
-         NOTA FACTUAL
-         ========================= -->
-    <section class="pea-section">
-      <h2>Nota factual (opcional)</h2>
+<!-- =========================
+     NOTA FACTUAL + MOMENTO ESTRUCTURAL
+     ========================= -->
+<section class="pea-section">
+  <h2>Nota factual (opcional)</h2>
 
-      <textarea
-        id="pea-nota"
-        maxlength="180"
-        placeholder="Descripción objetiva (máx. 180 caracteres)"
-      ></textarea>
-    </section>
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+
+    <!-- Nota factual -->
+    <textarea
+      id="pea-nota"
+      maxlength="180"
+      placeholder="Descripción objetiva (máx. 180 caracteres)"
+    ></textarea>
+
+    <!-- Momento estructural -->
+    <label>
+      Momento estructural
+      <select id="pea-momento-estructural">
+        <option value="">— Sin marcar —</option>
+        <option value="CAMBIO_DE_REGLAS">Cambio de reglas</option>
+        <option value="INICIO_CUENTA_NUEVA">Inicio cuenta nueva</option>
+        <option value="CAMBIO_DE_MERCADO">Cambio de mercado</option>
+        <option value="CAMBIO_DE_ACTIVO">Cambio de activo</option>
+        <option value="CAMBIO_DE_INSTRUMENTO">Cambio de instrumento</option>
+        <option value="NUEVA_ESTRATEGIA">Nueva estrategia</option>
+        <option value="AJUSTE_ESTRATEGIA">Ajuste de estrategia</option>
+        <option value="OPTIMIZACION_RIESGO">Optimización de riesgo</option>
+        <option value="CAMBIO_HORARIO">Cambio de horario</option>
+        <option value="CAMBIO_PLATAFORMA">Cambio de plataforma</option>
+        <option value="OTROS">Otros</option>
+      </select>
+    </label>
+
+  </div>
+</section>
 
     <!-- =========================
          ACCIONES FINALES
