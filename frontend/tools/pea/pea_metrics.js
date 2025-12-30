@@ -139,47 +139,19 @@ function calculateMetrics(records) {
    TAREA 17 — Estado del sistema (salud del dato)
    ============================================================ */
 
-function calculateDataHealth(metrics) {
-  if (!metrics || metrics.total <= 2) {
-    return {
-      level: "INSUFICIENTE",
-      icon: "🔴",
-      text: metrics?.total
-        ? `Datos insuficientes (${metrics.total} registros)`
-        : "Datos insuficientes"
-    };
-  }
-
-  if (metrics.total <= 4) {
-    return {
-      level: "PARCIAL",
-      icon: "🟡",
-      text: `Datos parciales (${metrics.total} registros)`
-    };
-  }
-
-  return {
-    level: "SUFICIENTE",
-    icon: "🟢",
-    text: `Datos suficientes (${metrics.total} registros)`
-  };
-}
-
 function renderMetrics(metrics) {
   const box = $("pea-level-0");
   if (!box) return;
 
-  const health = calculateDataHealth(metrics);
-
-  if (!metrics) {
-    box.innerHTML = `
-      <div class="pea-empty">
-        ${health.icon} ${health.text}
-      </div>
-    `;
-    return;
-  }
-
+if (!metrics) {
+  box.innerHTML = `
+    <div class="pea-empty">
+      Evidencia insuficiente para calcular esta métrica.
+    </div>
+  `;
+  return;
+}
+   
   const momentoRows = Object.entries(metrics.distribucionMomento || {})
     .map(([k, v]) => `<li>${k}: ${v}</li>`)
     .join("") || `<li>—</li>`;
