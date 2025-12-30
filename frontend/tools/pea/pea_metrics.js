@@ -314,3 +314,6 @@ function getNombreNivelPEA(nivel) {
       return "—";
   }
 }
+
+// 🔓 Exponer renderer base para estadísticas externas
+window.renderCuadroBasePEA = renderCuadroBasePEA;
