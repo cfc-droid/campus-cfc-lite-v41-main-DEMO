@@ -65,6 +65,12 @@ const PEA_STATS_RENDERERS = [
 function runAllPEAStats() {
   if (!Array.isArray(PEA_STATS_RENDERERS)) return;
 
+  // 🔑 LIMPIAR LOS CONTENEDORES DE NIVEL UNA SOLA VEZ
+  document.querySelectorAll('.pea-level-content').forEach(el => {
+    el.innerHTML = '';
+  });
+
+  // 🔁 Ejecutar cada estadística
   PEA_STATS_RENDERERS.forEach(fnName => {
     try {
       if (typeof window[fnName] === 'function') {
