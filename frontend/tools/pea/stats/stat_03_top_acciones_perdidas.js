@@ -144,7 +144,7 @@
       </table>
     `;
 
-    box.innerHTML = window.renderCuadroBasePEA({
+    box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
       nivel: 1,
       indice: 3,
       titulo: "Top Acciones en Pérdidas (DURANTE)",
@@ -159,7 +159,7 @@
   };
 
   function renderEmpty(box) {
-    box.innerHTML = window.renderCuadroBasePEA({
+    box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
       nivel: 1,
       indice: 3,
       titulo: "Top Acciones en Pérdidas (DURANTE)",
