@@ -2,122 +2,127 @@
    STAT 02 — TOP PENSAMIENTOS EN PÉRDIDAS (ANTES)
    Campus CFC LITE V41
 
-   Objetivo:
-   - Mostrar los pensamientos más frecuentes (ANTES)
-     en días que terminaron en PÉRDIDA.
+   Estadística 2/17
 
-   Reglas:
-   - La PÉRDIDA se detecta SOLO desde DESPUÉS
-   - Cruce exclusivamente por FECHA
-   - Usa primer registro ANTES por día
-   - Solo meta.estado ∈ {VALIDO, CORREGIDO}
-   - ANULADO fuera
-   - Siempre muestra si existe ≥ 1 dato
-   - Formato CUADRO (ranking + conteo + %)
-
-   No interpreta. No aconseja. No diagnostica.
+   Contrato:
+   - Usa renderCuadroBasePEA REAL (pea_metrics.js)
+   - Inserta manualmente en #pea-level-1
+   - Resultado heredado por fecha desde DESPUÉS
    ========================================================= */
 
 (function () {
+
   window.renderStat_02_top_pensamientos_perdidas = function () {
 
-    // ===============================
-    // 1. CARGA Y FILTRO BASE
-    // ===============================
+    const box = document.getElementById("pea-level-1");
+    if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS) return;
 
-    if (!window.PEA_STORAGE || !window.PEA_FILTERS) return;
+    const all = window.PEA_STORAGE.loadPEALog() || [];
+    const filtered = window.PEA_FILTERS.apply(all) || [];
 
-    const allLogs = window.PEA_STORAGE.loadPEALog() || [];
-    const filtered = window.PEA_FILTERS.apply(allLogs) || [];
-
-    const validLogs = filtered.filter(r =>
-      r &&
-      r.meta &&
-      (r.meta.estado === 'VALIDO' || r.meta.estado === 'CORREGIDO')
+    const valid = filtered.filter(r =>
+      r?.meta?.estado === "VALIDO" || r?.meta?.estado === "CORREGIDO"
     );
 
-    if (validLogs.length === 0) {
-      renderEmpty();
-      return;
-    }
-
     // ===============================
-    // 2. FECHAS QUE TERMINARON EN PÉRDIDA
+    // Fechas con PÉRDIDA (DESPUÉS)
     // ===============================
-
-    const fechasPerdida = new Set();
-
-    validLogs.forEach(r => {
-      if (
-        r.momento === 'DESPUÉS' &&
-        r.resultado_operativo === 'PERDIDA' &&
-        r.fecha
-      ) {
-        fechasPerdida.add(r.fecha);
-      }
-    });
+    const fechasPerdida = new Set(
+      valid
+        .filter(r =>
+          r.momento === "DESPUÉS" &&
+          r.resultado_operativo === "PERDIDA" &&
+          r.fecha
+        )
+        .map(r => r.fecha)
+    );
 
     if (fechasPerdida.size === 0) {
-      renderEmpty();
+      renderEmpty(box);
       return;
     }
 
     // ===============================
-    // 3. PRIMER ANTES POR FECHA
+    // Primer ANTES por fecha
     // ===============================
+    const pensamientos = [];
 
-    const antesPorFecha = {};
-
-    validLogs.forEach(r => {
+    const seen = new Set();
+    valid.forEach(r => {
       if (
-        r.momento === 'ANTES' &&
-        fechasPerdida.has(r.fecha)
+        r.momento === "ANTES" &&
+        fechasPerdida.has(r.fecha) &&
+        !seen.has(r.fecha) &&
+        r.pensamiento_key
       ) {
-        if (!antesPorFecha[r.fecha]) {
-          antesPorFecha[r.fecha] = r;
-        }
+        pensamientos.push(r.pensamiento_key);
+        seen.add(r.fecha);
       }
     });
 
-    const pensamientos = Object.values(antesPorFecha)
-      .map(r => r.pensamiento_key)
-      .filter(Boolean);
-
-    if (pensamientos.length === 0) {
-      renderEmpty();
+    if (!pensamientos.length) {
+      renderEmpty(box);
       return;
     }
 
     // ===============================
-    // 4. CONTEO Y PORCENTAJES
+    // Conteo
     // ===============================
-
     const total = pensamientos.length;
-    const conteo = {};
+    const map = {};
+    pensamientos.forEach(p => (map[p] = (map[p] || 0) + 1));
 
-    pensamientos.forEach(p => {
-      conteo[p] = (conteo[p] || 0) + 1;
+    const rows = Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .map(([key, count], i) => `
+        <tr>
+          <td>#${i + 1}</td>
+          <td>${key}</td>
+          <td>${count}</td>
+          <td>${Math.round((count / total) * 100)}%</td>
+        </tr>
+      `)
+      .join("");
+
+    const contenidoHTML = `
+      <table class="pea-table">
+        <thead>
+          <tr>
+            <th>Ranking</th>
+            <th>Pensamiento</th>
+            <th>Cantidad</th>
+            <th>Porcentaje</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows}
+        </tbody>
+      </table>
+    `;
+
+    box.innerHTML = window.renderCuadroBasePEA({
+      nivel: 1,
+      indice: 2,
+      titulo: "Top Pensamientos en Pérdidas (ANTES)",
+      totalRegistros: total,
+      universo: "Primer registro ANTES por fecha en días con DESPUÉS = PERDIDA",
+      criterios: [
+        "Resultado heredado por fecha desde DESPUÉS",
+        "Solo registros VALIDO y CORREGIDO"
+      ],
+      contenidoHTML
     });
+  };
 
-    const ranking = Object.entries(conteo)
-      .map(([key, count]) => ({
-        pensamiento: key,
-        cantidad: count,
-        porcentaje: Math.round((count / total) * 100)
-      }))
-      .sort((a, b) => b.cantidad - a.cantidad);
-
-  // ===============================
-  // RENDER VACÍO CONTROLADO
-  // ===============================
-
-  function renderEmpty() {
-    window.renderCuadroBasePEA({
-      containerId: 'pea-level-1',
-      titulo: 'Top Pensamientos en Pérdidas (ANTES)',
-      subtitulo: 'Muestra insuficiente',
-      tipo: 'texto',
-      contenido: 'No hay registros ANTES válidos asociados a días que terminaron en PÉRDIDA con los filtros actuales.'
+  function renderEmpty(box) {
+    box.innerHTML = window.renderCuadroBasePEA({
+      nivel: 1,
+      indice: 2,
+      titulo: "Top Pensamientos en Pérdidas (ANTES)",
+      totalRegistros: 0,
+      universo: "—",
+      criterios: null,
+      contenidoHTML: `<div class="pea-empty">No hay evidencia suficiente para esta estadística.</div>`
     });
   }
 
