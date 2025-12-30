@@ -166,7 +166,7 @@ function calculateDataHealth(metrics) {
 }
 
 function renderMetrics(metrics) {
-  const box = $("pea-metrics");
+  const box = $("pea-level-0");
   if (!box) return;
 
   const health = calculateDataHealth(metrics);
