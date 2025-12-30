@@ -176,7 +176,7 @@ if (!metrics) {
 
 const contenidoEstadistica1 = `
   <div class="pea-metric-item">
-    <strong>Cobertura diaria por Momento Operativo:</strong><br>
+    <strong>Cobertura por día (faltantes de los 3 registros):</strong>
     El ${coverage.coveragePercent}% de los días tienen los 3 registros completos (ANTES, DURANTE y DESPUES de una operación).
     ${
       coverage.incompleteDays.length ? `
@@ -190,6 +190,8 @@ const contenidoEstadistica1 = `
     }
   </div>
 `;
+
+} // ← CIERRA renderMetrics
 
 box.innerHTML = renderCuadroBasePEA({
   nivel: 0,
