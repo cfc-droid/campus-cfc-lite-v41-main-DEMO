@@ -3,12 +3,6 @@
    Campus CFC LITE V41
 
    Estadística 2/17
-
-   Contrato:
-   - Cuadro SIEMPRE de 5 filas fijas:
-     #1, #2, #3, OTRAS, TOTAL
-   - Funciona con 1 o N datos
-   - Resultado heredado por fecha desde DESPUÉS
    ========================================================= */
 
 (function () {
@@ -16,7 +10,7 @@
   window.renderStat_02_top_pensamientos_perdidas = function () {
 
     const box = document.getElementById("pea-level-1");
-    if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS) return;
+    if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS || !window.renderCuadroBasePEA) return;
 
     const all = window.PEA_STORAGE.loadPEALog() || [];
     const filtered = window.PEA_FILTERS.apply(all) || [];
@@ -25,9 +19,6 @@
       r?.meta?.estado === "VALIDO" || r?.meta?.estado === "CORREGIDO"
     );
 
-    /* ===============================
-       Fechas con PÉRDIDA (DESPUÉS)
-       =============================== */
     const fechasPerdida = new Set(
       valid
         .filter(r =>
@@ -43,9 +34,6 @@
       return;
     }
 
-    /* ===============================
-       Primer ANTES por fecha
-       =============================== */
     const pensamientos = [];
     const seen = new Set();
 
@@ -66,9 +54,6 @@
       return;
     }
 
-    /* ===============================
-       Conteo
-       =============================== */
     const total = pensamientos.length;
     const map = {};
     pensamientos.forEach(p => (map[p] = (map[p] || 0) + 1));
@@ -78,12 +63,8 @@
 
     const top3 = ordered.slice(0, 3);
     const rest = ordered.slice(3);
-
     const otrasCount = rest.reduce((acc, [, c]) => acc + c, 0);
 
-    /* ===============================
-       Construcción de filas FIJAS
-       =============================== */
     const filas = [];
 
     for (let i = 0; i < 3; i++) {
@@ -143,6 +124,7 @@
       </table>
     `;
 
+    // ✅ CLAVE: cierre correcto })); (si no, el script MUERE)
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
       nivel: 1,
       indice: 2,
@@ -154,31 +136,32 @@
         "Solo registros VALIDO y CORREGIDO"
       ],
       contenidoHTML
-    });
+    }));
   };
 
-function renderEmpty(box) {
-  box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
-    nivel: 1,
-    indice: 2,
-    titulo: "Top Pensamientos en Pérdidas (ANTES)",
-    totalRegistros: 0,
-    universo: "Registros existentes, pero sin combinación válida",
-    criterios: [
-      "Existen registros PEA cargados",
-      "No hay días con DESPUÉS = PERDIDA que tengan ANTES válido",
-      "La estadística no puede calcularse sin forzar el dato"
-    ],
-    contenidoHTML: `
-      <div class="pea-warning">
-        ⚠️ Existen datos cargados, pero no se encontró ningún día que cumpla:
-        <br><br>
-        <strong>DESPUÉS = PERDIDA + ANTES válido</strong>
-        <br><br>
-        El cuadro se muestra por integridad del sistema, no como resultado estadístico.
-      </div>
-    `
-  }));
-}
+  function renderEmpty(box) {
+    // ✅ Siempre muestra cuadro (tu “opción B”), pero SIN romper sintaxis
+    box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
+      nivel: 1,
+      indice: 2,
+      titulo: "Top Pensamientos en Pérdidas (ANTES)",
+      totalRegistros: 0,
+      universo: "Registros existentes, pero sin combinación válida",
+      criterios: [
+        "Existen registros PEA cargados",
+        "No hay días con DESPUÉS = PERDIDA que tengan ANTES válido",
+        "La estadística no puede calcularse sin forzar el dato"
+      ],
+      contenidoHTML: `
+        <div class="pea-warning">
+          ⚠️ Existen datos cargados, pero no se encontró ningún día que cumpla:
+          <br><br>
+          <strong>DESPUÉS = PERDIDA + ANTES válido</strong>
+          <br><br>
+          El cuadro se muestra por integridad del sistema, no como resultado estadístico.
+        </div>
+      `
+    }));
+  }
 
 })();
