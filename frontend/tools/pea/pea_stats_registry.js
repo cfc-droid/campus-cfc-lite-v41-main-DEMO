@@ -1,7 +1,7 @@
 /* ============================================================
    PEA — REGISTRO DE ESTADÍSTICAS
-   Rol: Orquestar estadísticas 2/17 → 17/17
-   CAMINO B: mostrar aunque haya 1 sola ocurrencia
+   Estadística 2/17 — BRÚJULA
+   Rol: Lectura primaria (ANTES → pensamiento / DURANTE → acción)
    Regla: NO tocar pea_metrics.js
    ============================================================ */
 
@@ -19,7 +19,6 @@
   function pickResultado(r) {
     const v =
       r?.resultado_operativo ??
-      r?.resultado_operativo_key ??
       r?.resultado ??
       "";
     return String(v).trim().toUpperCase();
@@ -29,16 +28,15 @@
     return String(r?.momento ?? "").trim().toUpperCase();
   }
 
-function pickPensamiento(r) {
-  return String(r?.pensamiento_key ?? "").trim();
-}
+  function pickPensamiento(r) {
+    return String(r?.pensamiento_key ?? "").trim();
+  }
 
-function pickAcciones(r) {
-  const v = r?.acciones_keys;
-  return Array.isArray(v) && v.length ? v : [];
-}
+  function pickAcciones(r) {
+    return Array.isArray(r?.acciones_keys) ? r.acciones_keys : [];
+  }
 
-  /* ========= Contador SIMPLE (no exige dominancia) ========= */
+  /* ========= Contador SIMPLE ========= */
 
   function topSimple(arr, extractor, limit = 3) {
     const map = {};
@@ -69,15 +67,10 @@ function pickAcciones(r) {
     const container = document.getElementById("pea-level-1");
     if (!container) return;
 
-const base = getFilteredRecords().filter(r => {
-  const res = pickResultado(r);
-  const aks = Array.isArray(r?.acciones_keys) ? r.acciones_keys : [];
-  return (
-    res === "GANADA" ||
-    res === "PERDIDA" ||
-    aks.length > 0
-  );
-});
+    const base = getFilteredRecords().filter(r => {
+      const res = pickResultado(r);
+      return res === "GANADA" || res === "PERDIDA";
+    });
 
     let contenido = "";
 
@@ -103,10 +96,15 @@ ${bloque(
 
 ${bloque(
   "DURANTE — Acciones",
-  topSimple(ganadas.filter(r => pickMomento(r) === "DURANTE"), pickAcciones),
-  topSimple(perdidas.filter(r => pickMomento(r) === "DURANTE"), pickAcciones)
+  topSimple(
+    ganadas.filter(r => pickMomento(r) === "DURANTE" && pickAcciones(r).length),
+    pickAcciones
+  ),
+  topSimple(
+    perdidas.filter(r => pickMomento(r) === "DURANTE" && pickAcciones(r).length),
+    pickAcciones
+  )
 )}
-
 `;
     }
 
