@@ -33,6 +33,28 @@ function average(nums) {
   return Math.round((sum / nums.length) * 100) / 100;
 }
 
+function top3Count(array, extractor) {
+  const all = [];
+  array.forEach(r => {
+    const v = extractor(r);
+    if (Array.isArray(v)) all.push(...v);
+    else if (v) all.push(v);
+  });
+
+  if (!all.length) return [];
+
+  const counts = countBy(all);
+  const total = all.length;
+
+  return Object.entries(counts)
+    .map(([key, count]) => ({
+      key,
+      percent: Math.round((count / total) * 100)
+    }))
+    .sort((a, b) => b.percent - a.percent)
+    .slice(0, 3);
+}
+
 function onlyForMetrics(records) {
   const src = Array.isArray(records) ? records : [];
   return src.filter(r => (r?.meta?.estado || "VALIDO") !== "ANULADO");
