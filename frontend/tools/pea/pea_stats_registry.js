@@ -7,13 +7,11 @@
 (function () {
   if (!window.PEA_STATS) window.PEA_STATS = {};
 
-  function getFilteredValidRecords() {
-    if (!window.PEA_STORAGE || !window.PEA_FILTERS) return [];
-    const all = window.PEA_STORAGE.loadPEALog();
-    return window.PEA_FILTERS
-      .apply(all)
-      .filter(r => (r?.meta?.estado || "VALIDO") === "VALIDO");
-  }
+function getFilteredRecords() {
+  if (!window.PEA_STORAGE || !window.PEA_FILTERS) return [];
+  const all = window.PEA_STORAGE.loadPEALog();
+  return window.PEA_FILTERS.apply(all);
+}
 
   /* ============================================================
      ESTADÍSTICA 2/17 — BRÚJULA — GANADORAS vs PERDEDORAS
@@ -24,7 +22,7 @@
     const container = document.getElementById("pea-level-1");
     if (!container) return;
 
-    const base = getFilteredValidRecords().filter(
+const base = getFilteredRecords().filter(
       r => r.resultado === "GANADA" || r.resultado === "PERDIDA"
     );
 
