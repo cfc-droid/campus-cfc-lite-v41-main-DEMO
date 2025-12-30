@@ -226,3 +226,19 @@
   padding-bottom: 1rem;
   border-bottom: 2px solid var(--border-neutral);
 }
+
+/* =========================================================
+   JERARQUÍA VISUAL — TÍTULO DE NIVEL PEA
+   ========================================================= */
+
+.pea-identidad .pea-nivel {
+  font-size: 1.1rem;                 /* más grande */
+  font-weight: 700;                  /* negrita fuerte */
+  text-transform: uppercase;
+
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
+
+  border-top: 2px solid var(--border-neutral);
+  border-bottom: 2px solid var(--border-neutral);
+}
