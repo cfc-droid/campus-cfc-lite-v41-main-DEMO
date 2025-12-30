@@ -178,16 +178,13 @@ const contenidoEstadistica1 = `
   <div class="pea-metric-item">
     <strong>Cobertura por día (faltantes de los 3 registros):</strong>
     El ${coverage.coveragePercent}% de los días tienen los 3 registros completos (ANTES, DURANTE y DESPUES de una operación).
-    ${
-      coverage.incompleteDays.length ? `
-      <details style="margin-top:6px;">
-        <summary><strong>Días con cobertura incompleta</strong></summary>
-        <div style="max-height:120px; overflow:auto; padding-left:8px; margin-top:4px;">
-          ${incompleteRows}
-        </div>
-      </details>
-      ` : ""
-    }
+    
+  <details style="margin-top:6px;">
+  <summary><strong>Días con cobertura incompleta</strong></summary>
+  <div style="max-height:120px; overflow:auto; padding-left:8px; margin-top:4px;">
+    ${coverage.incompleteDays.length ? incompleteRows : "—"}
+  </div>
+</details>
   </div>
 `;
 
