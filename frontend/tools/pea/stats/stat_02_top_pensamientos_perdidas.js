@@ -107,26 +107,6 @@
       }))
       .sort((a, b) => b.cantidad - a.cantidad);
 
-    // ===============================
-    // 5. RENDER CUADRO
-    // ===============================
-
-    window.renderCuadroBasePEA({
-      containerId: 'pea-level-1',
-      titulo: 'Top Pensamientos en Pérdidas (ANTES)',
-      subtitulo: `Días con pérdida analizados: ${fechasPerdida.size}`,
-      tipo: 'tabla',
-      columnas: ['Ranking', 'Pensamiento', 'Cantidad', 'Porcentaje'],
-      filas: ranking.map((r, i) => ([
-        `#${i + 1}`,
-        r.pensamiento,
-        r.cantidad,
-        `${r.porcentaje}%`
-      ])),
-      nota: 'Base: primer registro ANTES por fecha en días que terminaron en PÉRDIDA. Resultado heredado desde DESPUÉS.'
-    });
-  };
-
   // ===============================
   // RENDER VACÍO CONTROLADO
   // ===============================
