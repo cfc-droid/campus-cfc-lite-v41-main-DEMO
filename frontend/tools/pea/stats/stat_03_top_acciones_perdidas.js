@@ -155,7 +155,7 @@
         "Solo registros VALIDO y CORREGIDO"
       ],
       contenidoHTML
-    });
+    }));
   };
 
   function renderEmpty(box) {
@@ -167,7 +167,7 @@
       universo: "—",
       criterios: null,
       contenidoHTML: `<div class="pea-empty">No hay evidencia suficiente para esta estadística.</div>`
-    });
+    }));
   }
 
 })();
