@@ -143,7 +143,7 @@
       </table>
     `;
 
-    box.innerHTML = window.renderCuadroBasePEA({
+    box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
       nivel: 1,
       indice: 2,
       titulo: "Top Pensamientos en Pérdidas (ANTES)",
@@ -158,7 +158,7 @@
   };
 
   function renderEmpty(box) {
-    box.innerHTML = window.renderCuadroBasePEA({
+    box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
       nivel: 1,
       indice: 2,
       titulo: "Top Pensamientos en Pérdidas (ANTES)",
