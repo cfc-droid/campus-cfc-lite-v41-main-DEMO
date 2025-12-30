@@ -69,10 +69,15 @@ function pickAcciones(r) {
     const container = document.getElementById("pea-level-1");
     if (!container) return;
 
-    const base = getFilteredRecords().filter(r => {
-      const res = pickResultado(r);
-      return res === "GANADA" || res === "PERDIDA";
-    });
+const base = getFilteredRecords().filter(r => {
+  const res = pickResultado(r);
+  const aks = Array.isArray(r?.acciones_keys) ? r.acciones_keys : [];
+  return (
+    res === "GANADA" ||
+    res === "PERDIDA" ||
+    aks.length > 0
+  );
+});
 
     let contenido = "";
 
