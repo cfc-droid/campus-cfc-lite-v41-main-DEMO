@@ -248,7 +248,7 @@ function renderCuadroBasePEA({
       NIVEL ${nivel}/4 — ${getNombreNivelPEA(nivel)}
     </div>
     <div class="pea-estadistica">
-      ${indice}/17 — ${titulo}
+     ESTADÍSTICA ${indice}/17 — ${titulo}
     </div>
   </div>
 
