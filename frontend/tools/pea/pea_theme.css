@@ -343,3 +343,27 @@
   border-top: 2px solid var(--border-neutral);
   font-weight: 700;
 }
+
+/* Control de ancho por columna — estadísticas */
+.pea-cuadro-estadistico .pea-table th:nth-child(1),
+.pea-cuadro-estadistico .pea-table td:nth-child(1) {
+  width: 80px;   /* Ranking */
+}
+
+.pea-cuadro-estadistico .pea-table th:nth-child(3),
+.pea-cuadro-estadistico .pea-table td:nth-child(3) {
+  width: 90px;   /* Cantidad */
+  text-align: right;
+}
+
+.pea-cuadro-estadistico .pea-table th:nth-child(4),
+.pea-cuadro-estadistico .pea-table td:nth-child(4) {
+  width: 110px;  /* Porcentaje */
+  text-align: right;
+}
+
+/* Pensamiento toma el resto */
+.pea-cuadro-estadistico .pea-table th:nth-child(2),
+.pea-cuadro-estadistico .pea-table td:nth-child(2) {
+  width: auto;
+}
