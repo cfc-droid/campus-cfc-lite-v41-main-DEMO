@@ -28,34 +28,9 @@
   <!-- CONTENEDOR PRINCIPAL: 3 ZONAS VERTICALES (NO NEGOCIABLE) -->
   <main class="pea-history">
 
-    <!-- ZONA 1 — LECTURA PRIMARIA (BRÚJULA) — placeholder Bloque 8.5 -->
-    <section class="pea-zone pea-zone-primary" aria-label="Lectura primaria">
-<h2>Lectura primaria (Brújula)</h2>
-
-<div class="pea-zone-primary-grid">
-
-  <!-- Columna izquierda: Brújula -->
-  <div class="pea-primary-left">
-    <div id="pea-primary-reading">
-      <div class="pea-empty">
-        Evidencia insuficiente para lectura primaria.
-      </div>
-    </div>
-  </div>
-
-  <!-- Columna derecha: Gráfico resumen (placeholder) -->
-  <div class="pea-primary-right">
-    <div class="pea-empty">
-      Gráfico resumen global (no interactivo).
-    </div>
-  </div>
-
-</div>
-    </section>
-
     <div class="pea-zone-core-inner">
 
-    <!-- ZONA 2 — FILTROS + REGISTROS CRUDOS -->
+    <!-- ZONA 1 — FILTROS + REGISTROS CRUDOS -->
     <section class="pea-zone pea-zone-core" aria-label="Filtros y registros">
 
       <!-- FILTROS -->
@@ -203,7 +178,7 @@
         <div id="pea-filter-status" class="pea-filter-status" aria-live="polite"></div>
       </section>
 
-      <!-- TABLA — REGISTROS CRUDOS (1 fila = 1 evidencia) -->
+      <!-- ZONA 2 - TABLA — REGISTROS CRUDOS (1 fila = 1 evidencia) -->
       <section class="pea-table-wrap">
         <h2>Registros</h2>
         
@@ -256,33 +231,43 @@
 
 </div> <!-- 🔴 CIERRE pea-zone-core-inner -->
 
-    <!-- ZONA 3 — MÉTRICAS SECUNDARIAS -->
-   <section class="pea-zone pea-zone-secondary" aria-label="Métricas secundarias">
+<!-- ZONA 3 — ESTADÍSTICAS (17) -->
+<section class="pea-zone pea-zone-secondary" aria-label="Estadísticas">
 
-  <h2>Métricas secundarias (según filtros aplicados)</h2>
+  <h2>Estadísticas</h2>
 
-  <!-- 🔑 Grilla igual a Zona A -->
-  <div class="pea-zone-secondary-grid">
+  <!-- NIVEL 0 -->
+  <section class="pea-level" data-level="0">
+    <h3>NIVEL 0/4 — INFORMACIÓN A CORROBORRAR / COMPLETAR (INFLUYE EN TODO)</h3>
+    <div class="pea-level-content" id="pea-level-0"></div>
+  </section>
 
-    <!-- Columna izquierda: métricas numéricas -->
-    <div class="pea-metrics-left">
-      <div id="pea-metrics">
-        <div class="pea-empty">
-          Evidencia insuficiente para calcular métricas.
-        </div>
-      </div>
-    </div>
+  <!-- NIVEL 1 -->
+  <section class="pea-level" data-level="1">
+    <h3>NIVEL 1/4 — BRÚJULA (LECTURA PRIMARIA)</h3>
+    <div class="pea-level-content" id="pea-level-1"></div>
+  </section>
 
-    <!-- Columna derecha: gráfico exploratorio -->
-    <div class="pea-metrics-right">
-      <div class="pea-empty">
-        Gráfico exploratorio (barra / torta / línea).
-      </div>
-    </div>
+  <!-- NIVEL 2 -->
+  <section class="pea-level" data-level="2">
+    <h3>NIVEL 2/4 — SECUNDARIAS DE ALTO VALOR</h3>
+    <div class="pea-level-content" id="pea-level-2"></div>
+  </section>
 
-  </div>
+  <!-- NIVEL 3 -->
+  <section class="pea-level" data-level="3">
+    <h3>NIVEL 3/4 — CONTEXTO Y SALUD DEL SISTEMA</h3>
+    <div class="pea-level-content" id="pea-level-3"></div>
+  </section>
+
+  <!-- NIVEL 4 (OCULTO POR DEFECTO) -->
+  <section class="pea-level pea-level--collapsed" data-level="4">
+    <h3>NIVEL 4/4 — EXPLORATORIAS (AVANZADAS)</h3>
+    <div class="pea-level-content" id="pea-level-4"></div>
+  </section>
 
 </section>
+
 
 <!-- =========================
      ACCESOS RÁPIDOS (UX — BLOQUE 1 TAREA 6)
