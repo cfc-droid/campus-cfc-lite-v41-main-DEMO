@@ -303,10 +303,11 @@
    ========================================================= */
 
 .pea-cuadro-estadistico .pea-table {
-  min-width: unset;              /* ❌ quita efecto "Excel ancho" */
-  border-collapse: separate;     /* 🔑 separa columnas visualmente */
-  border-spacing: 0;             /* control total */
+  min-width: unset;
   width: 100%;
+  table-layout: fixed;   /* 🔑 CLAVE: evita columnas "elásticas" */
+  border-collapse: separate;
+  border-spacing: 0;
 }
 
 /* Encabezado */
