@@ -7,72 +7,112 @@
 (function () {
   if (!window.PEA_STATS) window.PEA_STATS = {};
 
-function getFilteredRecords() {
-  if (!window.PEA_STORAGE || !window.PEA_FILTERS) return [];
-  const all = window.PEA_STORAGE.loadPEALog();
-  return window.PEA_FILTERS.apply(all);
-}
+  function getFilteredRecords() {
+    if (!window.PEA_STORAGE || !window.PEA_FILTERS) return [];
+    const all = window.PEA_STORAGE.loadPEALog();
+    return window.PEA_FILTERS.apply(all);
+  }
+
+  // ✅ Normalizador: no dependemos de 1 solo nombre de campo
+  function pickResultadoOperativo(r) {
+    const v =
+      r?.resultado_operativo ??
+      r?.resultado_operativo_key ??
+      r?.resultadoOperativo ??
+      r?.resultado ??
+      r?.resultado_key ??
+      "";
+    return String(v).trim().toUpperCase();
+  }
+
+  function pickMomento(r) {
+    const v = r?.momento ?? r?.momento_key ?? "";
+    return String(v).trim().toUpperCase();
+  }
+
+  function pickPensamiento(r) {
+    const v = r?.pensamiento ?? "";
+    return String(v).trim();
+  }
+
+  function pickAccionesKeys(r) {
+    const v = r?.acciones_keys ?? r?.accionesKeys ?? [];
+    return Array.isArray(v) ? v : [];
+  }
 
   /* ============================================================
      ESTADÍSTICA 2/17 — BRÚJULA — GANADORAS vs PERDEDORAS
      NIVEL 1/4
+     Qué hace:
+       - Toma el MISMO universo que ves en la tabla (post-filtros)
+       - Se queda con GANADA / PERDIDA
+       - Top 3:
+         * ANTES: pensamientos más frecuentes (GANADA vs PERDIDA)
+         * DURANTE: acciones más frecuentes (GANADA vs PERDIDA)
      ============================================================ */
 
   window.PEA_STATS.renderBrújula = function () {
     const container = document.getElementById("pea-level-1");
     if (!container) return;
 
-const base = getFilteredRecords().filter(
-      r => r.resultado === "GANADA" || r.resultado === "PERDIDA"
-    );
+    const base = getFilteredRecords().filter(r => {
+      const res = pickResultadoOperativo(r);
+      return res === "GANADA" || res === "PERDIDA";
+    });
 
     let contenido = "";
 
-    if (base.length >= 4) {
-      const porResultado = {
-        GANADA: base.filter(r => r.resultado === "GANADA"),
-        PERDIDA: base.filter(r => r.resultado === "PERDIDA")
-      };
+    // helper Top3 (por %)
+    const top3 = (arr, extractor) => {
+      const all = [];
+      arr.forEach(r => {
+        const v = extractor(r);
+        if (Array.isArray(v)) all.push(...v);
+        else if (v) all.push(v);
+      });
 
-      const top3 = (arr, fn) => {
-        const all = [];
-        arr.forEach(r => {
-          const v = fn(r);
-          if (Array.isArray(v)) all.push(...v);
-          else if (v) all.push(v);
-        });
-        if (!all.length) return [];
-        const map = {};
-        all.forEach(v => (map[v] = (map[v] || 0) + 1));
-        const total = all.length;
-        return Object.entries(map)
-          .map(([k, c]) => ({
-            key: k,
-            percent: Math.round((c / total) * 100)
-          }))
-          .sort((a, b) => b.percent - a.percent)
-          .slice(0, 3);
-      };
+      const clean = all
+        .map(x => String(x).trim())
+        .filter(Boolean);
+
+      if (!clean.length) return [];
+
+      const map = {};
+      clean.forEach(v => (map[v] = (map[v] || 0) + 1));
+      const total = clean.length;
+
+      return Object.entries(map)
+        .map(([k, c]) => ({
+          key: k,
+          percent: Math.round((c / total) * 100)
+        }))
+        .sort((a, b) => b.percent - a.percent)
+        .slice(0, 3);
+    };
+
+    if (base.length >= 4) {
+      const ganadas = base.filter(r => pickResultadoOperativo(r) === "GANADA");
+      const perdidas = base.filter(r => pickResultadoOperativo(r) === "PERDIDA");
 
       const antes = {
         GANADA: top3(
-          porResultado.GANADA.filter(r => r.momento === "ANTES"),
-          r => r.pensamiento
+          ganadas.filter(r => pickMomento(r) === "ANTES"),
+          r => pickPensamiento(r)
         ),
         PERDIDA: top3(
-          porResultado.PERDIDA.filter(r => r.momento === "ANTES"),
-          r => r.pensamiento
+          perdidas.filter(r => pickMomento(r) === "ANTES"),
+          r => pickPensamiento(r)
         )
       };
 
       const durante = {
         GANADA: top3(
-          porResultado.GANADA.filter(r => r.momento === "DURANTE"),
-          r => r.acciones_keys
+          ganadas.filter(r => pickMomento(r) === "DURANTE"),
+          r => pickAccionesKeys(r)
         ),
         PERDIDA: top3(
-          porResultado.PERDIDA.filter(r => r.momento === "DURANTE"),
-          r => r.acciones_keys
+          perdidas.filter(r => pickMomento(r) === "DURANTE"),
+          r => pickAccionesKeys(r)
         )
       };
 
@@ -93,13 +133,13 @@ PERDIDA:<br>${durante.PERDIDA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>
 `;
     }
 
-    container.innerHTML = renderCuadroBasePEA({
+    container.innerHTML = window.renderCuadroBasePEA({
       nivel: 1,
       indice: 2,
       titulo: "BRÚJULA — GANADORAS vs PERDEDORAS",
       totalRegistros: base.length,
-      universo: "registros con estado_registro = VALIDO",
-      criterios: ["Resultado ∈ {GANADA, PERDIDA}"],
+      universo: "registros post-filtros (se ve lo mismo que la tabla)",
+      criterios: ["Resultado operativo ∈ {GANADA, PERDIDA}"],
       contenidoHTML: contenido
     });
   };
