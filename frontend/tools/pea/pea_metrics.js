@@ -280,3 +280,94 @@ function updateMetrics() {
 
 document.addEventListener("DOMContentLoaded", updateMetrics);
 document.addEventListener("PEA_FILTERS_UPDATED", updateMetrics);
+
+/* ============================================================
+   PEA — RENDER BASE CUADRO ESTADÍSTICO (ACCIÓN 31f.2)
+   Rol: Forzar el ESTÁNDAR ÚNICO DE CUADRO ESTADÍSTICO — PEA
+   Nota: NO calcula métricas. SOLO render estructural.
+   ============================================================ */
+
+function renderCuadroBasePEA({
+  nivel,               // 0–4
+  indice,              // 1–17
+  titulo,              // string exacto contrato PEA
+  totalRegistros,      // N
+  universo,            // string
+  criterios = null,    // array de strings o null
+  contenidoHTML = "",  // cuerpo ya calculado
+}) {
+  const estado =
+    totalRegistros >= 6
+      ? { icon: "🟢", text: `Datos suficientes (${totalRegistros} registros)` }
+      : totalRegistros >= 4
+      ? { icon: "🟡", text: `Datos parciales (${totalRegistros} registros)` }
+      : { icon: "🔴", text: "Datos insuficientes" };
+
+  return `
+<div class="pea-cuadro-estadistico">
+
+  <div class="pea-identidad">
+    <div class="pea-nivel">
+      NIVEL ${nivel}/4 — ${getNombreNivelPEA(nivel)}
+    </div>
+    <div class="pea-estadistica">
+      (Estadística ${indice}/17) ${titulo}
+    </div>
+  </div>
+
+  <div class="pea-cabecera">
+    Estado del sistema: ${estado.icon} ${estado.text}<br>
+    Total de registros: ${totalRegistros}
+  </div>
+
+  <div class="pea-separador">────────────────────────────</div>
+
+  <div class="pea-universo">
+    Universo: ${universo}
+  </div>
+
+  ${
+    criterios && criterios.length
+      ? `
+  <div class="pea-criterios">
+    Criterios adicionales:
+    <ul>
+      ${criterios.map(c => `<li>${c}</li>`).join("")}
+    </ul>
+  </div>
+  `
+      : ""
+  }
+
+  <div class="pea-cuerpo">
+    ${
+      estado.icon === "🔴"
+        ? "Evidencia insuficiente para calcular esta métrica."
+        : contenidoHTML
+    }
+  </div>
+
+  <div class="pea-nav">
+    <a href="#top">[ Subir arriba ]</a>
+  </div>
+
+</div>
+`;
+}
+
+function getNombreNivelPEA(nivel) {
+  switch (nivel) {
+    case 0:
+      return "INFORMACIÓN A CORROBORRAR / COMPLETAR (INFLUYE EN TODO)";
+    case 1:
+      return "BRÚJULA (LECTURA PRIMARIA)";
+    case 2:
+      return "SECUNDARIAS DE ALTO VALOR";
+    case 3:
+      return "CONTEXTO Y SALUD DEL SISTEMA";
+    case 4:
+      return "EXPLORATORIAS (AVANZADAS)";
+    default:
+      return "—";
+  }
+}
