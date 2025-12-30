@@ -29,14 +29,14 @@
     return String(r?.momento ?? "").trim().toUpperCase();
   }
 
-  function pickPensamiento(r) {
-    return String(r?.pensamiento ?? r?.pensamiento_key ?? "").trim();
-  }
+function pickPensamiento(r) {
+  return String(r?.pensamiento_key ?? "").trim();
+}
 
-  function pickAcciones(r) {
-    const v = r?.acciones_keys ?? r?.accionesKeys ?? [];
-    return Array.isArray(v) ? v : [];
-  }
+function pickAcciones(r) {
+  const v = r?.acciones_keys;
+  return Array.isArray(v) && v.length ? v : [];
+}
 
   /* ========= Contador SIMPLE (no exige dominancia) ========= */
 
@@ -102,11 +102,6 @@ ${bloque(
   topSimple(perdidas.filter(r => pickMomento(r) === "DURANTE"), pickAcciones)
 )}
 
-${bloque(
-  "DESPUÉS — Pensamientos",
-  topSimple(ganadas.filter(r => pickMomento(r) === "DESPUÉS"), pickPensamiento),
-  topSimple(perdidas.filter(r => pickMomento(r) === "DESPUÉS"), pickPensamiento)
-)}
 `;
     }
 
