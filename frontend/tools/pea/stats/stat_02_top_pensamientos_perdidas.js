@@ -5,8 +5,9 @@
    Estadística 2/17
 
    Contrato:
-   - Usa renderCuadroBasePEA REAL (pea_metrics.js)
-   - Inserta manualmente en #pea-level-1
+   - Cuadro SIEMPRE de 5 filas fijas:
+     #1, #2, #3, OTRAS, TOTAL
+   - Funciona con 1 o N datos
    - Resultado heredado por fecha desde DESPUÉS
    ========================================================= */
 
@@ -24,9 +25,9 @@
       r?.meta?.estado === "VALIDO" || r?.meta?.estado === "CORREGIDO"
     );
 
-    // ===============================
-    // Fechas con PÉRDIDA (DESPUÉS)
-    // ===============================
+    /* ===============================
+       Fechas con PÉRDIDA (DESPUÉS)
+       =============================== */
     const fechasPerdida = new Set(
       valid
         .filter(r =>
@@ -37,17 +38,17 @@
         .map(r => r.fecha)
     );
 
-    if (fechasPerdida.size === 0) {
+    if (!fechasPerdida.size) {
       renderEmpty(box);
       return;
     }
 
-    // ===============================
-    // Primer ANTES por fecha
-    // ===============================
+    /* ===============================
+       Primer ANTES por fecha
+       =============================== */
     const pensamientos = [];
-
     const seen = new Set();
+
     valid.forEach(r => {
       if (
         r.momento === "ANTES" &&
@@ -65,24 +66,66 @@
       return;
     }
 
-    // ===============================
-    // Conteo
-    // ===============================
+    /* ===============================
+       Conteo
+       =============================== */
     const total = pensamientos.length;
     const map = {};
     pensamientos.forEach(p => (map[p] = (map[p] || 0) + 1));
 
-    const rows = Object.entries(map)
-      .sort((a, b) => b[1] - a[1])
-      .map(([key, count], i) => `
-        <tr>
-          <td>#${i + 1}</td>
-          <td>${key}</td>
-          <td>${count}</td>
-          <td>${Math.round((count / total) * 100)}%</td>
-        </tr>
-      `)
-      .join("");
+    const ordered = Object.entries(map)
+      .sort((a, b) => b[1] - a[1]);
+
+    const top3 = ordered.slice(0, 3);
+    const rest = ordered.slice(3);
+
+    const otrasCount = rest.reduce((acc, [, c]) => acc + c, 0);
+
+    /* ===============================
+       Construcción de filas FIJAS
+       =============================== */
+    const filas = [];
+
+    for (let i = 0; i < 3; i++) {
+      if (top3[i]) {
+        const [key, count] = top3[i];
+        filas.push(`
+          <tr>
+            <td>#${i + 1}</td>
+            <td>${key}</td>
+            <td>${count}</td>
+            <td>${Math.round((count / total) * 100)}%</td>
+          </tr>
+        `);
+      } else {
+        filas.push(`
+          <tr>
+            <td>#${i + 1}</td>
+            <td>—</td>
+            <td>0</td>
+            <td>0%</td>
+          </tr>
+        `);
+      }
+    }
+
+    filas.push(`
+      <tr>
+        <td>OTRAS</td>
+        <td>—</td>
+        <td>${otrasCount}</td>
+        <td>${Math.round((otrasCount / total) * 100)}%</td>
+      </tr>
+    `);
+
+    filas.push(`
+      <tr>
+        <td>TOTAL</td>
+        <td>—</td>
+        <td>${total}</td>
+        <td>100%</td>
+      </tr>
+    `);
 
     const contenidoHTML = `
       <table class="pea-table">
@@ -95,7 +138,7 @@
           </tr>
         </thead>
         <tbody>
-          ${rows}
+          ${filas.join("")}
         </tbody>
       </table>
     `;
