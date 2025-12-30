@@ -33,28 +33,6 @@ function average(nums) {
   return Math.round((sum / nums.length) * 100) / 100;
 }
 
-function top3Count(array, extractor) {
-  const all = [];
-  array.forEach(r => {
-    const v = extractor(r);
-    if (Array.isArray(v)) all.push(...v);
-    else if (v) all.push(v);
-  });
-
-  if (!all.length) return [];
-
-  const counts = countBy(all);
-  const total = all.length;
-
-  return Object.entries(counts)
-    .map(([key, count]) => ({
-      key,
-      percent: Math.round((count / total) * 100)
-    }))
-    .sort((a, b) => b.percent - a.percent)
-    .slice(0, 3);
-}
-
 function onlyForMetrics(records) {
   const src = Array.isArray(records) ? records : [];
   return src.filter(r => (r?.meta?.estado || "VALIDO") !== "ANULADO");
@@ -178,9 +156,22 @@ if (!metrics) {
   `;
   return;
 }
+   
+  const momentoRows = Object.entries(metrics.distribucionMomento || {})
+    .map(([k, v]) => `<li>${k}: ${v}</li>`)
+    .join("") || `<li>—</li>`;
 
+  const rankingRows = metrics.rankingAcciones
+    .map((r, i) => `
+      <tr>
+        <td>#${i + 1}</td>
+        <td>${r.key}</td>
+        <td>${r.count}</td>
+        <td>${r.percent}%</td>
+      </tr>
+    `)
+    .join("");
 
- // === ESTADÍSTICA 1/17 ===
   const coverage = metrics.coverageByMoment;
   const incompleteRows = coverage.incompleteDays.length
     ? coverage.incompleteDays
@@ -212,109 +203,6 @@ box.innerHTML = renderCuadroBasePEA({
   contenidoHTML: contenidoEstadistica1
 });
 
-/* ============================================================
-   ESTADÍSTICA 2/17 — BRÚJULA — GANADORAS vs PERDEDORAS
-   NIVEL 1/4 — BRÚJULA (LECTURA PRIMARIA)
-   ============================================================ */
-
-// Universo: mismos registros filtrados, solo GANADA / PERDIDA
-const brujulaBase = metrics.total
-  ? window.PEA_FILTERS
-      .apply(window.PEA_STORAGE.loadPEALog())
-      .filter(
-        r =>
-          (r?.meta?.estado || "VALIDO") === "VALIDO" &&
-          (r?.resultado === "GANADA" || r?.resultado === "PERDIDA")
-      )
-  : [];
-
-let contenidoEstadistica2 = "";
-
-// Estado 🔴 si no hay muestra suficiente
-if (brujulaBase.length >= 4) {
-  const porResultado = {
-    GANADA: brujulaBase.filter(r => r.resultado === "GANADA"),
-    PERDIDA: brujulaBase.filter(r => r.resultado === "PERDIDA")
-  };
-
-  const antes = {
-    GANADA: top3Count(
-      porResultado.GANADA.filter(r => r.momento === "ANTES"),
-      r => r.pensamiento
-    ),
-    PERDIDA: top3Count(
-      porResultado.PERDIDA.filter(r => r.momento === "ANTES"),
-      r => r.pensamiento
-    )
-  };
-
-  const durante = {
-    GANADA: top3Count(
-      porResultado.GANADA.filter(r => r.momento === "DURANTE"),
-      r => r.acciones_keys
-    ),
-    PERDIDA: top3Count(
-      porResultado.PERDIDA.filter(r => r.momento === "DURANTE"),
-      r => r.acciones_keys
-    )
-  };
-
-  const despuesEstados = {
-    GANADA: mostFrequent(
-      countBy(
-        porResultado.GANADA
-          .filter(r => r.momento === "DESPUÉS")
-          .map(r => r.estado_key)
-      )
-    ),
-    PERDIDA: mostFrequent(
-      countBy(
-        porResultado.PERDIDA
-          .filter(r => r.momento === "DESPUÉS")
-          .map(r => r.estado_key)
-      )
-    )
-  };
-
-  contenidoEstadistica2 = `
-<div class="pea-metric-item">
-  <strong>ANTES — Top 3 pensamientos</strong><br>
-  GANADA:<br>
-  ${antes.GANADA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>") || "—"}
-  <br><br>
-  PERDIDA:<br>
-  ${antes.PERDIDA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>") || "—"}
-</div>
-
-<div class="pea-metric-item" style="margin-top:8px;">
-  <strong>DURANTE — Top 3 acciones</strong><br>
-  GANADA:<br>
-  ${durante.GANADA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>") || "—"}
-  <br><br>
-  PERDIDA:<br>
-  ${durante.PERDIDA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>") || "—"}
-</div>
-
-<div class="pea-metric-item" style="margin-top:8px;">
-  <strong>DESPUÉS — Estado dominante</strong><br>
-  GANADA: ${despuesEstados.GANADA || "—"}<br>
-  PERDIDA: ${despuesEstados.PERDIDA || "—"}
-</div>
-`;
-}
-
-document.getElementById("pea-level-1").innerHTML =
-  renderCuadroBasePEA({
-    nivel: 1,
-    indice: 2,
-    titulo: "BRÚJULA — GANADORAS vs PERDEDORAS",
-    totalRegistros: brujulaBase.length,
-    universo: "registros con estado_registro = VALIDO",
-    criterios: ["Resultado ∈ {GANADA, PERDIDA}"],
-    contenidoHTML: contenidoEstadistica2
-  });
-
-   
 } // ← CIERRA renderMetrics
    
 function updateMetrics() {
