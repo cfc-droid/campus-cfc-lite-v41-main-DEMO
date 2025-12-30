@@ -208,42 +208,21 @@ box.innerHTML = renderCuadroBasePEA({
    NIVEL 1/4 — BRÚJULA (LECTURA PRIMARIA)
    ============================================================ */
 
-// Filtrar universo específico
 const brujulaBase = metrics
-  ? metrics.__source
-      .filter(
-        r =>
-          (r?.resultado === "GANADA" || r?.resultado === "PERDIDA")
-      )
+  ? metrics.__source.filter(
+      r =>
+        r.resultado === "GANADA" ||
+        r.resultado === "PERDIDA"
+    )
   : [];
 
 let contenidoEstadistica2 = "";
 
-const estadoInsuficiente = brujulaBase.length < 4;
-contenidoEstadistica2 = estadoInsuficiente
- ? else {
+if (brujulaBase.length >= 4) {
   const porResultado = {
     GANADA: brujulaBase.filter(r => r.resultado === "GANADA"),
     PERDIDA: brujulaBase.filter(r => r.resultado === "PERDIDA")
   };
-
-  function top3Count(array, extractor) {
-    const all = [];
-    array.forEach(r => {
-      const v = extractor(r);
-      if (Array.isArray(v)) all.push(...v);
-      else if (v) all.push(v);
-    });
-    const counts = countBy(all);
-    const total = all.length || 1;
-    return Object.entries(counts)
-      .map(([k, c]) => ({
-        key: k,
-        percent: Math.round((c / total) * 100)
-      }))
-      .sort((a, b) => b.percent - a.percent)
-      .slice(0, 3);
-  }
 
   const antes = {
     GANADA: top3Count(
@@ -287,19 +266,19 @@ contenidoEstadistica2 = estadoInsuficiente
   contenidoEstadistica2 = `
 <div class="pea-metric-item">
   <strong>ANTES — Top 3 pensamientos</strong><br>
-  GANADA:
+  GANADA:<br>
   ${antes.GANADA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>") || "—"}
-  <br>
-  PERDIDA:
+  <br><br>
+  PERDIDA:<br>
   ${antes.PERDIDA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>") || "—"}
 </div>
 
 <div class="pea-metric-item" style="margin-top:8px;">
   <strong>DURANTE — Top 3 acciones</strong><br>
-  GANADA:
+  GANADA:<br>
   ${durante.GANADA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>") || "—"}
-  <br>
-  PERDIDA:
+  <br><br>
+  PERDIDA:<br>
   ${durante.PERDIDA.map(e => `• ${e.key}: ${e.percent}%`).join("<br>") || "—"}
 </div>
 
@@ -311,16 +290,16 @@ contenidoEstadistica2 = estadoInsuficiente
 `;
 }
 
-document.getElementById("pea-level-1").innerHTML = renderCuadroBasePEA({
-  nivel: 1,
-  indice: 2,
-  titulo: "BRÚJULA — GANADORAS vs PERDEDORAS",
-  totalRegistros: brujulaBase.length,
-  universo: "registros con estado_registro = VALIDO",
-  criterios: ["Resultado ∈ {GANADA, PERDIDA}"],
-  contenidoHTML: contenidoEstadistica2
-});
-
+document.getElementById("pea-level-1").innerHTML =
+  renderCuadroBasePEA({
+    nivel: 1,
+    indice: 2,
+    titulo: "BRÚJULA — GANADORAS vs PERDEDORAS",
+    totalRegistros: brujulaBase.length,
+    universo: "registros con estado_registro = VALIDO",
+    criterios: ["Resultado ∈ {GANADA, PERDIDA}"],
+    contenidoHTML: contenidoEstadistica2
+  });
    
 } // ← CIERRA renderMetrics
    
