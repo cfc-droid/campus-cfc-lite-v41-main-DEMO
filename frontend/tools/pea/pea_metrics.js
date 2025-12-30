@@ -202,27 +202,32 @@ function renderMetrics(metrics) {
         .join("<br>")
     : "—";
 
-  box.innerHTML = `
-    <div class="pea-metric-item">
-      <strong>Cobertura diaria por Momento Operativo:</strong><br>
-      El ${coverage.coveragePercent}% de los días tienen los 3 registros completos (ANTES, DURANTE y DESPUES de una operación).
-${coverage.incompleteDays.length ? `
-  <details style="margin-top:6px;">
-    <summary><strong>Días con cobertura incompleta</strong></summary>
-    <div style="max-height:120px; overflow:auto; padding-left:8px; margin-top:4px;">
-      ${incompleteRows}
-    </div>
-  </details>
-` : ""}
-    </div>
+const contenidoEstadistica1 = `
+  <div class="pea-metric-item">
+    <strong>Cobertura diaria por Momento Operativo:</strong><br>
+    El ${coverage.coveragePercent}% de los días tienen los 3 registros completos (ANTES, DURANTE y DESPUES de una operación).
+    ${
+      coverage.incompleteDays.length ? `
+      <details style="margin-top:6px;">
+        <summary><strong>Días con cobertura incompleta</strong></summary>
+        <div style="max-height:120px; overflow:auto; padding-left:8px; margin-top:4px;">
+          ${incompleteRows}
+        </div>
+      </details>
+      ` : ""
+    }
+  </div>
+`;
 
-    <div class="pea-metric-item">
-      <strong>Estado del sistema:</strong> ${health.icon} ${health.text}
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Total de registros:</strong> ${metrics.total}
-    </div>
+box.innerHTML = renderCuadroBasePEA({
+  nivel: 0,
+  indice: 1,
+  titulo: "Cobertura por día (faltantes de los 3 registros)",
+  totalRegistros: metrics.total,
+  universo: "registros con estado_registro = VALIDO",
+  criterios: null,
+  contenidoHTML: contenidoEstadistica1
+});
 
     <div class="pea-metric-item">
       <strong>Acción más frecuente:</strong> ${metrics.accionMasFrecuente || "—"}
