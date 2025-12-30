@@ -271,13 +271,19 @@ function renderCuadroBasePEA({
       : ""
   }
 
-  <div class="pea-cuerpo">
-    ${
-      estado.icon === "🔴"
-        ? "Evidencia insuficiente para calcular esta métrica."
-        : contenidoHTML
-    }
-  </div>
+<div class="pea-cuerpo">
+
+  ${
+    estado.icon === "🔴"
+      ? `<div class="pea-warning">
+           Evidencia insuficiente para métricas completas.
+         </div>`
+      : ""
+  }
+
+  ${contenidoHTML}
+
+</div>
 
   <div class="pea-nav">
     <a href="#top">[ Subir arriba ]</a>
