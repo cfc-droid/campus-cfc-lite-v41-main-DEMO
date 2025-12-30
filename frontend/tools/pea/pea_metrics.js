@@ -177,34 +177,10 @@ if (!metrics) {
     </div>
   `;
   return;
-
-box.innerHTML = renderCuadroBasePEA({
-  nivel: 0,
-  indice: 1,
-  titulo: "Cobertura por día (faltantes de los 3 registros)",
-  totalRegistros: metrics.total,
-  universo: "registros con estado_registro = VALIDO",
-  criterios: null,
-  contenidoHTML: contenidoEstadistica1
-});
-
 }
-   
-  const momentoRows = Object.entries(metrics.distribucionMomento || {})
-    .map(([k, v]) => `<li>${k}: ${v}</li>`)
-    .join("") || `<li>—</li>`;
 
-  const rankingRows = metrics.rankingAcciones
-    .map((r, i) => `
-      <tr>
-        <td>#${i + 1}</td>
-        <td>${r.key}</td>
-        <td>${r.count}</td>
-        <td>${r.percent}%</td>
-      </tr>
-    `)
-    .join("");
 
+ // === ESTADÍSTICA 1/17 ===
   const coverage = metrics.coverageByMoment;
   const incompleteRows = coverage.incompleteDays.length
     ? coverage.incompleteDays
