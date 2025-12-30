@@ -109,6 +109,11 @@ function calculateMetrics(records) {
     }
   });
 
+// ORDENAR días incompletos por fecha ascendente (YYYY-MM-DD)
+incompleteDays.sort((a, b) => {
+  return new Date(a.date) - new Date(b.date);
+});
+
   const totalDays = daysEntries.length;
   const coveragePercent = totalDays
     ? Math.round((completeDays / totalDays) * 100)
