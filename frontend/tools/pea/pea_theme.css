@@ -240,3 +240,59 @@
 .pea-identidad .pea-estadistica {
   font-weight: 600;
 }
+
+/* =========================================================
+   PEA — CUADROS ESTADÍSTICOS (NO TABLA EXCEL)
+   Aplica SOLO a estadísticas, no a registros crudos
+   ========================================================= */
+
+.pea-cuadro-estadistico table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 0.5rem;
+  font-size: 0.9rem;
+}
+
+/* Encabezado fuerte */
+.pea-cuadro-estadistico thead th {
+  border-bottom: 2px solid var(--border-neutral);
+  border-top: 2px solid var(--border-neutral);
+  padding: 0.4rem 0.6rem;
+  font-weight: 600;
+  text-align: left;
+}
+
+/* Celdas */
+.pea-cuadro-estadistico tbody td {
+  border-bottom: 1px solid var(--border-neutral);
+  padding: 0.35rem 0.6rem;
+  vertical-align: middle;
+}
+
+/* Separación visual entre columnas */
+.pea-cuadro-estadistico td + td,
+.pea-cuadro-estadistico th + th {
+  border-left: 1px solid var(--border-neutral);
+}
+
+/* Filas ranking normales */
+.pea-cuadro-estadistico tbody tr:nth-child(-n+3) td {
+  font-weight: 500;
+}
+
+/* Fila OTRAS */
+.pea-cuadro-estadistico tbody tr:nth-last-child(2) td {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Fila TOTAL */
+.pea-cuadro-estadistico tbody tr:last-child td {
+  border-top: 2px solid var(--border-neutral);
+  font-weight: 600;
+}
+
+/* Evita look de Excel */
+.pea-cuadro-estadistico table {
+  background: transparent;
+}
