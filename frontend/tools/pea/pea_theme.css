@@ -216,3 +216,13 @@
   /* Mantiene coherencia visual */
   background: var(--bg-main, #fff);
 }
+
+/* =========================================================
+   SEPARADOR VISUAL ENTRE ESTADÍSTICAS PEA
+   ========================================================= */
+
+.pea-cuadro-estadistico {
+  margin-bottom: 2rem;               /* separación clara entre stats */
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-neutral);
+}
