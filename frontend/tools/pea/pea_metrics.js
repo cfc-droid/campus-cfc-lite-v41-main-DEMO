@@ -191,8 +191,6 @@ const contenidoEstadistica1 = `
   </div>
 `;
 
-} // ← CIERRA renderMetrics
-
 box.innerHTML = renderCuadroBasePEA({
   nivel: 0,
   indice: 1,
@@ -203,6 +201,8 @@ box.innerHTML = renderCuadroBasePEA({
   contenidoHTML: contenidoEstadistica1
 });
 
+} // ← CIERRA renderMetrics
+   
 function updateMetrics() {
   if (!window.PEA_STORAGE || !window.PEA_FILTERS) return;
 
