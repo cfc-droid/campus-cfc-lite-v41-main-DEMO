@@ -296,3 +296,49 @@
 .pea-cuadro-estadistico table {
   background: transparent;
 }
+
+/* =========================================================
+   OVERRIDE REAL — TABLAS DENTRO DE CUADROS ESTADÍSTICOS
+   (pisan .pea-table global SIN afectar registros)
+   ========================================================= */
+
+.pea-cuadro-estadistico .pea-table {
+  min-width: unset;              /* ❌ quita efecto "Excel ancho" */
+  border-collapse: separate;     /* 🔑 separa columnas visualmente */
+  border-spacing: 0;             /* control total */
+  width: 100%;
+}
+
+/* Encabezado */
+.pea-cuadro-estadistico .pea-table thead th {
+  border: none;
+  border-bottom: 2px solid var(--border-neutral);
+  padding: 0.45rem 0.6rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+/* Celdas */
+.pea-cuadro-estadistico .pea-table tbody td {
+  border: none;
+  border-bottom: 1px solid var(--border-neutral);
+  padding: 0.4rem 0.6rem;
+}
+
+/* Separadores verticales suaves (NO Excel) */
+.pea-cuadro-estadistico .pea-table th + th,
+.pea-cuadro-estadistico .pea-table td + td {
+  border-left: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Fila OTRAS */
+.pea-cuadro-estadistico .pea-table tbody tr:nth-last-child(2) td {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+/* Fila TOTAL */
+.pea-cuadro-estadistico .pea-table tbody tr:last-child td {
+  border-top: 2px solid var(--border-neutral);
+  font-weight: 700;
+}
