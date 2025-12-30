@@ -157,16 +157,28 @@
     });
   };
 
-  function renderEmpty(box) {
-    box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
-      nivel: 1,
-      indice: 2,
-      titulo: "Top Pensamientos en Pérdidas (ANTES)",
-      totalRegistros: 0,
-      universo: "—",
-      criterios: null,
-      contenidoHTML: `<div class="pea-empty">No hay evidencia suficiente para esta estadística.</div>`
-    });
-  }
+function renderEmpty(box) {
+  box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
+    nivel: 1,
+    indice: 2,
+    titulo: "Top Pensamientos en Pérdidas (ANTES)",
+    totalRegistros: 0,
+    universo: "Registros existentes, pero sin combinación válida",
+    criterios: [
+      "Existen registros PEA cargados",
+      "No hay días con DESPUÉS = PERDIDA que tengan ANTES válido",
+      "La estadística no puede calcularse sin forzar el dato"
+    ],
+    contenidoHTML: `
+      <div class="pea-warning">
+        ⚠️ Existen datos cargados, pero no se encontró ningún día que cumpla:
+        <br><br>
+        <strong>DESPUÉS = PERDIDA + ANTES válido</strong>
+        <br><br>
+        El cuadro se muestra por integridad del sistema, no como resultado estadístico.
+      </div>
+    `
+  }));
+}
 
 })();
