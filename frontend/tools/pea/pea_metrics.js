@@ -210,20 +210,18 @@ box.innerHTML = renderCuadroBasePEA({
 
 // Filtrar universo específico
 const brujulaBase = metrics
-  ? window.PEA_FILTERS
-      .apply(window.PEA_STORAGE.loadPEALog())
+  ? metrics.__source
       .filter(
         r =>
-          (r?.meta?.estado || "VALIDO") === "VALIDO" &&
           (r?.resultado === "GANADA" || r?.resultado === "PERDIDA")
       )
   : [];
 
 let contenidoEstadistica2 = "";
 
-if (!brujulaBase.length || brujulaBase.length < 4) {
-  contenidoEstadistica2 = "";
-} else {
+const estadoInsuficiente = brujulaBase.length < 4;
+contenidoEstadistica2 = estadoInsuficiente
+ ? else {
   const porResultado = {
     GANADA: brujulaBase.filter(r => r.resultado === "GANADA"),
     PERDIDA: brujulaBase.filter(r => r.resultado === "PERDIDA")
