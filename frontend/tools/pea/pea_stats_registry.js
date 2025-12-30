@@ -1,124 +1,93 @@
-/* ============================================================
-   PEA — REGISTRO DE ESTADÍSTICAS
-   Estadística 2/17 — BRÚJULA
-   Rol: Lectura primaria (ANTES → pensamiento / DURANTE → acción)
-   Regla: NO tocar pea_metrics.js
-   ============================================================ */
+/* =========================================================
+   PEA_STATS_REGISTRY.JS
+   Campus CFC LITE V41
 
-(function () {
-  if (!window.PEA_STATS) window.PEA_STATS = {};
+   Rol:
+   - Orquestador mínimo de estadísticas PEA
+   - NO contiene lógica de cálculo
+   - NO filtra datos
+   - NO interpreta resultados
 
-  function getFilteredRecords() {
-    if (!window.PEA_STORAGE || !window.PEA_FILTERS) return [];
-    const all = window.PEA_STORAGE.loadPEALog();
-    return window.PEA_FILTERS.apply(all);
-  }
+   Responsabilidades:
+   1) Ejecutar render de todas las estadísticas
+   2) Re-ejecutar ante cambios de filtros
+   3) Mantener aislamiento total entre stats
 
-  /* ========= Normalizadores ========= */
+   Eventos escuchados:
+   - DOMContentLoaded
+   - PEA_FILTERS_UPDATED
 
-  function pickResultado(r) {
-    const v =
-      r?.resultado_operativo ??
-      r?.resultado ??
-      "";
-    return String(v).trim().toUpperCase();
-  }
+   Dependencias esperadas (YA EXISTEN):
+   - pea_storage.js
+   - pea_filters.js
+   - pea_metrics.js (renderCuadroBasePEA)
 
-  function pickMomento(r) {
-    return String(r?.momento ?? "").trim().toUpperCase();
-  }
+   IMPORTANTE:
+   - Cada estadística vive en su propio archivo
+   - Cada archivo expone UNA función global:
+     window.renderStat_XX()
+   ========================================================= */
 
-  function pickPensamiento(r) {
-    return String(r?.pensamiento_key ?? "").trim();
-  }
+/* =========================================================
+   LISTADO OFICIAL DE ESTADÍSTICAS (ORDEN FIJO)
+   ========================================================= */
 
-  function pickAcciones(r) {
-    return Array.isArray(r?.acciones_keys) ? r.acciones_keys : [];
-  }
+const PEA_STATS_RENDERERS = [
+  // NIVEL 1 — BRÚJULA
+  'renderStat_01_brujula_perdidas',
+  'renderStat_02_top_pensamientos_perdidas',
+  'renderStat_03_top_acciones_perdidas',
+  'renderStat_04_estados_intensidad_perdidas',
 
-  /* ========= Contador SIMPLE ========= */
+  // NIVEL 2 — OPERATIVO
+  'renderStat_05_interferencia_ganar_vs_perder',
+  'renderStat_06_cumplimiento_ganar_vs_perder',
+  'renderStat_07_balanza_cumplimiento_interferencia',
+  'renderStat_08_intensidad_por_resultado',
 
-  function topSimple(arr, extractor, limit = 3) {
-    const map = {};
+  // NIVEL 3 — SALUD / CALIDAD
+  'renderStat_09_cobertura_metodo',
+  'renderStat_10_salud_dato',
+  'renderStat_11_momentos_estructurales',
+  'renderStat_12_distribucion_global',
 
-    arr.forEach(r => {
-      const v = extractor(r);
-      if (Array.isArray(v)) {
-        v.forEach(x => {
-          if (!x) return;
-          map[x] = (map[x] || 0) + 1;
-        });
-      } else if (v) {
-        map[v] = (map[v] || 0) + 1;
+  // NIVEL 4 — AVANZADAS
+  'renderStat_13_matriz_momento_resultado',
+  'renderStat_14_pareto_acciones',
+  'renderStat_15_pareto_pensamientos',
+  'renderStat_16_puentes_conductuales'
+];
+
+/* =========================================================
+   FUNCIÓN CENTRAL DE EJECUCIÓN
+   ========================================================= */
+
+function runAllPEAStats() {
+  if (!Array.isArray(PEA_STATS_RENDERERS)) return;
+
+  PEA_STATS_RENDERERS.forEach(fnName => {
+    try {
+      if (typeof window[fnName] === 'function') {
+        window[fnName]();
+      } else {
+        console.warn('[PEA][STATS] Renderer no encontrado:', fnName);
       }
-    });
-
-    return Object.entries(map)
-      .map(([k, c]) => ({ key: k, count: c }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, limit);
-  }
-
-  /* ============================================================
-     ESTADÍSTICA 2/17 — BRÚJULA
-     ============================================================ */
-
-  window.PEA_STATS.renderBrújula = function () {
-    const container = document.getElementById("pea-level-1");
-    if (!container) return;
-
-    const base = getFilteredRecords().filter(r => {
-      const res = pickResultado(r);
-      return res === "GANADA" || res === "PERDIDA";
-    });
-
-    let contenido = "";
-
-    if (base.length) {
-      const ganadas = base.filter(r => pickResultado(r) === "GANADA");
-      const perdidas = base.filter(r => pickResultado(r) === "PERDIDA");
-
-      const bloque = (titulo, g, p) => `
-<div class="pea-metric-item">
-<strong>${titulo}</strong><br>
-GANADA:<br>${g.length ? g.map(e => `• ${e.key} (${e.count})`).join("<br>") : "—"}
-<br><br>
-PERDIDA:<br>${p.length ? p.map(e => `• ${e.key} (${e.count})`).join("<br>") : "—"}
-</div>
-`;
-
-      contenido = `
-${bloque(
-  "ANTES — Pensamientos",
-  topSimple(ganadas.filter(r => pickMomento(r) === "ANTES"), pickPensamiento),
-  topSimple(perdidas.filter(r => pickMomento(r) === "ANTES"), pickPensamiento)
-)}
-
-${bloque(
-  "DURANTE — Acciones",
-  topSimple(
-    ganadas.filter(r => pickMomento(r) === "DURANTE" && pickAcciones(r).length),
-    pickAcciones
-  ),
-  topSimple(
-    perdidas.filter(r => pickMomento(r) === "DURANTE" && pickAcciones(r).length),
-    pickAcciones
-  )
-)}
-`;
+    } catch (err) {
+      console.error('[PEA][STATS] Error ejecutando', fnName, err);
     }
+  });
+}
 
-    container.innerHTML = window.renderCuadroBasePEA({
-      nivel: 1,
-      indice: 2,
-      titulo: "BRÚJULA — GANADORAS vs PERDEDORAS",
-      totalRegistros: base.length,
-      universo: "registros post-filtros (igual a la tabla)",
-      criterios: ["Resultado ∈ {GANADA, PERDIDA}"],
-      contenidoHTML: contenido
-    });
-  };
+/* =========================================================
+   HOOKS DE EJECUCIÓN
+   ========================================================= */
 
-  document.addEventListener("DOMContentLoaded", window.PEA_STATS.renderBrújula);
-  document.addEventListener("PEA_FILTERS_UPDATED", window.PEA_STATS.renderBrújula);
-})();
+// Al cargar la pantalla
+document.addEventListener('DOMContentLoaded', () => {
+  runAllPEAStats();
+});
+
+// Al cambiar filtros
+document.addEventListener('PEA_FILTERS_UPDATED', () => {
+  runAllPEAStats();
+});
