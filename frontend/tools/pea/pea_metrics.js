@@ -229,50 +229,6 @@ box.innerHTML = renderCuadroBasePEA({
   contenidoHTML: contenidoEstadistica1
 });
 
-    <div class="pea-metric-item">
-      <strong>Acción más frecuente:</strong> ${metrics.accionMasFrecuente || "—"}
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Estado dominante:</strong> ${metrics.estadoDominante || "—"}
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Intensidad promedio:</strong> ${metrics.intensidadPromedio ?? "—"}
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Distribución por Momento:</strong>
-      <ul>${momentoRows}</ul>
-    </div>
-
-    <div class="pea-metric-item">
-      <strong>Ranking de conductas operativas: Acción(es)</strong><br>
-      <small>CANTIDAD DE Acción(es) EN TOTAL: ${metrics.totalAcciones}</small>
-
-      <table class="pea-table">
-        <thead>
-          <tr>
-            <th>Ranking</th>
-            <th>Acción</th>
-            <th>Cantidad</th>
-            <th>PORCENTAJE</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${rankingRows}
-          <tr>
-            <td><strong>TOTAL</strong></td>
-            <td>—</td>
-            <td><strong>${metrics.totalAcciones}</strong></td>
-            <td><strong>100%</strong></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  `;
-}
-
 function updateMetrics() {
   if (!window.PEA_STORAGE || !window.PEA_FILTERS) return;
 
