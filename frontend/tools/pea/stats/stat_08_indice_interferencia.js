@@ -6,17 +6,8 @@
    Nivel 3 — Comparación real (operativo)
    Estadística 8/17
 
-   Pregunta:
-   ¿Cuántos días con interferencia terminan en GANADA
-   vs cuántos terminan en PERDIDA?
-
-   Definición de interferencia:
-   - Presencia de ≥1 acción DURANTE
-     que NO sea de cumplimiento del plan
-
-   No mide gravedad.
-   No interpreta.
-   Solo presencia / ausencia.
+   Interferencia = presencia de ≥1 acción
+   ∈ SET_INTERFERENCIA durante el DURANTE
    ========================================================= */
 
 (function () {
@@ -34,23 +25,25 @@
     );
 
     /* ===============================
-       Acciones consideradas LIMPIAS
+       SET EXPLÍCITO DE INTERFERENCIA
        =============================== */
-    const ACCIONES_SIN_INTERFERENCIA = new Set([
-      "Cumplí plan",
-      "Respeté el stop",
-      "Respeté el tamaño",
-      "Esperé confirmación",
-      "Cancelé operación inválida",
-      "Ejecuté sin interferencia",
-      "No operé sin señal",
-      "Operé solo en horario",
-      "Cerré según plan",
-      "Reduí riesgo"
+    const SET_INTERFERENCIA = new Set([
+      "Entré tarde",
+      "Entré antes",
+      "Entré sin señal",
+      "Moví stop",
+      "Aumenté tamaño",
+      "No respeté tamaño",
+      "Cerré antes",
+      "Cerré tarde",
+      "Dejé correr pérdida",
+      "Re-entré sin señal",
+      "Sobreoperé",
+      "Operé fuera de horario"
     ]);
 
     /* ===============================
-       Fechas con resultado final
+       Resultado final por fecha
        =============================== */
     const resultadoPorFecha = {};
 
@@ -72,7 +65,7 @@
     }
 
     /* ===============================
-       Detectar interferencia DURANTE
+       Co-ocurrencia DURANTE
        =============================== */
     const resumen = {
       GANADA: { total: 0, conInterferencia: 0 },
@@ -92,7 +85,7 @@
       if (!durante) return;
 
       const huboInterferencia = durante.acciones_keys.some(
-        a => !ACCIONES_SIN_INTERFERENCIA.has(a)
+        a => SET_INTERFERENCIA.has(a)
       );
 
       if (huboInterferencia) {
@@ -100,11 +93,8 @@
       }
     });
 
-    /* ===============================
-       Cálculo porcentajes
-       =============================== */
-    function pct(parte, total) {
-      return total ? Math.round((parte / total) * 100) : 0;
+    function pct(p, t) {
+      return t ? Math.round((p / t) * 100) : 0;
     }
 
     const g = resumen.GANADA;
@@ -137,10 +127,9 @@
       </table>
 
       <div class="pea-metricas-secundarias">
-        <strong>Interpretación operativa:</strong><br>
-        Comparación directa entre presencia de interferencia DURANTE
+        Co-ocurrencia pura entre interferencia DURANTE
         y resultado final del día.<br>
-        No mide intensidad ni tipo, solo co-ocurrencia.
+        No mide gravedad ni tipo.
       </div>
     `;
 
@@ -151,7 +140,7 @@
       totalRegistros: fechas.length,
       universo: "Primer DURANTE por fecha con DESPUÉS = GANADA o PERDIDA",
       criterios: [
-        "Interferencia = ≥1 acción DURANTE no alineada al plan",
+        "Interferencia = acción ∈ SET_INTERFERENCIA",
         "Resultado heredado del registro DESPUÉS",
         "Solo registros VALIDO y CORREGIDO"
       ],
@@ -169,8 +158,7 @@
       criterios: null,
       contenidoHTML: `
         <div class="pea-empty">
-          No hay días con resultado GANADA o PERDIDA
-          y registro DURANTE válido.
+          Evidencia insuficiente para esta estadística.
         </div>
       `
     }));
