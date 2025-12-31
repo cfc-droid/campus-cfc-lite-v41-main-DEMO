@@ -39,11 +39,9 @@ const PEA_STATS_RENDERERS = [
   'renderStat_03_top_acciones_perdidas',
   'renderStat_04_top_emociones_perdidas_despues',
 
-  // NIVEL 2 — OPERATIVO
-  'renderStat_05_interferencia_ganar_vs_perder',
-  'renderStat_06_cumplimiento_ganar_vs_perder',
-  'renderStat_07_balanza_cumplimiento_interferencia',
-  'renderStat_08_intensidad_por_resultado',
+  // NIVEL 2 — ESPEJO DE GANADAS
+'renderStat_05_top_pensamientos_ganadas',
+   
 
   // NIVEL 3 — SALUD / CALIDAD
   'renderStat_09_cobertura_metodo',
