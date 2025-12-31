@@ -303,13 +303,13 @@ function getNombreNivelPEA(nivel) {
     case 0:
       return "INFORMACIÓN A CORROBORRAR / COMPLETAR (INFLUYE EN TODO)";
     case 1:
-      return "BRÚJULA (LECTURA PRIMARIA)";
+      return "BRÚJULA DE PÉRDIDAS";
     case 2:
-      return "SECUNDARIAS DE ALTO VALOR";
+      return "ESPEJO DE GANADAS";
     case 3:
-      return "CONTEXTO Y SALUD DEL SISTEMA";
+      return "COMPARACIÓN REAL (OPERATIVO)";
     case 4:
-      return "EXPLORATORIAS (AVANZADAS)";
+      return "SALUD, ESTRUCTURA Y CAMBIOS";
     default:
       return "—";
   }
