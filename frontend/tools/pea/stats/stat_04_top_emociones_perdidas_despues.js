@@ -28,11 +28,14 @@
     /* ===============================
        Registros DESPUÉS con PÉRDIDA
        =============================== */
-    const emociones = valid.filter(r =>
-      r.momento === "DESPUÉS" &&
-      r.resultado_operativo === "PERDIDA" &&
-      r.estado_key
-    ).map(r => r.estado_key);
+const registros = valid.filter(r =>
+  r.momento === "DESPUÉS" &&
+  r.resultado_operativo === "PERDIDA" &&
+  r.estado_key &&
+  Number.isInteger(r.intensidad)
+);
+
+const emociones = registros.map(r => r.estado_key);
 
     if (!emociones.length) {
       renderEmpty(box);
@@ -53,6 +56,21 @@
     const rest = ordered.slice(3);
 
     const otrasCount = rest.reduce((acc, [, c]) => acc + c, 0);
+
+    /* ===============================
+   Intensidad promedio y picos
+   =============================== */
+const intensidades = registros.map(r => r.intensidad);
+
+const intensidadPromedio = intensidades.length
+  ? (intensidades.reduce((a, b) => a + b, 0) / intensidades.length).toFixed(1)
+  : null;
+
+const picosAltos = intensidades.filter(i => i >= 4).length;
+
+const porcentajePicos = intensidades.length
+  ? Math.round((picosAltos / intensidades.length) * 100)
+  : null;
 
     /* ===============================
        Construcción de filas FIJAS
