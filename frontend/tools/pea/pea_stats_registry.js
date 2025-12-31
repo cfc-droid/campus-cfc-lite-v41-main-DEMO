@@ -33,23 +33,27 @@
    ========================================================= */
 
 const PEA_STATS_RENDERERS = [
-  // NIVEL 1 — BRÚJULA
+  // NIVEL 0 — BRÚJULA GENERAL
   'renderStat_01_brujula_perdidas',
+   
+   // NIVEL 0 — BRÚJULA DE PERDIDAS
   'renderStat_02_top_pensamientos_perdidas',
   'renderStat_03_top_acciones_perdidas',
   'renderStat_04_top_emociones_perdidas_despues',
 
   // NIVEL 2 — ESPEJO DE GANADAS
-'renderStat_05_top_pensamientos_ganadas',
+   'renderStat_05_top_pensamientos_ganadas',
+   'renderStat_06_top_acciones_ganadas',
+  
    
 
-  // NIVEL 3 — SALUD / CALIDAD
+  // NIVEL 3 — COMPARACIÓN REAL (OPERATIVO)
   'renderStat_09_cobertura_metodo',
   'renderStat_10_salud_dato',
   'renderStat_11_momentos_estructurales',
   'renderStat_12_distribucion_global',
 
-  // NIVEL 4 — AVANZADAS
+  // NIVEL 4 — SALUD, ESTRUCTURA Y CAMBIOS
   'renderStat_13_matriz_momento_resultado',
   'renderStat_14_pareto_acciones',
   'renderStat_15_pareto_pensamientos',
