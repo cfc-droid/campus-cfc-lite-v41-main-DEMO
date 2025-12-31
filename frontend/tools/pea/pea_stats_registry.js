@@ -56,6 +56,8 @@ const PEA_STATS_RENDERERS = [
   // NIVEL 4 — SALUD, ESTRUCTURA Y CAMBIOS
 "renderStat_11_top_interferencias_por_resultado",
 "renderStat_12_intensidad_por_resultado",
+"renderStat_13_salud_del_dato",
+   
 
    
 ];
