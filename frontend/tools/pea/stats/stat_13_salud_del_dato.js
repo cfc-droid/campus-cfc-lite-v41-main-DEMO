@@ -25,7 +25,7 @@
     };
 
     filtered.forEach(r => {
-      const estado = r?.meta?.estado || "VALIDO";
+      const estado = r?.estado_registro || "VALIDO";
       if (counters.hasOwnProperty(estado)) {
         counters[estado]++;
       }
