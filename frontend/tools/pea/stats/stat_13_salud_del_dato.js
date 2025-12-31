@@ -1,13 +1,6 @@
 /* =========================================================
    STAT 13 — SALUD DEL DATO
    Campus CFC LITE V41
-
-   Rol:
-   Auditoría estructural del dataset.
-   No interpreta, no evalúa conducta, no infiere causalidad.
-
-   Estadística 13/17
-   NIVEL 0 — INFORMACIÓN A CORROBORRAR / COMPLETAR
    ========================================================= */
 
 (function () {
@@ -25,13 +18,9 @@
       return;
     }
 
-    /* ===============================
-       Conteo por estado del registro
-       =============================== */
-
     const counters = {
       VALIDO: 0,
-      CORREGIDO: 0,
+      CORRECCION: 0,
       ANULADO: 0
     };
 
@@ -42,20 +31,13 @@
       }
     });
 
-    const total = counters.VALIDO + counters.CORREGIDO + counters.ANULADO;
-
+    const total = counters.VALIDO + counters.CORRECCION + counters.ANULADO;
     if (!total) {
       renderEmpty(box);
       return;
     }
 
-    function pct(v) {
-      return Math.round((v / total) * 100);
-    }
-
-    /* ===============================
-       Tabla estructural (sin ranking)
-       =============================== */
+    const pct = v => Math.round((v / total) * 100);
 
     const contenidoHTML = `
       <table class="pea-table">
@@ -73,9 +55,9 @@
             <td>${pct(counters.VALIDO)}%</td>
           </tr>
           <tr>
-            <td>CORREGIDO</td>
-            <td>${counters.CORREGIDO}</td>
-            <td>${pct(counters.CORREGIDO)}%</td>
+            <td>CORRECCION</td>
+            <td>${counters.CORRECCION}</td>
+            <td>${pct(counters.CORRECCION)}%</td>
           </tr>
           <tr>
             <td>ANULADO</td>
@@ -98,9 +80,9 @@
       totalRegistros: total,
       universo: "Registros visibles según filtros activos",
       criterios: [
-        "Incluye todos los estados del registro",
+        "Distribución por estado del registro",
         "Respeta filtros activos",
-        "No interpreta resultados"
+        "Auditoría estructural del dataset"
       ],
       contenidoHTML
     }));
@@ -116,7 +98,7 @@
       criterios: null,
       contenidoHTML: `
         <div class="pea-empty">
-          No hay registros suficientes para evaluar la salud del dato.
+          No hay registros visibles para evaluar la salud del dato.
         </div>
       `
     }));
