@@ -51,9 +51,10 @@ const PEA_STATS_RENDERERS = [
     'renderStat_08_indice_interferencia',
     'renderStat_09_indice_cumplimiento',
     'renderStat_10_balanza_cumplimiento_interferencia',
- 
 
+   
   // NIVEL 4 — SALUD, ESTRUCTURA Y CAMBIOS
+"renderStat_11_top_interferencias_por_resultado",
 
    
 ];
