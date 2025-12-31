@@ -74,7 +74,7 @@
     `;
 
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
-      nivel: 0,
+      nivel: 4,
       indice: 13,
       titulo: "Salud del dato",
       totalRegistros: total,
@@ -90,7 +90,7 @@
 
   function renderEmpty(box) {
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
-      nivel: 0,
+      nivel: 4,
       indice: 13,
       titulo: "Salud del dato",
       totalRegistros: 0,
