@@ -118,21 +118,26 @@ const porcentajePicos = intensidades.length
       </tr>
     `);
 
-    const contenidoHTML = `
-      <table class="pea-table">
-        <thead>
-          <tr>
-            <th>Ranking</th>
-            <th>Emoción</th>
-            <th>Cantidad</th>
-            <th>Porcentaje</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${filas.join("")}
-        </tbody>
-      </table>
-    `;
+ const contenidoHTML = `
+  <table class="pea-table">
+    <thead>
+      <tr>
+        <th>Ranking</th>
+        <th>Emoción</th>
+        <th>Cantidad</th>
+        <th>Porcentaje</th>
+      </tr>
+    </thead>
+    <tbody>
+      ${filas.join("")}
+    </tbody>
+  </table>
+
+  <div class="pea-metricas-secundarias">
+    <div><strong>Intensidad promedio:</strong> ${intensidadPromedio ?? "—"}</div>
+    <div><strong>Picos de intensidad (4–5):</strong> ${porcentajePicos !== null ? porcentajePicos + "%" : "—"}</div>
+  </div>
+`;
 
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
       nivel: 1,
