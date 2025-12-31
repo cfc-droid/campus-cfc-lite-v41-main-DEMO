@@ -37,7 +37,7 @@
       }
     });
 
-    const total = counters.VALIDO + counters.CORRECCION + counters.ANULADO;
+    const total = counters.VALIDO + counters.CORREGIDO + counters.ANULADO;
     if (!total) {
       renderEmpty(box);
       return;
