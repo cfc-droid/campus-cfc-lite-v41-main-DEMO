@@ -44,7 +44,7 @@ const PEA_STATS_RENDERERS = [
   // NIVEL 2 — ESPEJO DE GANADAS
    'renderStat_05_top_pensamientos_ganadas',
    'renderStat_06_top_acciones_ganadas',
-  
+   'renderStat_07_top_emociones_ganadas_despues', 
    
 
   // NIVEL 3 — COMPARACIÓN REAL (OPERATIVO)
