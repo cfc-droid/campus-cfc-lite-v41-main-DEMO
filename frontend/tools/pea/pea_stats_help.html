@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>PEA — Cálculo de estadísticas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- Estilos heredados del Campus -->
+  <link rel="stylesheet" href="/frontend/css/style.css" />
+</head>
+
+<body>
+
+<main class="pea-help-page">
+
+  <h1>Cálculo de estadísticas (PEA)</h1>
+
+  <p>
+    Esta sección documenta <strong>cómo se calculan las estadísticas del sistema PEA</strong>.
+    <br>
+    No interpreta resultados. No aconseja. No establece causalidad.
+  </p>
+
+  <hr>
+
+  <h2>Principios base (no negociables)</h2>
+
+  <ul>
+    <li>El <strong>resultado operativo</strong> (GANADA / PERDIDA / BE / NA) existe solo en <strong>DESPUÉS</strong>.</li>
+    <li>Los registros <strong>ANTES</strong> y <strong>DURANTE</strong> nunca filtran por resultado.</li>
+    <li>El cruce entre momentos se realiza <strong>únicamente por fecha</strong>.</li>
+    <li>Solo se consideran registros con <code>meta.estado ∈ {VALIDO, CORREGIDO}</code>.</li>
+    <li>Los registros <code>ANULADO</code> quedan fuera de todas las métricas.</li>
+    <li>Regla de auditoría: <strong>primer registro del día por momento</strong>.</li>
+  </ul>
+
+  <hr>
+
+  <h2>Intensidad emocional</h2>
+
+  <h3>Intensidad promedio</h3>
+  <p>
+    Se calcula sumando los valores de intensidad de todos los registros válidos
+    y dividiendo por la cantidad total de registros considerados.
+  </p>
+
+  <pre>
+(intensidad1 + intensidad2 + ... + intensidadN) / N
+  </pre>
+
+  <p>
+    El resultado se muestra con un decimal.
+  </p>
+
+  <h3>Picos de intensidad (4–5)</h3>
+  <p>
+    Se consideran <strong>picos</strong> aquellos registros cuya intensidad es
+    <strong>mayor o igual a 4</strong>.
+  </p>
+
+  <pre>
+(cantidad de intensidades ≥ 4 / total de intensidades) × 100
+  </pre>
+
+  <p>
+    El porcentaje indica la proporción de registros con intensidad alta
+    dentro del universo analizado.
+  </p>
+
+  <hr>
+
+  <h2>Qué hacen las estadísticas</h2>
+
+  <ul>
+    <li>Detectan <strong>frecuencias y repeticiones</strong>.</li>
+    <li>Muestran <strong>co-ocurrencias</strong>.</li>
+    <li>Permiten auditoría conductual retrospectiva.</li>
+  </ul>
+
+  <h2>Qué NO hacen las estadísticas</h2>
+
+  <ul>
+    <li>No infieren causas.</li>
+    <li>No predicen resultados futuros.</li>
+    <li>No interpretan emociones.</li>
+    <li>No recomiendan acciones.</li>
+    <li>No reemplazan criterio operativo.</li>
+  </ul>
+
+  <hr>
+
+  <h2>Advertencia metodológica</h2>
+
+  <p>
+    Si una estadística indica <em>“datos insuficientes”</em>, el sistema
+    <strong>no fuerza cálculos</strong>.
+    <br>
+    El cuadro se muestra únicamente por integridad estructural.
+  </p>
+
+  <hr>
+
+  <p>
+    Este documento es parte del sistema PEA y existe para
+    <strong>garantizar transparencia metodológica</strong>.
+  </p>
+
+  <div style="margin-top:24px;">
+    <button onclick="history.back()">Volver</button>
+  </div>
+
+</main>
+
+</body>
+</html>
