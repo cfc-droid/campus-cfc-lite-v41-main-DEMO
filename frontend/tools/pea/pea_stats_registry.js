@@ -48,16 +48,12 @@ const PEA_STATS_RENDERERS = [
    
 
   // NIVEL 3 — COMPARACIÓN REAL (OPERATIVO)
-  'renderStat_09_cobertura_metodo',
-  'renderStat_10_salud_dato',
-  'renderStat_11_momentos_estructurales',
-  'renderStat_12_distribucion_global',
+    'renderStat_08_indice_interferencia',
+
 
   // NIVEL 4 — SALUD, ESTRUCTURA Y CAMBIOS
-  'renderStat_13_matriz_momento_resultado',
-  'renderStat_14_pareto_acciones',
-  'renderStat_15_pareto_pensamientos',
-  'renderStat_16_puentes_conductuales'
+
+   
 ];
 
 /* =========================================================
