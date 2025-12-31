@@ -7,7 +7,7 @@
 
   window.renderStat_13_salud_del_dato = function () {
 
-    const box = document.getElementById("pea-level-0");
+    <div class="pea-level-content" id="pea-level-4"></div>
     if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS || !window.renderCuadroBasePEA) return;
 
     const all = window.PEA_STORAGE.loadPEALog() || [];
