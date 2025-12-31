@@ -57,7 +57,7 @@ const PEA_STATS_RENDERERS = [
 "renderStat_11_top_interferencias_por_resultado",
 "renderStat_12_intensidad_por_resultado",
 "renderStat_13_salud_del_dato",
-   
+"renderStat_14_momentos_estructurales_cambios",   
 
    
 ];
