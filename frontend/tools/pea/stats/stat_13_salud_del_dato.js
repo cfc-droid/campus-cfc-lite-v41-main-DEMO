@@ -20,7 +20,7 @@
 
     const counters = {
       VALIDO: 0,
-      CORRECCION: 0,
+      CORREGIDO: 0,
       ANULADO: 0
     };
 
@@ -61,9 +61,9 @@
             <td>${pct(counters.VALIDO)}%</td>
           </tr>
           <tr>
-            <td>CORRECCION</td>
-            <td>${counters.CORRECCION}</td>
-            <td>${pct(counters.CORRECCION)}%</td>
+            <td>CORREGIDO</td>
+            <td>${counters.CORREGIDO}</td>
+            <td>${pct(counters.CORREGIDO)}%</td>
           </tr>
           <tr>
             <td>ANULADO</td>
