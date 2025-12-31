@@ -7,7 +7,7 @@
 
   window.renderStat_13_salud_del_dato = function () {
 
-    const box = document.getElementById("pea-level-0");
+    const box = document.getElementById("pea-level-4");
     if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS || !window.renderCuadroBasePEA) return;
 
     const all = window.PEA_STORAGE.loadPEALog() || [];
@@ -80,7 +80,7 @@
     `;
 
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
-      nivel: 0,
+      nivel: 4,
       indice: 13,
       titulo: "Salud del dato",
       totalRegistros: total,
@@ -96,7 +96,7 @@
 
   function renderEmpty(box) {
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
-      nivel: 0,
+      nivel: 4,
       indice: 13,
       titulo: "Salud del dato",
       totalRegistros: 0,
