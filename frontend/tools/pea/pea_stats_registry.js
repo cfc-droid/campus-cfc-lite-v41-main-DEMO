@@ -50,6 +50,7 @@ const PEA_STATS_RENDERERS = [
   // NIVEL 3 — COMPARACIÓN REAL (OPERATIVO)
     'renderStat_08_indice_interferencia',
     'renderStat_09_indice_cumplimiento',
+    'renderStat_10_balanza_cumplimiento_interferencia',
  
 
   // NIVEL 4 — SALUD, ESTRUCTURA Y CAMBIOS
