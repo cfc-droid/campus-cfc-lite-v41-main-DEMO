@@ -37,7 +37,7 @@ const PEA_STATS_RENDERERS = [
   'renderStat_01_brujula_perdidas',
   'renderStat_02_top_pensamientos_perdidas',
   'renderStat_03_top_acciones_perdidas',
-  'renderStat_04_estados_intensidad_perdidas',
+  'renderStat_04_top_emociones_perdidas_despues',
 
   // NIVEL 2 — OPERATIVO
   'renderStat_05_interferencia_ganar_vs_perder',
