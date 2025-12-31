@@ -7,52 +7,37 @@
 
   window.renderStat_13_salud_del_dato = function () {
 
-    const box = document.getElementById("pea-level-4");
+    const box = document.getElementById("pea-level-0");
     if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS || !window.renderCuadroBasePEA) return;
 
     const all = window.PEA_STORAGE.loadPEALog() || [];
-
-    // -------------------------------------------------
-    // 🔍 Aplicar TODOS los filtros EXCEPTO estado_registro
-    // (auditoría real de salud del dataset)
-    // -------------------------------------------------
-    const activeFilters = window.PEA_FILTERS.getActiveFilters
-      ? window.PEA_FILTERS.getActiveFilters()
-      : {};
-
-    const filtered = all.filter(r => {
-      for (const key in activeFilters) {
-        if (key === "estado_registro") continue;
-        if (activeFilters[key] == null || activeFilters[key] === "") continue;
-        if (r[key] !== activeFilters[key]) return false;
-      }
-      return true;
-    });
+    const filtered = window.PEA_FILTERS.apply(all) || [];
 
     if (!filtered.length) {
       renderEmpty(box);
       return;
     }
 
-    // -------------------------------------------------
-    // CONTADORES REALES (alineados al dataset)
-    // -------------------------------------------------
     const counters = {
       VALIDO: 0,
-      CORREGIDO: 0,
+      CORRECCION: 0,
       ANULADO: 0
     };
 
     filtered.forEach(r => {
-      const estado = (r.estado_registro || "VALIDO").toUpperCase();
 
-      if (estado === "VALIDO") counters.VALIDO++;
-      else if (estado === "CORREGIDO") counters.CORREGIDO++;
-      else if (estado === "ANULADO") counters.ANULADO++;
+      // 🔑 LECTURA ROBUSTA DEL ESTADO REAL
+      const estado =
+        r?.meta?.estado ||
+        r?.estado_registro ||
+        "VALIDO";
+
+      if (counters.hasOwnProperty(estado)) {
+        counters[estado]++;
+      }
     });
 
-    const total = counters.VALIDO + counters.CORREGIDO + counters.ANULADO;
-
+    const total = counters.VALIDO + counters.CORRECCION + counters.ANULADO;
     if (!total) {
       renderEmpty(box);
       return;
@@ -66,7 +51,7 @@
           <tr>
             <th>Estado</th>
             <th>Cantidad</th>
-            <th>%</th>
+            <th>Porcentaje</th>
           </tr>
         </thead>
         <tbody>
@@ -76,9 +61,9 @@
             <td>${pct(counters.VALIDO)}%</td>
           </tr>
           <tr>
-            <td>CORREGIDO</td>
-            <td>${counters.CORREGIDO}</td>
-            <td>${pct(counters.CORREGIDO)}%</td>
+            <td>CORRECCION</td>
+            <td>${counters.CORRECCION}</td>
+            <td>${pct(counters.CORRECCION)}%</td>
           </tr>
           <tr>
             <td>ANULADO</td>
@@ -95,15 +80,15 @@
     `;
 
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
-      nivel: 4,
+      nivel: 0,
       indice: 13,
       titulo: "Salud del dato",
       totalRegistros: total,
-      universo: "Registros visibles (auditoría estructural)",
+      universo: "Registros visibles según filtros activos",
       criterios: [
-        "Distribución real por estado del registro",
-        "Ignora filtro estado_registro",
-        "Evalúa confiabilidad del dataset"
+        "Distribución por estado del registro",
+        "Respeta filtros activos",
+        "Auditoría estructural del dataset"
       ],
       contenidoHTML
     }));
@@ -111,7 +96,7 @@
 
   function renderEmpty(box) {
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
-      nivel: 4,
+      nivel: 0,
       indice: 13,
       titulo: "Salud del dato",
       totalRegistros: 0,
