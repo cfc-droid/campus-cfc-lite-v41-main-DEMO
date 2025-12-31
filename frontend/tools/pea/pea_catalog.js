@@ -231,7 +231,7 @@ export const PEA_ACCIONES = Object.freeze([
   "No re-entré",
   "Operé solo en horario",
   "Ejecuté sin interferencia",
-  "Reduí riesgo",
+  "Reduje riesgo",
   "Salí por regla externa"
 ]);
 
@@ -259,7 +259,7 @@ export const PEA_ACCIONES_DESC = Object.freeze({
   "No re-entré": "Evita sobreoperar.",
   "Operé solo en horario": "Marco respetado.",
   "Ejecuté sin interferencia": "Ejecución limpia.",
-  "Reduí riesgo": "Riesgo reducido.",
+  "Reduje riesgo": "Riesgo reducido.",
   "Salí por regla externa": "Regla objetiva."
 });
 
