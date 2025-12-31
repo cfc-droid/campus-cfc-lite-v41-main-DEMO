@@ -13,8 +13,8 @@
     const all = window.PEA_STORAGE.loadPEALog() || [];
 
     // -------------------------------------------------
-    // 🔑 FILTRADO CORRECTO PARA STAT 13
-    // Aplica todos los filtros EXCEPTO estado_registro
+    // 🔍 Aplicar TODOS los filtros EXCEPTO estado_registro
+    // (auditoría real de salud del dataset)
     // -------------------------------------------------
     const activeFilters = window.PEA_FILTERS.getActiveFilters
       ? window.PEA_FILTERS.getActiveFilters()
@@ -22,7 +22,7 @@
 
     const filtered = all.filter(r => {
       for (const key in activeFilters) {
-        if (key === "estado_registro") continue; // 👈 CLAVE
+        if (key === "estado_registro") continue;
         if (activeFilters[key] == null || activeFilters[key] === "") continue;
         if (r[key] !== activeFilters[key]) return false;
       }
@@ -35,22 +35,24 @@
     }
 
     // -------------------------------------------------
-    // CONTADORES REALES
+    // CONTADORES REALES (alineados al dataset)
     // -------------------------------------------------
     const counters = {
       VALIDO: 0,
-      CORRECCION: 0,
+      CORREGIDO: 0,
       ANULADO: 0
     };
 
     filtered.forEach(r => {
-      const estado = r.estado_registro || "VALIDO";
-      if (counters.hasOwnProperty(estado)) {
-        counters[estado]++;
-      }
+      const estado = (r.estado_registro || "VALIDO").toUpperCase();
+
+      if (estado === "VALIDO") counters.VALIDO++;
+      else if (estado === "CORREGIDO") counters.CORREGIDO++;
+      else if (estado === "ANULADO") counters.ANULADO++;
     });
 
-    const total = counters.VALIDO + counters.CORRECCION + counters.ANULADO;
+    const total = counters.VALIDO + counters.CORREGIDO + counters.ANULADO;
+
     if (!total) {
       renderEmpty(box);
       return;
@@ -64,7 +66,7 @@
           <tr>
             <th>Estado</th>
             <th>Cantidad</th>
-            <th>Porcentaje</th>
+            <th>%</th>
           </tr>
         </thead>
         <tbody>
@@ -74,9 +76,9 @@
             <td>${pct(counters.VALIDO)}%</td>
           </tr>
           <tr>
-            <td>CORRECCION</td>
-            <td>${counters.CORRECCION}</td>
-            <td>${pct(counters.CORRECCION)}%</td>
+            <td>CORREGIDO</td>
+            <td>${counters.CORREGIDO}</td>
+            <td>${pct(counters.CORREGIDO)}%</td>
           </tr>
           <tr>
             <td>ANULADO</td>
@@ -97,11 +99,11 @@
       indice: 13,
       titulo: "Salud del dato",
       totalRegistros: total,
-      universo: "Registros visibles (auditoría real, sin filtrar por estado)",
+      universo: "Registros visibles (auditoría estructural)",
       criterios: [
-        "Distribución REAL por estado del registro",
-        "Ignora filtro estado_registro (auditoría)",
-        "Respeta el resto de los filtros"
+        "Distribución real por estado del registro",
+        "Ignora filtro estado_registro",
+        "Evalúa confiabilidad del dataset"
       ],
       contenidoHTML
     }));
