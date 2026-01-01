@@ -44,15 +44,21 @@ const valid = (Array.isArray(universe) ? universe : []).filter(
     // Orden cronológico estable
     const ordered = [...valid].sort((a, b) => getTimeKey(a).localeCompare(getTimeKey(b)));
 
-    // 3) Segmentar por MOMENTO ESTRUCTURAL consecutivo
-    const segments = [];
-    ordered.forEach((r) => {
-      const v = normalizeMomentoEstructural(r?.momento_estructural);
-      const last = segments[segments.length - 1];
-      if (!last || last.value !== v) segments.push({ value: v, records: [r] });
-      else last.records.push(r);
-    });
+   // 3) Agrupar por MOMENTO ESTRUCTURAL (NO consecutivo) — une AJUSTE_ESTRATEGIA aunque haya cortes
+const segments = [];
+const idxByValue = new Map();
 
+ordered.forEach((r) => {
+  const v = normalizeMomentoEstructural(r?.momento_estructural);
+
+  if (!idxByValue.has(v)) {
+    idxByValue.set(v, segments.length);
+    segments.push({ value: v, records: [] });
+  }
+
+  segments[idxByValue.get(v)].records.push(r);
+});
+     
     // Nota: NO hay cantidad fija de cuadros. Se generan dinámicamente según segmentos.
     const cardsData = segments.map((seg, idx) => buildMomentCardData(seg.value, seg.records, idx + 1));
 
