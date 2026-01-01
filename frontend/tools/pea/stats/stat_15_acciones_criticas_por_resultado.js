@@ -7,26 +7,27 @@
    Estadística 15/17
 
    Qué hace:
-   - Toma 3–6 acciones “bandera” (lista fija)
-   - Calcula % de aparición en días GANADA vs PERDIDA
-   - Presencia/ausencia por día (no frecuencia)
-   - Co-ocurrencia, sin causalidad
+   - Lista fija de 3–6 acciones “bandera”
+   - Por cada día, mira si la bandera estuvo presente en el DURANTE canónico
+   - Compara por resultado final del día (DESPUÉS canónico): GANADA vs PERDIDA
+   - Presencia/ausencia por día (NO frecuencia)
 
    FIX CLAVE (para que funcione con filtros):
-   - Los filtros definen el "scope" de FECHAS
-   - El DURANTE/DESPUÉS canónico se busca en ALL (sin filtros)
-     pero SOLO para esas fechas
+   - Los filtros definen el SCOPE de FECHAS
+   - DURANTE/DESPUÉS canónicos se buscan en ALL (sin filtros) pero SOLO para esas fechas
 
-   FIX CLAVE #2 (para que NO quede todo 0%):
+   FIX CLAVE #2 (para que NO quede todo 0):
    - Las acciones pueden venir como:
        acciones_keys: []
-       acciones: []
-       acciones: "A, B, C" (string)
-       accion: "A, B" (string)
+       acciones: [] / "A, B, C"
+       accion / accion_key: "A, B"
+       acciones_text / acciones_str / acciones_display: "A, B, C"
+       (lo que ves en la tabla como "Acción(es)")
      => se parsea robusto y se normaliza.
    ========================================================= */
 
 (function () {
+
   window.renderStat_15_acciones_criticas_por_resultado = function () {
     const box = document.getElementById("pea-level-4");
     if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS || !window.renderCuadroBasePEA) return;
@@ -34,7 +35,7 @@
     const all = window.PEA_STORAGE.loadPEALog() || [];
     const filtered = window.PEA_FILTERS.apply(all) || [];
 
-    // ✅ Validación de estado: VALIDO + CORREGIDO cuentan como VALIDO
+    // ✅ Estado: VALIDO + CORREGIDO cuentan como VALIDO
     const allValid = (Array.isArray(all) ? all : []).filter(
       (r) => normalizeEstadoRegistro(getRecordState(r)) === "VALIDO"
     );
@@ -71,7 +72,7 @@
       return;
     }
 
-    // Normalizar banderas para matcheo robusto
+    // Normalizar banderas para match robusto
     const BANDERAS_N = BANDERAS.map((a) => normalizeText(a));
     const banderaByNorm = new Map();
     BANDERAS.forEach((a) => banderaByNorm.set(normalizeText(a), a));
@@ -86,13 +87,13 @@
     );
 
     if (!scopeFechas.size) {
-      renderEmpty(box, "No hay fechas en el universo actual.");
+      renderEmpty(box, "No hay fechas en el universo actual (scope).");
       return;
     }
 
     /* ===============================
-       3) Resultado CANÓNICO por fecha (DESPUÉS más reciente)
-       - se busca en ALL, pero solo para scopeFechas
+       3) Resultado CANÓNICO por fecha:
+          DESPUÉS más reciente del día
        =============================== */
     const resultadoPorFecha = {}; // { "YYYY-MM-DD": { res, key } }
 
@@ -113,14 +114,13 @@
 
     const fechasConResultado = Object.keys(resultadoPorFecha);
     if (!fechasConResultado.length) {
-      renderEmpty(box, "No hay DESPUÉS (canónico) con resultado GANADA/PERDIDA en las fechas del scope.");
+      renderEmpty(box, "No hay DESPUÉS canónico con GANADA/PERDIDA dentro del scope de fechas.");
       return;
     }
 
     /* ===============================
-       4) DURANTE CANÓNICO por fecha
-       - se busca en ALL, pero solo para fechasConResultado
-       - canónico = más temprano (por created_at_iso si existe)
+       4) DURANTE CANÓNICO por fecha:
+          el más temprano del día
        =============================== */
     const duranteCanonPorFecha = {}; // { "YYYY-MM-DD": record }
 
@@ -162,9 +162,10 @@
       const duranteCanon = duranteCanonPorFecha[fecha];
       if (!duranteCanon) return;
 
-      const accionesNormSet = new Set(extractAcciones(duranteCanon).map((x) => normalizeText(x)));
+      const acciones = extractAcciones(duranteCanon);
+      const accionesNormSet = new Set(acciones.map((x) => normalizeText(x)));
 
-      // Match robusto por normalización
+      // Match robusto (por normalización)
       BANDERAS_N.forEach((bn) => {
         if (accionesNormSet.has(bn)) {
           const original = banderaByNorm.get(bn);
@@ -174,56 +175,65 @@
     });
 
     /* ===============================
-       6) Render tabla simple (SIN columna diferencia)
+       6) Render tabla CLARA (más columnas)
        =============================== */
-    const gT = base.GANADA.total || 0;
-    const pT = base.PERDIDA.total || 0;
+    const gBase = base.GANADA.total || 0;
+    const pBase = base.PERDIDA.total || 0;
 
-    function pct(h, t) {
+    function pctInt(h, t) {
       return t ? Math.round((h / t) * 100) : null;
     }
 
-    function fmtPct(h, t) {
-      const p = pct(h, t);
-      if (p == null) return "—";
-      return `${p}% <span style="opacity:.6;">(${h}/${t})</span>`;
+    function fmtPctOnly(h, t) {
+      const p = pctInt(h, t);
+      return (p == null) ? "—" : `${p}%`;
     }
 
     const rows = BANDERAS.map((a) => {
-      const gH = base.GANADA.hit[a] || 0;
-      const pH = base.PERDIDA.hit[a] || 0;
-      const gPct = pct(gH, gT);
-      const pPct = pct(pH, pT);
+      const gHit = base.GANADA.hit[a] || 0;
+      const pHit = base.PERDIDA.hit[a] || 0;
 
-      // Orden “más señal” primero: PERDIDA alto y GANADA bajo
+      const gPct = pctInt(gHit, gBase);
+      const pPct = pctInt(pHit, pBase);
+
+      // “señal” para ordenar: PERDIDA más alto y GANADA más bajo primero
       const score = (pPct == null ? -1 : pPct) - (gPct == null ? 0 : gPct);
-      return { a, gH, pH, gPct, pPct, score };
+
+      return { a, gHit, pHit, gPct, pPct, score };
     }).sort((x, y) => y.score - x.score);
 
-    const body = rows
-      .map(
-        (r) => `
-        <tr>
-          <td>${escapeHtml(r.a)}</td>
-          <td class="pea-n">${fmtPct(r.gH, gT)}</td>
-          <td class="pea-n">${fmtPct(r.pH, pT)}</td>
-        </tr>
-      `
-      )
-      .join("");
+    const body = rows.map(r => `
+      <tr>
+        <td>${escapeHtml(r.a)}</td>
+
+        <td class="pea-n">${r.gHit}</td>
+        <td class="pea-n">${gBase}</td>
+        <td class="pea-n">${fmtPctOnly(r.gHit, gBase)}</td>
+
+        <td class="pea-n">${r.pHit}</td>
+        <td class="pea-n">${pBase}</td>
+        <td class="pea-n">${fmtPctOnly(r.pHit, pBase)}</td>
+      </tr>
+    `).join("");
 
     const contenidoHTML = `
       <div class="pea-metricas-secundarias" style="margin-bottom:8px;">
-        <strong>Base:</strong> GANADA = ${gT} día(s) | PERDIDA = ${pT} día(s)<br>
-        Presencia/ausencia por día (no frecuencia). Co-ocurrencia pura con el resultado final del día.
+        <strong>Base del scope:</strong> GANADA = ${gBase} día(s) | PERDIDA = ${pBase} día(s)<br>
+        Cada “Día con bandera” cuenta 1 si la acción estuvo presente en el <strong>DURANTE canónico</strong> de ese día.
       </div>
 
       <table class="pea-table">
         <thead>
           <tr>
             <th>Acción bandera</th>
-            <th>GANADA</th>
-            <th>PERDIDA</th>
+
+            <th>GANADA<br>Días con bandera</th>
+            <th>GANADA<br>Días base</th>
+            <th>GANADA<br>%</th>
+
+            <th>PERDIDA<br>Días con bandera</th>
+            <th>PERDIDA<br>Días base</th>
+            <th>PERDIDA<br>%</th>
           </tr>
         </thead>
         <tbody>
@@ -232,8 +242,9 @@
       </table>
 
       <div class="pea-metricas-secundarias" style="margin-top:8px;">
+        Presencia/ausencia por día (no frecuencia). Co-ocurrencia con el resultado final del día.<br>
         No mide gravedad. No interpreta. No establece causalidad.<br>
-        “—” significa que no hay base para ese resultado en el scope actual (por filtros).
+        “—” significa que no hay base para ese resultado (por filtros / scope).
       </div>
     `;
 
@@ -243,48 +254,42 @@
     const totalDias = fechasConResultado.length;
 
     let semaforo = "🟡 Datos parciales";
-    if (gT >= 3 && pT >= 3) semaforo = "🟢 Datos suficientes";
-    if (gT === 0 || pT === 0) semaforo = "🔴 Datos insuficientes";
+    if (gBase >= 3 && pBase >= 3) semaforo = "🟢 Datos suficientes";
+    if (gBase === 0 || pBase === 0) semaforo = "🔴 Datos insuficientes";
 
-    box.insertAdjacentHTML(
-      "beforeend",
-      window.renderCuadroBasePEA({
-        nivel: 4,
-        indice: 15,
-        titulo: "Acciones críticas por resultado (banderas)",
-        totalRegistros: totalDias,
-        universo: "Scope por filtros (fechas). DURANTE/DESPUÉS canónicos buscados en ALL para esas fechas.",
-        criterios: [
-          `Banderas: ${BANDERAS.length} (lista fija)`,
-          "Presencia/ausencia por día (no ranking, no frecuencia)",
-          "Resultado canónico = último DESPUÉS del día",
-          "DURANTE canónico = primer DURANTE del día",
-          "Solo registros VALIDO y CORREGIDO",
-          semaforo
-        ],
-        contenidoHTML
-      })
-    );
+    box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
+      nivel: 4,
+      indice: 15,
+      titulo: "Acciones críticas por resultado (banderas)",
+      totalRegistros: totalDias,
+      universo: "Scope por filtros (fechas). DURANTE/DESPUÉS canónicos buscados en ALL para esas fechas.",
+      criterios: [
+        `Banderas: ${BANDERAS.length} (lista fija)`,
+        "Presencia/ausencia por día (no ranking, no frecuencia)",
+        "Resultado canónico = último DESPUÉS del día",
+        "DURANTE canónico = primer DURANTE del día",
+        "Solo registros VALIDO y CORREGIDO",
+        semaforo
+      ],
+      contenidoHTML
+    }));
   };
 
   function renderEmpty(box, reason) {
-    box.insertAdjacentHTML(
-      "beforeend",
-      window.renderCuadroBasePEA({
-        nivel: 4,
-        indice: 15,
-        titulo: "Acciones críticas por resultado (banderas)",
-        totalRegistros: 0,
-        universo: "—",
-        criterios: null,
-        contenidoHTML: `
-          <div class="pea-empty">
-            Evidencia insuficiente para esta estadística.<br>
-            <span style="opacity:.85;">${escapeHtml(reason || "")}</span>
-          </div>
-        `
-      })
-    );
+    box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
+      nivel: 4,
+      indice: 15,
+      titulo: "Acciones críticas por resultado (banderas)",
+      totalRegistros: 0,
+      universo: "—",
+      criterios: null,
+      contenidoHTML: `
+        <div class="pea-empty">
+          Evidencia insuficiente para esta estadística.<br>
+          <span style="opacity:.85;">${escapeHtml(reason || "")}</span>
+        </div>
+      `
+    }));
   }
 
   /* ===============================
@@ -329,42 +334,71 @@
     return "NA";
   }
 
-  // ✅ Robustez real: array / string / campo único
+  // ✅ Extractor robusto: arrays + strings + campos “textuales”
   function extractAcciones(r) {
     const out = [];
 
     // 1) acciones_keys: []
     if (Array.isArray(r?.acciones_keys)) {
       r.acciones_keys.forEach((a) => a && out.push(String(a)));
-      return out;
+      return uniqClean(out);
     }
 
     // 2) acciones: [] (array)
     if (Array.isArray(r?.acciones)) {
       r.acciones.forEach((a) => a && out.push(String(a)));
-      return out;
+      return uniqClean(out);
     }
 
     // 3) acciones: "A, B, C" (string)
     if (typeof r?.acciones === "string" && r.acciones.trim()) {
-      return splitAccionesString(r.acciones);
+      return uniqClean(splitAccionesString(r.acciones));
     }
 
-    // 4) accion_key / accion (puede venir "A, B")
+    // 4) Campos textuales típicos (lo que suele verse como “Acción(es)”)
+    const candidates = [
+      r?.acciones_text,
+      r?.acciones_txt,
+      r?.acciones_str,
+      r?.acciones_display,
+      r?.acciones_label,
+      r?.acciones_raw,
+      r?.acciones_human,
+      r?.acciones_ui,
+      r?.accion_text,
+      r?.accion_str
+    ].filter((x) => typeof x === "string" && x.trim());
+
+    if (candidates.length) {
+      candidates.forEach((s) => splitAccionesString(s).forEach((a) => out.push(a)));
+      return uniqClean(out);
+    }
+
+    // 5) accion_key / accion (puede venir "A, B")
     const a1 = r?.accion_key ?? r?.accion ?? null;
     if (typeof a1 === "string" && a1.trim()) {
-      return splitAccionesString(a1);
+      return uniqClean(splitAccionesString(a1));
     }
     if (a1) out.push(String(a1));
 
-    return out;
+    return uniqClean(out);
   }
 
   function splitAccionesString(s) {
     return String(s)
+      // separadores comunes
       .split(/[,;|\n]+/g)
       .map((x) => x.trim())
       .filter(Boolean);
+  }
+
+  function uniqClean(arr) {
+    const set = new Set();
+    (arr || []).forEach((x) => {
+      const t = String(x || "").trim();
+      if (t) set.add(t);
+    });
+    return Array.from(set);
   }
 
   function getTimeKey(r) {
@@ -400,4 +434,5 @@
       .replaceAll('"', "&quot;")
       .replaceAll("'", "&#039;");
   }
+
 })();
