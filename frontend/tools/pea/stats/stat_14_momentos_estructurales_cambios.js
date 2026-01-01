@@ -540,7 +540,7 @@ function normalizeEstadoRegistro(v) {
   // Tratar CORREGIDO como VALIDO
   if (s === "CORREGIDO" || s === "CORREGIDA") return "VALIDO";
 
-  return s || "VALIDO";
+  return s || "VALIDO"; "CORREGIDO"
 }
 
   function normalizeMomentoEstructural(v) {
