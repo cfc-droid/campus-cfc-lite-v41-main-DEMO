@@ -354,18 +354,21 @@ const baseTotalDias = Math.max(1, Object.keys(localResultByFecha || {}).length);
     });
 
     // Estados/Emociones (DESPUÉS): SOLO desde los DESPUÉS del tramo que matchean target
-    const estados = [];
-    despuesMatch.forEach((r) => {
-      const est =
-        r?.estado_key ??
-        r?.estado ??
-        r?.emocion_key ??
-        r?.emocion ??
-        r?.estado_emocion ??
-        null;
+const estados = [];
+fechasTarget.forEach((f) => {
+  const r = localResultByFecha?.[f]?.record;
+  if (!r) return;
 
-      if (est) estados.push(safeText(est));
-    });
+  const est =
+    r?.estado_key ??
+    r?.estado ??
+    r?.emocion_key ??
+    r?.emocion ??
+    r?.estado_emocion ??
+    null;
+
+  if (est) estados.push(safeText(est));
+});
 
     return {
       totalDias,
