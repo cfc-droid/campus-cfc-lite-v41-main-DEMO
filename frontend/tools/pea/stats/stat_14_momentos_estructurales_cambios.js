@@ -538,9 +538,9 @@ function normalizeEstadoRegistro(v) {
   const s = normalizeText(v);
 
   // Tratar CORREGIDO como VALIDO
-  if (s === "CORREGIDO" || s === "CORREGIDA") return "VALIDO";
+  if (s === "CORREGIDO") return "VALIDO";
 
-  return s || "VALIDO"; "CORREGIDO"
+  return s || "VALIDO";
 }
 
   function normalizeMomentoEstructural(v) {
