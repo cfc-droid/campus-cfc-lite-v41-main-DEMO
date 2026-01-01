@@ -14,12 +14,20 @@
 
    FIX CLAVE (para que funcione con filtros):
    - Los filtros definen el "scope" de FECHAS
-   - El DURANTE/DESPUÉS canónico se busca en ALL (sin filtros) pero solo para esas fechas
+   - El DURANTE/DESPUÉS canónico se busca en ALL (sin filtros)
+     pero SOLO para esas fechas
+
+   FIX CLAVE #2 (para que NO quede todo 0%):
+   - Las acciones pueden venir como:
+       acciones_keys: []
+       acciones: []
+       acciones: "A, B, C" (string)
+       accion: "A, B" (string)
+     => se parsea robusto y se normaliza.
    ========================================================= */
 
 (function () {
   window.renderStat_15_acciones_criticas_por_resultado = function () {
-    // ✅ NIVEL 4 (no altera orden del Nivel 3)
     const box = document.getElementById("pea-level-4");
     if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS || !window.renderCuadroBasePEA) return;
 
@@ -54,7 +62,7 @@
 
     // Si existe catálogo global, filtrar banderas inválidas
     if (Array.isArray(window.PEA_ACCIONES) && window.PEA_ACCIONES.length) {
-      const setCat = new Set(window.PEA_ACCIONES);
+      const setCat = new Set(window.PEA_ACCIONES.map((x) => String(x)));
       BANDERAS = BANDERAS.filter((a) => setCat.has(a));
     }
 
@@ -63,10 +71,13 @@
       return;
     }
 
+    // Normalizar banderas para matcheo robusto
+    const BANDERAS_N = BANDERAS.map((a) => normalizeText(a));
+    const banderaByNorm = new Map();
+    BANDERAS.forEach((a) => banderaByNorm.set(normalizeText(a), a));
+
     /* ===============================
        2) SCOPE de FECHAS (lo definen los filtros)
-       - Si el usuario filtra por PERDIDA, etc., acá quedan esas fechas.
-       - Si el filtro deja vacío, caer a todas las fechas visibles (allValid).
        =============================== */
     const scopeFechas = new Set(
       (filteredValid.length ? filteredValid : allValid)
@@ -81,7 +92,7 @@
 
     /* ===============================
        3) Resultado CANÓNICO por fecha (DESPUÉS más reciente)
-       - se busca en ALL (sin filtros), pero SOLO para scopeFechas
+       - se busca en ALL, pero solo para scopeFechas
        =============================== */
     const resultadoPorFecha = {}; // { "YYYY-MM-DD": { res, key } }
 
@@ -108,7 +119,7 @@
 
     /* ===============================
        4) DURANTE CANÓNICO por fecha
-       - se busca en ALL (sin filtros), pero SOLO para fechasConResultado
+       - se busca en ALL, pero solo para fechasConResultado
        - canónico = más temprano (por created_at_iso si existe)
        =============================== */
     const duranteCanonPorFecha = {}; // { "YYYY-MM-DD": record }
@@ -151,21 +162,25 @@
       const duranteCanon = duranteCanonPorFecha[fecha];
       if (!duranteCanon) return;
 
-      const accionesSet = new Set(extractAcciones(duranteCanon));
+      const accionesNormSet = new Set(extractAcciones(duranteCanon).map((x) => normalizeText(x)));
 
-      BANDERAS.forEach((a) => {
-        if (accionesSet.has(a)) base[res].hit[a]++;
+      // Match robusto por normalización
+      BANDERAS_N.forEach((bn) => {
+        if (accionesNormSet.has(bn)) {
+          const original = banderaByNorm.get(bn);
+          if (original) base[res].hit[original] = (base[res].hit[original] || 0) + 1;
+        }
       });
     });
 
     /* ===============================
-       6) Tabla + UX (— cuando no hay base)
+       6) Render tabla simple (SIN columna diferencia)
        =============================== */
     const gT = base.GANADA.total || 0;
     const pT = base.PERDIDA.total || 0;
 
     function pct(h, t) {
-      return t ? Math.round((h / t) * 100) : null; // null => no base
+      return t ? Math.round((h / t) * 100) : null;
     }
 
     function fmtPct(h, t) {
@@ -174,27 +189,16 @@
       return `${p}% <span style="opacity:.6;">(${h}/${t})</span>`;
     }
 
-    function fmtDelta(gPct, pPct) {
-      if (gPct == null || pPct == null) return "—";
-      const d = pPct - gPct;
-      return `${d >= 0 ? "+" : ""}${d} pp`;
-    }
-
     const rows = BANDERAS.map((a) => {
       const gH = base.GANADA.hit[a] || 0;
       const pH = base.PERDIDA.hit[a] || 0;
-
       const gPct = pct(gH, gT);
       const pPct = pct(pH, pT);
-      const delta = fmtDelta(gPct, pPct);
 
-      // Para ordenar: si delta es "—", va al final
-      const deltaNum = (gPct == null || pPct == null) ? -9999 : (pPct - gPct);
-
-      return { a, gH, pH, gPct, pPct, delta, deltaNum };
-    });
-
-    rows.sort((x, y) => (y.deltaNum - x.deltaNum));
+      // Orden “más señal” primero: PERDIDA alto y GANADA bajo
+      const score = (pPct == null ? -1 : pPct) - (gPct == null ? 0 : gPct);
+      return { a, gH, pH, gPct, pPct, score };
+    }).sort((x, y) => y.score - x.score);
 
     const body = rows
       .map(
@@ -203,27 +207,23 @@
           <td>${escapeHtml(r.a)}</td>
           <td class="pea-n">${fmtPct(r.gH, gT)}</td>
           <td class="pea-n">${fmtPct(r.pH, pT)}</td>
-          <td class="pea-n">${r.delta}</td>
         </tr>
       `
       )
       .join("");
 
-    const noteDelta = `
-      <div class="pea-metricas-secundarias" style="margin-top:8px;">
-        <strong>Nota:</strong> <em>pp</em> = puntos porcentuales. Ej: 50% − 0% = +50 pp.<br>
-        Si una columna muestra “—”, significa <strong>no hay base</strong> para ese resultado en el scope actual (por filtros).
-      </div>
-    `;
-
     const contenidoHTML = `
+      <div class="pea-metricas-secundarias" style="margin-bottom:8px;">
+        <strong>Base:</strong> GANADA = ${gT} día(s) | PERDIDA = ${pT} día(s)<br>
+        Presencia/ausencia por día (no frecuencia). Co-ocurrencia pura con el resultado final del día.
+      </div>
+
       <table class="pea-table">
         <thead>
           <tr>
             <th>Acción bandera</th>
             <th>GANADA</th>
             <th>PERDIDA</th>
-            <th>Diferencia (PERDIDA − GANADA)</th>
           </tr>
         </thead>
         <tbody>
@@ -231,12 +231,10 @@
         </tbody>
       </table>
 
-      <div class="pea-metricas-secundarias">
-        Presencia/ausencia por día (no frecuencia). Co-ocurrencia pura con el resultado final del día.<br>
-        No mide gravedad. No interpreta. No establece causalidad.
+      <div class="pea-metricas-secundarias" style="margin-top:8px;">
+        No mide gravedad. No interpreta. No establece causalidad.<br>
+        “—” significa que no hay base para ese resultado en el scope actual (por filtros).
       </div>
-
-      ${noteDelta}
     `;
 
     /* ===============================
@@ -331,23 +329,42 @@
     return "NA";
   }
 
+  // ✅ Robustez real: array / string / campo único
   function extractAcciones(r) {
     const out = [];
 
+    // 1) acciones_keys: []
     if (Array.isArray(r?.acciones_keys)) {
       r.acciones_keys.forEach((a) => a && out.push(String(a)));
       return out;
     }
 
+    // 2) acciones: [] (array)
     if (Array.isArray(r?.acciones)) {
       r.acciones.forEach((a) => a && out.push(String(a)));
       return out;
     }
 
+    // 3) acciones: "A, B, C" (string)
+    if (typeof r?.acciones === "string" && r.acciones.trim()) {
+      return splitAccionesString(r.acciones);
+    }
+
+    // 4) accion_key / accion (puede venir "A, B")
     const a1 = r?.accion_key ?? r?.accion ?? null;
+    if (typeof a1 === "string" && a1.trim()) {
+      return splitAccionesString(a1);
+    }
     if (a1) out.push(String(a1));
 
     return out;
+  }
+
+  function splitAccionesString(s) {
+    return String(s)
+      .split(/[,;|\n]+/g)
+      .map((x) => x.trim())
+      .filter(Boolean);
   }
 
   function getTimeKey(r) {
