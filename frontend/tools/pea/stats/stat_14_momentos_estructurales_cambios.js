@@ -14,8 +14,8 @@
 
    REGLAS CLAVE:
    1) Debe mostrar datos haya o no filtros activos (si filtros dejan vacío, cae a TODO)
-   2) Excluye ANULADO (usa VALIDO / CORREGIDO / resto)
-   3) El ÚNICO resultado válido sale de DESPUÉS y se hereda por fecha para ANTES/DURANTE
+   2) Excluye ANULADO (todo lo demás pasa)
+   3) El ÚNICO resultado válido sale de DESPUÉS y se hereda por fecha para ANTES/DURANTE (puente)
    4) NO gráfico: solo espacio reservado a la derecha
 
    UX:
@@ -27,6 +27,10 @@
   window.renderStat_14_momentos_estructurales_cambios = function () {
     const box = document.getElementById("pea-level-4");
     if (!box || !window.PEA_STORAGE || !window.renderCuadroBasePEA) return;
+
+    // IMPORTANTE: limpiar el contenedor para que el título del cuadro (renderCuadroBasePEA) se vea bien
+    // y no se acumulen renders anteriores.
+    box.innerHTML = "";
 
     const all = window.PEA_STORAGE.loadPEALog() || [];
 
@@ -177,7 +181,7 @@
       const n = clampInt(nRaw, 1, 4);
       const railWidth = rail.clientWidth || 900;
 
-      // Compacto (como IMA2): tarjetas claras, columnas juntas
+      // Compacto (como IMA2)
       const gap = 12;
       const padding = 20;
       const cardW = Math.max(420, Math.floor((railWidth - padding - (gap * (n - 1))) / n));
@@ -196,7 +200,7 @@
   function buildMomentCardData(momentoValue, records, idx) {
     const list = Array.isArray(records) ? records : [];
 
-    const fechas = list.map(r => safeText(r?.fecha)).filter(Boolean);
+    const fechas = list.map(r => normalizeFechaKey(getFechaAny(r))).filter(Boolean);
     const start = minDateISO(fechas) || "—";
     const end = maxDateISO(fechas) || "—";
     const dias = new Set(fechas).size;
@@ -205,13 +209,13 @@
     const resultByFecha = {};
     list.forEach(r => {
       if (normalizeMomento(r?.momento) === "DESPUES") {
-        const f = safeText(r?.fecha);
+        const f = normalizeFechaKey(getFechaAny(r));
         const res = normalizeResultadoOperativo(getResultadoAny(r));
         if (f && !resultByFecha[f]) resultByFecha[f] = res;
       }
     });
 
-    // CAPA 2: distribución SOLO con DESPUÉS
+    // CAPA 2: distribución SOLO con DESPUÉS (NO TOCAR: funciona)
     const despues = list.filter(r => normalizeMomento(r?.momento) === "DESPUES");
     const dist = countBy(despues, r => normalizeResultadoOperativo(getResultadoAny(r)));
 
@@ -234,10 +238,11 @@
       ? Math.round((intensidadVals.filter(v => v >= 4).length / intensidadVals.length) * 100)
       : null;
 
-    // CAPA 3: PAE por resultado (GANADAS / PERDIDAS) usando puente por fecha
+    // CAPA 3: PAE por resultado (GANADAS / PERDIDAS)
+    // CLAVE: la "Cantidad" sale de CAPA 2 (DESPUÉS) y el puente por fecha alimenta ANTES/DURANTE.
     const capa3 = {
-      GANADAS: buildPAEForResult("GANADA", list, resultByFecha),
-      PERDIDAS: buildPAEForResult("PERDIDA", list, resultByFecha)
+      GANADAS: buildPAEForResult("GANADA", list, resultByFecha, out.TOTAL, out.GANADA),
+      PERDIDAS: buildPAEForResult("PERDIDA", list, resultByFecha, out.TOTAL, out.PERDIDA)
     };
 
     return {
@@ -251,33 +256,37 @@
     };
   }
 
-  function buildPAEForResult(targetRes, list, resultByFecha) {
+  function buildPAEForResult(targetRes, list, resultByFecha, baseTotalDespues, countFromCapa2) {
     const normTarget = normalizeResultadoOperativo(targetRes);
 
-    // Días (DESPUÉS) con ese resultado (base para Cantidad en IMA2)
-    const despuesMatch = list.filter(r =>
-      normalizeMomento(r?.momento) === "DESPUES" &&
-      normalizeResultadoOperativo(getResultadoAny(r)) === normTarget
-    );
-    const totalDias = despuesMatch.length;
+    // Cantidad EXACTA como IMA2: lo define DESPUÉS (CAPA 2)
+    const totalDias = typeof countFromCapa2 === "number" ? countFromCapa2 : 0;
+    const baseTotal = typeof baseTotalDespues === "number" ? baseTotalDespues : 0;
 
-    // Pensamientos (ANTES) asociados por fecha -> resultado heredado
+    // Pensamientos (ANTES) asociados por fecha -> resultado heredado (puente)
     const pensamientos = [];
     list.forEach(r => {
       if (normalizeMomento(r?.momento) !== "ANTES") return;
-      const f = safeText(r?.fecha);
+      const f = normalizeFechaKey(getFechaAny(r));
       const res = f ? (resultByFecha[f] || "NA") : "NA";
       if (res !== normTarget) return;
 
-      const p = r?.pensamiento_key ?? r?.pensamiento ?? r?.pensamiento_text ?? r?.pensamiento_label;
+      const p =
+        r?.pensamiento_key ??
+        r?.pensamiento ??
+        r?.pensamiento_text ??
+        r?.pensamiento_label ??
+        r?.pensamiento_nombre ??
+        null;
+
       if (p) pensamientos.push(safeText(p));
     });
 
-    // Acciones (DURANTE) asociadas por fecha -> resultado heredado
+    // Acciones (DURANTE) asociadas por fecha -> resultado heredado (puente)
     const acciones = [];
     list.forEach(r => {
       if (normalizeMomento(r?.momento) !== "DURANTE") return;
-      const f = safeText(r?.fecha);
+      const f = normalizeFechaKey(getFechaAny(r));
       const res = f ? (resultByFecha[f] || "NA") : "NA";
       if (res !== normTarget) return;
 
@@ -285,27 +294,38 @@
         r.acciones_keys.forEach(a => { if (a) acciones.push(safeText(a)); });
       } else if (Array.isArray(r?.acciones)) {
         r.acciones.forEach(a => { if (a) acciones.push(safeText(a)); });
+      } else if (Array.isArray(r?.accion)) {
+        r.accion.forEach(a => { if (a) acciones.push(safeText(a)); });
       } else {
-        const a1 = r?.accion_key ?? r?.accion ?? null;
+        const a1 = r?.accion_key ?? r?.accion ?? r?.accion_text ?? r?.accion_label ?? null;
         if (a1) acciones.push(safeText(a1));
       }
     });
 
-    // Estados/Emociones (DESPUÉS) asociados directo
+    // Estados/Emociones (DESPUÉS): se toma SOLO de DESPUÉS, pero filtrado por resultado del propio DESPUÉS
     const estados = [];
-    despuesMatch.forEach(r => {
+    list.forEach(r => {
+      if (normalizeMomento(r?.momento) !== "DESPUES") return;
+      const res = normalizeResultadoOperativo(getResultadoAny(r));
+      if (res !== normTarget) return;
+
       const est =
         r?.estado_key ??
         r?.estado ??
         r?.emocion_key ??
         r?.emocion ??
         r?.estado_emocion ??
+        r?.estado_label ??
+        r?.emocion_label ??
         null;
+
       if (est) estados.push(safeText(est));
     });
 
     return {
       totalDias,
+      baseTotal,
+      percentTotal: baseTotal ? Math.round((totalDias / baseTotal) * 100) : 0,
       topPensamientos: topNWithPercent(pensamientos, 3),
       topAcciones: topNWithPercent(acciones, 3),
       topEstados: topNWithPercent(estados, 3)
@@ -322,7 +342,6 @@
 
     const pct = (count, total) => total ? `${Math.round((count / total) * 100)}%` : "0%";
 
-    // Tabla CAPA 2 con 3 columnas (Resultado / Cantidad / Porcentaje)
     const cap2Rows = `
       <tr><td>GANADA</td><td class="n">${out.GANADA}</td><td class="n">${pct(out.GANADA, out.TOTAL)}</td></tr>
       <tr><td>PERDIDA</td><td class="n">${out.PERDIDA}</td><td class="n">${pct(out.PERDIDA, out.TOTAL)}</td></tr>
@@ -334,9 +353,9 @@
     const intensidadProm = (cd.capa2.intensidadProm == null) ? "—" : cd.capa2.intensidadProm.toFixed(1);
     const picos = (cd.capa2.picos == null) ? "—" : `${cd.capa2.picos}%`;
 
+    // Nota: el <style> acá es intencional para asegurar “columnas juntas” sin tocar CSS global.
     return `
       <style>
-        /* Compacto y claro (columnas juntas) */
         .s14-wrap { font-size: 13px; line-height: 1.25; }
         .s14-hr { margin: 10px 0; border-top: 1px solid rgba(255,255,255,.06); }
         .s14-title { font-size: 13px; font-weight: 700; letter-spacing: .2px; }
@@ -345,11 +364,14 @@
         .s14-table th, .s14-table td { padding: 4px 4px; vertical-align: top; }
         .s14-table thead th { opacity: .9; font-weight: 700; }
         .s14-table .n { text-align: right; }
+
+        /* TABLAS compactas (como IMA2) */
+        .s14-cap2 td:nth-child(2), .s14-cap2 th:nth-child(2){ width: 76px; }
+        .s14-cap2 td:nth-child(3), .s14-cap2 th:nth-child(3){ width: 76px; }
+
         .s14-rank td:nth-child(1), .s14-rank th:nth-child(1){ width: 52px; }
         .s14-rank td:nth-child(3), .s14-rank th:nth-child(3){ width: 76px; }
         .s14-rank td:nth-child(4), .s14-rank th:nth-child(4){ width: 60px; }
-        .s14-cap2 td:nth-child(2), .s14-cap2 th:nth-child(2){ width: 76px; }
-        .s14-cap2 td:nth-child(3), .s14-cap2 th:nth-child(3){ width: 76px; }
       </style>
 
       <div
@@ -423,7 +445,9 @@
   }
 
   function renderResultBlock(label, icon, data) {
-    const totalDias = data.totalDias || 0;
+    const totalDias = data?.totalDias || 0;
+    const baseTotal = data?.baseTotal || 0;
+    const pct = baseTotal ? Math.round((totalDias / baseTotal) * 100) : 0;
 
     return `
       <div style="border:1px solid rgba(255,255,255,.06); border-radius:10px; padding:10px;">
@@ -432,35 +456,34 @@
         </div>
 
         <div class="s14-sub" style="margin-bottom:10px;">
-          <strong>Cantidad:</strong> ${totalDias}${totalDias ? ` — <strong>${Math.round((totalDias / (data._baseTotalDias || totalDias)) * 100)}%</strong>` : ""}
+          <strong>Cantidad:</strong> ${totalDias} — <strong>${pct}%</strong>
         </div>
 
         <div style="margin-bottom:10px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
             <span>🧠</span><strong>Pensamientos (ANTES)</strong>
           </div>
-          ${renderRankTable(data.topPensamientos, "Pensamiento")}
+          ${renderRankTable(data?.topPensamientos, "Pensamiento")}
         </div>
 
         <div style="margin-bottom:10px;">
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
             <span>🎯</span><strong>Acciones (DURANTE)</strong>
           </div>
-          ${renderRankTable(data.topAcciones, "Acción")}
+          ${renderRankTable(data?.topAcciones, "Acción")}
         </div>
 
         <div>
           <div style="display:flex; align-items:center; gap:8px; margin-bottom:6px;">
             <span>❤️</span><strong>Estados / Emociones (DESPUÉS)</strong>
           </div>
-          ${renderRankTable(data.topEstados, "Estado")}
+          ${renderRankTable(data?.topEstados, "Estado")}
         </div>
       </div>
     `;
   }
 
   function renderRankTable(items, colName) {
-    // SIEMPRE 3 filas (#1..#3)
     const rows = (items && items.length ? items : []).slice(0, 3);
     while (rows.length < 3) rows.push({ key: "—", count: 0, percent: 0 });
 
@@ -506,17 +529,36 @@
     return s ? s : "SIN_MARCAR";
   }
 
-  // "DESPUÉS" puede venir como "DESPUES" o con acento o minúsculas
+  // Momento puede venir con acento / variantes
   function normalizeMomento(v) {
     const s = normalizeText(v);
-    // soportar variantes
     if (s === "DESPUES" || s === "DESP" || s === "DESPUÉS") return "DESPUES";
     if (s === "ANTES" || s === "ANT") return "ANTES";
     if (s === "DURANTE" || s === "DUR") return "DURANTE";
     return s || "";
   }
 
-  // Soporta múltiples nombres posibles de campo de resultado
+  // Fecha: tolera campos alternativos
+  function getFechaAny(r) {
+    return r?.fecha ?? r?.fecha_iso ?? r?.fecha_local ?? r?.date ?? r?.dia ?? null;
+  }
+
+  // Normaliza fecha para que el puente funcione aunque venga DD/MM/YYYY
+  function normalizeFechaKey(v) {
+    const s = safeText(v).trim();
+    if (!s) return "";
+    // YYYY-MM-DD (ok)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+    // DD/MM/YYYY -> YYYY-MM-DD
+    const m1 = s.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    if (m1) return `${m1[3]}-${m1[2]}-${m1[1]}`;
+    // DD-MM-YYYY -> YYYY-MM-DD
+    const m2 = s.match(/^(\d{2})-(\d{2})-(\d{4})$/);
+    if (m2) return `${m2[3]}-${m2[2]}-${m2[1]}`;
+    // fallback (no romper)
+    return s;
+  }
+
   function getResultadoAny(r) {
     return (
       r?.resultado_operativo ??
@@ -531,7 +573,6 @@
   function normalizeResultadoOperativo(v) {
     const s = normalizeText(v);
     if (s === "GANADA" || s === "PERDIDA" || s === "BE" || s === "NA") return s;
-    // A veces llega plural / variantes
     if (s === "GANADAS") return "GANADA";
     if (s === "PERDIDAS") return "PERDIDA";
     return "NA";
@@ -539,7 +580,6 @@
 
   function normalizeText(v) {
     if (v == null) return "";
-    // quitar acentos para que "DESPUÉS" = "DESPUES"
     return String(v)
       .trim()
       .toUpperCase()
@@ -556,11 +596,10 @@
     const iso = safeText(r?.meta?.created_at_iso).trim();
     if (iso) return iso;
 
-    const f = safeText(r?.fecha).trim();
+    const f = normalizeFechaKey(getFechaAny(r));
     const m = normalizeMomento(r?.momento);
     const mo = momentOrder(m);
     const id = safeText(r?.id).trim();
-    // fecha primero, luego orden de momento, luego id (estable)
     return `${f}T00:00:00.000Z|${String(mo).padStart(2, "0")}|${m}|${id}`;
   }
 
@@ -615,7 +654,6 @@
     return Math.max(min, Math.min(max, n));
   }
 
-  // Fechas tipo YYYY-MM-DD
   function minDateISO(list) {
     const arr = (Array.isArray(list) ? list : []).filter(Boolean).sort();
     return arr.length ? arr[0] : null;
