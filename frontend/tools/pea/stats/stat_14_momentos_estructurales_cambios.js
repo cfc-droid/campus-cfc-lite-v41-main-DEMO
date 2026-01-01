@@ -274,23 +274,23 @@ ordered.forEach((r) => {
   }
 
 function buildLocalResultByFecha(despuesList) {
-  // { fecha: { res, key, record } }
+  // { opKey: { res, key, record } }
   const map = {};
 
   (Array.isArray(despuesList) ? despuesList : []).forEach((r) => {
-    const f = safeText(r?.fecha).trim();
-    if (!f) return;
+    const opKey = getOpKey(r);
+    if (!opKey) return;
 
     const res = normalizeResultadoOperativo(getResultadoAny(r));
     const tkey = getTimeKey(r);
 
-    // Me quedo con el DESPUÉS "más reciente" de esa fecha (canónico)
-    if (!map[f] || tkey > map[f].key) {
-      map[f] = { res, key: tkey, record: r };
+    // Me quedo con el DESPUÉS "más reciente" de esa OPERACIÓN (canónico)
+    if (!map[opKey] || tkey > map[opKey].key) {
+      map[opKey] = { res, key: tkey, record: r };
     }
   });
 
-  return map; // { "2025-12-29": {res,key,record}, ... }
+  return map; // { "fecha||momento_estructural||direccion||estado": {res,key,record}, ... }
 }
 
   function buildPAEForResult(targetRes, list, despues, localResultByFecha) {
@@ -298,25 +298,25 @@ function buildLocalResultByFecha(despuesList) {
 
     const despuesList = Array.isArray(despues) ? despues : [];
 
-// Fechas cuyo RESULTADO CANÓNICO (último DESPUÉS del día) == target
+// Operaciones cuyo RESULTADO CANÓNICO (último DESPUÉS de la operación) == target
 const fechasTarget = new Set(
   Object.keys(localResultByFecha || {}).filter(
-    (f) => localResultByFecha[f]?.res === normTarget
+    (k) => localResultByFecha[k]?.res === normTarget
   )
 );
 
-// Conteo por FECHA (no por cantidad de registros)
+// Conteo por OPERACIÓN (no por cantidad de registros)
 const totalDias = fechasTarget.size;
 
-// Base también por FECHA (todas las fechas que tuvieron algún DESPUÉS)
+// Base también por OPERACIÓN (todas las ops que tuvieron algún DESPUÉS)
 const baseTotalDias = Math.max(1, Object.keys(localResultByFecha || {}).length);
 
     // Pensamientos (ANTES) del tramo, solo de fechasTarget
     const pensamientos = [];
     (Array.isArray(list) ? list : []).forEach((r) => {
       if (normalizeMomento(r?.momento) !== "ANTES") return;
-      const f = safeText(r?.fecha).trim();
-      if (!f || !fechasTarget.has(f)) return;
+      const opKey = getOpKey(r);
+      if (!opKey || !fechasTarget.has(opKey)) return;
 
       const p =
         r?.pensamiento_key ??
@@ -332,8 +332,8 @@ const baseTotalDias = Math.max(1, Object.keys(localResultByFecha || {}).length);
     const acciones = [];
     (Array.isArray(list) ? list : []).forEach((r) => {
       if (normalizeMomento(r?.momento) !== "DURANTE") return;
-      const f = safeText(r?.fecha).trim();
-      if (!f || !fechasTarget.has(f)) return;
+      const opKey = getOpKey(r);
+      if (!opKey || !fechasTarget.has(opKey)) return;
 
       if (Array.isArray(r?.acciones_keys)) {
         r.acciones_keys.forEach((a) => {
@@ -351,8 +351,8 @@ const baseTotalDias = Math.max(1, Object.keys(localResultByFecha || {}).length);
 
     // Estados/Emociones (DESPUÉS): SOLO desde los DESPUÉS del tramo que matchean target
 const estados = [];
-fechasTarget.forEach((f) => {
-  const r = localResultByFecha?.[f]?.record;
+fechasTarget.forEach((k) => {
+  const r = localResultByFecha?.[k]?.record;
   if (!r) return;
 
   const est =
@@ -557,6 +557,22 @@ function normalizeEstadoRegistro(v) {
     if (s === "ANTES" || s === "ANT") return "ANTES";
     if (s === "DURANTE" || s === "DUR") return "DURANTE";
     return s || "";
+  }
+
+  function normalizeDireccion(v) {
+    const s = normalizeText(v);
+    if (s === "COMPRA" || s === "BUY") return "COMPRA";
+    if (s === "VENTA" || s === "SELL") return "VENTA";
+    return s || "NA";
+  }
+
+  function getOpKey(r) {
+    const f = safeText(r?.fecha).trim();
+    const me = normalizeMomentoEstructural(r?.momento_estructural);
+    const dir = normalizeDireccion(r?.direccion);
+    const st = normalizeEstadoRegistro(getRecordState(r));
+    if (!f || !me) return "";
+    return `${f}||${me}||${dir}||${st}`;
   }
 
   function getResultadoAny(r) {
