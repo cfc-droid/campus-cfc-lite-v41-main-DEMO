@@ -1,4 +1,4 @@
-/* =========================================================
+/* ========================================================
    STAT 14 — MOMENTOS ESTRUCTURALES (PAE + RESULTADO)
    Campus CFC LITE V41
    Estadística 14/17 — Nivel 4
@@ -21,7 +21,7 @@
    UX:
    - Rail horizontal + selector 2/3/4 por pantalla
    - Columnas juntas (compacto y claro)
-   ========================================================= */
+   ======================================================== */
 
 (function () {
   window.renderStat_14_momentos_estructurales_cambios = function () {
