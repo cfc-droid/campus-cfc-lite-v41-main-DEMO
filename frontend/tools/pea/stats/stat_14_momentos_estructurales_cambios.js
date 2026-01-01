@@ -5,10 +5,10 @@
 
    SOLUCIÓN (DIFERENTE / CORRECTA):
    - CAPA 2: se calcula SOLO con DESPUÉS dentro del tramo (segmento) (se mantiene).
-   - CAPA 3: usa PUENTE GLOBAL por fecha:
-       * Primero armamos resultadoPorFecha con TODOS los DESPUÉS válidos del universo
-       * Luego, por cada tramo, clasificamos sus fechas por ese mapa global
-         y levantamos PAE (ANTES/DURANTE/DESPUÉS) SOLO de los registros del tramo.
+   - CAPA 3: se alinea con CAPA 2 para evitar inconsistencias:
+       * El resultado por fecha se define SOLO con DESPUÉS del tramo (puente LOCAL).
+       * ANTES/DURANTE se asocian únicamente a fechas que tienen DESPUÉS en el mismo tramo.
+       * Estados/Emociones se toman SOLO desde los DESPUÉS del tramo.
 
    UX:
    - Rail horizontal + selector 2/3/4
@@ -44,12 +44,7 @@
     // Orden cronológico estable
     const ordered = [...valid].sort((a, b) => getTimeKey(a).localeCompare(getTimeKey(b)));
 
-    // 3) PUENTE GLOBAL: fecha -> resultado (SOLO DESPUÉS)
-    //    Regla de precedencia: si hay múltiples, gana el último por created_at_iso.
-    //    Y si primero aparece NA y luego PERDIDA/GANADA/BE, se debe pisar.
-    const globalResultByFecha = buildGlobalResultByFecha(ordered);
-
-    // 4) Segmentar por MOMENTO ESTRUCTURAL consecutivo
+    // 3) Segmentar por MOMENTO ESTRUCTURAL consecutivo
     const segments = [];
     ordered.forEach((r) => {
       const v = normalizeMomentoEstructural(r?.momento_estructural);
@@ -58,9 +53,8 @@
       else last.records.push(r);
     });
 
-    const cardsData = segments.map((seg, idx) =>
-      buildMomentCardData(seg.value, seg.records, idx + 1, globalResultByFecha)
-    );
+    // Nota: NO hay cantidad fija de cuadros. Se generan dinámicamente según segmentos.
+    const cardsData = segments.map((seg, idx) => buildMomentCardData(seg.value, seg.records, idx + 1));
 
     const contenidoHTML = renderRailUI(cardsData);
 
@@ -75,7 +69,7 @@
         criterios: [
           "Excluye ANULADO",
           "CAPA 2: Resultado tomado SOLO de DESPUÉS (del tramo)",
-          "CAPA 3: ANTES y DURANTE heredan resultado por fecha usando PUENTE GLOBAL (DESPUÉS manda)",
+          "CAPA 3: ANTES/DURANTE se asocian SOLO a fechas con DESPUÉS dentro del mismo tramo (consistente con CAPA 2)",
           "Top 3 fijo (aunque vacío)",
           "Rail horizontal + espacio reservado a la derecha (sin gráfico)"
         ],
@@ -223,48 +217,7 @@
      DATA
      ========================================================= */
 
-  function buildGlobalResultByFecha(orderedAll) {
-    const map = {}; // { fecha: {res, key} }
-    (Array.isArray(orderedAll) ? orderedAll : []).forEach((r) => {
-      if (normalizeMomento(r?.momento) !== "DESPUES") return;
-
-      const f = safeText(r?.fecha).trim();
-      if (!f) return;
-
-      const res = normalizeResultadoOperativo(getResultadoAny(r));
-      const tkey = getTimeKey(r);
-
-      // Precedencia: siempre quedarse con el "último" por timeKey,
-      // y además, si el map tenía NA y ahora viene un resultado real, pisar.
-      if (!map[f]) {
-        map[f] = { res, key: tkey };
-        return;
-      }
-
-      const prev = map[f];
-      const prevRes = prev.res;
-
-      const prevIsNA = prevRes === "NA";
-      const curIsNA = res === "NA";
-
-      // si antes era NA y ahora no, pisar
-      if (prevIsNA && !curIsNA) {
-        map[f] = { res, key: tkey };
-        return;
-      }
-
-      // si ambos son no-NA, o ambos NA, tomar el último por timeKey
-      if (tkey > prev.key) {
-        map[f] = { res, key: tkey };
-      }
-    });
-
-    const out = {};
-    Object.keys(map).forEach((f) => (out[f] = map[f].res));
-    return out; // { fecha: "GANADA"|"PERDIDA"|"BE"|"NA" }
-  }
-
-  function buildMomentCardData(momentoValue, records, idx, globalResultByFecha) {
+  function buildMomentCardData(momentoValue, records, idx) {
     const list = Array.isArray(records) ? records : [];
 
     const fechas = list.map((r) => safeText(r?.fecha)).filter(Boolean);
@@ -295,10 +248,12 @@
       ? Math.round((intensidadVals.filter((v) => v >= 4).length / intensidadVals.length) * 100)
       : null;
 
-    // CAPA 3 (PUENTE GLOBAL)
+    // CAPA 3 (ALINEADA con CAPA 2: puente LOCAL solo con DESPUÉS del tramo)
+    const localResultByFecha = buildLocalResultByFecha(despues);
+
     const capa3 = {
-      GANADAS: buildPAEForResult("GANADA", list, globalResultByFecha, dias),
-      PERDIDAS: buildPAEForResult("PERDIDA", list, globalResultByFecha, dias)
+      GANADAS: buildPAEForResult("GANADA", list, despues, localResultByFecha),
+      PERDIDAS: buildPAEForResult("PERDIDA", list, despues, localResultByFecha)
     };
 
     return {
@@ -312,32 +267,56 @@
     };
   }
 
-  function buildPAEForResult(targetRes, list, globalResultByFecha, segmentDias) {
+  function buildLocalResultByFecha(despuesList) {
+    const map = {}; // { fecha: {res, key} }
+    (Array.isArray(despuesList) ? despuesList : []).forEach((r) => {
+      const f = safeText(r?.fecha).trim();
+      if (!f) return;
+
+      const res = normalizeResultadoOperativo(getResultadoAny(r));
+      const tkey = getTimeKey(r);
+
+      if (!map[f]) {
+        map[f] = { res, key: tkey };
+        return;
+      }
+
+      if (tkey > map[f].key) {
+        map[f] = { res, key: tkey };
+      }
+    });
+
+    const out = {};
+    Object.keys(map).forEach((f) => (out[f] = map[f].res));
+    return out; // { fecha: "GANADA"|"PERDIDA"|"BE"|"NA" }
+  }
+
+  function buildPAEForResult(targetRes, list, despues, localResultByFecha) {
     const normTarget = normalizeResultadoOperativo(targetRes);
 
-    // Fechas presentes en el tramo
-    const fechasTramo = Array.from(
-      new Set((Array.isArray(list) ? list : []).map((r) => safeText(r?.fecha)).filter(Boolean))
+    const despuesList = Array.isArray(despues) ? despues : [];
+
+    // DESPUÉS del tramo cuyo resultado == target (consistente con CAPA 2)
+    const despuesMatch = despuesList.filter(
+      (r) => normalizeResultadoOperativo(getResultadoAny(r)) === normTarget
     );
 
-    // Fechas del tramo cuyo resultado (global) == target
-    const fechasTarget = fechasTramo.filter((f) => (globalResultByFecha[f] || "NA") === normTarget);
+    const totalDias = despuesMatch.length;
 
-    // Cantidad: en IMA2 se percibe como “cantidad de días/operaciones” del resultado.
-    // Para que no quede inconsistente cuando el DESPUÉS cae en otro tramo, usamos:
-    // - cantidad = número de fechasTarget (días del tramo cuyo resultado global es target)
-    const totalDias = fechasTarget.length;
+    // Porcentaje alineado con CAPA 2: base = TOTAL de DESPUÉS del tramo
+    const baseTotalDias = Math.max(1, despuesList.length);
 
-    // Base % (si el tramo tiene DESPUÉS, es mejor base TOTAL de CAPA2; si no, base = fechasTramo)
-    // Como acá no recibimos CAPA2, usamos base = fechasTramo (días del tramo).
-    const baseTotalDias = Math.max(1, fechasTramo.length);
+    // Fechas del tramo que realmente tienen DESPUÉS target
+    const fechasTarget = new Set(
+      despuesMatch.map((r) => safeText(r?.fecha).trim()).filter(Boolean)
+    );
 
-    // Pensamientos (ANTES) del tramo, de fechasTarget
+    // Pensamientos (ANTES) del tramo, solo de fechasTarget
     const pensamientos = [];
-    list.forEach((r) => {
+    (Array.isArray(list) ? list : []).forEach((r) => {
       if (normalizeMomento(r?.momento) !== "ANTES") return;
       const f = safeText(r?.fecha).trim();
-      if (!f || !fechasTarget.includes(f)) return;
+      if (!f || !fechasTarget.has(f)) return;
 
       const p =
         r?.pensamiento_key ??
@@ -349,30 +328,30 @@
       if (p) pensamientos.push(safeText(p));
     });
 
-    // Acciones (DURANTE) del tramo, de fechasTarget
+    // Acciones (DURANTE) del tramo, solo de fechasTarget
     const acciones = [];
-    list.forEach((r) => {
+    (Array.isArray(list) ? list : []).forEach((r) => {
       if (normalizeMomento(r?.momento) !== "DURANTE") return;
       const f = safeText(r?.fecha).trim();
-      if (!f || !fechasTarget.includes(f)) return;
+      if (!f || !fechasTarget.has(f)) return;
 
       if (Array.isArray(r?.acciones_keys)) {
-        r.acciones_keys.forEach((a) => { if (a) acciones.push(safeText(a)); });
+        r.acciones_keys.forEach((a) => {
+          if (a) acciones.push(safeText(a));
+        });
       } else if (Array.isArray(r?.acciones)) {
-        r.acciones.forEach((a) => { if (a) acciones.push(safeText(a)); });
+        r.acciones.forEach((a) => {
+          if (a) acciones.push(safeText(a));
+        });
       } else {
         const a1 = r?.accion_key ?? r?.accion ?? null;
         if (a1) acciones.push(safeText(a1));
       }
     });
 
-    // Estados/Emociones (DESPUÉS) del tramo, de fechasTarget
+    // Estados/Emociones (DESPUÉS): SOLO desde los DESPUÉS del tramo que matchean target
     const estados = [];
-    list.forEach((r) => {
-      if (normalizeMomento(r?.momento) !== "DESPUES") return;
-      const f = safeText(r?.fecha).trim();
-      if (!f || !fechasTarget.includes(f)) return;
-
+    despuesMatch.forEach((r) => {
       const est =
         r?.estado_key ??
         r?.estado ??
