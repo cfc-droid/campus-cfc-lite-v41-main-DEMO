@@ -31,10 +31,11 @@
       if (Array.isArray(filtered) && filtered.length) universe = filtered;
     }
 
-    // 2) Excluir ANULADO
-    const valid = (Array.isArray(universe) ? universe : []).filter(
-      (r) => normalizeEstadoRegistro(getRecordState(r)) !== "ANULADO"
-    );
+// 2) Solo registros VALIDO y CORREGIDO (igual que otros stats)
+const valid = (Array.isArray(universe) ? universe : []).filter((r) => {
+  const st = safeText(r?.meta?.estado).trim();
+  return st === "VALIDO" || st === "CORREGIDO";
+});
 
     if (!valid.length) {
       renderEmpty(box, "No hay registros válidos (excluye ANULADO).");
