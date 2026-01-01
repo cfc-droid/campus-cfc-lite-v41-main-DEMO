@@ -6,24 +6,34 @@
    Nivel 4/4 (operativo directo)
    Estadística 15/17
 
-   Qué hace:
-   - Lista fija de 3–6 acciones “bandera”
-   - Por cada día, mira si la bandera estuvo presente en el DURANTE canónico
-   - Compara por resultado final del día (DESPUÉS canónico): GANADA vs PERDIDA
-   - Presencia/ausencia por día (NO frecuencia)
+   OBJETIVO (simple y entendible):
+   - En las fechas del filtro (scope), mirar por cada DÍA:
+       1) Cómo terminó el día (DESPUÉS canónico): GANADA o PERDIDA
+       2) Si en ese día apareció una “acción bandera” en ALGÚN registro DURANTE
+   - Cuenta presencia/ausencia por día (NO frecuencia):
+       "¿Apareció al menos una vez ese día?" -> 1 / 0
+
+   ¿Qué se muestra?
+   - Para cada bandera:
+       - GANADA: Días con bandera / Días base (y %)
+       - PERDIDA: Días con bandera / Días base (y %)
+   - "Días base" = 100% (siempre). Por eso lo mostramos explícito.
 
    FIX CLAVE (para que funcione con filtros):
    - Los filtros definen el SCOPE de FECHAS
-   - DURANTE/DESPUÉS canónicos se buscan en ALL (sin filtros) pero SOLO para esas fechas
+   - El DESPUÉS canónico se busca en ALL (sin filtros) pero SOLO para esas fechas
 
-   FIX CLAVE #2 (para que NO quede todo 0):
-   - Las acciones pueden venir como:
-       acciones_keys: []
-       acciones: [] / "A, B, C"
-       accion / accion_key: "A, B"
-       acciones_text / acciones_str / acciones_display: "A, B, C"
-       (lo que ves en la tabla como "Acción(es)")
-     => se parsea robusto y se normaliza.
+   FIX CLAVE (para NO confundir con ceros “raros”):
+   - Antes: se tomaba solo 1 DURANTE canónico (muy estricto) => muchos 0%
+   - Ahora: se considera "DÍA CON BANDERA" si la acción aparece en
+           CUALQUIER registro DURANTE de ese día (más humano y útil)
+
+   Robustez de acciones:
+   - acciones_keys: []
+   - acciones: [] / "A, B, C"
+   - accion / accion_key: "A, B"
+   - acciones_text / acciones_str / acciones_display / etc.
+   - (lo que ves como “Acción(es)” en la tabla)
    ========================================================= */
 
 (function () {
@@ -57,7 +67,7 @@
     ];
 
     let BANDERAS =
-      Array.isArray(window.PEA_STAT15_BANDERAS) && window.PEA_STAT15_BANDERAS.length
+      (Array.isArray(window.PEA_STAT15_BANDERAS) && window.PEA_STAT15_BANDERAS.length)
         ? window.PEA_STAT15_BANDERAS.slice(0, 6)
         : DEFAULT_BANDERAS;
 
@@ -79,6 +89,7 @@
 
     /* ===============================
        2) SCOPE de FECHAS (lo definen los filtros)
+       - Si el filtro deja vacío, caer a ALL
        =============================== */
     const scopeFechas = new Set(
       (filteredValid.length ? filteredValid : allValid)
@@ -114,15 +125,17 @@
 
     const fechasConResultado = Object.keys(resultadoPorFecha);
     if (!fechasConResultado.length) {
-      renderEmpty(box, "No hay DESPUÉS canónico con GANADA/PERDIDA dentro del scope de fechas.");
+      renderEmpty(box, "No hay DESPUÉS con resultado GANADA/PERDIDA dentro del scope de fechas.");
       return;
     }
 
     /* ===============================
-       4) DURANTE CANÓNICO por fecha:
-          el más temprano del día
+       4) Acciones DURANTE por fecha (TODOS los DURANTE del día)
+       - Para cada fecha, armamos un set con TODAS las acciones vistas en DURANTE
+       - Si un día no tiene DURANTE, queda vacío (y lo reportamos)
        =============================== */
-    const duranteCanonPorFecha = {}; // { "YYYY-MM-DD": record }
+    const accionesDurantePorFecha = {}; // { "YYYY-MM-DD": Set(normalizedAction) }
+    let diasSinDurante = 0;
 
     fechasConResultado.forEach((fecha) => {
       const durantes = allValid.filter(
@@ -131,17 +144,27 @@
           normalizeMomento(r?.momento) === "DURANTE"
       );
 
-      if (!durantes.length) return;
+      if (!durantes.length) {
+        diasSinDurante++;
+        accionesDurantePorFecha[fecha] = new Set();
+        return;
+      }
 
-      const canon = durantes
-        .map((r) => ({ r, key: getTimeKey(r) }))
-        .sort((a, b) => a.key.localeCompare(b.key))[0]?.r;
+      const setAcc = new Set();
+      durantes.forEach((rec) => {
+        const acciones = extractAcciones(rec);
+        acciones.forEach((a) => {
+          const n = normalizeText(a);
+          if (n) setAcc.add(n);
+        });
+      });
 
-      if (canon) duranteCanonPorFecha[fecha] = canon;
+      accionesDurantePorFecha[fecha] = setAcc;
     });
 
     /* ===============================
        5) Base por día (presencia/ausencia)
+       - "Día con bandera" = la bandera aparece en CUALQUIER DURANTE del día
        =============================== */
     const base = {
       GANADA: { total: 0, hit: {} },
@@ -159,15 +182,11 @@
 
       base[res].total++;
 
-      const duranteCanon = duranteCanonPorFecha[fecha];
-      if (!duranteCanon) return;
+      const accionesSet = accionesDurantePorFecha[fecha] || new Set();
 
-      const acciones = extractAcciones(duranteCanon);
-      const accionesNormSet = new Set(acciones.map((x) => normalizeText(x)));
-
-      // Match robusto (por normalización)
+      // Match robusto por normalización (presencia/ausencia por día)
       BANDERAS_N.forEach((bn) => {
-        if (accionesNormSet.has(bn)) {
+        if (accionesSet.has(bn)) {
           const original = banderaByNorm.get(bn);
           if (original) base[res].hit[original] = (base[res].hit[original] || 0) + 1;
         }
@@ -175,7 +194,9 @@
     });
 
     /* ===============================
-       6) Render tabla CLARA (más columnas)
+       6) Render tabla CLARA (para APB)
+       - "Días base" se muestra como 100% explícito
+       - Cuando no hay base, mostramos "—" (no 0%)
        =============================== */
     const gBase = base.GANADA.total || 0;
     const pBase = base.PERDIDA.total || 0;
@@ -189,6 +210,11 @@
       return (p == null) ? "—" : `${p}%`;
     }
 
+    function fmtBase(t) {
+      // Mostramos claramente que base = 100% del universo para ese resultado
+      return t ? `${t} (100%)` : "0 (—)";
+    }
+
     const rows = BANDERAS.map((a) => {
       const gHit = base.GANADA.hit[a] || 0;
       const pHit = base.PERDIDA.hit[a] || 0;
@@ -196,30 +222,45 @@
       const gPct = pctInt(gHit, gBase);
       const pPct = pctInt(pHit, pBase);
 
-      // “señal” para ordenar: PERDIDA más alto y GANADA más bajo primero
+      // Orden por "señal" (más útil): PERDIDA alto y GANADA bajo primero
       const score = (pPct == null ? -1 : pPct) - (gPct == null ? 0 : gPct);
 
-      return { a, gHit, pHit, gPct, pPct, score };
-    }).sort((x, y) => y.score - x.score);
+      const presentAny = (gHit + pHit) > 0;
+
+      return { a, gHit, pHit, gPct, pPct, score, presentAny };
+    })
+      // Primero las que aparecen al menos una vez en el scope, luego el resto (para menos ruido)
+      .sort((x, y) => {
+        if (x.presentAny !== y.presentAny) return (y.presentAny ? 1 : 0) - (x.presentAny ? 1 : 0);
+        return (y.score - x.score);
+      });
 
     const body = rows.map(r => `
-      <tr>
+      <tr style="${r.presentAny ? "" : "opacity:.65;"}">
         <td>${escapeHtml(r.a)}</td>
 
         <td class="pea-n">${r.gHit}</td>
-        <td class="pea-n">${gBase}</td>
+        <td class="pea-n">${fmtBase(gBase)}</td>
         <td class="pea-n">${fmtPctOnly(r.gHit, gBase)}</td>
 
         <td class="pea-n">${r.pHit}</td>
-        <td class="pea-n">${pBase}</td>
+        <td class="pea-n">${fmtBase(pBase)}</td>
         <td class="pea-n">${fmtPctOnly(r.pHit, pBase)}</td>
       </tr>
     `).join("");
 
+    const totalDias = fechasConResultado.length;
+
+    // Mensajes ultra claros
+    const msgDurante = (diasSinDurante > 0)
+      ? `⚠️ ${diasSinDurante} día(s) no tienen registros DURANTE en el scope. En esos días, ninguna bandera puede “aparecer”.`
+      : `✅ Todos los días del scope tienen al menos un registro DURANTE.`;
+
     const contenidoHTML = `
-      <div class="pea-metricas-secundarias" style="margin-bottom:8px;">
-        <strong>Base del scope:</strong> GANADA = ${gBase} día(s) | PERDIDA = ${pBase} día(s)<br>
-        Cada “Día con bandera” cuenta 1 si la acción estuvo presente en el <strong>DURANTE canónico</strong> de ese día.
+      <div class="pea-metricas-secundarias" style="margin-bottom:10px;">
+        <strong>Cómo leerlo (en 1 línea):</strong> “De los días que terminaron GANADA/PERDIDA, ¿en cuántos apareció cada bandera en algún DURANTE?”<br>
+        <strong>Base del scope:</strong> GANADA = ${gBase} día(s) | PERDIDA = ${pBase} día(s) | Total días con resultado = ${totalDias} día(s)<br>
+        ${escapeHtml(msgDurante)}
       </div>
 
       <table class="pea-table">
@@ -241,20 +282,20 @@
         </tbody>
       </table>
 
-      <div class="pea-metricas-secundarias" style="margin-top:8px;">
-        Presencia/ausencia por día (no frecuencia). Co-ocurrencia con el resultado final del día.<br>
-        No mide gravedad. No interpreta. No establece causalidad.<br>
-        “—” significa que no hay base para ese resultado (por filtros / scope).
+      <div class="pea-metricas-secundarias" style="margin-top:10px;">
+        <strong>Importante:</strong> esto mide <em>presencia/ausencia por día</em> (no cuántas veces pasó).<br>
+        No interpreta. No establece causalidad.<br>
+        “—” significa que no hay base para ese resultado en el scope actual (por filtros).
       </div>
     `;
 
     /* ===============================
-       7) Semáforo (simple)
+       7) Semáforo (simple y honesto)
        =============================== */
-    const totalDias = fechasConResultado.length;
-
     let semaforo = "🟡 Datos parciales";
+    // suficiente si hay al menos 3 días en cada lado
     if (gBase >= 3 && pBase >= 3) semaforo = "🟢 Datos suficientes";
+    // insuficiente si falta un lado
     if (gBase === 0 || pBase === 0) semaforo = "🔴 Datos insuficientes";
 
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
@@ -262,12 +303,12 @@
       indice: 15,
       titulo: "Acciones críticas por resultado (banderas)",
       totalRegistros: totalDias,
-      universo: "Scope por filtros (fechas). DURANTE/DESPUÉS canónicos buscados en ALL para esas fechas.",
+      universo: "Scope por filtros (fechas). Resultado = DESPUÉS (último). Banderas = aparece en cualquier DURANTE del día.",
       criterios: [
         `Banderas: ${BANDERAS.length} (lista fija)`,
-        "Presencia/ausencia por día (no ranking, no frecuencia)",
-        "Resultado canónico = último DESPUÉS del día",
-        "DURANTE canónico = primer DURANTE del día",
+        "Presencia/ausencia por día (no frecuencia)",
+        "Resultado del día = último DESPUÉS (GANADA/PERDIDA)",
+        "Bandera del día = aparece en cualquier DURANTE",
         "Solo registros VALIDO y CORREGIDO",
         semaforo
       ],
@@ -366,7 +407,11 @@
       r?.acciones_human,
       r?.acciones_ui,
       r?.accion_text,
-      r?.accion_str
+      r?.accion_str,
+      // extra defensivo
+      r?.accion_display,
+      r?.accion_label,
+      r?.acciones_resumen
     ].filter((x) => typeof x === "string" && x.trim());
 
     if (candidates.length) {
@@ -386,7 +431,6 @@
 
   function splitAccionesString(s) {
     return String(s)
-      // separadores comunes
       .split(/[,;|\n]+/g)
       .map((x) => x.trim())
       .filter(Boolean);
