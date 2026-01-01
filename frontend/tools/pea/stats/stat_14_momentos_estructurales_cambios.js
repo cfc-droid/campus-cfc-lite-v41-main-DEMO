@@ -31,11 +31,10 @@
       if (Array.isArray(filtered) && filtered.length) universe = filtered;
     }
 
-// 2) Solo registros VALIDO y CORREGIDO (igual que otros stats)
-const valid = (Array.isArray(universe) ? universe : []).filter((r) => {
-  const st = safeText(r?.meta?.estado).trim();
-  return st === "VALIDO" || st === "CORREGIDO";
-});
+// 2) Excluir ANULADO
+const valid = (Array.isArray(universe) ? universe : []).filter(
+  (r) => normalizeEstadoRegistro(getRecordState(r)) !== "ANULADO"
+);
 
     if (!valid.length) {
       renderEmpty(box, "No hay registros válidos (excluye ANULADO).");
@@ -535,10 +534,14 @@ const valid = (Array.isArray(universe) ? universe : []).filter((r) => {
     return r?.meta?.estado || r?.estado_registro || r?.meta_estado || "VALIDO";
   }
 
-  function normalizeEstadoRegistro(v) {
-    const s = normalizeText(v);
-    return s || "VALIDO";
-  }
+function normalizeEstadoRegistro(v) {
+  const s = normalizeText(v);
+
+  // Tratar CORREGIDO como VALIDO (mismo criterio que Stat 04 / 07)
+  if (s === "CORREGIDO") return "VALIDO";
+
+  return s || "VALIDO";
+}
 
   function normalizeMomentoEstructural(v) {
     const s = safeText(v).trim();
