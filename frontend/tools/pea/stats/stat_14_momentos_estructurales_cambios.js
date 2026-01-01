@@ -302,20 +302,18 @@ ordered.forEach((r) => {
 
     const despuesList = Array.isArray(despues) ? despues : [];
 
-    // DESPUÉS del tramo cuyo resultado == target (consistente con CAPA 2)
-    const despuesMatch = despuesList.filter(
-      (r) => normalizeResultadoOperativo(getResultadoAny(r)) === normTarget
-    );
+// Fechas cuyo RESULTADO CANÓNICO (último DESPUÉS del día) == target
+const fechasTarget = new Set(
+  Object.keys(localResultByFecha || {}).filter(
+    (f) => localResultByFecha[f]?.res === normTarget
+  )
+);
 
-    const totalDias = despuesMatch.length;
+// Conteo por FECHA (no por cantidad de registros)
+const totalDias = fechasTarget.size;
 
-    // Porcentaje alineado con CAPA 2: base = TOTAL de DESPUÉS del tramo
-    const baseTotalDias = Math.max(1, despuesList.length);
-
-    // Fechas del tramo que realmente tienen DESPUÉS target
-    const fechasTarget = new Set(
-      despuesMatch.map((r) => safeText(r?.fecha).trim()).filter(Boolean)
-    );
+// Base también por FECHA (todas las fechas que tuvieron algún DESPUÉS)
+const baseTotalDias = Math.max(1, Object.keys(localResultByFecha || {}).length);
 
     // Pensamientos (ANTES) del tramo, solo de fechasTarget
     const pensamientos = [];
