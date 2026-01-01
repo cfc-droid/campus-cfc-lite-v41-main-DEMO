@@ -3,10 +3,10 @@
    Campus CFC LITE V41
 
    Nivel 4 — Salud, estructura y cambios
-   Estadística 14/17 (NUEVA versión: análisis por momento)
+   Estadística 14/17
 
-   Objetivo:
-   Para cada momento_estructural, mostrar:
+   Objetivo (formato "detalle del detalle" como IMA2):
+   Por cada MOMENTO ESTRUCTURAL (como tramo consecutivo / etapa):
    - Capa 1: Contexto (nombre, período, días)
    - Capa 2: Resultado operativo (DESPUÉS) + intensidad
    - Capa 3: Cadena PAE por resultado (GANADAS / PERDIDAS)
@@ -15,14 +15,14 @@
        * Top 3 Estados/Emociones (DESPUÉS)
 
    UX:
-   - Rail horizontal de tarjetas (muchos momentos sin estirar el layout)
-   - Selector: “ver 2/3/4” tarjetas por pantalla (responsive)
-   - Panel fijo a la derecha: placeholder para gráfico
+   - Rail horizontal (tarjetas lado a lado) + selector 2/3/4 por pantalla
+   - A la derecha: espacio reservado para gráfico (sin implementar)
 
    Reglas:
    - Usa SOLO registros filtrados (PEA_FILTERS.apply)
    - Excluye ANULADO (usa VALIDO y CORREGIDO)
-   - Hereda resultado por fecha desde DESPUÉS (porque ANTES/DURANTE no lo tienen)
+   - Resultado se toma del registro DESPUÉS (campo resultado / resultado_operativo)
+     y se "hereda por fecha" para asociar ANTES/DURANTE.
    - No interpreta, no aconseja
    ========================================================= */
 
@@ -44,32 +44,26 @@
       return;
     }
 
-    // Orden cronológico para segmentar por momento_estructural
+    // Orden cronológico para detectar TRAMOS consecutivos (etapas)
     const ordered = [...valid].sort((a, b) => getTimeKey(a).localeCompare(getTimeKey(b)));
 
-    // Segmentar por momento_estructural (tramos consecutivos) y luego consolidar por valor
-    // IMPORTANTE: el usuario quiere ver el momento como “etapa”; acá lo tratamos por valor,
-    // y el período se calcula por min/max fecha dentro del valor en el universo filtrado.
-    const byMoment = groupBy(ordered, r => normalizeMomentoEstructural(r?.momento_estructural));
+    // Segmentar por MOMENTO ESTRUCTURAL consecutivo (esto produce #1, #2, #3...)
+    const segments = []; // [{ value, records: [...] }]
+    ordered.forEach(r => {
+      const v = normalizeMomentoEstructural(r?.momento_estructural);
+      const last = segments[segments.length - 1];
+      if (!last || last.value !== v) segments.push({ value: v, records: [r] });
+      else last.records.push(r);
+    });
 
-    // Si solo existe SIN_MARCAR y nada más, se vuelve poco útil: igual lo mostramos.
-    const momentKeys = Object.keys(byMoment);
-    if (!momentKeys.length) {
+    if (!segments.length) {
       renderEmpty(box, "No se encontraron momentos estructurales en el universo filtrado.");
       return;
     }
 
-    // Construir “tarjetas” (una por momento estructural)
-    const cardsData = momentKeys
-      .sort((a, b) => {
-        // ordenar por primera fecha del momento
-        const aMin = minDateISO(byMoment[a].map(r => safeText(r?.fecha)));
-        const bMin = minDateISO(byMoment[b].map(r => safeText(r?.fecha)));
-        return (aMin || "").localeCompare(bMin || "");
-      })
-      .map((momentoValue, idx) => buildMomentCardData(momentoValue, byMoment[momentoValue], idx + 1));
+    // Construir tarjetas (una por tramo/etapa)
+    const cardsData = segments.map((seg, idx) => buildMomentCardData(seg.value, seg.records, idx + 1));
 
-    // Render UI: rail + selector + panel gráfico fijo
     const contenidoHTML = renderRailUI(cardsData);
 
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
@@ -77,23 +71,23 @@
       indice: 14,
       titulo: "Momentos estructurales (PAE + resultado)",
       totalRegistros: cardsData.length,
-      universo: "Registros del universo filtrado agrupados por momento_estructural",
+      universo: "Registros del universo filtrado segmentados por tramos consecutivos de momento_estructural",
       criterios: [
         "Universo filtrado actual (PEA_FILTERS.apply)",
         "Solo registros VALIDO y CORREGIDO",
-        "Resultado operativo heredado por fecha desde el registro DESPUÉS",
+        "Momento estructural tratado como etapa (tramos consecutivos, no agrupación global)",
+        "Resultado operativo tomado del registro DESPUÉS (resultado / resultado_operativo) y heredado por fecha",
         "Capa 3 separa GANADAS vs PERDIDAS y muestra Top 3 PAE",
         "Rail horizontal evita que el layout se estire con muchos momentos"
       ],
       contenidoHTML
     }));
 
-    // Hook UI: selector (2/3/4 visibles) + “enfocar” tarjeta para gráfico
     wireStat14UI();
   };
 
   /* =========================================================
-     UI (Rail + selector + panel gráfico)
+     UI (Rail + selector + espacio reservado a la derecha)
      ========================================================= */
 
   function renderRailUI(cardsData) {
@@ -144,9 +138,9 @@
           </div>
         </div>
 
-        <!-- DERECHA: panel fijo para gráfico (placeholder) -->
+        <!-- DERECHA: espacio reservado para gráfico (SIN UI / SIN gráfico) -->
         <div
-          id="pea-stat14-chart-panel"
+          id="pea-stat14-chart-space"
           style="
             flex: 0 0 360px;
             max-width:360px;
@@ -155,44 +149,11 @@
             padding:10px;
             position:sticky;
             top:10px;
+            min-height:420px;
           "
         >
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-            <strong>Gráfico</strong>
-            <select id="pea-stat14-chart-type" style="padding:4px 6px;">
-              <option value="NONE" selected>—</option>
-              <option value="PIE">Torta</option>
-              <option value="BAR">Barras</option>
-              <option value="LINE">Línea</option>
-            </select>
-          </div>
-
-          <div style="opacity:.85; font-size:13px; margin-bottom:8px;">
-            Seleccioná un tipo de gráfico y luego hacé click en una tarjeta para “enfocarla”.
-          </div>
-
-          <div
-            id="pea-stat14-chart"
-            style="
-              height:260px;
-              display:flex;
-              align-items:center;
-              justify-content:center;
-              border:1px dashed rgba(255,255,255,.18);
-              border-radius:10px;
-              opacity:.85;
-              font-size:13px;
-              padding:10px;
-              text-align:center;
-            "
-          >
-            (placeholder) <br>
-            Gráfico pendiente de implementación.
-          </div>
-
-          <div id="pea-stat14-chart-meta" style="margin-top:10px; font-size:13px; opacity:.9;">
-            <div><strong>Momento enfocado:</strong> <span id="pea-stat14-focus-name">—</span></div>
-            <div style="margin-top:4px;"><strong>Período:</strong> <span id="pea-stat14-focus-period">—</span></div>
+          <div style="opacity:.75; font-size:13px;">
+            (Espacio reservado para gráfico — se implementa cuando terminen las 17 estadísticas)
           </div>
         </div>
       </div>
@@ -206,43 +167,21 @@
     const selectVisible = document.getElementById("pea-stat14-visible");
     const rail = document.getElementById("pea-stat14-rail");
     const railInner = document.getElementById("pea-stat14-rail-inner");
-
     if (!selectVisible || !rail || !railInner) return;
 
-    // Responsive default: si pantalla chica, usar 1 o 2
-    // (no rompemos: dejamos 2 por default como pidió)
     applyVisibleCount(selectVisible.value);
 
     selectVisible.addEventListener("change", () => {
       applyVisibleCount(selectVisible.value);
-      // al cambiar cantidad visible, volvemos al inicio del rail para que no “pierda” contexto
       rail.scrollLeft = 0;
-    });
-
-    // Click en tarjeta: foco para gráfico (placeholder)
-    railInner.querySelectorAll("[data-stat14-card='1']").forEach(card => {
-      card.addEventListener("click", () => {
-        railInner.querySelectorAll("[data-stat14-card='1']").forEach(c => c.style.outline = "none");
-        card.style.outline = "2px solid rgba(80,200,120,.55)";
-
-        const name = card.getAttribute("data-momento") || "—";
-        const period = card.getAttribute("data-period") || "—";
-        const nameEl = document.getElementById("pea-stat14-focus-name");
-        const periodEl = document.getElementById("pea-stat14-focus-period");
-        if (nameEl) nameEl.textContent = name;
-        if (periodEl) periodEl.textContent = period;
-      });
     });
 
     function applyVisibleCount(nRaw) {
       const n = clampInt(nRaw, 1, 4);
-      // “Izquierda” (rail) ocupa lo que le queda al panel fijo derecho.
-      // Ajustamos ancho de tarjeta para que entren n “por pantalla” en el viewport del rail.
-      // Esto NO impide scroll: solo define un “tamaño objetivo” de tarjeta.
       const railWidth = rail.clientWidth || 800;
       const gap = 12;
-      const padding = 20; // rail inner
-      const cardW = Math.max(360, Math.floor((railWidth - padding - (gap * (n - 1))) / n));
+      const padding = 20;
+      const cardW = Math.max(520, Math.floor((railWidth - padding - (gap * (n - 1))) / n));
 
       railInner.querySelectorAll("[data-stat14-card='1']").forEach(card => {
         card.style.flex = `0 0 ${cardW}px`;
@@ -252,7 +191,7 @@
   }
 
   /* =========================================================
-     Construcción de datos por tarjeta (momento estructural)
+     Construcción de datos por tarjeta (segmento / etapa)
      ========================================================= */
 
   function buildMomentCardData(momentoValue, records, idx) {
@@ -261,21 +200,21 @@
     const fechas = list.map(r => safeText(r?.fecha)).filter(Boolean);
     const start = minDateISO(fechas) || "—";
     const end = maxDateISO(fechas) || "—";
-    const uniqueDays = new Set(fechas).size;
+    const dias = new Set(fechas).size;
 
     // Map fecha -> resultado (desde DESPUÉS)
     const resultByFecha = {};
     list.forEach(r => {
       if (safeText(r?.momento).toUpperCase() === "DESPUES") {
         const f = safeText(r?.fecha);
-        const res = normalizeResultadoOperativo(r?.resultado_operativo);
+        const res = normalizeResultadoOperativo(getResultadoAny(r));
         if (f && !resultByFecha[f]) resultByFecha[f] = res;
       }
     });
 
     // Capa 2: distribución de resultados usando DESPUÉS
     const despues = list.filter(r => safeText(r?.momento).toUpperCase() === "DESPUES");
-    const dist = countBy(despues, r => normalizeResultadoOperativo(r?.resultado_operativo));
+    const dist = countBy(despues, r => normalizeResultadoOperativo(getResultadoAny(r)));
 
     const totalDespues = despues.length;
     const out = {
@@ -290,13 +229,12 @@
       .map(r => toNumberOrNull(r?.intensidad))
       .filter(v => typeof v === "number" && !Number.isNaN(v));
 
-    const intensidadProm = intensidadVals.length ? (avg(intensidadVals)) : null;
-    const picos = intensidadVals.length ? Math.round((intensidadVals.filter(v => v >= 4).length / intensidadVals.length) * 100) : null;
+    const intensidadProm = intensidadVals.length ? avg(intensidadVals) : null;
+    const picos = intensidadVals.length
+      ? Math.round((intensidadVals.filter(v => v >= 4).length / intensidadVals.length) * 100)
+      : null;
 
     // Capa 3: PAE por resultado (GANADAS / PERDIDAS)
-    // - pensamientos: ANTES (fecha -> resultado heredado)
-    // - acciones: DURANTE (fecha -> resultado heredado)
-    // - estados/emociones: DESPUÉS (directo por resultado)
     const capa3 = {
       GANADAS: buildPAEForResult("GANADA", list, resultByFecha),
       PERDIDAS: buildPAEForResult("PERDIDA", list, resultByFecha)
@@ -307,7 +245,7 @@
       momento: momentoValue,
       start,
       end,
-      dias: uniqueDays,
+      dias,
       capa2: { out, intensidadProm, picos },
       capa3
     };
@@ -316,10 +254,9 @@
   function buildPAEForResult(targetRes, list, resultByFecha) {
     const normTarget = normalizeResultadoOperativo(targetRes);
 
-    // días (DESPUÉS) con ese resultado (base porcentual)
     const despuesMatch = list.filter(r =>
       safeText(r?.momento).toUpperCase() === "DESPUES" &&
-      normalizeResultadoOperativo(r?.resultado_operativo) === normTarget
+      normalizeResultadoOperativo(getResultadoAny(r)) === normTarget
     );
 
     const totalDias = despuesMatch.length;
@@ -331,7 +268,9 @@
       const f = safeText(r?.fecha);
       const res = f ? (resultByFecha[f] || "NA") : "NA";
       if (res !== normTarget) return;
-      if (r?.pensamiento_key) pensamientos.push(safeText(r.pensamiento_key));
+
+      const p = r?.pensamiento_key || r?.pensamiento;
+      if (p) pensamientos.push(safeText(p));
     });
 
     // Acciones DURANTE asociadas a esos días
@@ -341,12 +280,15 @@
       const f = safeText(r?.fecha);
       const res = f ? (resultByFecha[f] || "NA") : "NA";
       if (res !== normTarget) return;
+
       if (Array.isArray(r?.acciones_keys)) {
         r.acciones_keys.forEach(a => { if (a) acciones.push(safeText(a)); });
+      } else if (Array.isArray(r?.acciones)) {
+        r.acciones.forEach(a => { if (a) acciones.push(safeText(a)); });
       }
     });
 
-    // Estados/Emociones DESPUÉS (columna Estado (E)) asociados a ese resultado
+    // Estados/Emociones DESPUÉS (Estado (E)) asociados a ese resultado
     const estados = [];
     despuesMatch.forEach(r => {
       const est = r?.estado_key || r?.estado || r?.emocion_key || r?.emocion;
@@ -355,20 +297,20 @@
 
     return {
       totalDias,
-      topPensamientos: topNWithPercent(pensamientos, 3, true),
-      topAcciones: topNWithPercent(acciones, 3, true),
-      topEstados: topNWithPercent(estados, 3, true)
+      topPensamientos: topNWithPercent(pensamientos, 3),
+      topAcciones: topNWithPercent(acciones, 3),
+      topEstados: topNWithPercent(estados, 3)
     };
   }
 
   /* =========================================================
-     Render tarjeta
+     Render tarjeta (formato IMA2)
      ========================================================= */
 
   function renderMomentCard(cd) {
     const period = `${cd.start} → ${cd.end}`;
-
     const out = cd.capa2.out;
+
     const pct = (count, total) => total ? `${Math.round((count / total) * 100)}%` : "0%";
 
     const cap2Rows = `
@@ -376,7 +318,7 @@
       <tr><td>PERDIDA</td><td>${out.PERDIDA}</td><td>${pct(out.PERDIDA, out.TOTAL)}</td></tr>
       <tr><td>BE</td><td>${out.BE}</td><td>${pct(out.BE, out.TOTAL)}</td></tr>
       <tr><td>NA</td><td>${out.NA}</td><td>${pct(out.NA, out.TOTAL)}</td></tr>
-      <tr><td><strong>TOTAL</strong></td><td><strong>${out.TOTAL}</strong></td><td><strong>100%</strong></td></tr>
+      <tr><td><strong>TOTAL</strong></td><td><strong>${out.TOTAL}</strong></td><td><strong>${out.TOTAL ? "100%" : "0%"}</strong></td></tr>
     `;
 
     const intensidadProm = (cd.capa2.intensidadProm == null) ? "—" : cd.capa2.intensidadProm.toFixed(1);
@@ -386,15 +328,12 @@
       <div
         class="pea-cuadro-interno"
         data-stat14-card="1"
-        data-momento="${escapeAttr(cd.momento)}"
-        data-period="${escapeAttr(period)}"
         style="
           display:block;
           padding:10px;
           border-radius:10px;
           border:1px solid rgba(255,255,255,.06);
           background:rgba(0,0,0,.10);
-          cursor:pointer;
         "
       >
         <div style="margin-bottom:10px;">
@@ -402,6 +341,7 @@
             <span style="color:rgba(80,200,120,.9);">◆</span>
             <strong>MOMENTO ESTRUCTURAL #${cd.idx}</strong>
           </div>
+
           <div style="margin-top:6px; font-size:14px;">
             <strong>${safeText(cd.momento)}</strong>
           </div>
@@ -425,9 +365,7 @@
             <thead>
               <tr><th>Resultado</th><th>Cantidad</th><th>Porcentaje</th></tr>
             </thead>
-            <tbody>
-              ${cap2Rows}
-            </tbody>
+            <tbody>${cap2Rows}</tbody>
           </table>
 
           <div style="margin-top:8px; font-size:13px; opacity:.9;">
@@ -490,7 +428,7 @@
   }
 
   function renderRankTable(items, colName) {
-    // Siempre 3 filas (#1..#3)
+    // SIEMPRE 3 filas (#1..#3) aunque no haya datos
     const rows = (items && items.length ? items : []).slice(0, 3);
     while (rows.length < 3) rows.push({ key: "—", count: 0, percent: 0 });
 
@@ -536,10 +474,14 @@
     return s ? s : "SIN_MARCAR";
   }
 
+  // IMPORTANTE: soporta ambos nombres de campo
+  function getResultadoAny(r) {
+    return r?.resultado_operativo ?? r?.resultado ?? r?.resultadoOp ?? r?.resultado_key ?? null;
+  }
+
   function normalizeResultadoOperativo(v) {
     const s = safeText(v).trim().toUpperCase();
     if (s === "GANADA" || s === "PERDIDA" || s === "BE" || s === "NA") return s;
-    // si no existe (como suele pasar), lo tratamos como NA
     return "NA";
   }
 
@@ -548,32 +490,16 @@
     return String(v);
   }
 
-  function escapeAttr(v) {
-    return safeText(v)
-      .replace(/&/g, "&amp;")
-      .replace(/"/g, "&quot;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;");
-  }
-
   function getTimeKey(r) {
+    // Preferir created_at_iso si existe
     const iso = safeText(r?.meta?.created_at_iso).trim();
     if (iso) return iso;
 
+    // Fallback estable
     const f = safeText(r?.fecha).trim();
     const m = safeText(r?.momento).trim();
     const id = safeText(r?.id).trim();
     return `${f}T00:00:00.000Z|${m}|${id}`;
-  }
-
-  function groupBy(arr, keyFn) {
-    const out = {};
-    (Array.isArray(arr) ? arr : []).forEach(x => {
-      const k = safeText(keyFn(x));
-      if (!out[k]) out[k] = [];
-      out[k].push(x);
-    });
-    return out;
   }
 
   function countBy(arr, keyFn) {
@@ -585,7 +511,7 @@
     return m;
   }
 
-  function topNWithPercent(values, n, sortDesc) {
+  function topNWithPercent(values, n) {
     const arr = Array.isArray(values) ? values.filter(Boolean) : [];
     const total = arr.length;
     if (!total) return [];
@@ -593,16 +519,14 @@
     const map = {};
     arr.forEach(v => (map[v] = (map[v] || 0) + 1));
 
-    const entries = Object.entries(map).sort((a, b) => {
-      const diff = b[1] - a[1];
-      return sortDesc ? diff : -diff;
-    });
-
-    return entries.slice(0, n).map(([key, count]) => ({
-      key,
-      count,
-      percent: Math.round((count / total) * 100)
-    }));
+    return Object.entries(map)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, n)
+      .map(([key, count]) => ({
+        key,
+        count,
+        percent: Math.round((count / total) * 100)
+      }));
   }
 
   function toNumberOrNull(v) {
@@ -622,7 +546,7 @@
     return Math.max(min, Math.min(max, n));
   }
 
-  // Fechas tipo YYYY-MM-DD (como en tu tabla)
+  // Fechas tipo YYYY-MM-DD
   function minDateISO(list) {
     const arr = (Array.isArray(list) ? list : []).filter(Boolean).sort();
     return arr.length ? arr[0] : null;
