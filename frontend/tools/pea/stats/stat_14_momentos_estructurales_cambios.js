@@ -273,29 +273,25 @@ ordered.forEach((r) => {
     };
   }
 
-  function buildLocalResultByFecha(despuesList) {
-    const map = {}; // { fecha: {res, key} }
-    (Array.isArray(despuesList) ? despuesList : []).forEach((r) => {
-      const f = safeText(r?.fecha).trim();
-      if (!f) return;
+function buildLocalResultByFecha(despuesList) {
+  // { fecha: { res, key, record } }
+  const map = {};
 
-      const res = normalizeResultadoOperativo(getResultadoAny(r));
-      const tkey = getTimeKey(r);
+  (Array.isArray(despuesList) ? despuesList : []).forEach((r) => {
+    const f = safeText(r?.fecha).trim();
+    if (!f) return;
 
-      if (!map[f]) {
-        map[f] = { res, key: tkey };
-        return;
-      }
+    const res = normalizeResultadoOperativo(getResultadoAny(r));
+    const tkey = getTimeKey(r);
 
-      if (tkey > map[f].key) {
-        map[f] = { res, key: tkey };
-      }
-    });
+    // Me quedo con el DESPUÉS "más reciente" de esa fecha (canónico)
+    if (!map[f] || tkey > map[f].key) {
+      map[f] = { res, key: tkey, record: r };
+    }
+  });
 
-    const out = {};
-    Object.keys(map).forEach((f) => (out[f] = map[f].res));
-    return out; // { fecha: "GANADA"|"PERDIDA"|"BE"|"NA" }
-  }
+  return map; // { "2025-12-29": {res,key,record}, ... }
+}
 
   function buildPAEForResult(targetRes, list, despues, localResultByFecha) {
     const normTarget = normalizeResultadoOperativo(targetRes);
