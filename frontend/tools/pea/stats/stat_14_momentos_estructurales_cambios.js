@@ -534,14 +534,10 @@
     return r?.meta?.estado || r?.estado_registro || r?.meta_estado || "VALIDO";
   }
 
-function normalizeEstadoRegistro(v) {
-  const s = normalizeText(v);
-
-  // Tratar CORREGIDO como VALIDO
-  if (s === "CORREGIDO") return "VALIDO";
-
-  return s || "VALIDO";
-}
+  function normalizeEstadoRegistro(v) {
+    const s = normalizeText(v);
+    return s || "VALIDO";
+  }
 
   function normalizeMomentoEstructural(v) {
     const s = safeText(v).trim();
