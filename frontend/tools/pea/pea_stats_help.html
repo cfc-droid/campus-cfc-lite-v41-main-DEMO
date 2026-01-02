@@ -135,41 +135,46 @@
   <!-- =========================================================
        3) PRINCIPIOS BASE (REGLAS NO NEGOCIABLES)
        ========================================================= -->
-  <h2>Principios base (reglas no negociables)</h2>
+<h2>Principios base (reglas no negociables)</h2>
 
-      <li><strong>Conjuntos operativos (SETs):</strong>
-      <ul>
-        <li><strong>SET_INTERFERENCIA:</strong> lista de acciones que el sistema considera “interferentes” (definida en configuración del sistema).</li>
-        <li><strong>SET_CUMPLIMIENTO:</strong> lista de acciones que el sistema considera “alineadas al plan / cumplimiento” (definida en configuración del sistema).</li>
-        <li>Si una acción <strong>no está</strong> en el set correspondiente, <strong>no cuenta</strong> para esa métrica, aunque “parezca” interferencia/cumplimiento.</li>
-        <li>Estos sets pueden evolucionar por versión: la estadística siempre usa la <strong>configuración vigente</strong>.</li>
-      </ul>
-    </li>
+<ul>
+  <li><strong>Conjuntos operativos (SETs):</strong>
+    <ul>
+      <li><strong>SET_INTERFERENCIA:</strong> lista de acciones que el sistema considera “interferentes” (definida en configuración del sistema).</li>
+      <li><strong>SET_CUMPLIMIENTO:</strong> lista de acciones que el sistema considera “alineadas al plan / cumplimiento” (definida en configuración del sistema).</li>
+      <li>Si una acción <strong>no está</strong> en el set correspondiente, <strong>no cuenta</strong> para esa métrica, aunque “parezca” interferencia/cumplimiento.</li>
+      <li>Estos sets pueden evolucionar por versión: la estadística siempre usa la <strong>configuración vigente</strong>.</li>
+    </ul>
+  </li>
 
-  <ul>
-    <li><strong>Filtro de calidad:</strong> el sistema trabaja con registros cuyo estado sea <code>VALIDO</code> o <code>CORREGIDO</code> (CORREGIDO cuenta como VALIDO). <code>ANULADO</code> se excluye.</li>
-    <li><strong>Resultado operativo:</strong> para análisis por resultado, la clasificación final se basa en <strong>DESPUÉS</strong>:
-      <ul>
-        <li>En estadísticas “directas de DESPUÉS”, se usa el resultado del <strong>mismo registro DESPUÉS</strong>.</li>
-        <li>En estadísticas de ANTES o DURANTE, el resultado se <strong>hereda</strong> desde DESPUÉS usando reglas de cruce (por fecha o por fecha+dirección).</li>
-      </ul>
-    </li>
-    <li><strong>Respeto de filtros:</strong> en general, el universo usa <strong>los filtros activos</strong>. Si no hay registros tras filtrar, se muestra “evidencia insuficiente” (no se inventa universo).</li>
-    <li><strong>Unidad de conteo:</strong> según la estadística, la unidad puede ser:
-      <ul>
-        <li>DÍA (por ejemplo, cobertura).</li>
-        <li>REGISTRO (por ejemplo, intensidad promedio de DESPUÉS).</li>
-        <li>ETIQUETA (pensamiento, acción, estado) por <strong>ocurrencias</strong>.</li>
-      </ul>
-    </li>
-    <li><strong>Ocurrencias vs. “unidades únicas”:</strong> cuando una etiqueta se repite, cuenta tantas veces como aparezca. Si un registro contiene “A, B”, cuenta 1 para A y 1 para B.</li>
-    <li><strong>Reglas de cruce entre momentos:</strong>
-      <ul>
-        <li>Algunas estadísticas cruzan por <strong>fecha</strong> (día).</li>
-        <li>Otras cruzan por <strong>fecha + dirección</strong> (COMPRA/VENTA) para evitar mezclar operaciones distintas en el mismo día.</li>
-      </ul>
-    </li>
-  </ul>
+  <li><strong>Filtro de calidad:</strong> el sistema trabaja con registros cuyo estado sea <code>VALIDO</code> o <code>CORREGIDO</code> (CORREGIDO cuenta como VALIDO). <code>ANULADO</code> se excluye.</li>
+
+  <li><strong>Resultado operativo:</strong> para análisis por resultado, la clasificación final se basa en <strong>DESPUÉS</strong>:
+    <ul>
+      <li>En estadísticas “directas de DESPUÉS”, se usa el resultado del <strong>mismo registro DESPUÉS</strong>.</li>
+      <li>En estadísticas de ANTES o DURANTE, el resultado se <strong>hereda</strong> desde DESPUÉS usando reglas de cruce (por fecha o por fecha+dirección).</li>
+    </ul>
+  </li>
+
+  <li><strong>Respeto de filtros:</strong> en general, el universo usa <strong>los filtros activos</strong>. Si no hay registros tras filtrar, se muestra “evidencia insuficiente” (no se inventa universo).</li>
+
+  <li><strong>Unidad de conteo:</strong> según la estadística, la unidad puede ser:
+    <ul>
+      <li>DÍA (por ejemplo, cobertura).</li>
+      <li>REGISTRO (por ejemplo, intensidad promedio de DESPUÉS).</li>
+      <li>ETIQUETA (pensamiento, acción, estado) por <strong>ocurrencias</strong>.</li>
+    </ul>
+  </li>
+
+  <li><strong>Ocurrencias vs. “unidades únicas”:</strong> cuando una etiqueta se repite, cuenta tantas veces como aparezca. Si un registro contiene “A, B”, cuenta 1 para A y 1 para B.</li>
+
+  <li><strong>Reglas de cruce entre momentos:</strong>
+    <ul>
+      <li>Algunas estadísticas cruzan por <strong>fecha</strong> (día).</li>
+      <li>Otras cruzan por <strong>fecha + dirección</strong> (COMPRA/VENTA) para evitar mezclar operaciones distintas en el mismo día.</li>
+    </ul>
+  </li>
+</ul>
 
   <hr>
 
@@ -701,6 +706,7 @@
   <p><strong>A) Qué es</strong><br>
     Agrupa el historial por <strong>momentos estructurales</strong> (tramos/etapas consecutivas) y, dentro de cada tramo,
     resume:
+    </p>
     <ul>
       <li>Resultados operativos (DESPUÉS) del tramo.</li>
       <li>Cadena PAE por resultado (pensamientos ANTES, acciones DURANTE, estados DESPUÉS).</li>
