@@ -15,11 +15,6 @@ document.getElementById('pea-btn-back').onclick = () => {
   window.location.href = '/frontend/index.html';
 };
 
-document.getElementById('pea-btn-theme').onclick = () => {
-  if (typeof toggleThemeSafe === 'function') {
-    toggleThemeSafe();
-  }
-};
 
 // Vistas guardadas y Modo Auditoría
 // Se habilitan en bloques posteriores
