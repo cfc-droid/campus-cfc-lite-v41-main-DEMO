@@ -22,6 +22,20 @@
 
   <hr>
 
+    <!-- =========================================================
+       RESUMEN EJECUTIVO (APB)
+       ========================================================= -->
+  <h2>Resumen rápido (lectura práctica)</h2>
+  <ul>
+    <li>Cada estadística responde <strong>una pregunta concreta</strong> (si no responde una pregunta, no existe).</li>
+    <li>Si aparece <em>“datos insuficientes”</em>, el sistema <strong>no calcula</strong> y <strong>no hay conclusión posible</strong>.</li>
+    <li>Con muestras chicas, los porcentajes son <strong>volátiles</strong> (1 caso puede ser 100%).</li>
+    <li>PEA es <strong>descriptivo</strong>: muestra qué ocurrió, no qué “debería ocurrir”.</li>
+    <li><strong>Co-ocurrencia ≠ causalidad</strong>: que A aparezca con B no significa que A cause B.</li>
+  </ul>
+
+  <hr>
+
   <!-- =========================================================
        0) QUÉ ES PEA (GENERAL)
        ========================================================= -->
@@ -101,12 +115,36 @@
     <li><strong>Co-ocurrencia:</strong> “X aparece junto con Y” en el universo elegido (no implica causalidad).</li>
   </ul>
 
+    <h3>Unidades de análisis (esto explica casi todas las dudas)</h3>
+  <ul>
+    <li><strong>Unidad = DÍA:</strong> la estadística cuenta “días” (ej.: cobertura, índices 8/9/10). Un día vale 1, aunque tengas 10 registros.</li>
+    <li><strong>Unidad = REGISTRO:</strong> cuenta registros completos (ej.: intensidad en DESPUÉS).</li>
+    <li><strong>Unidad = OCURRENCIA de etiqueta:</strong> cuenta cada aparición de pensamiento/acción/estado (si aparece 3 veces, cuenta 3).</li>
+  </ul>
+
+  <h3>Regla “primer / último registro” (auditoría temporal)</h3>
+  <ul>
+    <li><strong>Primer ANTES del día:</strong> cuando una estadística necesita 1 ANTES por fecha, se toma el primer ANTES (orden temporal interno).</li>
+    <li><strong>Primer DURANTE del día:</strong> igual para DURANTE.</li>
+    <li><strong>Último DESPUÉS del día (+ dirección):</strong> para estadísticas 15/16, se usa el último DESPUÉS del mismo día y misma dirección para definir el cierre.</li>
+    <li>Si tu día tiene varios ANTES/DURANTE/DESPUÉS, el sistema <strong>no promedia</strong> por defecto: aplica estas reglas para mantener consistencia.</li>
+  </ul>
+
   <hr>
 
   <!-- =========================================================
        3) PRINCIPIOS BASE (REGLAS NO NEGOCIABLES)
        ========================================================= -->
   <h2>Principios base (reglas no negociables)</h2>
+
+      <li><strong>Conjuntos operativos (SETs):</strong>
+      <ul>
+        <li><strong>SET_INTERFERENCIA:</strong> lista de acciones que el sistema considera “interferentes” (definida en configuración del sistema).</li>
+        <li><strong>SET_CUMPLIMIENTO:</strong> lista de acciones que el sistema considera “alineadas al plan / cumplimiento” (definida en configuración del sistema).</li>
+        <li>Si una acción <strong>no está</strong> en el set correspondiente, <strong>no cuenta</strong> para esa métrica, aunque “parezca” interferencia/cumplimiento.</li>
+        <li>Estos sets pueden evolucionar por versión: la estadística siempre usa la <strong>configuración vigente</strong>.</li>
+      </ul>
+    </li>
 
   <ul>
     <li><strong>Filtro de calidad:</strong> el sistema trabaja con registros cuyo estado sea <code>VALIDO</code> o <code>CORREGIDO</code> (CORREGIDO cuenta como VALIDO). <code>ANULADO</code> se excluye.</li>
@@ -131,6 +169,22 @@
         <li>Otras cruzan por <strong>fecha + dirección</strong> (COMPRA/VENTA) para evitar mezclar operaciones distintas en el mismo día.</li>
       </ul>
     </li>
+  </ul>
+
+  <hr>
+
+    <!-- =========================================================
+       CASOS LÍMITE Y REGLAS DE EXCLUSIÓN (APB)
+       ========================================================= -->
+  <h2>Casos límite y reglas de exclusión (por qué algo NO aparece)</h2>
+
+  <ul>
+    <li><strong>Si falta el campo requerido</strong> (ej.: falta intensidad en estadísticas emocionales), ese registro <strong>no entra</strong> al universo de esa estadística.</li>
+    <li><strong>Si no existe DESPUÉS clasificable</strong> (GANADA/PERDIDA) para ese cruce, <strong>no hay puente posible</strong> y ANTES/DURANTE quedan fuera.</li>
+    <li><strong>Si el registro está ANULADO</strong>, se excluye siempre (aunque tenga datos “buenos”).</li>
+    <li><strong>Si los filtros dejan el universo vacío</strong>, el sistema muestra <em>datos insuficientes</em> y no “rellena”.</li>
+    <li><strong>Si un registro tiene múltiples etiquetas</strong> (ej.: “A, B, C”), cuenta <strong>1 ocurrencia por cada etiqueta</strong>.</li>
+    <li><strong>Filas “—” en Top</strong>: aparecen por <strong>Top fijo</strong> (estructura), no porque haya datos ocultos.</li>
   </ul>
 
   <hr>
