@@ -7,7 +7,7 @@
    Estadística 17/17
 
    OBJETIVO (similar a Stat 15/16):
-   - Unidad = ESTADO (no día)
+   - Unidad = ESTADO (E) (no día)
    - Para cada estado (top 5):
        GANADAS: cantidad + %
        PERDIDAS: cantidad + %
@@ -19,9 +19,10 @@
        GANADA / PERDIDA
    - No hace falta puente por fecha+dirección porque en DESPUÉS ya es “cierre”.
 
-   SCOPE:
+   SCOPE (IMPORTANTE):
    - Estados tomados de registros DESPUÉS que respetan filtros activos
-   - Solo se consideran DESPUÉS con resultado_operativo GANADA/PERDIDA
+   - Si filtros dejan vacío => se muestra “Evidencia insuficiente”
+     (NO se cae a ALL, para no “inventar” resultados fuera del filtro)
 
    REGLAS:
    - Si un DESPUÉS no tiene GANADA/PERDIDA => no entra al universo
@@ -29,7 +30,7 @@
 
    Robustez de estado (Estado “E”):
    - estado / emocion / emoción / estado_emocional / estado_key / estados_keys / etc.
-   - meta.estado / meta.emocion / meta.estado_emocional
+   - meta.emocion / meta.estado_emocional (PERO NO meta.estado, porque suele ser estado_registro)
    ========================================================= */
 
 (function () {
@@ -51,16 +52,19 @@
     );
 
     /* ===============================
-       1) Scope (lo definen los filtros)
-          - Si filtros dejan vacío, caemos a ALL
+       1) SCOPE (respeta filtros SIEMPRE)
        =============================== */
-    const scopeRecords = filteredValid.length ? filteredValid : allValid;
+    const scopeRecords = filteredValid; // ✅ sin fallback a ALL
+
+    if (!scopeRecords.length) {
+      return renderEmpty(box, "No hay registros válidos que cumplan los filtros actuales.");
+    }
 
     // Tomamos SOLO DESPUÉS dentro del scope
     const despuesScope = scopeRecords.filter((r) => normalizeMomento(r?.momento) === "DESPUES");
 
     if (!despuesScope.length) {
-      return renderEmpty(box, "No hay registros DESPUÉS (válidos) en el universo actual (scope).");
+      return renderEmpty(box, "No hay registros DESPUÉS (válidos) dentro de los filtros actuales.");
     }
 
     /* ===============================
@@ -72,8 +76,8 @@
       return res === "GANADA" || res === "PERDIDA";
     });
 
-    // Si no hay cierres clasificables, mostramos cuadro fijo vacío
-    const counts = new Map(); // key estado normalized => { label, g, p, t }
+    // Conteo por estado: key estado normalized => { label, g, p, t }
+    const counts = new Map();
     let totalOcurrencias = 0;
     let huboDespuesSinEstado = false;
 
@@ -106,12 +110,11 @@
     const itemsAll = Array.from(counts.values()).filter((x) => x.t > 0);
 
     /* ===============================
-       3) TOP 5 (dinámico) + cuadro FIJO
+       3) TOP 5 + cuadro FIJO
        =============================== */
     const FIXED_ROWS = 5;
 
     if (itemsAll.length) {
-      // Orden: más frecuencia primero; si empata, más % pérdida primero
       itemsAll.sort((a, b) => {
         if (b.t !== a.t) return b.t - a.t;
         const ap = a.t ? (a.p / a.t) : 0;
@@ -123,7 +126,7 @@
     const top = itemsAll.slice(0, FIXED_ROWS);
 
     /* ===============================
-       4) Render (APB) — 5 filas + Totales
+       4) Render
        =============================== */
     function pct(n, t) {
       return t ? Math.round((n / t) * 100) : 0;
@@ -133,7 +136,6 @@
     const sumP = top.reduce((acc, r) => acc + (r?.p || 0), 0);
     const sumT = top.reduce((acc, r) => acc + (r?.t || 0), 0);
 
-    // Evitar negritas heredadas por CSS
     const tdPlain = 'style="font-weight:400 !important;"';
     const tdNum = 'class="pea-n" style="font-weight:400 !important;"';
 
@@ -180,7 +182,6 @@
       </tr>
     `);
 
-    // Semáforo simple (por volumen de ocurrencias)
     let semaforo = "🟡 Datos parciales";
     if (totalOcurrencias >= 30) semaforo = "🟢 Datos suficientes";
     if (totalOcurrencias < 10) semaforo = "🔴 Datos insuficientes";
@@ -267,6 +268,7 @@
      =============================== */
 
   function getRecordState(r) {
+    // OJO: esto es estado_registro (VALIDO/CORREGIDO/ANULADO), NO Estado (E)
     return r?.meta?.estado || r?.estado_registro || r?.meta_estado || "VALIDO";
   }
 
@@ -304,7 +306,7 @@
     return "NA";
   }
 
-  // ✅ Extractor robusto de Estados (E)
+  // ✅ Extractor robusto de Estados (E) (NO usar meta.estado)
   function extractEstados(r) {
     const out = [];
 
@@ -320,6 +322,7 @@
     // campos típicos (lo que ves como “Estado (E)”)
     const candidates = [
       r?.estado,
+      r?.estado_e,
       r?.estado_emocional,
       r?.estado_emocion,
       r?.emocion,
@@ -330,10 +333,11 @@
       r?.emocion_text,
       r?.emocion_str,
 
-      // meta
-      r?.meta?.estado,
+      // meta (pero NO meta.estado)
       r?.meta?.emocion,
-      r?.meta?.estado_emocional
+      r?.meta?.estado_emocional,
+      r?.meta?.estado_emocion,
+      r?.meta?.estado_e
     ];
 
     candidates.forEach((x) => {
@@ -341,7 +345,6 @@
       else if (Array.isArray(x)) x.forEach((y) => (y && String(y).trim() ? out.push(String(y).trim()) : null));
     });
 
-    // split si viene “A, B, C”
     const expanded = [];
     out.forEach((s) => splitTextList(s).forEach((p) => expanded.push(p)));
 
@@ -371,11 +374,6 @@
       .toUpperCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "");
-  }
-
-  function safeText(v) {
-    if (v == null) return "";
-    return String(v);
   }
 
   function escapeHtml(s) {
