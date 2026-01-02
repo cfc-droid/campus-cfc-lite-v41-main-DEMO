@@ -5,45 +5,12 @@
   <title>Análisis (PAE) — Registro operativo</title>
 
   <!-- CSS global del Campus (heredado, NO modificar) -->
-<link rel="stylesheet" href="/frontend/css/style.css" />
+  <link rel="stylesheet" href="/frontend/css/style.css" />
 
-<!-- PEA CSS (solo visual) -->
-<link rel="stylesheet" href="./css/pea_tokens.css" />
-<link rel="stylesheet" href="./css/pea_layout.css" />
-<link rel="stylesheet" href="./css/pea_components.css" />
-
-<!-- ✅ SOLO ESTO SE AGREGA: estilos del “recuadro contenedor” + botones arriba -->
-<style>
-  /* Contenedor general (centra y da aire) */
-  .pea-shell{
-    max-width: 980px;
-    margin: 40px auto;
-    padding: 0 16px;
-  }
-
-  /* Card: envuelve TODO */
-  .pea-card{
-    border-radius: 16px;
-    padding: 22px 24px;
-    background: rgba(255,255,255,.88);
-    color: #111;
-  }
-
-  /* Botones superiores (mismo formato que Home, usando .btn-main) */
-  .pea-top-actions{
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin: 12px 0 14px 0;
-  }
-
-  /* Dark mode (misma lógica que Home: html.pea-dark) */
-  html.pea-dark .pea-card{
-    background: rgba(20,20,20,.78);
-    color: #f3f3f3;
-  }
-</style>
-
+  <!-- PEA CSS (solo visual) -->
+  <link rel="stylesheet" href="./css/pea_tokens.css" />
+  <link rel="stylesheet" href="./css/pea_layout.css" />
+  <link rel="stylesheet" href="./css/pea_components.css" />
 </head>
 
 <body>
@@ -59,7 +26,7 @@
         <h1>Análisis (PAE) — Registro operativo</h1>
       </header>
 
-      <!-- ✅ BOTONES ARRIBA (incluye Claro/Oscuro como en Home) -->
+      <!-- ✅ BOTONES ARRIBA (incluye Claro/Oscuro) -->
       <div class="pea-top-actions pea-actions">
         <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">
           Historial y estadísticas
@@ -84,8 +51,11 @@
       <section class="pea-legal-banner">
         <p>Sistema de auditoría operativa. No interpreta, no aconseja, no diagnostica.</p>
 
-        <p>Nota operativa: Un mismo día puede incluir hasta 3 registros, dependiendo del "Momento operativo" que te encuentres (ANTES, DURANTE o DESPUÉS DE UNA OPERACIÓN). 
-          La ausencia de alguno de ellos no invalida el registro, pero reduce la precisión del análisis por momento.</p>
+        <p>
+          Nota operativa: Un mismo día puede incluir hasta 3 registros, dependiendo del "Momento operativo" que te encuentres
+          (ANTES, DURANTE o DESPUÉS DE UNA OPERACIÓN). La ausencia de alguno de ellos no invalida el registro, pero reduce
+          la precisión del análisis por momento.
+        </p>
       </section>
 
       <!-- ======================================================
@@ -121,7 +91,6 @@
               <option value="NA">NA</option>
             </select>
           </label>
-
         </section>
 
         <!-- =========================
@@ -141,7 +110,6 @@
         <!-- =========================
              ACCIÓN (A)
              ========================= -->
-
         <section class="pea-section">
           <h2>Acción (A)</h2>
 
@@ -234,22 +202,18 @@
           <h2>Nota factual (opcional)</h2>
 
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-
-            <!-- Nota factual -->
             <textarea
               id="pea-nota"
               maxlength="180"
               placeholder="Descripción objetiva (máx. 180 caracteres)"
             ></textarea>
 
-            <!-- Momento estructural -->
             <label>
               Momento estructural
               <select id="pea-momento-estructural">
                 <option value="SIN_MARCAR">— Sin marcar —</option>
               </select>
             </label>
-
           </div>
         </section>
 
@@ -257,9 +221,9 @@
              ACCIONES FINALES
              ========================= -->
         <section class="pea-actions">
-          <button id="pea-guardar" type="button">Guardar</button>
-          <button id="pea-nuevo" type="button">Nuevo</button>
-          <button id="pea-modificar" type="button">Modificar</button>
+          <button id="pea-guardar" type="button" class="btn-main">Guardar</button>
+          <button id="pea-nuevo" type="button" class="btn-main">Nuevo</button>
+          <button id="pea-modificar" type="button" class="btn-main">Modificar</button>
         </section>
 
       </main>
@@ -267,16 +231,58 @@
     </div>
   </div>
 
-<script src="./pea_theme.js"></script>  
+  <script src="./pea_theme.js"></script>
 
-<!-- VALIDACIONES (window.validatePEAForm) -->
-<script src="./pea_validate.js"></script>
+  <!-- ✅ FIX: garantiza que Claro/Oscuro funcione aunque pea_theme.js no enganche el botón -->
+  <script>
+    (function(){
+      const ROOT = document.documentElement;
+      const BTN = document.getElementById('pea-btn-theme');
 
-<!-- STORAGE GLOBAL (window.PEA_STORAGE) -->
-<script src="./pea_storage.js"></script>
+      function readPref(){
+        // Probamos varios keys por compatibilidad
+        const a = localStorage.getItem('pea_theme');
+        const b = localStorage.getItem('PEA_THEME');
+        const c = localStorage.getItem('theme');
+        const v = (a || b || c || '').toLowerCase();
+        if (v.includes('dark') || v === '1' || v === 'true') return 'dark';
+        if (v.includes('light') || v === '0' || v === 'false') return 'light';
+        return ROOT.classList.contains('pea-dark') ? 'dark' : 'light';
+      }
 
-<!-- REGISTER (usa validate + storage) -->
-<script type="module" src="./pea_register.js"></script>
+      function writePref(mode){
+        localStorage.setItem('pea_theme', mode);
+        localStorage.setItem('PEA_THEME', mode);
+        localStorage.setItem('theme', mode);
+      }
+
+      function apply(mode){
+        if (mode === 'dark') ROOT.classList.add('pea-dark');
+        else ROOT.classList.remove('pea-dark');
+        writePref(mode);
+      }
+
+      // Estado inicial
+      apply(readPref());
+
+      // Click
+      if (BTN){
+        BTN.addEventListener('click', function(){
+          const isDark = ROOT.classList.contains('pea-dark');
+          apply(isDark ? 'light' : 'dark');
+        });
+      }
+    })();
+  </script>
+
+  <!-- VALIDACIONES (window.validatePEAForm) -->
+  <script src="./pea_validate.js"></script>
+
+  <!-- STORAGE GLOBAL (window.PEA_STORAGE) -->
+  <script src="./pea_storage.js"></script>
+
+  <!-- REGISTER (usa validate + storage) -->
+  <script type="module" src="./pea_register.js"></script>
 
 </body>
 </html>
