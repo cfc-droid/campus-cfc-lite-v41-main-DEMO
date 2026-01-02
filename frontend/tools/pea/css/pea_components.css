@@ -1,0 +1,56 @@
+/* Cards / Paneles */
+.pea-zone, .pea-section, .pea-filters, .pea-table-wrap{
+  border-radius: var(--pea-radius);
+}
+
+/* Cuadros “base” (stats) */
+.pea-table{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.pea-table th,
+.pea-table td{
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+.pea-table thead th{
+  border-bottom: var(--pea-border-soft);
+  font-weight: 800;
+}
+
+.pea-table tbody tr:not(:last-child) td{
+  border-bottom: var(--pea-border-soft);
+}
+
+.pea-empty,
+.pea-warning{
+  padding: var(--pea-pad-3);
+  border-radius: var(--pea-radius-sm);
+  border: var(--pea-border);
+}
+
+.pea-warning{
+  background: rgba(255,200,70,.08);
+}
+
+/* Botones (sin pelearte con el Campus) */
+.pea-actions button,
+.pea-actions .btn-main{
+  border-radius: var(--pea-radius-sm);
+  padding: 10px 12px;
+}
+
+/* Tipos de texto */
+.pea-help{
+  color: var(--pea-text-2);
+}
+
+.pea-metricas-secundarias{
+  color: var(--pea-text-2);
+}
+
+/* Numeritos alineados (stats) */
+.pea-n{ text-align:right; }
