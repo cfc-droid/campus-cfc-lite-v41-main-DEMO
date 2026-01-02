@@ -59,6 +59,7 @@ const PEA_STATS_RENDERERS = [
 "renderStat_13_salud_del_dato",
 "renderStat_14_momentos_estructurales_cambios",
 'renderStat_15_acciones_criticas_por_resultado',
+'renderStat_16_pensamientos_criticos_por_resultado.js',  
    
 
    
