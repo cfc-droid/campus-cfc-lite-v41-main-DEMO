@@ -54,3 +54,37 @@
 
 /* Numeritos alineados (stats) */
 .pea-n{ text-align:right; }
+
+/* =========================================
+   PEA — Premium Dark global
+   Activado por: html.pea-dark
+   ========================================= */
+
+html.pea-dark body{
+  background: #0f0f10;
+  color: #f4f4f4;
+}
+
+/* Texto blanco legible */
+html.pea-dark p,
+html.pea-dark li,
+html.pea-dark label,
+html.pea-dark small,
+html.pea-dark .pea-help,
+html.pea-dark .pea-metricas-secundarias{
+  color: #f4f4f4 !important;
+  opacity: 1 !important;
+}
+
+/* Dorado premium */
+html.pea-dark h1,
+html.pea-dark h2,
+html.pea-dark strong{
+  color: #d6b25e !important;
+}
+
+/* Links dorados */
+html.pea-dark a{
+  color: #d6b25e !important;
+  text-decoration-color: rgba(214,178,94,.55);
+}
