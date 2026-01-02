@@ -28,8 +28,13 @@ if (auditBtn) {
   auditBtn.onclick = () => alert('Función no disponible en esta versión.');
 }
 
-document.getElementById('pea-btn-theme').onclick = () => {
-  if (typeof toggleThemeSafe === 'function') {
-    toggleThemeSafe();
-  }
-};
+const themeBtn = document.getElementById('pea-btn-theme');
+if (themeBtn) {
+  themeBtn.onclick = () => {
+    if (typeof toggleThemeSafe === 'function') {
+      toggleThemeSafe();
+    } else {
+      console.warn("toggleThemeSafe no está disponible en esta página.");
+    }
+  };
+}
