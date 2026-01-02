@@ -36,13 +36,6 @@
   background: rgba(255,200,70,.08);
 }
 
-/* Botones (sin pelearte con el Campus) */
-.pea-actions button,
-.pea-actions .btn-main{
-  border-radius: var(--pea-radius-sm);
-  padding: 10px 12px;
-}
-
 /* Tipos de texto */
 .pea-help{
   color: var(--pea-text-2);
@@ -102,7 +95,7 @@ html.pea-dark a{
 .pea-card{
   border-radius: 18px;
   padding: 22px 24px;
-  background: rgba(255,255,255,.88);
+  background: rgba(255,255,255,.92);
   color: #111;
   box-shadow: 0 10px 30px rgba(0,0,0,.08);
   border: 1px solid rgba(0,0,0,.06);
@@ -134,6 +127,22 @@ html.pea-dark a{
   filter: brightness(0.97);
 }
 
+/* ✅ Botones de abajo: mismo look aunque no tengan class (por si acaso) */
+.pea-actions button{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+
+.pea-actions button:hover{
+  filter: brightness(0.97);
+}
+
 /* Dark: mismo criterio que Home */
 html.pea-dark .pea-card{
   background: rgba(20,20,20,.78);
@@ -146,8 +155,69 @@ html.pea-dark .pea-top-actions{
   border-bottom: 1px solid rgba(255,255,255,.10);
 }
 
-/* En dark, dorado para títulos/strong ya lo tenías; mantenemos botón premium */
-html.pea-dark .btn-main{
+/* En dark, mantenemos botón premium amarillo */
+html.pea-dark .btn-main,
+html.pea-dark .pea-actions button{
   background: #ffd400;
   color: #111;
+}
+
+/* =========================================
+   ✅ CAMPOS (inputs/select/textarea) DORADOS
+   ========================================= */
+
+/* Base claro */
+.pea-register input[type="text"],
+.pea-register input[type="date"],
+.pea-register select,
+.pea-register textarea{
+  width: 100%;
+  background: rgba(255,212,0,.18);       /* doradito */
+  border: 1px solid rgba(0,0,0,.18);
+  color: #111;
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+/* Placeholder */
+.pea-register textarea::placeholder,
+.pea-register input::placeholder{
+  color: rgba(0,0,0,.55);
+}
+
+/* Focus */
+.pea-register input:focus,
+.pea-register select:focus,
+.pea-register textarea:focus{
+  border-color: rgba(255,212,0,.85);
+  box-shadow: 0 0 0 3px rgba(255,212,0,.22);
+}
+
+/* Dropdown (lo máximo posible, depende del navegador) */
+.pea-register select option{
+  background: #1a1a1a;   /* para que al abrir no “cante” blanco en muchos casos */
+  color: #f4f4f4;
+}
+
+/* Dark fields */
+html.pea-dark .pea-register input[type="text"],
+html.pea-dark .pea-register input[type="date"],
+html.pea-dark .pea-register select,
+html.pea-dark .pea-register textarea{
+  background: rgba(255,212,0,.14);
+  border: 1px solid rgba(255,255,255,.14);
+  color: #f4f4f4;
+}
+
+html.pea-dark .pea-register textarea::placeholder,
+html.pea-dark .pea-register input::placeholder{
+  color: rgba(255,255,255,.55);
+}
+
+html.pea-dark .pea-register input:focus,
+html.pea-dark .pea-register select:focus,
+html.pea-dark .pea-register textarea:focus{
+  border-color: rgba(255,212,0,.85);
+  box-shadow: 0 0 0 3px rgba(255,212,0,.18);
 }
