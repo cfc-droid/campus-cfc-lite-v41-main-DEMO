@@ -27,3 +27,9 @@ const auditBtn = document.getElementById('pea-btn-audit');
 if (auditBtn) {
   auditBtn.onclick = () => alert('Función no disponible en esta versión.');
 }
+
+document.getElementById('pea-btn-theme').onclick = () => {
+  if (typeof toggleThemeSafe === 'function') {
+    toggleThemeSafe();
+  }
+};
