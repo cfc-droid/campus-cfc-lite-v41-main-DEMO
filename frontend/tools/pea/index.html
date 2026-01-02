@@ -14,28 +14,59 @@
 <link rel="stylesheet" href="./css/pea_layout.css?v=1" />
 <link rel="stylesheet" href="./css/pea_components.css?v=1" />
 
+  
 <style>
-  /* FIX legibilidad: crea una “tarjeta” para que el texto no quede sobre el fondo del premium */
+  /* 1) La página COMPLETA (no solo la tarjeta) */
+  html, body{
+    min-height: 100%;
+  }
+
+  /* Light */
+  body.premium-scope{
+    background: transparent;
+    color: #111;
+  }
+
+  /* Dark: fuerza fondo global + texto global */
+  html.pea-dark body.premium-scope{
+    background-color: #0f0f10 !important;
+    background-image: none !important;
+    color: #f3f3f3;
+  }
+
+  /* Si premium dibuja fondos con pseudoelementos, los apagamos en dark */
+  html.pea-dark body.premium-scope::before,
+  html.pea-dark body.premium-scope::after{
+    display: none !important;
+  }
+
+  /* 2) “Tarjeta” integrada (sin cuadro blanco) */
   .pea-home{
     max-width: 980px;
     margin: 40px auto;
     padding: 22px 24px;
     border-radius: 16px;
-    background: rgba(255,255,255,.88);
-    color: #111;
-  }
-  .pea-home h1 { margin-top: 0; }
-  .pea-desc, .pea-help { color: #111; }
-  .pea-help li { margin: 6px 0; }
 
-  /* Dark mode */
-  html.pea-dark .pea-home{
-    background: rgba(20,20,20,.78);
-    color: #f3f3f3;
+    /* integrado (no blanco) */
+    background: rgba(255,255,255,.20);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+
+    /* borde sutil para separar sin “caja” */
+    border: 1px solid rgba(0,0,0,.08);
+    color: inherit;
   }
-  html.pea-dark .pea-desc,
-  html.pea-dark .pea-help { color: #f3f3f3; }
+
+  html.pea-dark .pea-home{
+    background: rgba(0,0,0,.25);
+    border: 1px solid rgba(255,255,255,.10);
+  }
+
+  .pea-home h1 { margin-top: 0; }
+  .pea-desc, .pea-help { color: inherit; }
+  .pea-help li { margin: 6px 0; }
 </style>
+
 
   
 </head>
