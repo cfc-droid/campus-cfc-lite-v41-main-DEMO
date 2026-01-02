@@ -148,7 +148,6 @@
       const dark = (mode === "dark");
       root.classList.toggle("pea-dark", dark);
       localStorage.setItem(KEY, dark ? "dark" : "light");
-      if (btn) btn.textContent = dark ? "Claro" : "Oscuro";
     }
 
     const saved = localStorage.getItem(KEY) || "light";
