@@ -134,7 +134,36 @@
     })();
   </script>
 
-  <script src="./pea_home.js"></script>
+<script>
+  // =========================================================
+  // ✅ PEA THEME (independiente del Campus)
+  // No pisa nada global
+  // =========================================================
+  (function peaThemeInit(){
+    const KEY = "PEA_THEME";
+    const root = document.documentElement;
+    const btn = document.getElementById("pea-btn-theme");
+
+    function apply(mode){
+      const dark = (mode === "dark");
+      root.classList.toggle("pea-dark", dark);
+      localStorage.setItem(KEY, dark ? "dark" : "light");
+      if (btn) btn.textContent = dark ? "Claro" : "Oscuro";
+    }
+
+    const saved = localStorage.getItem(KEY) || "light";
+    apply(saved);
+
+    if (btn){
+      btn.addEventListener("click", () => {
+        const current = localStorage.getItem(KEY) || "light";
+        apply(current === "dark" ? "light" : "dark");
+      });
+    }
+  })();
+</script>
+
+<script src="./pea_home.js"></script>
 
 </body>
 </html>
