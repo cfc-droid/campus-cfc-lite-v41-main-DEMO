@@ -1,533 +1,298 @@
 /* =========================================================
-   PEA — Sistema Visual HEREDADO del Campus
-   (NO paleta nueva / NO hex / NO “colores inventados”)
+   PEA — Sistema Visual Heredado del Campus
    ========================================================= */
 
 /* =========================================================
-   0) TOKENS (solo “puente” a variables Campus existentes)
-   - Si alguna no existe, fallback NEUTRO (transparent/currentColor)
+   BASE GENERAL
    ========================================================= */
-:root{
-  /* Base */
-  --pea-bg:            var(--bg-main, transparent);
-  --pea-text:          var(--text-main, currentColor);
-  --pea-text-muted:    var(--text-secondary, currentColor);
-  --pea-border:        var(--border-neutral, currentColor);
-  --pea-accent:        var(--accent-primary, currentColor);
 
-  /* Superficies / Cards */
-  --pea-surface:       var(--bg-surface, transparent);
-  --pea-surface-2:     var(--bg-elevated, transparent);
-
-  /* Tipografía */
-  --pea-font:          var(--font-main, inherit);
-
-  /* Radios / sombras (solo si Campus los define) */
-  --pea-radius:        var(--radius, var(--radius-md, 12px));
-  --pea-radius-sm:     var(--radius-sm, 10px);
-  --pea-shadow:        var(--shadow, var(--shadow-soft, none));
-
-  /* Contenedor */
-  --pea-container:     var(--campus-container, 1100px);
-  --pea-pad:           var(--campus-space-4, 16px);
-
-  /* Controles */
-  --pea-control-bg:    var(--control-bg, var(--pea-surface, transparent));
-  --pea-control-text:  var(--control-text, var(--pea-text, currentColor));
-  --pea-control-bd:    var(--control-border, var(--pea-border, currentColor));
-
-  /* Botones (texto “sobre acento” debe venir del Campus) */
-  --pea-btn-primary-bg:  var(--btn-primary-bg, var(--button-primary-bg, var(--pea-accent, currentColor)));
-  --pea-btn-primary-fg:  var(--btn-primary-text, var(--button-primary-text, var(--text-on-accent, var(--text-dark, var(--text-main, currentColor)))));
-  --pea-btn-secondary-bg:var(--btn-secondary-bg, var(--button-secondary-bg, transparent));
-  --pea-btn-secondary-fg:var(--btn-secondary-text, var(--button-secondary-text, var(--pea-text, currentColor)));
-  --pea-btn-border:      var(--btn-border, var(--button-border, var(--pea-border, currentColor)));
-}
-
-/* =========================================================
-   1) BASE GENERAL (no tocar lógica, solo estilo)
-   Mantengo selectores existentes + agrego .pea-root
-   ========================================================= */
 #pea-root,
-.pea-root,
 .pea-home,
 .pea-screen,
 .pea-history {
-  background: var(--pea-bg);
-  color: var(--pea-text);
+  background: var(--bg-main);
+  color: var(--text-main);
 }
 
 #pea-root,
-.pea-root,
 .pea-home,
 .pea-screen,
 .pea-history,
-#pea-root *,
-.pea-root * {
-  font-family: var(--pea-font);
-  box-sizing: border-box;
+#pea-root * {
+  font-family: var(--font-main);
 }
 
-/* Contenedor “campus-like” */
-#pea-root,
-.pea-root,
-.pea-home,
-.pea-screen,
-.pea-history {
-  max-width: var(--pea-container);
-  margin: 0 auto;
-  padding: var(--pea-pad);
-}
-
-/* =========================================================
-   2) TIPOGRAFÍA / JERARQUÍA (heredar Campus)
-   ========================================================= */
+/* Títulos */
 .pea-home h1,
 .pea-screen h1,
-.pea-history h1{
-  font-weight: 700;
-  margin: 0 0 0.75rem 0;
+.pea-history h1 {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .pea-home h2,
 .pea-screen h2,
-.pea-history h2{
-  font-weight: 600;
-  margin: 1rem 0 0.5rem 0;
+.pea-history h2 {
+  font-weight: 500;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
 }
 
+/* Texto auxiliar */
 .pea-desc,
-.pea-empty{
-  color: var(--pea-text-muted);
+.pea-empty {
+  color: var(--text-secondary);
 }
 
-/* Texto “micro” metodológico */
-.pea-micro,
-.pea-note,
-.pea-hint{
-  color: var(--pea-text-muted);
-  font-size: 0.95rem;
-}
-
-/* =========================================================
-   3) “CARDS” NEUTRAS (envolver secciones sin cambiar lógica)
-   - Usar .pea-card si la agregás en HTML
-   ========================================================= */
-.pea-card{
-  background: var(--pea-surface);
-  border: 1px solid var(--pea-border);
-  border-radius: var(--pea-radius);
-  padding: var(--pea-pad);
-  margin: 0 0 var(--pea-pad) 0;
-  box-shadow: var(--pea-shadow);
-}
-
-/* Separadores suaves */
-.pea-divider{
-  border-top: 1px solid var(--pea-border);
-  margin: 1rem 0;
-}
-
-/* =========================================================
-   4) BOTONERAS (una fila / wrap en mobile)
-   ========================================================= */
+/* Botoneras */
 .pea-actions,
-.pea-access{
+.pea-access {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  align-items: center;
   margin-top: 0.75rem;
 }
 
-/* Contenedores sugeridos por índice (si existen) */
-.pea-form-actions,
-.pea-topbar__right{
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  align-items: center;
-}
-
 /* =========================================================
-   5) BOTONES (sin borrar ninguno; solo estilo)
-   - Si ya existen clases Campus (.btn, .btn-primary, etc.) van a ganar por cascada.
-   - Esto es “fallback” PEA para que no queden HTML pelados.
+   BLOQUE 8 — HISTORIAL
    ========================================================= */
-.pea-btn,
-#pea-root button,
-.pea-root button,
-.pea-home button,
-.pea-screen button,
-.pea-history button,
-#pea-root input[type="button"],
-.pea-root input[type="button"],
-.pea-home input[type="button"],
-.pea-screen input[type="button"],
-.pea-history input[type="button"]{
-  appearance: none;
-  border: 1px solid var(--pea-btn-border);
-  background: var(--pea-btn-secondary-bg);
-  color: var(--pea-btn-secondary-fg);
-  border-radius: var(--pea-radius-sm);
-  padding: 0.45rem 0.75rem;
-  line-height: 1;
-  font: inherit;
-  cursor: pointer;
-}
 
-/* Primario (dorado campus + texto “del campus” sobre acento) */
-.pea-btn--primary{
-  background: var(--pea-btn-primary-bg);
-  color: var(--pea-btn-primary-fg);
-  border-color: var(--pea-btn-primary-bg);
-}
-
-/* Secundario */
-.pea-btn--secondary{
-  background: var(--pea-btn-secondary-bg);
-  color: var(--pea-btn-secondary-fg);
-  border-color: var(--pea-btn-border);
-}
-
-/* Hover/Focus/Disabled (sin colores nuevos) */
-.pea-btn:hover,
-#pea-root button:hover,
-.pea-root button:hover,
-.pea-home button:hover,
-.pea-screen button:hover,
-.pea-history button:hover{
-  /* leve “realce” sin cambiar paleta: usa sombra Campus si existe */
-  box-shadow: var(--pea-shadow);
-}
-
-.pea-btn:focus-visible,
-#pea-root button:focus-visible,
-.pea-root button:focus-visible,
-.pea-home button:focus-visible,
-.pea-screen button:focus-visible,
-.pea-history button:focus-visible{
-  /* NO eliminar outline si Campus lo maneja */
-  outline: 2px solid var(--pea-border);
-  outline-offset: 2px;
-}
-
-.pea-btn:disabled,
-#pea-root button:disabled,
-.pea-root button:disabled,
-.pea-home button:disabled,
-.pea-screen button:disabled,
-.pea-history button:disabled{
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-/* =========================================================
-   6) CONTROLES (inputs/selects) — altura/padding consistentes
-   ========================================================= */
-#pea-root input[type="text"],
-#pea-root input[type="date"],
-#pea-root select,
-#pea-root textarea,
-.pea-root input[type="text"],
-.pea-root input[type="date"],
-.pea-root select,
-.pea-root textarea,
-.pea-home input[type="text"],
-.pea-home input[type="date"],
-.pea-home select,
-.pea-home textarea,
-.pea-screen input[type="text"],
-.pea-screen input[type="date"],
-.pea-screen select,
-.pea-screen textarea,
-.pea-history input[type="text"],
-.pea-history input[type="date"],
-.pea-history select,
-.pea-history textarea{
-  background: var(--pea-control-bg);
-  color: var(--pea-control-text);
-  border: 1px solid var(--pea-control-bd);
-  border-radius: var(--pea-radius-sm);
-  padding: 0.45rem 0.55rem;
-  font: inherit;
-}
-
-#pea-root textarea,
-.pea-root textarea,
-.pea-home textarea,
-.pea-screen textarea,
-.pea-history textarea{
-  min-height: 2.4rem;
-  resize: vertical;
-}
-
-/* Labels */
-#pea-root label,
-.pea-root label,
-.pea-home label,
-.pea-screen label,
-.pea-history label{
-  font-weight: 600;
-}
-
-/* =========================================================
-   7) TOPBAR STICKY (si existe en HTML: .pea-topbar)
-   ========================================================= */
-.pea-topbar{
-  position: sticky;
-  top: 0;
-  z-index: 50;
-  background: var(--pea-surface-2);
-  border-bottom: 1px solid var(--pea-border);
-  padding: 0.6rem var(--pea-pad);
-  margin: 0 calc(var(--pea-pad) * -1) 1rem calc(var(--pea-pad) * -1);
-  display: grid;
-  grid-template-columns: 1fr minmax(220px, 1fr) auto;
-  gap: 0.75rem;
-  align-items: center;
-  box-shadow: var(--pea-shadow);
-}
-
-.pea-topbar__title{
-  font-weight: 700;
-}
-
-.pea-control{
-  width: 100%;
-}
-
-/* “sr-only” accesible */
-.pea-sr-only{
-  position: absolute !important;
-  width: 1px !important;
-  height: 1px !important;
-  padding: 0 !important;
-  margin: -1px !important;
-  overflow: hidden !important;
-  clip: rect(0,0,0,0) !important;
-  white-space: nowrap !important;
-  border: 0 !important;
-}
-
-/* =========================================================
-   8) BLOQUE 8 — HISTORIAL (mantengo tu estructura actual)
-   ========================================================= */
-.pea-zone-primary{
-  border: 1px solid var(--pea-border);
+/* ZONA A */
+.pea-zone-primary {
+  border: 1px solid var(--border-neutral);
   padding: 0.75rem;
   margin-bottom: 1rem;
-  border-radius: var(--pea-radius);
-  background: var(--pea-surface);
-  box-shadow: var(--pea-shadow);
 }
 
-.pea-zone-primary-grid{
+.pea-zone-primary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
 .pea-primary-left,
-.pea-primary-right{
-  border: 1px dashed var(--pea-border);
+.pea-primary-right {
+  border: 1px dashed var(--border-neutral);
   padding: 0.75rem;
-  border-radius: var(--pea-radius);
-  background: transparent;
 }
 
-.pea-zone-core-inner{
+/* ZONA B */
+.pea-zone-core-inner {
   margin-bottom: 1rem;
 }
 
-.pea-zone-core{
-  border: 1px solid var(--pea-border);
+.pea-zone-core {
+  border: 1px solid var(--border-neutral);
   padding: 0.75rem;
-  border-radius: var(--pea-radius);
-  background: var(--pea-surface);
-  box-shadow: var(--pea-shadow);
 }
 
-.pea-filters{
+.pea-filters {
   margin-bottom: 1rem;
 }
 
-.pea-filters-grid{
+.pea-filters-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 0.5rem;
 }
 
 /* =========================================================
-   9) TABLA (auditoría) + FIX scroll (mantengo y limpio hardcode)
+   TABLA
    ========================================================= */
-.pea-table-scroll{
-  max-height: 420px;        /* alto fijo: OK (no es color) */
-  width: 100%;
-  overflow-y: auto;
-  overflow-x: auto;
-  position: relative;
-  border-radius: var(--pea-radius);
+
+.pea-table-scroll {
+  max-height: 420px;        /* 🔑 CLAVE: fija el alto */
+  width: 100%;              /* asegura cálculo horizontal */
+  overflow-y: scroll;       /* scroll vertical SIEMPRE */
+  overflow-x: scroll;       /* scroll horizontal SIEMPRE */
 }
 
-.pea-table{
+.pea-table {
   width: 100%;
-  min-width: 1200px;
+  min-width: 1200px; /* fuerza scroll horizontal */
   border-collapse: collapse;
-  background: transparent;
 }
 
 .pea-table th,
-.pea-table td{
-  border: 1px solid var(--pea-border);
+.pea-table td {
+  border: 1px solid var(--border-neutral);
   padding: 0.4rem 0.5rem;
   text-align: left;
   font-size: 0.85rem;
-  vertical-align: top;
 }
 
-.pea-table th{
-  font-weight: 700;
-  position: sticky;
-  top: 0;
-  z-index: 5;
-  background: var(--pea-bg); /* sin #fff */
-}
-
-/* El contenedor intermedio NO debe crecer infinito */
-.pea-zone-core-inner{
-  overflow: hidden;
-}
-
-/* Zona de filtros + tabla: permite que el scroll interno funcione */
-.pea-zone-core{
-  overflow: hidden;
+.pea-table th {
+  font-weight: 600;
 }
 
 /* =========================================================
-   10) ZONA C — MÉTRICAS
+   ZONA C — MÉTRICAS
    ========================================================= */
-.pea-zone-secondary{
-  border-top: 2px solid var(--pea-border);
+
+.pea-zone-secondary {
+  border-top: 2px solid var(--border-neutral);
   padding-top: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.pea-zone-secondary-grid{
+.pea-zone-secondary-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1rem;
 }
 
 .pea-metrics-left,
-.pea-metrics-right{
-  border: 1px dashed var(--pea-border);
+.pea-metrics-right {
+  border: 1px dashed var(--border-neutral);
   padding: 0.75rem;
-  border-radius: var(--pea-radius);
 }
 
 /* =========================================================
-   11) ELEMENTOS NEUTROS (sin “semáforos”)
+   ELEMENTOS NEUTROS
    ========================================================= */
+
 .pea-health-green,
 .pea-health-yellow,
-.pea-health-red{
-  color: var(--pea-text);
+.pea-health-red {
+  color: var(--text-main);
 }
 
-.pea-link{
-  color: var(--pea-accent);
+.pea-link {
+  color: var(--accent-primary);
   text-decoration: none;
 }
-.pea-link:hover{
+
+.pea-link:hover {
   text-decoration: underline;
 }
 
-.pea-icon{
+.pea-icon {
   filter: none;
   opacity: 0.9;
 }
 
 /* =========================================================
-   12) SEPARADORES VISUALES ENTRE ESTADÍSTICAS
+   FIX DEFINITIVO SCROLL TABLA PEA
+   No altera estructura ni lógica del Campus
    ========================================================= */
-.pea-cuadro-estadistico{
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid var(--pea-border);
+
+/* El contenedor intermedio NO debe crecer infinito */
+.pea-zone-core-inner {
+  overflow: hidden; /* 🔑 clave */
 }
 
-.pea-identidad .pea-nivel{
-  font-size: 1.1rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  padding: 0.5rem 0;
-  margin-bottom: 0.5rem;
-  border-top: 2px solid var(--pea-border);
-  border-bottom: 2px solid var(--pea-border);
+/* Zona de filtros + tabla: permite que el scroll interno funcione */
+.pea-zone-core {
+  overflow: hidden; /* 🔑 clave */
 }
 
-.pea-identidad .pea-estadistica{
-  font-weight: 700;
+/* Scroll SIEMPRE controlado acá */
+.pea-table-scroll {
+  overflow-y: auto;
+  overflow-x: auto;
+  width: 100%;
+}
+
+/* Fuerza ancho mayor al viewport */
+.pea-table {
+  min-width: 1200px;
+}
+
+/* ============================================================
+   FIX UX — HEADER DE TABLA FIJO EN SCROLL
+   PEA HISTORIAL
+   ============================================================ */
+
+.pea-table-scroll {
+  position: relative;
+  overflow-y: auto;
+}
+
+.pea-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+
+  /* Mantiene coherencia visual */
+  background: var(--bg-main, #fff);
 }
 
 /* =========================================================
-   13) CUADROS ESTADÍSTICOS (NO Excel)
+   SEPARADOR VISUAL ENTRE ESTADÍSTICAS PEA
    ========================================================= */
-.pea-cuadro-estadistico table{
+
+.pea-cuadro-estadistico {
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid var(--border-neutral);
+}
+
+.pea-identidad .pea-nivel {
+  font-size: 1.1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.5rem 0;
+  margin-bottom: 0.5rem;
+  border-top: 2px solid var(--border-neutral);
+  border-bottom: 2px solid var(--border-neutral);
+}
+
+.pea-identidad .pea-estadistica {
+  font-weight: 600;
+}
+
+/* =========================================================
+   PEA — CUADROS ESTADÍSTICOS (NO TABLA EXCEL)
+   Aplica SOLO a estadísticas, no a registros crudos
+   ========================================================= */
+
+.pea-cuadro-estadistico table {
   border-collapse: collapse;
   width: 100%;
   margin-top: 0.5rem;
   font-size: 0.9rem;
-  background: transparent;
 }
 
-.pea-cuadro-estadistico thead th{
-  border-bottom: 2px solid var(--pea-border);
-  border-top: 2px solid var(--pea-border);
+/* Encabezado fuerte */
+.pea-cuadro-estadistico thead th {
+  border-bottom: 2px solid var(--border-neutral);
+  border-top: 2px solid var(--border-neutral);
   padding: 0.4rem 0.6rem;
-  font-weight: 700;
+  font-weight: 600;
   text-align: left;
-  background: transparent;
 }
 
-.pea-cuadro-estadistico tbody td{
-  border-bottom: 1px solid var(--pea-border);
+/* Celdas */
+.pea-cuadro-estadistico tbody td {
+  border-bottom: 1px solid var(--border-neutral);
   padding: 0.35rem 0.6rem;
   vertical-align: middle;
 }
 
+/* Separación visual entre columnas */
 .pea-cuadro-estadistico td + td,
-.pea-cuadro-estadistico th + th{
-  border-left: 1px solid var(--pea-border);
+.pea-cuadro-estadistico th + th {
+  border-left: 1px solid var(--border-neutral);
 }
 
 /* Filas ranking normales */
-.pea-cuadro-estadistico tbody tr:nth-child(-n+3) td{
-  font-weight: 600;
+.pea-cuadro-estadistico tbody tr:nth-child(-n+3) td {
+  font-weight: 500;
 }
 
 /* Fila OTRAS */
-.pea-cuadro-estadistico tbody tr:nth-last-child(2) td{
+.pea-cuadro-estadistico tbody tr:nth-last-child(2) td {
   font-style: italic;
-  color: var(--pea-text-muted);
+  color: var(--text-secondary);
 }
 
 /* Fila TOTAL */
-.pea-cuadro-estadistico tbody tr:last-child td{
-  border-top: 2px solid var(--pea-border);
-  font-weight: 800;
+.pea-cuadro-estadistico tbody tr:last-child td {
+  border-top: 2px solid var(--border-neutral);
+  font-weight: 600;
 }
 
-/* =========================================================
-   14) RESPONSIVE mínimo
-   ========================================================= */
-@media (max-width: 860px){
-  .pea-zone-primary-grid,
-  .pea-zone-secondary-grid{
-    grid-template-columns: 1fr;
-  }
-  .pea-topbar{
-    grid-template-columns: 1fr;
-  }
+/* Evita look de Excel */
+.pea-cuadro-estadistico table {
+  background: transparent;
 }
