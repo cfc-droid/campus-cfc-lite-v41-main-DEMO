@@ -12,218 +12,260 @@
 <link rel="stylesheet" href="./css/pea_layout.css" />
 <link rel="stylesheet" href="./css/pea_components.css" />
 
+<!-- ✅ SOLO ESTO SE AGREGA: estilos del “recuadro contenedor” + botones arriba -->
+<style>
+  /* Contenedor general (centra y da aire) */
+  .pea-shell{
+    max-width: 980px;
+    margin: 40px auto;
+    padding: 0 16px;
+  }
+
+  /* Card: envuelve TODO */
+  .pea-card{
+    border-radius: 16px;
+    padding: 22px 24px;
+    background: rgba(255,255,255,.88);
+    color: #111;
+  }
+
+  /* Botones superiores (mismo formato que Home, usando .btn-main) */
+  .pea-top-actions{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 12px 0 14px 0;
+  }
+
+  /* Dark mode (misma lógica que Home: html.pea-dark) */
+  html.pea-dark .pea-card{
+    background: rgba(20,20,20,.78);
+    color: #f3f3f3;
+  }
+</style>
+
 </head>
 
 <body>
 
-  <!-- ======================================================
-       HEADER
-       ====================================================== -->
-  <header class="pea-header">
-    <h1>Análisis (PAE) — Registro operativo</h1>
-  </header>
+  <!-- ✅ RECUADRO CONTENEDOR (CARD) QUE ENVUELVE TODO -->
+  <div class="pea-shell">
+    <div class="pea-card">
 
-  <!-- ======================================================
-       BANNER LEGAL (1 línea)
-       ====================================================== -->
-  <section class="pea-legal-banner">
-    <p>Sistema de auditoría operativa. No interpreta, no aconseja, no diagnostica.</p>
+      <!-- ======================================================
+           HEADER
+           ====================================================== -->
+      <header class="pea-header">
+        <h1>Análisis (PAE) — Registro operativo</h1>
+      </header>
 
-    <p>Nota operativa: Un mismo día puede incluir hasta 3 registros, dependiendo del "Momento operativo" que te encuentres (ANTES, DURANTE o DESPUÉS DE UNA OPERACIÓN). 
-      La ausencia de alguno de ellos no invalida el registro, pero reduce la precisión del análisis por momento.</p>
-  </section>
+      <!-- ✅ BOTONES ARRIBA (incluye Claro/Oscuro como en Home) -->
+      <div class="pea-top-actions pea-actions">
+        <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">
+          Historial y estadísticas
+        </button>
 
-  <!-- ======================================================
-       FORMULARIO PRINCIPAL
-       ====================================================== -->
-  <main class="pea-register">
+        <button type="button" class="btn-main" onclick="window.location.href='/index.html'">
+          Volver al Campus
+        </button>
 
-    <!-- =========================
-         IDENTIFICACIÓN
-         ========================= -->
-    <section class="pea-section">
-      <h2>Identificación</h2>
+        <button type="button" class="btn-main" id="pea-btn-theme">
+          Claro / Oscuro
+        </button>
 
-      <label>
-        Fecha (obligatoria)
-        <input type="date" id="pea-fecha" required />
-      </label>
+        <button type="button" class="btn-main" onclick="history.back()">
+          Volver atrás
+        </button>
+      </div>
 
-      <label>
-        Momento operativo (obligatorio)
-        <select id="pea-momento" required>
-          <option value="">— Seleccionar —</option>
-        </select>
-      </label>
+      <!-- ======================================================
+           BANNER LEGAL (1 línea)
+           ====================================================== -->
+      <section class="pea-legal-banner">
+        <p>Sistema de auditoría operativa. No interpreta, no aconseja, no diagnostica.</p>
 
-    <label>
-  Resultado operativo
-  <select id="pea-resultado-operativo">
-    <option value="">— Seleccionar —</option>
-    <option value="GANADA">GANADA</option>
-    <option value="PERDIDA">PERDIDA</option>
-    <option value="BE">BE</option>
-    <option value="NA">NA</option>
-  </select>
-</label>
+        <p>Nota operativa: Un mismo día puede incluir hasta 3 registros, dependiendo del "Momento operativo" que te encuentres (ANTES, DURANTE o DESPUÉS DE UNA OPERACIÓN). 
+          La ausencia de alguno de ellos no invalida el registro, pero reduce la precisión del análisis por momento.</p>
+      </section>
 
-</section>
-    <!-- =========================
-         PENSAMIENTO (P)
-         ========================= -->
-    <section class="pea-section">
-      <h2>Pensamiento (P)</h2>
+      <!-- ======================================================
+           FORMULARIO PRINCIPAL
+           ====================================================== -->
+      <main class="pea-register">
 
-      <label>
-        Pensamiento operativo (obligatorio)
-        <select id="pea-pensamiento" required>
-          <option value="">— Seleccionar —</option>
-        </select>
-      </label>
-    </section>
+        <!-- =========================
+             IDENTIFICACIÓN
+             ========================= -->
+        <section class="pea-section">
+          <h2>Identificación</h2>
 
-    <!-- =========================
-         ACCIÓN (A)
-         ========================= -->
+          <label>
+            Fecha (obligatoria)
+            <input type="date" id="pea-fecha" required />
+          </label>
 
-<section class="pea-section">
-  <h2>Acción (A)</h2>
+          <label>
+            Momento operativo (obligatorio)
+            <select id="pea-momento" required>
+              <option value="">— Seleccionar —</option>
+            </select>
+          </label>
 
-  <p class="pea-help">
-    Seleccioná entre <strong>2 y 5 acciones operativas reales</strong>
-    ocurridas en esta operación.
-  </p>
+          <label>
+            Resultado operativo
+            <select id="pea-resultado-operativo">
+              <option value="">— Seleccionar —</option>
+              <option value="GANADA">GANADA</option>
+              <option value="PERDIDA">PERDIDA</option>
+              <option value="BE">BE</option>
+              <option value="NA">NA</option>
+            </select>
+          </label>
 
-  <div id="pea-acciones-slots">
-    <select class="pea-accion-slot"></select>
-    <select class="pea-accion-slot"></select>
-    <select class="pea-accion-slot"></select>
-    <select class="pea-accion-slot"></select>
-    <select class="pea-accion-slot"></select>
+        </section>
+
+        <!-- =========================
+             PENSAMIENTO (P)
+             ========================= -->
+        <section class="pea-section">
+          <h2>Pensamiento (P)</h2>
+
+          <label>
+            Pensamiento operativo (obligatorio)
+            <select id="pea-pensamiento" required>
+              <option value="">— Seleccionar —</option>
+            </select>
+          </label>
+        </section>
+
+        <!-- =========================
+             ACCIÓN (A)
+             ========================= -->
+
+        <section class="pea-section">
+          <h2>Acción (A)</h2>
+
+          <p class="pea-help">
+            Seleccioná entre <strong>2 y 5 acciones operativas reales</strong>
+            ocurridas en esta operación.
+          </p>
+
+          <div id="pea-acciones-slots">
+            <select class="pea-accion-slot"></select>
+            <select class="pea-accion-slot"></select>
+            <select class="pea-accion-slot"></select>
+            <select class="pea-accion-slot"></select>
+            <select class="pea-accion-slot"></select>
+          </div>
+
+          <div class="pea-acciones-preview">
+            <strong>Se guardarán:</strong>
+            <ul id="pea-acciones-preview-list"></ul>
+          </div>
+        </section>
+
+        <!-- =========================
+             ESTADO OPERATIVO (E)
+             ========================= -->
+        <section class="pea-section">
+          <h2>Estado operativo (E)</h2>
+
+          <label>
+            Estado (obligatorio)
+            <select id="pea-estado" required>
+              <option value="">— Seleccionar —</option>
+            </select>
+          </label>
+
+          <label>
+            Intensidad (1–5) (obligatoria)
+            <select id="pea-intensidad" required>
+              <option value="">—</option>
+            </select>
+          </label>
+        </section>
+
+        <!-- =========================
+             CONTEXTO OPERATIVO (OPCIONAL)
+             ========================= -->
+        <section class="pea-section">
+          <h2>Contexto operativo (opcional)</h2>
+
+          <label>
+            Activo
+            <select id="pea-activo">
+              <option value="">—</option>
+            </select>
+          </label>
+
+          <input
+            type="text"
+            id="pea-activo-otros"
+            placeholder="OTROS (si corresponde)"
+            maxlength="50"
+          />
+
+          <label>
+            Instrumento
+            <select id="pea-instrumento">
+              <option value="">—</option>
+            </select>
+          </label>
+
+          <input
+            type="text"
+            id="pea-instrumento-otros"
+            placeholder="OTROS (si corresponde)"
+            maxlength="50"
+          />
+
+          <label>
+            Dirección
+            <select id="pea-direccion">
+              <option value="">—</option>
+            </select>
+          </label>
+        </section>
+
+        <!-- =========================
+             NOTA FACTUAL + MOMENTO ESTRUCTURAL
+             ========================= -->
+        <section class="pea-section">
+          <h2>Nota factual (opcional)</h2>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+
+            <!-- Nota factual -->
+            <textarea
+              id="pea-nota"
+              maxlength="180"
+              placeholder="Descripción objetiva (máx. 180 caracteres)"
+            ></textarea>
+
+            <!-- Momento estructural -->
+            <label>
+              Momento estructural
+              <select id="pea-momento-estructural">
+                <option value="SIN_MARCAR">— Sin marcar —</option>
+              </select>
+            </label>
+
+          </div>
+        </section>
+
+        <!-- =========================
+             ACCIONES FINALES
+             ========================= -->
+        <section class="pea-actions">
+          <button id="pea-guardar" type="button">Guardar</button>
+          <button id="pea-nuevo" type="button">Nuevo</button>
+          <button id="pea-modificar" type="button">Modificar</button>
+        </section>
+
+      </main>
+
+    </div>
   </div>
-
-  <div class="pea-acciones-preview">
-    <strong>Se guardarán:</strong>
-    <ul id="pea-acciones-preview-list"></ul>
-  </div>
-</section>
-
-    <!-- =========================
-         ESTADO OPERATIVO (E)
-         ========================= -->
-    <section class="pea-section">
-      <h2>Estado operativo (E)</h2>
-
-      <label>
-        Estado (obligatorio)
-        <select id="pea-estado" required>
-          <option value="">— Seleccionar —</option>
-        </select>
-      </label>
-
-      <label>
-        Intensidad (1–5) (obligatoria)
-        <select id="pea-intensidad" required>
-          <option value="">—</option>
-        </select>
-      </label>
-    </section>
-    
-    <!-- =========================
-         CONTEXTO OPERATIVO (OPCIONAL)
-         ========================= -->
-    <section class="pea-section">
-      <h2>Contexto operativo (opcional)</h2>
-
-      <label>
-        Activo
-        <select id="pea-activo">
-          <option value="">—</option>
-        </select>
-      </label>
-
-      <input
-        type="text"
-        id="pea-activo-otros"
-        placeholder="OTROS (si corresponde)"
-        maxlength="50"
-      />
-
-      <label>
-        Instrumento
-        <select id="pea-instrumento">
-          <option value="">—</option>
-        </select>
-      </label>
-
-      <input
-        type="text"
-        id="pea-instrumento-otros"
-        placeholder="OTROS (si corresponde)"
-        maxlength="50"
-      />
-
-      <label>
-        Dirección
-        <select id="pea-direccion">
-          <option value="">—</option>
-        </select>
-      </label>
-    </section>
-
-<!-- =========================
-     NOTA FACTUAL + MOMENTO ESTRUCTURAL
-     ========================= -->
-<section class="pea-section">
-  <h2>Nota factual (opcional)</h2>
-
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-
-    <!-- Nota factual -->
-    <textarea
-      id="pea-nota"
-      maxlength="180"
-      placeholder="Descripción objetiva (máx. 180 caracteres)"
-    ></textarea>
-
-    <!-- Momento estructural -->
-    <label>
-      Momento estructural
-     <select id="pea-momento-estructural">
-  <option value="SIN_MARCAR">— Sin marcar —</option>
-</select>
-    </label>
-
-  </div>
-</section>
-
-    <!-- =========================
-         ACCIONES FINALES
-         ========================= -->
-    <section class="pea-actions">
-      <button id="pea-guardar" type="button">Guardar</button>
-      <button id="pea-nuevo" type="button">Nuevo</button>
-      <button id="pea-modificar" type="button">Modificar</button>
-    </section>
-
-    <!-- =========================
-     NAVEGACIÓN RÁPIDA (UX)
-     ========================= -->
-<section class="pea-actions" style="margin-top: 12px;">
-  <a href="./pea_screen_history.html">
-    <button type="button">Ir a Historial</button>
-  </a>
-
-  <a href="/index.html">
-    <button type="button">Volver al Campus</button>
-  </a>
-
-  <button type="button" onclick="history.back()">
-    Volver atrás
-  </button>
-</section>
-
-  </main>
 
 <script src="./pea_theme.js"></script>  
 
