@@ -18,10 +18,12 @@ document.getElementById('pea-btn-back').onclick = () => {
 
 // Vistas guardadas y Modo Auditoría
 // Se habilitan en bloques posteriores
-document.getElementById('pea-btn-views').onclick = () => {
-  alert('Función no disponible en esta versión.');
-};
+const viewsBtn = document.getElementById('pea-btn-views');
+if (viewsBtn) {
+  viewsBtn.onclick = () => alert('Función no disponible en esta versión.');
+}
 
-document.getElementById('pea-btn-audit').onclick = () => {
-  alert('Función no disponible en esta versión.');
-};
+const auditBtn = document.getElementById('pea-btn-audit');
+if (auditBtn) {
+  auditBtn.onclick = () => alert('Función no disponible en esta versión.');
+}
