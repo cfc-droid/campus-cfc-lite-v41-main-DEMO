@@ -1,0 +1,27 @@
+/* Layout general */
+.pea-home, .pea-register, .pea-history{
+  color: var(--pea-text);
+}
+
+/* Header + banner */
+.pea-header{
+  padding: var(--pea-pad-4);
+}
+
+.pea-legal-banner{
+  padding: var(--pea-pad-3) var(--pea-pad-4);
+  border-top: var(--pea-border-soft);
+  border-bottom: var(--pea-border-soft);
+}
+
+/* Zonas del historial (tu estructura 3 zonas NO se toca, solo se mejora visualmente) */
+.pea-history{
+  padding: var(--pea-pad-3);
+}
+
+/* Cuando uses sticky/topbar */
+.pea-sticky-topbar{
+  position: sticky;
+  top: 0;
+  z-index: var(--pea-z-topbar);
+}
