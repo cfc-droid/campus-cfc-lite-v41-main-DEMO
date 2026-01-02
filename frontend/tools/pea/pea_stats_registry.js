@@ -60,8 +60,7 @@ const PEA_STATS_RENDERERS = [
 "renderStat_14_momentos_estructurales_cambios",
 'renderStat_15_acciones_criticas_por_resultado',
 'renderStat_16_pensamientos_criticos_por_resultado',  
-   
-
+'renderStat_17_pensamientos_despues_por_resultado',   
    
 ];
 
