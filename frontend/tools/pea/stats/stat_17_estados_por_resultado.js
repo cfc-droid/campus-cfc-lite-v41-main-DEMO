@@ -1,89 +1,93 @@
 /* =========================================================
-   STAT 17 — PENSAMIENTOS (DESPUÉS) POR RESULTADO (APB)
+   STAT 17 — ESTADOS (EMOCIÓN/ESTADO E) POR RESULTADO (APB)
    (GANADA vs PERDIDA) — cuadro simple, directo
 
    Campus CFC LITE V41
    Nivel 4/4 (operativo directo)
    Estadística 17/17
 
-   OBJETIVO (misma familia que 15 y 16, pero en DESPUÉS):
-   - Unidad = PENSAMIENTO (no día)
-   - Para cada pensamiento (top 5):
+   OBJETIVO (similar a Stat 15/16):
+   - Unidad = ESTADO (no día)
+   - Para cada estado (top 5):
        GANADAS: cantidad + %
        PERDIDAS: cantidad + %
        TOTAL: cantidad (siempre 100% por fila)
    - + Fila 6: TOTALES (sumas + % globales)
 
-   CLASIFICACIÓN (SIN PUENTE):
-   - En DESPUÉS ya es “cierre”, así que el resultado se toma del MISMO registro:
-     resultado_operativo ∈ {GANADA, PERDIDA}
+   CLASIFICACIÓN (sin puente):
+   - Se toma el resultado_operativo del MISMO registro DESPUÉS:
+       GANADA / PERDIDA
+   - No hace falta puente por fecha+dirección porque en DESPUÉS ya es “cierre”.
 
    SCOPE:
-   - Pensamientos tomados de registros DESPUÉS que respetan filtros activos
-   - Solo se consideran registros DESPUÉS con resultado GANADA/PERDIDA (válidos)
+   - Estados tomados de registros DESPUÉS que respetan filtros activos
+   - Solo se consideran DESPUÉS con resultado_operativo GANADA/PERDIDA
 
    REGLAS:
-   - Si un registro DESPUÉS no tiene GANADA/PERDIDA => se excluye
-   - Los pensamientos se computan por ocurrencias (frecuencia): si aparece 2 veces, cuenta 2
+   - Si un DESPUÉS no tiene GANADA/PERDIDA => no entra al universo
+   - Los estados se computan por ocurrencias (frecuencia): si aparece 2 veces, cuenta 2
 
-   Robustez de pensamiento:
-   - pensamiento / pensamientos / pensamiento_text / pensamiento_str / etc.
-   - pensamiento_key / pensamiento_keys / pensamientos_keys
-   - meta.pensamiento / meta.pensamiento_text
-   - (lo que ves como “Pensamiento” en la tabla)
+   Robustez de estado (Estado “E”):
+   - estado / emocion / emoción / estado_emocional / estado_key / estados_keys / etc.
+   - meta.estado / meta.emocion / meta.estado_emocional
    ========================================================= */
 
 (function () {
 
-  window.renderStat_17_pensamientos_despues_por_resultado = function () {
+  window.renderStat_17_estados_por_resultado = function () {
     const box = document.getElementById("pea-level-4");
     if (!box || !window.PEA_STORAGE || !window.PEA_FILTERS || !window.renderCuadroBasePEA) return;
 
     const all = window.PEA_STORAGE.loadPEALog() || [];
     const filtered = window.PEA_FILTERS.apply(all) || [];
 
-    // ✅ Estado: VALIDO + CORREGIDO cuentan como VALIDO
+    // ✅ Estado del registro: VALIDO + CORREGIDO cuentan como VALIDO
+    const allValid = (Array.isArray(all) ? all : []).filter(
+      (r) => normalizeEstadoRegistro(getRecordState(r)) === "VALIDO"
+    );
+
     const filteredValid = (Array.isArray(filtered) ? filtered : []).filter(
       (r) => normalizeEstadoRegistro(getRecordState(r)) === "VALIDO"
     );
 
-    if (!filteredValid.length) {
-      return renderEmpty(box, "No hay registros válidos en el universo actual (filtros).");
+    /* ===============================
+       1) Scope (lo definen los filtros)
+          - Si filtros dejan vacío, caemos a ALL
+       =============================== */
+    const scopeRecords = filteredValid.length ? filteredValid : allValid;
+
+    // Tomamos SOLO DESPUÉS dentro del scope
+    const despuesScope = scopeRecords.filter((r) => normalizeMomento(r?.momento) === "DESPUES");
+
+    if (!despuesScope.length) {
+      return renderEmpty(box, "No hay registros DESPUÉS (válidos) en el universo actual (scope).");
     }
 
     /* ===============================
-       1) Tomar DESPUÉS (RESPETA FILTROS)
-          - Solo DESPUÉS con resultado GANADA/PERDIDA
+       2) Filtrar DESPUÉS con resultado GANADA/PERDIDA
+          - clasificación = resultado del mismo registro
        =============================== */
-    const despuesFiltered = filteredValid.filter((r) => {
-      if (normalizeMomento(r?.momento) !== "DESPUES") return false;
+    const despuesClasificables = despuesScope.filter((r) => {
       const res = normalizeResultadoOperativo(getResultadoAny(r));
-      return (res === "GANADA" || res === "PERDIDA");
+      return res === "GANADA" || res === "PERDIDA";
     });
 
-    if (!despuesFiltered.length) {
-      return renderEmpty(
-        box,
-        "No hay registros DESPUÉS (válidos) con resultado GANADA/PERDIDA en el scope actual."
-      );
-    }
-
-    // Conteo por pensamiento: key = normalizedText, val = { label, g, p, t }
-    const counts = new Map();
+    // Si no hay cierres clasificables, mostramos cuadro fijo vacío
+    const counts = new Map(); // key estado normalized => { label, g, p, t }
     let totalOcurrencias = 0;
-    let huboDespuesPeroSinPensamientos = false;
+    let huboDespuesSinEstado = false;
 
-    despuesFiltered.forEach((rec) => {
-      const res = normalizeResultadoOperativo(getResultadoAny(rec));
+    despuesClasificables.forEach((rec) => {
+      const res = normalizeResultadoOperativo(getResultadoAny(rec)); // GANADA/PERDIDA
       if (res !== "GANADA" && res !== "PERDIDA") return;
 
-      const pensamientos = extractPensamientos(rec);
-      if (!pensamientos.length) {
-        huboDespuesPeroSinPensamientos = true;
+      const estados = extractEstados(rec);
+      if (!estados.length) {
+        huboDespuesSinEstado = true;
         return;
       }
 
-      pensamientos.forEach((txt) => {
+      estados.forEach((txt) => {
         const label = String(txt || "").trim();
         const key = normalizeText(label);
         if (!key) return;
@@ -102,7 +106,7 @@
     const itemsAll = Array.from(counts.values()).filter((x) => x.t > 0);
 
     /* ===============================
-       2) TOP 5 (dinámico) + tabla FIJA
+       3) TOP 5 (dinámico) + cuadro FIJO
        =============================== */
     const FIXED_ROWS = 5;
 
@@ -119,7 +123,7 @@
     const top = itemsAll.slice(0, FIXED_ROWS);
 
     /* ===============================
-       3) Render (APB) — 5 filas + Totales
+       4) Render (APB) — 5 filas + Totales
        =============================== */
     function pct(n, t) {
       return t ? Math.round((n / t) * 100) : 0;
@@ -181,26 +185,31 @@
     if (totalOcurrencias >= 30) semaforo = "🟢 Datos suficientes";
     if (totalOcurrencias < 10) semaforo = "🔴 Datos insuficientes";
 
-    const warnPensamientos = (!itemsAll.length)
-      ? `⚠️ Hay DESPUÉS en el scope, pero no se pudieron extraer pensamientos (campos vacíos o formato inesperado).`
-      : (huboDespuesPeroSinPensamientos ? `⚠️ Algunos registros DESPUÉS no tienen pensamiento legible (se omitieron).` : `✅ Se extrajeron pensamientos desde DESPUÉS correctamente.`);
+    const cierres = despuesClasificables.length;
 
-    const totalRegistrosDespuesValidos = despuesFiltered.length;
+    const diag =
+      !despuesClasificables.length
+        ? "⚠️ Hay DESPUÉS en el scope, pero ninguno tiene resultado GANADA/PERDIDA."
+        : (!itemsAll.length
+          ? "⚠️ Hay DESPUÉS con GANADA/PERDIDA, pero no se pudo extraer Estado (E)."
+          : (huboDespuesSinEstado
+            ? "⚠️ Algunos DESPUÉS no tenían Estado (E) legible (se omitieron)."
+            : "✅ Se extrajeron Estados (E) desde DESPUÉS correctamente."));
 
     const contenidoHTML = `
       <div class="pea-metricas-secundarias" style="margin-bottom:10px;">
-        <strong>Cómo leerlo:</strong> “Cuando aparece este pensamiento en <strong>DESPUÉS</strong>, ¿cómo cerró la operación?”<br>
-        <strong>Clasificación:</strong> se toma el <strong>resultado del mismo registro DESPUÉS</strong> (GANADA/PERDIDA).<br>
-        <strong>Scope:</strong> ${totalRegistrosDespuesValidos} registro(s) DESPUÉS con resultado válido. Ocurrencias de pensamiento analizadas = ${totalOcurrencias}.<br>
-        <strong>Nota:</strong> cuenta <em>ocurrencias</em> (si el pensamiento aparece 2 veces, cuenta 2).<br>
-        <span style="opacity:.85;">${escapeHtml(warnPensamientos)}</span>
+        <strong>Cómo leerlo:</strong> “Cuando aparece este <strong>Estado (E)</strong> en <strong>DESPUÉS</strong>, ¿cómo cerró la operación?”<br>
+        <strong>Clasificación:</strong> se toma el <strong>resultado del mismo DESPUÉS</strong> (GANADA/PERDIDA).<br>
+        <strong>Scope:</strong> cierres DESPUÉS clasificables = ${cierres}. Ocurrencias de Estado analizadas = ${totalOcurrencias}.<br>
+        <strong>Nota:</strong> cuenta <em>ocurrencias</em> (si el estado aparece 2 veces, cuenta 2).<br>
+        <span style="opacity:.85;">${escapeHtml(diag)}</span>
       </div>
 
       <table class="pea-table">
         <thead>
           <tr>
             <th>CANTIDAD</th>
-            <th>PENSAMIENTOS (NOMBRE/S)</th>
+            <th>ESTADOS (E) (NOMBRE/S)</th>
             <th>GANADAS (CANTIDAD + %)</th>
             <th>PERDIDAS (CANTIDAD + %)</th>
             <th>TOTAL (+%)</th>
@@ -212,7 +221,7 @@
       </table>
 
       <div class="pea-metricas-secundarias" style="margin-top:10px;">
-        No interpreta. No establece causalidad. Solo muestra co-ocurrencia pensamiento (DESPUÉS) → resultado del cierre.<br>
+        No interpreta. No establece causalidad. Solo muestra co-ocurrencia estado (DESPUÉS) → resultado de cierre.<br>
         Si un DESPUÉS no tiene GANADA/PERDIDA, no entra al universo.
       </div>
     `;
@@ -220,14 +229,14 @@
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
       nivel: 4,
       indice: 17,
-      titulo: "Pensamientos (DESPUÉS) por resultado",
+      titulo: "Estados (E) por resultado",
       totalRegistros: totalOcurrencias,
-      universo: "Pensamientos (DESPUÉS, según filtros) clasificados por resultado del mismo registro DESPUÉS.",
+      universo: "Estados (E) (DESPUÉS, según filtros) clasificados por el resultado del mismo DESPUÉS (GANADA/PERDIDA).",
       criterios: [
-        "Unidad = PENSAMIENTO (no día)",
-        "Pensamientos desde DESPUÉS (respeta filtros)",
+        "Unidad = ESTADO (E) (no día)",
+        "Estados desde DESPUÉS (respeta filtros)",
         "Clasificación = resultado del mismo DESPUÉS (GANADA/PERDIDA)",
-        "Salida: GANADAS vs PERDIDAS por pensamiento (cantidad + %)",
+        "Salida: GANADAS vs PERDIDAS por estado (cantidad + %)",
         "Top 5 fijo + fila 6 totales",
         "Solo registros VALIDO y CORREGIDO",
         semaforo
@@ -240,7 +249,7 @@
     box.insertAdjacentHTML("beforeend", window.renderCuadroBasePEA({
       nivel: 4,
       indice: 17,
-      titulo: "Pensamientos (DESPUÉS) por resultado",
+      titulo: "Estados (E) por resultado",
       totalRegistros: 0,
       universo: "—",
       criterios: null,
@@ -295,41 +304,36 @@
     return "NA";
   }
 
-  // ✅ Extractor robusto de pensamientos
-  function extractPensamientos(r) {
+  // ✅ Extractor robusto de Estados (E)
+  function extractEstados(r) {
     const out = [];
 
-    // 1) keys arrays
-    if (Array.isArray(r?.pensamiento_keys)) r.pensamiento_keys.forEach((x) => x && out.push(String(x)));
-    if (Array.isArray(r?.pensamientos_keys)) r.pensamientos_keys.forEach((x) => x && out.push(String(x)));
+    // keys arrays
+    if (Array.isArray(r?.estado_keys)) r.estado_keys.forEach((x) => x && out.push(String(x)));
+    if (Array.isArray(r?.estados_keys)) r.estados_keys.forEach((x) => x && out.push(String(x)));
+    if (Array.isArray(r?.emociones_keys)) r.emociones_keys.forEach((x) => x && out.push(String(x)));
 
-    // 2) keys strings
-    if (typeof r?.pensamiento_key === "string" && r.pensamiento_key.trim()) out.push(r.pensamiento_key.trim());
-    if (typeof r?.pensamientos_key === "string" && r.pensamientos_key.trim()) out.push(r.pensamientos_key.trim());
+    // keys strings
+    if (typeof r?.estado_key === "string" && r.estado_key.trim()) out.push(r.estado_key.trim());
+    if (typeof r?.emocion_key === "string" && r.emocion_key.trim()) out.push(r.emocion_key.trim());
 
-    // 3) campos típicos visibles en tabla (“Pensamiento”)
+    // campos típicos (lo que ves como “Estado (E)”)
     const candidates = [
-      r?.pensamiento,
-      r?.pensamientos,
-      r?.pensamiento_text,
-      r?.pensamiento_txt,
-      r?.pensamiento_str,
-      r?.pensamiento_display,
-      r?.pensamiento_label,
-      r?.pensamiento_raw,
-      r?.pensamiento_human,
-      r?.pensamiento_ui,
-
-      // variantes defensivas
-      r?.thought,
-      r?.thoughts,
-      r?.texto_pensamiento,
+      r?.estado,
+      r?.estado_emocional,
+      r?.estado_emocion,
+      r?.emocion,
+      r?.emoción,
+      r?.emociones,
+      r?.estado_text,
+      r?.estado_str,
+      r?.emocion_text,
+      r?.emocion_str,
 
       // meta
-      r?.meta?.pensamiento,
-      r?.meta?.pensamiento_text,
-      r?.meta?.pensamiento_str,
-      r?.meta?.pensamiento_display
+      r?.meta?.estado,
+      r?.meta?.emocion,
+      r?.meta?.estado_emocional
     ];
 
     candidates.forEach((x) => {
@@ -337,7 +341,7 @@
       else if (Array.isArray(x)) x.forEach((y) => (y && String(y).trim() ? out.push(String(y).trim()) : null));
     });
 
-    // split si alguno viene “A, B, C”
+    // split si viene “A, B, C”
     const expanded = [];
     out.forEach((s) => splitTextList(s).forEach((p) => expanded.push(p)));
 
