@@ -1,6 +1,6 @@
 /* =========================================================
-   STAT 15 — ACCIONES CRÍTICAS POR RESULTADO (NUEVA)
-   (GANADA vs PERDIDA) — estilo “APB” (simple, directo)
+   STAT 15 — ACCIONES CRÍTICAS POR RESULTADO (APB)
+   (GANADA vs PERDIDA) — cuadro simple, directo
 
    Campus CFC LITE V41
    Nivel 4/4 (operativo directo)
@@ -8,22 +8,23 @@
 
    OBJETIVO (como tu cuadro):
    - Unidad = ACCIÓN (no día)
-   - Para cada acción (3–6 acciones):
+   - Para cada acción (top 5):
        GANADAS: cantidad + %
        PERDIDAS: cantidad + %
-       TOTAL: cantidad (siempre 100%)
-   - Clasificación (puente):
-       Resultado del día = último registro DESPUÉS del día (GANADA/PERDIDA)
-       Acciones tomadas de registros DURANTE (visibles según filtros)
+       TOTAL: cantidad (siempre 100% por fila)
+   - + Fila 6: TOTALES (sumas + % globales)
 
-   REGLAS CLARAS:
-   - Si no existe DESPUÉS con GANADA/PERDIDA para una fecha, esa fecha NO entra al universo
-     (porque no se puede clasificar).
-   - Las acciones se computan por aparición en DURANTE (frecuencia/ocurrencias),
-     NO “presencia por día”.
-   - Acciones listadas:
-       - Si hay acciones en DURANTE (filtradas) -> top por frecuencia (hasta 6)
-       - Si hay menos, se muestran las que haya.
+   PUENTE (clasificación):
+   - Resultado del día = ÚLTIMO registro DESPUÉS del día (GANADA/PERDIDA)
+   - Se busca en ALL (sin filtros) pero SOLO para fechas dentro del scope
+
+   SCOPE:
+   - Acciones tomadas de registros DURANTE que respetan filtros activos
+   - Solo se consideran DURANTE de fechas que tengan resultado GANADA/PERDIDA (puente válido)
+
+   REGLAS:
+   - Si una fecha no tiene DESPUÉS GANADA/PERDIDA => no entra al universo (no se puede clasificar)
+   - Las acciones se computan por ocurrencias (frecuencia): si aparece 2 veces, cuenta 2
 
    Robustez de acciones:
    - acciones_keys: []
@@ -31,7 +32,6 @@
    - accion / accion_key: "A, B"
    - acciones_text / acciones_str / acciones_display / etc.
    - (lo que ves como “Acción(es)” en la tabla)
-
    ========================================================= */
 
 (function () {
@@ -54,7 +54,7 @@
 
     /* ===============================
        1) Scope de FECHAS (lo definen los filtros)
-       - Si filtros dejan vacío, caemos a ALL
+          - Si filtros dejan vacío, caemos a ALL
        =============================== */
     const scopeRecords = filteredValid.length ? filteredValid : allValid;
 
@@ -98,7 +98,7 @@
     const fechasConResultadoSet = new Set(fechasConResultado);
 
     /* ===============================
-       3) Tomar acciones desde DURANTE (RESPECTA FILTROS)
+       3) Tomar acciones desde DURANTE (RESPETA FILTROS)
           - Solo DURANTE dentro del scope y con resultado disponible
           - Cada acción cuenta como ocurrencia (frecuencia)
        =============================== */
@@ -115,8 +115,8 @@
       );
     }
 
-    // Conteo por acción: { "ACCION": { g: n, p: n, t: n } }
-    const counts = new Map(); // key = normalizedAction, val = { label, g, p, t }
+    // Conteo por acción: key = normalizedAction, val = { label, g, p, t }
+    const counts = new Map();
     let totalOcurrencias = 0;
 
     duranteFiltered.forEach((rec) => {
@@ -142,7 +142,6 @@
     });
 
     const accionesAll = Array.from(counts.values()).filter((x) => x.t > 0);
-
     if (!accionesAll.length) {
       return renderEmpty(
         box,
@@ -151,11 +150,11 @@
     }
 
     /* ===============================
-       4) Selección de 3–6 acciones (dinámica)
-          - Top por frecuencia (t) dentro del scope filtrado
-          - (Esto cumple tu idea: “cuadro dinámico según filtro”)
+       4) Selección TOP 5 (dinámica, según filtro)
+          - Si el usuario filtró por acción, ya viene restringido por filteredValid
+          - Si no filtró, esto elige las 5 más frecuentes del scope
        =============================== */
-    const MAX_ACCIONES = 6;
+    const FIXED_ROWS = 5;
 
     // Orden: más frecuencia primero; si empata, más % pérdida primero
     accionesAll.sort((a, b) => {
@@ -165,34 +164,83 @@
       return bp - ap;
     });
 
-    const accionesShow = accionesAll.slice(0, MAX_ACCIONES);
+    const top = accionesAll.slice(0, FIXED_ROWS);
 
     /* ===============================
        5) Render (APB)
-          Columnas: Acción | Ganadas (n, %) | Perdidas (n, %) | Total (n, 100%)
+          Columnas:
+          Cantidad (ranking 1..5)
+          Acción
+          GANADAS (n + %)
+          PERDIDAS (n + %)
+          TOTAL (n + 100%)
+          + fila 6 TOTALES: sumas y % global sobre totalOcurrencias
        =============================== */
     function pct(n, t) {
       return t ? Math.round((n / t) * 100) : 0;
     }
 
-    const body = accionesShow.map((r, idx) => {
+    // Sumatorias para fila Totales
+    const sumG = top.reduce((acc, r) => acc + (r.g || 0), 0);
+    const sumP = top.reduce((acc, r) => acc + (r.p || 0), 0);
+    const sumT = top.reduce((acc, r) => acc + (r.t || 0), 0);
+
+    // Estilo defensivo para que NADA salga en negrita por CSS heredado
+    const tdPlain = 'style="font-weight:400 !important;"';
+    const tdNum = 'class="pea-n" style="font-weight:400 !important;"';
+
+    function renderRow(idx, r) {
+      // Si faltan acciones para completar 5 filas
+      if (!r) {
+        return `
+          <tr>
+            <td ${tdNum}>${idx}</td>
+            <td ${tdPlain}>—</td>
+            <td ${tdNum}>0 (0%)</td>
+            <td ${tdNum}>0 (0%)</td>
+            <td ${tdNum}>0 (—)</td>
+          </tr>
+        `;
+      }
+
       const gp = pct(r.g, r.t);
       const pp = pct(r.p, r.t);
+
       return `
         <tr>
-          <td class="pea-n">${idx + 1}</td>
-          <td>${escapeHtml(r.label)}</td>
-
-          <td class="pea-n">${r.g} (${gp}%)</td>
-          <td class="pea-n">${r.p} (${pp}%)</td>
-          <td class="pea-n">${r.t} (100%)</td>
+          <td ${tdNum}>${idx}</td>
+          <td ${tdPlain}>${escapeHtml(r.label)}</td>
+          <td ${tdNum}>${r.g} (${gp}%)</td>
+          <td ${tdNum}>${r.p} (${pp}%)</td>
+          <td ${tdNum}>${r.t} (100%)</td>
         </tr>
       `;
-    }).join("");
+    }
+
+    const rowsHtml = [];
+    for (let i = 1; i <= FIXED_ROWS; i++) {
+      rowsHtml.push(renderRow(i, top[i - 1]));
+    }
+
+    // Fila 6 — TOTALES (sobre lo mostrado en el top)
+    // % globales: sobre sumT (lo mostrado) para que cierre el cuadro.
+    // (Si querés que sea sobre totalOcurrencias general, cambiás sumT -> totalOcurrencias)
+    const totGp = pct(sumG, sumT);
+    const totPp = pct(sumP, sumT);
+
+    rowsHtml.push(`
+      <tr>
+        <td ${tdNum}>6</td>
+        <td ${tdPlain}>TOTALES</td>
+        <td ${tdNum}>${sumG} (${totGp}%)</td>
+        <td ${tdNum}>${sumP} (${totPp}%)</td>
+        <td ${tdNum}>${sumT} (100%)</td>
+      </tr>
+    `);
 
     const totalDias = fechasConResultado.length;
 
-    // Semáforo súper simple (por volumen de ocurrencias)
+    // Semáforo simple (por volumen de ocurrencias)
     let semaforo = "🟡 Datos parciales";
     if (totalOcurrencias >= 30) semaforo = "🟢 Datos suficientes";
     if (totalOcurrencias < 10) semaforo = "🔴 Datos insuficientes";
@@ -201,22 +249,22 @@
       <div class="pea-metricas-secundarias" style="margin-bottom:10px;">
         <strong>Cómo leerlo:</strong> “Cuando aparece esta acción en <strong>DURANTE</strong>, ¿cómo suele terminar el día?”<br>
         <strong>Puente:</strong> el resultado se toma del <strong>último DESPUÉS</strong> del día (GANADA/PERDIDA).<br>
-        <strong>Scope:</strong> fechas por filtros = ${totalDias} día(s) con resultado válido. Acciones analizadas = ${accionesShow.length}.<br>
+        <strong>Scope:</strong> ${totalDias} día(s) con resultado válido. Ocurrencias DURANTE analizadas = ${totalOcurrencias}.<br>
         <strong>Nota:</strong> cuenta <em>ocurrencias</em> de acción (si una acción aparece 2 veces, cuenta 2).
       </div>
 
       <table class="pea-table">
         <thead>
           <tr>
-            <th>Cantidad</th>
-            <th>Acción (nombre/s)</th>
-            <th>GANADAS (cantidad + %)</th>
-            <th>PERDIDAS (cantidad + %)</th>
+            <th>CANTIDAD</th>
+            <th>ACCIONES (NOMBRE/S)</th>
+            <th>GANADAS (CANTIDAD + %)</th>
+            <th>PERDIDAS (CANTIDAD + %)</th>
             <th>TOTAL (+%)</th>
           </tr>
         </thead>
         <tbody>
-          ${body}
+          ${rowsHtml.join("")}
         </tbody>
       </table>
 
@@ -237,6 +285,7 @@
         "Acciones desde DURANTE (respeta filtros)",
         "Resultado = último DESPUÉS del día (GANADA/PERDIDA)",
         "Salida: GANADAS vs PERDIDAS por acción (cantidad + %)",
+        "Top 5 fijo + fila 6 totales",
         "Solo registros VALIDO y CORREGIDO",
         semaforo
       ],
@@ -371,6 +420,7 @@
     const iso = safeText(r?.meta?.created_at_iso).trim();
     if (iso) return iso;
 
+    // fallback determinista
     const f = safeText(r?.fecha).trim();
     const m = normalizeMomento(r?.momento);
     const mo = m === "ANTES" ? 1 : m === "DURANTE" ? 2 : m === "DESPUES" ? 3 : 9;
