@@ -14,16 +14,18 @@
        TOTAL: cantidad (siempre 100% por fila)
    - + Fila 6: TOTALES (sumas + % globales)
 
-   PUENTE (clasificación):
-   - Resultado del día = ÚLTIMO registro DESPUÉS del día (GANADA/PERDIDA)
+   PUENTE (clasificación) — ✅ CORREGIDO:
+   - Resultado del cierre = ÚLTIMO registro DESPUÉS del día (GANADA/PERDIDA)
+   - Pero el puente es por (FECHA + DIRECCIÓN) para no mezclar operaciones:
+       "mismo día + misma dirección (COMPRA/VENTA)"
    - Se busca en ALL (sin filtros) pero SOLO para fechas dentro del scope
 
    SCOPE:
    - Acciones tomadas de registros DURANTE que respetan filtros activos
-   - Solo se consideran DURANTE de fechas que tengan resultado GANADA/PERDIDA (puente válido)
+   - Solo se consideran DURANTE de fechas+dirección que tengan resultado GANADA/PERDIDA (puente válido)
 
    REGLAS:
-   - Si una fecha no tiene DESPUÉS GANADA/PERDIDA => no entra al universo (no se puede clasificar)
+   - Si una fecha+dirección no tiene DESPUÉS GANADA/PERDIDA => no entra al universo (no se puede clasificar)
    - Las acciones se computan por ocurrencias (frecuencia): si aparece 2 veces, cuenta 2
 
    Robustez de acciones:
@@ -69,11 +71,11 @@
     }
 
     /* ===============================
-       2) Resultado del día (puente)
+       2) Resultado del cierre (PUENTE) — ✅ por FECHA + DIRECCIÓN
           - Último DESPUÉS del día con GANADA/PERDIDA
           - Se busca en ALL (sin filtros) pero SOLO para fechas del scope
        =============================== */
-    const resultadoPorFecha = {}; // { "YYYY-MM-DD": { res, key } }
+    const resultadoPorFechaDir = {}; // { "YYYY-MM-DD|COMPRA": { res, key }, "YYYY-MM-DD|VENTA": {...} }
 
     allValid.forEach((r) => {
       const fecha = safeText(r?.fecha).trim();
@@ -84,34 +86,45 @@
       const res = normalizeResultadoOperativo(getResultadoAny(r));
       if (res !== "GANADA" && res !== "PERDIDA") return;
 
+      const dir = normalizeDireccion(getDireccionAny(r));
+      if (!dir) return; // sin dirección, no podemos armar puente consistente
+
+      const k = `${fecha}|${dir}`;
       const tkey = getTimeKey(r);
-      if (!resultadoPorFecha[fecha] || tkey > resultadoPorFecha[fecha].key) {
-        resultadoPorFecha[fecha] = { res, key: tkey };
+
+      if (!resultadoPorFechaDir[k] || tkey > resultadoPorFechaDir[k].key) {
+        resultadoPorFechaDir[k] = { res, key: tkey };
       }
     });
 
-    const fechasConResultado = Object.keys(resultadoPorFecha);
-    if (!fechasConResultado.length) {
-      return renderEmpty(box, "No hay DESPUÉS con resultado GANADA/PERDIDA dentro del scope de fechas.");
+    const paresConResultado = Object.keys(resultadoPorFechaDir);
+    if (!paresConResultado.length) {
+      return renderEmpty(box, "No hay DESPUÉS con resultado GANADA/PERDIDA dentro del scope de fechas (con dirección).");
     }
 
-    const fechasConResultadoSet = new Set(fechasConResultado);
+    const paresConResultadoSet = new Set(paresConResultado);
 
     /* ===============================
        3) Tomar acciones desde DURANTE (RESPETA FILTROS)
-          - Solo DURANTE dentro del scope y con resultado disponible
+          - Solo DURANTE dentro del scope y con resultado disponible (fecha+dirección)
           - Cada acción cuenta como ocurrencia (frecuencia)
        =============================== */
     const duranteFiltered = filteredValid.filter((r) => {
       const fecha = safeText(r?.fecha).trim();
-      if (!fecha || !fechasConResultadoSet.has(fecha)) return false;
-      return normalizeMomento(r?.momento) === "DURANTE";
+      if (!fecha || !scopeFechas.has(fecha)) return false;
+      if (normalizeMomento(r?.momento) !== "DURANTE") return false;
+
+      const dir = normalizeDireccion(getDireccionAny(r));
+      if (!dir) return false;
+
+      const k = `${fecha}|${dir}`;
+      return paresConResultadoSet.has(k);
     });
 
     if (!duranteFiltered.length) {
       return renderEmpty(
         box,
-        "No hay registros DURANTE (válidos) en el scope actual con resultado GANADA/PERDIDA disponible."
+        "No hay registros DURANTE (válidos) en el scope actual con resultado GANADA/PERDIDA disponible (mismo día + misma dirección)."
       );
     }
 
@@ -121,7 +134,11 @@
 
     duranteFiltered.forEach((rec) => {
       const fecha = safeText(rec?.fecha).trim();
-      const res = resultadoPorFecha[fecha]?.res; // GANADA/PERDIDA
+      const dir = normalizeDireccion(getDireccionAny(rec));
+      if (!fecha || !dir) return;
+
+      const puenteKey = `${fecha}|${dir}`;
+      const res = resultadoPorFechaDir[puenteKey]?.res; // GANADA/PERDIDA por (día+dirección)
       if (res !== "GANADA" && res !== "PERDIDA") return;
 
       const acciones = extractAcciones(rec);
@@ -150,9 +167,7 @@
     }
 
     /* ===============================
-       4) Selección TOP 5 (dinámica, según filtro)
-          - Si el usuario filtró por acción, ya viene restringido por filteredValid
-          - Si no filtró, esto elige las 5 más frecuentes del scope
+       4) Selección TOP 5 (dinámica)
        =============================== */
     const FIXED_ROWS = 5;
 
@@ -168,19 +183,11 @@
 
     /* ===============================
        5) Render (APB)
-          Columnas:
-          Cantidad (ranking 1..5)
-          Acción
-          GANADAS (n + %)
-          PERDIDAS (n + %)
-          TOTAL (n + 100%)
-          + fila 6 TOTALES: sumas y % global sobre totalOcurrencias
        =============================== */
     function pct(n, t) {
       return t ? Math.round((n / t) * 100) : 0;
     }
 
-    // Sumatorias para fila Totales
     const sumG = top.reduce((acc, r) => acc + (r.g || 0), 0);
     const sumP = top.reduce((acc, r) => acc + (r.p || 0), 0);
     const sumT = top.reduce((acc, r) => acc + (r.t || 0), 0);
@@ -190,7 +197,6 @@
     const tdNum = 'class="pea-n" style="font-weight:400 !important;"';
 
     function renderRow(idx, r) {
-      // Si faltan acciones para completar 5 filas
       if (!r) {
         return `
           <tr>
@@ -223,8 +229,6 @@
     }
 
     // Fila 6 — TOTALES (sobre lo mostrado en el top)
-    // % globales: sobre sumT (lo mostrado) para que cierre el cuadro.
-    // (Si querés que sea sobre totalOcurrencias general, cambiás sumT -> totalOcurrencias)
     const totGp = pct(sumG, sumT);
     const totPp = pct(sumP, sumT);
 
@@ -238,7 +242,7 @@
       </tr>
     `);
 
-    const totalDias = fechasConResultado.length;
+    const totalPares = paresConResultado.length;
 
     // Semáforo simple (por volumen de ocurrencias)
     let semaforo = "🟡 Datos parciales";
@@ -247,9 +251,9 @@
 
     const contenidoHTML = `
       <div class="pea-metricas-secundarias" style="margin-bottom:10px;">
-        <strong>Cómo leerlo:</strong> “Cuando aparece esta acción en <strong>DURANTE</strong>, ¿cómo suele terminar el día?”<br>
-        <strong>Puente:</strong> el resultado se toma del <strong>último DESPUÉS</strong> del día (GANADA/PERDIDA).<br>
-        <strong>Scope:</strong> ${totalDias} día(s) con resultado válido. Ocurrencias DURANTE analizadas = ${totalOcurrencias}.<br>
+        <strong>Cómo leerlo:</strong> “Cuando aparece esta acción en <strong>DURANTE</strong>, ¿cómo suele cerrar la operación?”<br>
+        <strong>Puente:</strong> el resultado se toma del <strong>último DESPUÉS</strong> del <strong>mismo día + misma dirección</strong> (GANADA/PERDIDA).<br>
+        <strong>Scope:</strong> ${totalPares} par(es) día+dirección con cierre válido. Ocurrencias DURANTE analizadas = ${totalOcurrencias}.<br>
         <strong>Nota:</strong> cuenta <em>ocurrencias</em> de acción (si una acción aparece 2 veces, cuenta 2).
       </div>
 
@@ -269,8 +273,8 @@
       </table>
 
       <div class="pea-metricas-secundarias" style="margin-top:10px;">
-        No interpreta. No establece causalidad. Solo muestra co-ocurrencia acción → resultado del día.<br>
-        Si faltan DESPUÉS con GANADA/PERDIDA, esos días no entran al universo.
+        No interpreta. No establece causalidad. Solo muestra co-ocurrencia acción → resultado de cierre.<br>
+        Si faltan DESPUÉS con GANADA/PERDIDA para ese (día+dirección), esos DURANTE no entran al universo.
       </div>
     `;
 
@@ -279,11 +283,11 @@
       indice: 15,
       titulo: "Acciones críticas por resultado",
       totalRegistros: totalOcurrencias,
-      universo: "Acciones (DURANTE, según filtros) clasificadas por resultado del día (último DESPUÉS).",
+      universo: "Acciones (DURANTE, según filtros) clasificadas por resultado de cierre (último DESPUÉS del mismo día + dirección).",
       criterios: [
         "Unidad = ACCIÓN (no día)",
         "Acciones desde DURANTE (respeta filtros)",
-        "Resultado = último DESPUÉS del día (GANADA/PERDIDA)",
+        "Puente = último DESPUÉS del mismo día + dirección (GANADA/PERDIDA)",
         "Salida: GANADAS vs PERDIDAS por acción (cantidad + %)",
         "Top 5 fijo + fila 6 totales",
         "Solo registros VALIDO y CORREGIDO",
@@ -350,6 +354,27 @@
     if (s === "GANANCIA") return "GANADA";
     if (s === "PÉRDIDA" || s === "PERDIDA") return "PERDIDA";
     return "NA";
+  }
+
+  // ✅ Dirección robusta (COMPRA/VENTA)
+  function getDireccionAny(r) {
+    return (
+      r?.direccion ??
+      r?.direction ??
+      r?.dir ??
+      r?.meta?.direccion ??
+      r?.meta?.direction ??
+      null
+    );
+  }
+
+  function normalizeDireccion(v) {
+    const s = normalizeText(v);
+    if (!s) return "";
+    if (s === "COMPRA" || s === "BUY") return "COMPRA";
+    if (s === "VENTA" || s === "SELL") return "VENTA";
+    // tolerancia a valores raros (pero si no es compra/venta, lo descartamos)
+    return (s === "COMPRA" || s === "VENTA") ? s : "";
   }
 
   // ✅ Extractor robusto: arrays + strings + campos “textuales”
