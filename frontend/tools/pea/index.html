@@ -14,96 +14,30 @@
 <link rel="stylesheet" href="./css/pea_layout.css?v=1" />
 <link rel="stylesheet" href="./css/pea_components.css?v=1" />
 
-  
 <style>
-  /* 1) La página COMPLETA (no solo la tarjeta) */
-  html, body{
-    min-height: 100%;
-  }
-
-  /* Light */
-  body.premium-scope{
-    background: transparent;
+  /* FIX legibilidad: crea una “tarjeta” para que el texto no quede sobre el fondo del premium */
+  .pea-home{
+    max-width: 980px;
+    margin: 40px auto;
+    padding: 22px 24px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.88);
     color: #111;
   }
-
-  /* Dark: fuerza fondo global + texto global */
-  html[data-theme="dark"] body.premium-scope{
-    background-color: #0f0f10 !important;
-    background-image: none !important;
-    color: #f3f3f3;
-  }
-
-  /* Si premium dibuja fondos con pseudoelementos, los apagamos en dark */
-  html[data-theme="dark"] body.premium-scope::before,
-  html[data-theme="dark"] body.premium-scope::after{
-    display: none !important;
-  }
-
-  /* 2) “Tarjeta” integrada (sin cuadro blanco) */
-
-  html[data-theme="dark"] .pea-home{
-  max-width: 980px;
-  margin: 40px auto;
-  padding: 22px 24px;
-  border-radius: 16px;
-
-  background: rgba(0,0,0,.35);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-
-  border: 1px solid rgba(255,255,255,.12);
-  color: #f4f4f4 !important;
-}
-
-
   .pea-home h1 { margin-top: 0; }
-  .pea-desc, .pea-help { color: inherit; }
+  .pea-desc, .pea-help { color: #111; }
   .pea-help li { margin: 6px 0; }
 
-
-/* ==============================
-   PEA DARK PREMIUM (blanco + dorado)
-   ============================== */
-
-/* Texto general blanco en oscuro */
-html[data-theme="dark"] body.premium-scope,
-html[data-theme="dark"] .pea-home{
-  color: #f4f4f4 !important;
-}
-
-/* Asegura legibilidad de todo el contenido */
-html[data-theme="dark"] .pea-home h1,
-html[data-theme="dark"] .pea-home p,
-html[data-theme="dark"] .pea-home li{
-  color: #f4f4f4 !important;
-  opacity: 1 !important;
-}
-
-/* Dorado “premium” SOLO para títulos y énfasis */
-html[data-theme="dark"] .pea-home h1,
-html[data-theme="dark"] .pea-home strong{
-  color: #d6b25e !important; /* dorado */
-}
-
-html[data-theme="dark"] .pea-home a{
-  color: #d6b25e !important;
-  text-decoration-color: rgba(214,178,94,.55);
-}  
-
-/* Evita que premium.min.css te baje opacidad/contraste en dark */
-html[data-theme="dark"] .pea-home,
-html[data-theme="dark"] .pea-home *{
-  text-shadow: none;
-}
-
-html[data-theme="dark"] .pea-home p,
-html[data-theme="dark"] .pea-home li{
-  opacity: 1 !important;
-}
-  
+  /* Dark mode */
+  html.pea-dark .pea-home{
+    background: rgba(20,20,20,.78);
+    color: #f3f3f3;
+  }
+  html.pea-dark .pea-desc,
+  html.pea-dark .pea-help { color: #f3f3f3; }
 </style>
 
+  
 </head>
 
 <body class="premium-scope">
@@ -200,10 +134,34 @@ html[data-theme="dark"] .pea-home li{
     })();
   </script>
 
-<!-- (opcional) Theme del Campus: si existe, lo carga -->
-<script src="/frontend/js/theme_chapter_v2.js"></script>
+<script>
+  // =========================================================
+  // ✅ PEA THEME (independiente del Campus)
+  // No pisa nada global
+  // =========================================================
+  (function peaThemeInit(){
+    const KEY = "PEA_THEME";
+    const root = document.documentElement;
+    const btn = document.getElementById("pea-btn-theme");
 
-<!-- PEA navegación -->
+    function apply(mode){
+      const dark = (mode === "dark");
+      root.classList.toggle("pea-dark", dark);
+      localStorage.setItem(KEY, dark ? "dark" : "light");
+    }
+
+    const saved = localStorage.getItem(KEY) || "light";
+    apply(saved);
+
+    if (btn){
+      btn.addEventListener("click", () => {
+        const current = localStorage.getItem(KEY) || "light";
+        apply(current === "dark" ? "light" : "dark");
+      });
+    }
+  })();
+</script>
+
 <script src="./pea_home.js"></script>
 
 </body>
