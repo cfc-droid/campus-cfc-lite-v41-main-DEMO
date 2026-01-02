@@ -31,10 +31,10 @@ if (auditBtn) {
 const themeBtn = document.getElementById('pea-btn-theme');
 if (themeBtn) {
   themeBtn.onclick = () => {
-    if (typeof toggleThemeSafe === 'function') {
-      toggleThemeSafe();
+    if (typeof window.peaToggleTheme === 'function') {
+      window.peaToggleTheme();
     } else {
-      console.warn("toggleThemeSafe no está disponible en esta página.");
+      console.warn("peaToggleTheme no está disponible.");
     }
   };
 }
