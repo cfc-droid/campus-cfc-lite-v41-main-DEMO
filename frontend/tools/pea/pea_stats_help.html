@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>PEA — Cálculo de estadísticas</title>
+  <title>PEA — Cálculo de estadísticas (Guía completa)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <!-- Estilos heredados del Campus -->
@@ -10,99 +10,694 @@
 </head>
 
 <body>
-
 <main class="pea-help-page">
 
-  <h1>Cálculo de estadísticas (PEA)</h1>
+  <h1>PEA — Cálculo de estadísticas (guía metodológica completa)</h1>
 
   <p>
-    Esta sección documenta <strong>cómo se calculan las estadísticas del sistema PEA</strong>.
+    Este documento explica, de forma <strong>ultra detallada</strong>, <strong>cómo se calcula cada una de las 17 estadísticas</strong> del sistema PEA.
     <br>
-    No interpreta resultados. No aconseja. No establece causalidad.
+    El objetivo es que el usuario pueda entender <strong>exactamente</strong> qué significa cada cuadro, cuál es su universo, qué reglas aplica y cómo se obtienen los números.
   </p>
 
   <hr>
 
-  <h2>Principios base (no negociables)</h2>
+  <!-- =========================================================
+       0) QUÉ ES PEA (GENERAL)
+       ========================================================= -->
+  <h2>Qué es PEA y qué hacen (y NO hacen) estas estadísticas</h2>
 
+  <h3>Qué hacen</h3>
   <ul>
-    <li>El <strong>resultado operativo</strong> (GANADA / PERDIDA / BE / NA) existe solo en <strong>DESPUÉS</strong>.</li>
-    <li>Los registros <strong>ANTES</strong> y <strong>DURANTE</strong> nunca filtran por resultado.</li>
-    <li>El cruce entre momentos se realiza <strong>únicamente por fecha</strong>.</li>
-    <li>Solo se consideran registros con <code>meta.estado ∈ {VALIDO, CORREGIDO}</code>.</li>
-    <li>Los registros <code>ANULADO</code> quedan fuera de todas las métricas.</li>
-    <li>Regla de auditoría: <strong>primer registro del día por momento</strong>.</li>
+    <li>Ordenan registros operativos en una estructura <strong>ANTES → DURANTE → DESPUÉS</strong>.</li>
+    <li>Calculan <strong>frecuencias</strong> (cuántas veces aparece algo) y <strong>porcentajes</strong> (qué proporción representa).</li>
+    <li>Muestran <strong>co-ocurrencias</strong>: “esto apareció junto con aquello” (por ejemplo: una acción DURANTE co-ocurre con un cierre GANADA o PERDIDA).</li>
+    <li>Permiten auditoría retrospectiva: detectar patrones de repetición y consistencia.</li>
+    <li>Respetan filtros del usuario (fechas, instrumento, activo, dirección, estado, pensamiento, acción, etc.) según aplique a cada estadística.</li>
+  </ul>
+
+  <h3>Qué NO hacen</h3>
+  <ul>
+    <li><strong>No interpretan</strong> resultados ni emociones.</li>
+    <li><strong>No aconsejan</strong> qué hacer.</li>
+    <li><strong>No establecen causalidad</strong> (correlación ≠ causa).</li>
+    <li><strong>No predicen</strong> resultados futuros.</li>
+    <li><strong>No reemplazan</strong> criterio operativo, formación, gestión del riesgo, ni evaluación profesional.</li>
   </ul>
 
   <hr>
 
-  <h2>Intensidad emocional</h2>
-
-  <h3>Intensidad promedio</h3>
-  <p>
-    Se calcula sumando los valores de intensidad de todos los registros válidos
-    y dividiendo por la cantidad total de registros considerados.
-  </p>
-
-  <pre>
-(intensidad1 + intensidad2 + ... + intensidadN) / N
-  </pre>
+  <!-- =========================================================
+       1) ADVERTENCIAS / LEGALES / USO RESPONSABLE
+       ========================================================= -->
+  <h2>Advertencias metodológicas y de uso responsable</h2>
 
   <p>
-    El resultado se muestra con un decimal.
-  </p>
-
-  <h3>Picos de intensidad (4–5)</h3>
-  <p>
-    Se consideran <strong>picos</strong> aquellos registros cuya intensidad es
-    <strong>mayor o igual a 4</strong>.
-  </p>
-
-  <pre>
-(cantidad de intensidades ≥ 4 / total de intensidades) × 100
-  </pre>
-
-  <p>
-    El porcentaje indica la proporción de registros con intensidad alta
-    dentro del universo analizado.
-  </p>
-
-  <hr>
-
-  <h2>Qué hacen las estadísticas</h2>
-
-  <ul>
-    <li>Detectan <strong>frecuencias y repeticiones</strong>.</li>
-    <li>Muestran <strong>co-ocurrencias</strong>.</li>
-    <li>Permiten auditoría conductual retrospectiva.</li>
-  </ul>
-
-  <h2>Qué NO hacen las estadísticas</h2>
-
-  <ul>
-    <li>No infieren causas.</li>
-    <li>No predicen resultados futuros.</li>
-    <li>No interpretan emociones.</li>
-    <li>No recomiendan acciones.</li>
-    <li>No reemplazan criterio operativo.</li>
-  </ul>
-
-  <hr>
-
-  <h2>Advertencia metodológica</h2>
-
-  <p>
-    Si una estadística indica <em>“datos insuficientes”</em>, el sistema
-    <strong>no fuerza cálculos</strong>.
+    <strong>Advertencia metodológica (núcleo):</strong><br>
+    Si una estadística indica <em>“datos insuficientes”</em>, el sistema <strong>no fuerza conclusiones</strong> ni “infiere” resultados.
     <br>
-    El cuadro se muestra únicamente por integridad estructural.
+    El cuadro puede mostrarse igualmente por <strong>integridad estructural</strong> (para que la interfaz conserve el formato y el usuario vea qué faltaría completar).
+  </p>
+
+  <p>
+    <strong>Transparencia:</strong> este documento es parte del sistema PEA y existe para <strong>garantizar transparencia metodológica</strong>.
+  </p>
+
+  <p>
+    <strong>Limitación de responsabilidad (importante):</strong>
+    <ul>
+      <li>PEA es un sistema de <strong>auditoría operativa</strong>. No es un sistema de diagnóstico, terapia, asesoramiento médico, psicológico o financiero.</li>
+      <li>Los resultados dependen de la <strong>calidad del dato</strong> cargado por el usuario (completitud, consistencia, etiquetas).</li>
+      <li>Con muestras pequeñas, los porcentajes pueden ser <strong>volátiles</strong> (por ejemplo, 1 evento puede representar 100%).</li>
+      <li>El usuario es responsable de cómo interpreta y utiliza la información. PEA no garantiza resultados.</li>
+      <li>Si el sistema se usa en contextos de trading/finanzas, esto <strong>no es consejo financiero</strong> ni recomendación de inversión. Es auditoría retrospectiva.</li>
+      <li>Si el sistema se usa para estados emocionales, esto <strong>no es evaluación clínica</strong>. Es una etiqueta operativa autodeclarada.</li>
+    </ul>
   </p>
 
   <hr>
 
+  <!-- =========================================================
+       2) DEFINICIONES BASE (VOCABULARIO)
+       ========================================================= -->
+  <h2>Definiciones base (vocabulario obligatorio)</h2>
+
+  <ul>
+    <li><strong>Registro:</strong> una fila cargada por el usuario. Contiene fecha, momento (ANTES/DURANTE/DESPUÉS), y otros campos (pensamiento, acción, estado/emoción, intensidad, dirección, instrumento, etc.).</li>
+    <li><strong>Momento:</strong>
+      <ul>
+        <li><strong>ANTES:</strong> lo previo a la operación (pensamiento/condición previa).</li>
+        <li><strong>DURANTE:</strong> lo que ocurre en ejecución (acciones).</li>
+        <li><strong>DESPUÉS:</strong> cierre/resultados/estado posterior (incluye <strong>resultado operativo</strong>).</li>
+      </ul>
+    </li>
+    <li><strong>Resultado operativo:</strong> etiqueta del cierre (por ejemplo: GANADA, PERDIDA, BE, NA). Por diseño, el resultado “vive” en <strong>DESPUÉS</strong>.</li>
+    <li><strong>Dirección:</strong> COMPRA o VENTA (BUY/SELL). Se usa para distinguir operaciones del mismo día.</li>
+    <li><strong>Pensamiento:</strong> texto/etiqueta (o lista) asociada a ANTES.</li>
+    <li><strong>Acción:</strong> texto/etiqueta (o lista) asociada a DURANTE.</li>
+    <li><strong>Estado (E) / Emoción:</strong> texto/etiqueta (o lista) asociada típicamente a DESPUÉS.</li>
+    <li><strong>Intensidad:</strong> valor numérico (típicamente 1 a 5) asociado a DESPUÉS.</li>
+    <li><strong>Estado del registro:</strong> auditoría de calidad del registro (VALIDO, CORREGIDO, ANULADO). Por regla general, ANULADO se excluye de métricas.</li>
+    <li><strong>Co-ocurrencia:</strong> “X aparece junto con Y” en el universo elegido (no implica causalidad).</li>
+  </ul>
+
+  <hr>
+
+  <!-- =========================================================
+       3) PRINCIPIOS BASE (REGLAS NO NEGOCIABLES)
+       ========================================================= -->
+  <h2>Principios base (reglas no negociables)</h2>
+
+  <ul>
+    <li><strong>Filtro de calidad:</strong> el sistema trabaja con registros cuyo estado sea <code>VALIDO</code> o <code>CORREGIDO</code> (CORREGIDO cuenta como VALIDO). <code>ANULADO</code> se excluye.</li>
+    <li><strong>Resultado operativo:</strong> para análisis por resultado, la clasificación final se basa en <strong>DESPUÉS</strong>:
+      <ul>
+        <li>En estadísticas “directas de DESPUÉS”, se usa el resultado del <strong>mismo registro DESPUÉS</strong>.</li>
+        <li>En estadísticas de ANTES o DURANTE, el resultado se <strong>hereda</strong> desde DESPUÉS usando reglas de cruce (por fecha o por fecha+dirección).</li>
+      </ul>
+    </li>
+    <li><strong>Respeto de filtros:</strong> en general, el universo usa <strong>los filtros activos</strong>. Si no hay registros tras filtrar, se muestra “evidencia insuficiente” (no se inventa universo).</li>
+    <li><strong>Unidad de conteo:</strong> según la estadística, la unidad puede ser:
+      <ul>
+        <li>DÍA (por ejemplo, cobertura).</li>
+        <li>REGISTRO (por ejemplo, intensidad promedio de DESPUÉS).</li>
+        <li>ETIQUETA (pensamiento, acción, estado) por <strong>ocurrencias</strong>.</li>
+      </ul>
+    </li>
+    <li><strong>Ocurrencias vs. “unidades únicas”:</strong> cuando una etiqueta se repite, cuenta tantas veces como aparezca. Si un registro contiene “A, B”, cuenta 1 para A y 1 para B.</li>
+    <li><strong>Reglas de cruce entre momentos:</strong>
+      <ul>
+        <li>Algunas estadísticas cruzan por <strong>fecha</strong> (día).</li>
+        <li>Otras cruzan por <strong>fecha + dirección</strong> (COMPRA/VENTA) para evitar mezclar operaciones distintas en el mismo día.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <hr>
+
+  <!-- =========================================================
+       4) ÍNDICE GENERAL (17 estadísticas)
+       ========================================================= -->
+  <h2>Índice de las 17 estadísticas (nombre + explicación breve)</h2>
+
+  <ol>
+    <li><strong>1/17 — Cobertura por día (faltantes de los 3 registros):</strong> verifica si cada día tiene ANTES + DURANTE + DESPUÉS cargados.</li>
+    <li><strong>2/17 — Top Pensamientos en Pérdidas (ANTES):</strong> ranking de pensamientos más frecuentes en días que cerraron PERDIDA.</li>
+    <li><strong>3/17 — Top Acciones en Pérdidas (DURANTE):</strong> ranking de acciones más frecuentes en días que cerraron PERDIDA.</li>
+    <li><strong>4/17 — Top Emociones en Pérdidas (DESPUÉS):</strong> ranking de estados/emociones más frecuentes en cierres PERDIDA.</li>
+    <li><strong>5/17 — Top Pensamientos en Ganadas (ANTES):</strong> ranking de pensamientos más frecuentes en días que cerraron GANADA.</li>
+    <li><strong>6/17 — Top Acciones en Ganadas (DURANTE):</strong> ranking de acciones más frecuentes en días que cerraron GANADA.</li>
+    <li><strong>7/17 — Top Emociones en Ganadas (DESPUÉS):</strong> ranking de estados/emociones más frecuentes en cierres GANADA.</li>
+    <li><strong>8/17 — Índice de Interferencia (GANADA vs PERDIDA):</strong> compara % de días con “interferencia” DURANTE según resultado final.</li>
+    <li><strong>9/17 — Índice de Cumplimiento (GANADA vs PERDIDA):</strong> compara % de días con acciones de “cumplimiento” DURANTE según resultado final.</li>
+    <li><strong>10/17 — Balanza Cumplimiento vs Interferencia:</strong> vista comparativa de ambos índices lado a lado por resultado.</li>
+    <li><strong>11/17 — Top Interferencias por Resultado (DURANTE):</strong> desglose descriptivo de interferencias DURANTE separadas por GANADA/PERDIDA.</li>
+    <li><strong>12/17 — Intensidad promedio + picos por resultado:</strong> compara intensidad emocional (promedio y picos 4–5) en DESPUÉS por GANADA/PERDIDA.</li>
+    <li><strong>13/17 — Salud del dato:</strong> distribución de estados del registro (VALIDO/CORREGIDO/ANULADO) según el universo visible.</li>
+    <li><strong>14/17 — Momentos estructurales (PAE + resultado):</strong> agrupa por tramos/etapas (momento estructural) y resume PAE + resultados por tramo.</li>
+    <li><strong>15/17 — Acciones críticas por resultado:</strong> para acciones DURANTE, muestra cómo suelen cerrar (GANADA/PERDIDA) usando puente por fecha+dirección.</li>
+    <li><strong>16/17 — Pensamientos críticos por resultado:</strong> para pensamientos ANTES, muestra cómo suelen cerrar (GANADA/PERDIDA) usando puente por fecha+dirección.</li>
+    <li><strong>17/17 — Estados (E) por resultado:</strong> en DESPUÉS, clasifica estados/emociones por el resultado del mismo cierre (GANADA/PERDIDA).</li>
+  </ol>
+
+  <hr>
+
+  <!-- =========================================================
+       5) CUADRO: CADA ESTADÍSTICA → PREGUNTA/S
+       ========================================================= -->
+  <h2>Cuadro: cada estadística válida responde una pregunta</h2>
+
+  <table class="pea-table">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nombre</th>
+        <th>Pregunta/s que responde</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1/17</td>
+        <td>Cobertura por día</td>
+        <td>¿En qué % de días están completos ANTES, DURANTE y DESPUÉS? ¿Qué días tienen faltantes?</td>
+      </tr>
+      <tr>
+        <td>2/17</td>
+        <td>Top Pensamientos en Pérdidas (ANTES)</td>
+        <td>En días que terminan en PERDIDA: ¿qué pensamientos ANTES aparecen más?</td>
+      </tr>
+      <tr>
+        <td>3/17</td>
+        <td>Top Acciones en Pérdidas (DURANTE)</td>
+        <td>En días que terminan en PERDIDA: ¿qué acciones DURANTE aparecen más?</td>
+      </tr>
+      <tr>
+        <td>4/17</td>
+        <td>Top Emociones en Pérdidas (DESPUÉS)</td>
+        <td>En cierres PERDIDA: ¿qué estados/emociones DESPUÉS aparecen más? ¿Cuál es la intensidad promedio y picos?</td>
+      </tr>
+      <tr>
+        <td>5/17</td>
+        <td>Top Pensamientos en Ganadas (ANTES)</td>
+        <td>En días que terminan en GANADA: ¿qué pensamientos ANTES aparecen más?</td>
+      </tr>
+      <tr>
+        <td>6/17</td>
+        <td>Top Acciones en Ganadas (DURANTE)</td>
+        <td>En días que terminan en GANADA: ¿qué acciones DURANTE aparecen más?</td>
+      </tr>
+      <tr>
+        <td>7/17</td>
+        <td>Top Emociones en Ganadas (DESPUÉS)</td>
+        <td>En cierres GANADA: ¿qué estados/emociones DESPUÉS aparecen más? ¿Cuál es la intensidad promedio y picos?</td>
+      </tr>
+      <tr>
+        <td>8/17</td>
+        <td>Índice de Interferencia (GANADA vs PERDIDA)</td>
+        <td>¿Qué % de días (por resultado) contienen acciones clasificadas como interferencia DURANTE?</td>
+      </tr>
+      <tr>
+        <td>9/17</td>
+        <td>Índice de Cumplimiento (GANADA vs PERDIDA)</td>
+        <td>¿Qué % de días (por resultado) contienen acciones clasificadas como cumplimiento DURANTE?</td>
+      </tr>
+      <tr>
+        <td>10/17</td>
+        <td>Balanza Cumplimiento vs Interferencia</td>
+        <td>Comparación directa: por resultado, ¿cuánto cumplimiento vs cuánta interferencia hubo?</td>
+      </tr>
+      <tr>
+        <td>11/17</td>
+        <td>Top Interferencias por Resultado (DURANTE)</td>
+        <td>¿Qué interferencias específicas DURANTE aparecen en GANADAS y cuáles en PERDIDAS?</td>
+      </tr>
+      <tr>
+        <td>12/17</td>
+        <td>Intensidad promedio + picos por resultado</td>
+        <td>¿Cómo cambia la intensidad emocional DESPUÉS entre GANADAS y PERDIDAS? ¿Hay más picos (4–5) en algún resultado?</td>
+      </tr>
+      <tr>
+        <td>13/17</td>
+        <td>Salud del dato</td>
+        <td>¿Qué proporción de mis registros es VALIDO, CORREGIDO o ANULADO (en el universo visible)?</td>
+      </tr>
+      <tr>
+        <td>14/17</td>
+        <td>Momentos estructurales (PAE + resultado)</td>
+        <td>Por tramo/etapa: ¿qué resultados predominan? ¿cómo se ve la cadena PAE (pensamientos/acciones/estados) por resultado dentro del tramo?</td>
+      </tr>
+      <tr>
+        <td>15/17</td>
+        <td>Acciones críticas por resultado</td>
+        <td>Cuando aparece una acción DURANTE, ¿cómo suele cerrar la operación (GANADA/PERDIDA) para el mismo día + dirección?</td>
+      </tr>
+      <tr>
+        <td>16/17</td>
+        <td>Pensamientos críticos por resultado</td>
+        <td>Cuando aparece un pensamiento ANTES, ¿cómo suele cerrar la operación (GANADA/PERDIDA) para el mismo día + dirección?</td>
+      </tr>
+      <tr>
+        <td>17/17</td>
+        <td>Estados (E) por resultado</td>
+        <td>Cuando aparece un estado/emoción en DESPUÉS, ¿cómo cerró ese mismo DESPUÉS (GANADA/PERDIDA)?</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <hr>
+
+  <!-- =========================================================
+       6) SECCIONES DETALLADAS (A/B/C) PARA CADA ESTADÍSTICA
+       ========================================================= -->
+  <h2>Detalle completo por estadística (A qué es / B cómo se calcula / C ejemplo APB)</h2>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 1/17 — Cobertura por día (faltantes de los 3 registros)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Mide la <strong>completitud</strong> del registro diario: para cada fecha, verifica si existe al menos un registro
+    <strong>ANTES</strong>, uno <strong>DURANTE</strong> y uno <strong>DESPUÉS</strong>.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> registros con estado del registro = VALIDO o CORREGIDO (ANULADO excluido).</li>
+    <li><strong>Unidad:</strong> DÍA (fecha).</li>
+    <li>Para cada fecha:
+      <ul>
+        <li>Se marca si hay ANTES.</li>
+        <li>Se marca si hay DURANTE.</li>
+        <li>Se marca si hay DESPUÉS.</li>
+      </ul>
+    </li>
+    <li>Un día está “completo” si tiene los 3 momentos presentes.</li>
+    <li>Se reporta:
+      <ul>
+        <li>% de días completos.</li>
+        <li>lista de días con cobertura incompleta (faltantes).</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Día 2025-12-29:
+    <br>• hay ANTES ✅
+    <br>• hay DURANTE ✅
+    <br>• hay DESPUÉS ✅
+    <br>→ Cobertura completa (cuenta como “día completo”).
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 2/17 — Top Pensamientos en Pérdidas (ANTES)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Ranking de <strong>pensamientos</strong> (ANTES) más frecuentes en días cuyo cierre (DESPUÉS) es <strong>PERDIDA</strong>.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> “primer ANTES del día” dentro de fechas cuyo DESPUÉS (del día) = PERDIDA (según regla interna de auditoría).</li>
+    <li><strong>Clasificación por resultado:</strong> el resultado se <strong>hereda</strong> desde DESPUÉS del mismo día.</li>
+    <li><strong>Conteo:</strong> cada pensamiento cuenta por ocurrencia.</li>
+    <li><strong>Salida:</strong> Top (ranking) + porcentajes sobre el total del universo.</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Si en un día con cierre PERDIDA el pensamiento ANTES fue “Tengo que entrar sí o sí”, suma 1 ocurrencia a ese pensamiento.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 3/17 — Top Acciones en Pérdidas (DURANTE)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Ranking de <strong>acciones</strong> (DURANTE) más frecuentes en días cuyo cierre (DESPUÉS) es <strong>PERDIDA</strong>.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> “primer DURANTE del día” dentro de fechas cuyo DESPUÉS del día = PERDIDA.</li>
+    <li><strong>Clasificación:</strong> resultado heredado desde DESPUÉS (mismo día).</li>
+    <li><strong>Conteo:</strong> cada acción cuenta por ocurrencia (si el DURANTE trae “A, B”, suma 1 para A y 1 para B).</li>
+    <li><strong>Salida:</strong> ranking + % sobre el total.</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Día PERDIDA → DURANTE contiene “Cumplí plan, Respeté el stop” → suma 1 a cada acción dentro de “Pérdidas”.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 4/17 — Top Emociones en Pérdidas (DESPUÉS)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Ranking de <strong>estados/emociones</strong> (DESPUÉS) en cierres PERDIDA, más métricas de <strong>intensidad</strong>.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> registros DESPUÉS con resultado = PERDIDA.</li>
+    <li><strong>Estado/Emoción:</strong> se toma del mismo DESPUÉS.</li>
+    <li><strong>Ranking:</strong> conteo por ocurrencia.</li>
+    <li><strong>Intensidad promedio:</strong>
+      <pre>(intensidad1 + intensidad2 + ... + intensidadN) / N</pre>
+    </li>
+    <li><strong>Picos 4–5:</strong>
+      <pre>(cantidad con intensidad ≥ 4 / N) × 100</pre>
+    </li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Si hay 1 DESPUÉS PERDIDA con estado “Ansiedad” e intensidad 3:
+    <br>• “Ansiedad” = 1 (100%)
+    <br>• Intensidad promedio = 3.0
+    <br>• Picos (4–5) = 0%
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 5/17 — Top Pensamientos en Ganadas (ANTES)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Ranking de pensamientos ANTES más frecuentes en días cuyo cierre es GANADA.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li>Idéntico a la 2/17, pero el universo se restringe a fechas con DESPUÉS = GANADA.</li>
+    <li>Resultado heredado desde DESPUÉS (mismo día).</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Día GANADA → pensamiento ANTES “X” → suma 1 a “X” dentro del ranking de Ganadas.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 6/17 — Top Acciones en Ganadas (DURANTE)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Ranking de acciones DURANTE más frecuentes en días cuyo cierre es GANADA.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li>Idéntico a la 3/17, pero el universo se restringe a fechas con DESPUÉS = GANADA.</li>
+    <li>Resultado heredado desde DESPUÉS.</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Día GANADA → DURANTE contiene “Cumplí plan” → suma 1 en el ranking de Ganadas.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 7/17 — Top Emociones en Ganadas (DESPUÉS)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Ranking de estados/emociones DESPUÉS en cierres GANADA, con intensidad promedio y picos.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li>Idéntico a la 4/17, pero el universo es DESPUÉS con resultado = GANADA.</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Si hay 1 cierre GANADA con emoción “Calma” intensidad 2:
+    <br>• “Calma” = 1 (100%)
+    <br>• promedio = 2.0
+    <br>• picos 4–5 = 0%
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 8/17 — Índice de Interferencia (GANADA vs PERDIDA)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Compara, por resultado final del día, el % de días donde ocurrió al menos una acción DURANTE
+    que pertenece al conjunto <strong>SET_INTERFERENCIA</strong>.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> días con al menos un DURANTE y un DESPUÉS clasificable (GANADA/PERDIDA).</li>
+    <li><strong>Clasificación:</strong> resultado heredado desde DESPUÉS del día.</li>
+    <li><strong>Interferencia del día:</strong> se marca “sí” si el DURANTE del día contiene alguna acción ∈ SET_INTERFERENCIA.</li>
+    <li><strong>Salida:</strong> por resultado:
+      <pre>% con interferencia = (días con interferencia / días totales del resultado) × 100</pre>
+    </li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Si hubo 10 días GANADA y 3 de esos días tuvieron interferencia DURANTE:
+    <br>• GANADA → 3/10 = 30% con interferencia.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 9/17 — Índice de Cumplimiento (GANADA vs PERDIDA)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Igual lógica que la 8/17, pero para acciones DURANTE pertenecientes al conjunto <strong>SET_CUMPLIMIENTO</strong>.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> días con DURANTE y DESPUÉS clasificable.</li>
+    <li><strong>Cumplimiento del día:</strong> “sí” si DURANTE contiene alguna acción ∈ SET_CUMPLIMIENTO.</li>
+    <li><strong>Salida:</strong> por resultado:
+      <pre>% con cumplimiento = (días con cumplimiento / días totales del resultado) × 100</pre>
+    </li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    10 días GANADA; 7 con cumplimiento → 70% cumplimiento en GANADAS.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 10/17 — Balanza Cumplimiento vs Interferencia</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Presenta, para cada resultado (GANADA/PERDIDA), ambos porcentajes (cumplimiento e interferencia)
+    en una misma vista para comparación visual rápida.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li>Reutiliza los cálculos de 8/17 y 9/17 (misma definición de día, mismo universo).</li>
+    <li>Salida: tabla “Resultado → % Cumplimiento / % Interferencia”.</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    GANADA: Cumplimiento 70% / Interferencia 20% → permite ver “balanza” sin interpretación causal.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 11/17 — Top Interferencias por Resultado (DURANTE)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Lista qué acciones interferentes (DURANTE, acciones ∈ SET_INTERFERENCIA) aparecen cuando el resultado es GANADA
+    y cuando es PERDIDA.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> registros DURANTE asociados a días con DESPUÉS clasificable (GANADA/PERDIDA).</li>
+    <li><strong>Filtro:</strong> se toman solo acciones ∈ SET_INTERFERENCIA.</li>
+    <li><strong>Clasificación:</strong> resultado heredado del DESPUÉS del día.</li>
+    <li><strong>Salida:</strong> conteo descriptivo (no necesariamente “ranking duro” si el universo es chico).</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    PERDIDAS: “Moví stop” aparece 2 veces; GANADAS: no aparece → se muestra como desglose, sin causalidad.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 12/17 — Intensidad promedio + picos por resultado</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Compara la intensidad emocional DESPUÉS entre cierres GANADA y PERDIDA.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> registros DESPUÉS con resultado GANADA o PERDIDA y con intensidad válida (típicamente 1–5).</li>
+    <li><strong>Para cada resultado:</strong>
+      <ul>
+        <li>Promedio de intensidad.</li>
+        <li>% picos (intensidad ≥ 4).</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    GANADA: intensidades [1,2] → promedio 1.5; picos 0%.<br>
+    PERDIDA: intensidades [4,5] → promedio 4.5; picos 100%.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 13/17 — Salud del dato</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Auditoría del dataset: muestra la distribución de registros según su estado (VALIDO/CORREGIDO/ANULADO)
+    en el universo visible por filtros.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> registros visibles según filtros activos (sin reinterpretar el contenido).</li>
+    <li><strong>Conteo:</strong> cuántos están en cada estado.</li>
+    <li><strong>Porcentaje:</strong> (cantidad de estado / total) × 100.</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Si hay 8 registros visibles: 3 VALIDO, 4 CORREGIDO, 1 ANULADO →
+    <br>• VALIDO 37.5% • CORREGIDO 50% • ANULADO 12.5%.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 14/17 — Momentos estructurales (PAE + resultado)</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Agrupa el historial por <strong>momentos estructurales</strong> (tramos/etapas consecutivas) y, dentro de cada tramo,
+    resume:
+    <ul>
+      <li>Resultados operativos (DESPUÉS) del tramo.</li>
+      <li>Cadena PAE por resultado (pensamientos ANTES, acciones DURANTE, estados DESPUÉS).</li>
+      <li>Intensidad promedio y picos en DESPUÉS del tramo.</li>
+    </ul>
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> registros válidos (ANULADO excluido). Si filtros dejan vacío, se usa el universo completo (según implementación específica de esta estadística).</li>
+    <li><strong>Segmentación:</strong> el historial se parte en tramos según la etiqueta “momento estructural”.</li>
+    <li><strong>Capa 2 (resultado):</strong> se calcula usando SOLO DESPUÉS del tramo.</li>
+    <li><strong>Capa 3 (cadena PAE):</strong> ANTES y DURANTE se asocian a fechas que tienen DESPUÉS dentro del mismo tramo (consistencia interna).</li>
+    <li><strong>Top fijo:</strong> se reservan posiciones aunque falten datos (integridad estructural).</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Tramo “AJUSTE_ESTRATEGIA” con 2 cierres DESPUÉS: 1 GANADA y 1 PERDIDA →
+    <br>• Resultado del tramo: 50%/50%
+    <br>• Cadena PAE: pensamientos/acciones/estados se listan por resultado dentro del tramo.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 15/17 — Acciones críticas por resultado</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Toma acciones DURANTE y responde: <strong>“Cuando aparece esta acción, ¿cómo suele cerrar la operación?”</strong>
+    clasificada por GANADA/PERDIDA.
+    <br>
+    Esta estadística usa un <strong>puente por (fecha + dirección)</strong> para evitar mezclar COMPRA/VENTA del mismo día.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo de clasificación (puente):</strong>
+      <ul>
+        <li>Para cada par (FECHA + DIRECCIÓN), se busca el <strong>último</strong> registro DESPUÉS del día con resultado GANADA/PERDIDA.</li>
+        <li>Ese resultado se guarda como “cierre” del par (día+dirección).</li>
+        <li>Si un par no tiene DESPUÉS GANADA/PERDIDA, <strong>no entra</strong> al universo (no se puede clasificar).</li>
+      </ul>
+    </li>
+    <li><strong>Datos analizados:</strong> acciones extraídas desde registros DURANTE (respetan filtros) que pertenecen a pares (día+dirección) con cierre válido.</li>
+    <li><strong>Conteo:</strong> por ocurrencias de acción.</li>
+    <li><strong>Salida:</strong> Top 5 acciones + fila de totales; por cada acción:
+      <ul>
+        <li>GANADAS: cantidad y % sobre el total de esa acción.</li>
+        <li>PERDIDAS: cantidad y % sobre el total de esa acción.</li>
+        <li>TOTAL: ocurrencias (100% por fila).</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Día 2025-12-29, dirección COMPRA:
+    <br>• último DESPUÉS = GANADA
+    <br>• DURANTE contiene “Cumplí plan”
+    <br>→ “Cumplí plan” suma 1 en GANADAS.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 16/17 — Pensamientos críticos por resultado</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Toma pensamientos ANTES y responde: <strong>“Cuando aparece este pensamiento, ¿cómo suele cerrar la operación?”</strong>
+    clasificada por GANADA/PERDIDA, usando puente por <strong>fecha + dirección</strong>.
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Puente:</strong> idéntico al de la 15/17:
+      <ul>
+        <li>Para cada (fecha+dirección), se usa el <strong>último DESPUÉS</strong> con GANADA/PERDIDA.</li>
+      </ul>
+    </li>
+    <li><strong>Datos analizados:</strong> pensamientos extraídos desde ANTES (respetan filtros) y solo si su (fecha+dirección) tiene puente válido.</li>
+    <li><strong>Conteo:</strong> por ocurrencias de pensamiento.</li>
+    <li><strong>Salida:</strong> Top 5 + totales (mismo formato APB que la 15/17).</li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Día 2025-12-29, dirección VENTA:
+    <br>• último DESPUÉS = PERDIDA
+    <br>• ANTES contiene “Tengo que entrar sí o sí”
+    <br>→ ese pensamiento suma 1 en PERDIDAS.
+  </p>
+
+  <!-- ===================================== -->
+  <hr>
+  <h3>ESTADÍSTICA 17/17 — Estados (E) por resultado</h3>
+
+  <p><strong>A) Qué es</strong><br>
+    Toma estados/emociones DESPUÉS y responde: <strong>“Cuando aparece este Estado (E) en DESPUÉS, ¿cómo cerró la operación?”</strong>
+    usando el resultado del <strong>mismo registro DESPUÉS</strong> (sin puente).
+  </p>
+
+  <p><strong>B) Cómo se calcula</strong></p>
+  <ul>
+    <li><strong>Universo:</strong> registros DESPUÉS válidos (respeta filtros activos).</li>
+    <li><strong>Clasificables:</strong> solo DESPUÉS cuyo resultado sea GANADA o PERDIDA.</li>
+    <li><strong>Estado (E):</strong> se extrae del mismo registro (campo estado/emoción; puede ser lista).</li>
+    <li><strong>Conteo:</strong> por ocurrencias de estado.</li>
+    <li><strong>Salida:</strong> Top 5 + totales; por estado:
+      <ul>
+        <li>GANADAS: cantidad + % sobre el total del estado.</li>
+        <li>PERDIDAS: cantidad + % sobre el total del estado.</li>
+      </ul>
+    </li>
+  </ul>
+
+  <p><strong>C) Ejemplo APB</strong><br>
+    Si “Ansiedad” aparece en 2 cierres DESPUÉS:
+    <br>• 1 cierre GANADA, 1 cierre PERDIDA
+    <br>→ “Ansiedad”: GANADAS 1 (50%), PERDIDAS 1 (50%), TOTAL 2 (100%).
+  </p>
+
+  <hr>
+
+  <!-- =========================================================
+       7) NOTA FINAL
+       ========================================================= -->
+  <h2>Nota final</h2>
+
   <p>
-    Este documento es parte del sistema PEA y existe para
-    <strong>garantizar transparencia metodológica</strong>.
+    Este documento está diseñado para que el usuario pueda auditar cada número:
+    universo → filtro → reglas → fórmula → salida.
+    <br>
+    Si una etiqueta, campo o filtro no existe en un registro, ese registro puede quedar fuera del universo de una estadística específica (por ejemplo, falta dirección en estadísticas que puentean por fecha+dirección).
   </p>
 
   <div style="margin-top:24px;">
@@ -110,6 +705,5 @@
   </div>
 
 </main>
-
 </body>
 </html>
