@@ -14,23 +14,23 @@
        TOTAL: cantidad (siempre 100% por fila)
    - + Fila 6: TOTALES (sumas + % globales)
 
-   PUENTE (clasificación):
-   - Resultado del día = ÚLTIMO registro DESPUÉS del día (GANADA/PERDIDA)
-   - Se busca en ALL (sin filtros) pero SOLO para fechas dentro del scope
+   PUENTE (clasificación) — ✅ CORREGIDO:
+   - Resultado = ÚLTIMO registro DESPUÉS con GANADA/PERDIDA
+   - PERO ahora se calcula por (FECHA + DIRECCIÓN)
+     => evita mezclar operaciones COMPRA y VENTA del mismo día.
 
    SCOPE:
-   - Pensamientos tomados de registros ANTES que respetan filtros activos
-   - Solo se consideran ANTES de fechas que tengan resultado GANADA/PERDIDA (puente válido)
+   - Pensamientos desde ANTES (respeta filtros activos)
+   - Solo se consideran ANTES que tengan puente válido (fecha+dirección con DESPUÉS GANADA/PERDIDA)
 
    REGLAS:
-   - Si una fecha no tiene DESPUÉS GANADA/PERDIDA => no entra al universo (no se puede clasificar)
-   - Los pensamientos se computan por ocurrencias (frecuencia): si aparece 2 veces, cuenta 2
+   - Si no hay DESPUÉS GANADA/PERDIDA para ese (día+dirección), NO entra al universo.
+   - Pensamientos por ocurrencias (si aparece 2 veces, cuenta 2)
 
    Robustez de pensamiento:
    - pensamiento / pensamientos / pensamiento_text / pensamiento_str / etc.
    - pensamiento_key / pensamiento_keys / pensamientos_keys
    - meta.pensamiento / meta.pensamiento_text
-   - (lo que ves como “Pensamiento” en la tabla)
    ========================================================= */
 
 (function () {
@@ -67,11 +67,12 @@
     }
 
     /* ===============================
-       2) Resultado del día (puente)
-          - Último DESPUÉS del día con GANADA/PERDIDA
-          - Se busca en ALL (sin filtros) pero SOLO para fechas del scope
+       2) PUENTE CORREGIDO:
+          Resultado por (FECHA + DIRECCIÓN)
+          - último DESPUÉS del par (fecha+dir) con GANADA/PERDIDA
+          - se busca en ALL (sin filtros) pero SOLO para fechas del scope
        =============================== */
-    const resultadoPorFecha = {}; // { "YYYY-MM-DD": { res, key } }
+    const resultadoPorFechaDir = {}; // { "YYYY-MM-DD|COMPRA": { res, key } }
 
     allValid.forEach((r) => {
       const fecha = safeText(r?.fecha).trim();
@@ -82,52 +83,63 @@
       const res = normalizeResultadoOperativo(getResultadoAny(r));
       if (res !== "GANADA" && res !== "PERDIDA") return;
 
+      const dir = normalizeDireccion(r?.direccion);
+      if (!dir) return; // si no hay dirección, no puede cerrar “por operación”
+
+      const mapKey = `${fecha}|${dir}`;
       const tkey = getTimeKey(r);
-      if (!resultadoPorFecha[fecha] || tkey > resultadoPorFecha[fecha].key) {
-        resultadoPorFecha[fecha] = { res, key: tkey };
+
+      if (!resultadoPorFechaDir[mapKey] || tkey > resultadoPorFechaDir[mapKey].key) {
+        resultadoPorFechaDir[mapKey] = { res, key: tkey };
       }
     });
 
-    const fechasConResultado = Object.keys(resultadoPorFecha);
-    if (!fechasConResultado.length) {
-      return renderEmpty(box, "No hay DESPUÉS con resultado GANADA/PERDIDA dentro del scope de fechas.");
-    }
-
-    const fechasConResultadoSet = new Set(fechasConResultado);
-
-    /* ===============================
-       3) Tomar pensamientos desde ANTES (RESPETA FILTROS)
-          - Solo ANTES dentro del scope y con resultado disponible
-          - Cada pensamiento cuenta como ocurrencia (frecuencia)
-       =============================== */
-    const antesFiltered = filteredValid.filter((r) => {
-      const fecha = safeText(r?.fecha).trim();
-      if (!fecha || !fechasConResultadoSet.has(fecha)) return false;
-      return normalizeMomento(r?.momento) === "ANTES";
-    });
-
-    if (!antesFiltered.length) {
+    const keysPuente = Object.keys(resultadoPorFechaDir);
+    if (!keysPuente.length) {
       return renderEmpty(
         box,
-        "No hay registros ANTES (válidos) en el scope actual con resultado GANADA/PERDIDA disponible."
+        "No hay DESPUÉS con resultado GANADA/PERDIDA (y dirección válida) dentro del scope de fechas."
       );
     }
 
-    // Conteo por pensamiento: key = normalizedText, val = { label, g, p, t }
-    const counts = new Map();
-    let totalOcurrencias = 0;
+    const keysPuenteSet = new Set(keysPuente);
 
-    // flag diagnóstico (para mostrar aviso dentro del cuadro)
-    let huboAntesPeroSinPensamientos = false;
+    /* ===============================
+       3) Tomar pensamientos desde ANTES (RESPETA FILTROS)
+          - Solo ANTES dentro del scope
+          - Solo si existe puente para (fecha+dirección del ANTES)
+       =============================== */
+    const antesFiltered = filteredValid.filter((r) => {
+      const fecha = safeText(r?.fecha).trim();
+      if (!fecha) return false;
+
+      if (!scopeFechas.has(fecha)) return false;
+      if (normalizeMomento(r?.momento) !== "ANTES") return false;
+
+      const dir = normalizeDireccion(r?.direccion);
+      if (!dir) return false;
+
+      const mapKey = `${fecha}|${dir}`;
+      return keysPuenteSet.has(mapKey);
+    });
+
+    // Si no hay ANTES con puente válido, igual mostramos cuadro fijo vacío
+    let totalOcurrencias = 0;
+    const counts = new Map(); // key pensamiento normalized => { label, g, p, t }
+
+    let huboAntesSinPensamientos = false;
 
     antesFiltered.forEach((rec) => {
       const fecha = safeText(rec?.fecha).trim();
-      const res = resultadoPorFecha[fecha]?.res; // GANADA/PERDIDA
+      const dir = normalizeDireccion(rec?.direccion);
+      const mapKey = `${fecha}|${dir}`;
+
+      const res = resultadoPorFechaDir[mapKey]?.res; // GANADA/PERDIDA
       if (res !== "GANADA" && res !== "PERDIDA") return;
 
       const pensamientos = extractPensamientos(rec);
       if (!pensamientos.length) {
-        huboAntesPeroSinPensamientos = true;
+        huboAntesSinPensamientos = true;
         return;
       }
 
@@ -150,13 +162,11 @@
     const itemsAll = Array.from(counts.values()).filter((x) => x.t > 0);
 
     /* ===============================
-       4) TOP 5 (dinámico) + tabla FIJA
-       - Si no hay itemsAll, igual renderizamos 5 filas vacías + Totales 0
+       4) TOP 5 (dinámico) + cuadro FIJO
        =============================== */
     const FIXED_ROWS = 5;
 
     if (itemsAll.length) {
-      // Orden: más frecuencia primero; si empata, más % pérdida primero
       itemsAll.sort((a, b) => {
         if (b.t !== a.t) return b.t - a.t;
         const ap = a.t ? (a.p / a.t) : 0;
@@ -212,7 +222,6 @@
     const rowsHtml = [];
     for (let i = 1; i <= FIXED_ROWS; i++) rowsHtml.push(renderRow(i, top[i - 1]));
 
-    // Totales: sobre lo mostrado (sumT). Si sumT=0, % no aplica.
     const totGp = pct(sumG, sumT);
     const totPp = pct(sumP, sumT);
 
@@ -226,25 +235,32 @@
       </tr>
     `);
 
-    const totalDias = fechasConResultado.length;
+    // Universo: contamos pares fecha+dirección con puente válido dentro del scope
+    // (más fiel que “días” cuando hay varias operaciones)
+    const universoKeys = new Set(
+      keysPuente.filter((k) => scopeFechas.has(k.split("|")[0]))
+    );
+    const totalParesFechaDir = universoKeys.size;
 
     // Semáforo simple (por volumen de ocurrencias)
     let semaforo = "🟡 Datos parciales";
     if (totalOcurrencias >= 30) semaforo = "🟢 Datos suficientes";
     if (totalOcurrencias < 10) semaforo = "🔴 Datos insuficientes";
 
-    // Mensaje diagnóstico interno (sin romper el cuadro)
-    const warnPensamientos = (!itemsAll.length)
-      ? `⚠️ Hay ANTES en el scope, pero no se pudieron extraer pensamientos (campos vacíos o formato inesperado).`
-      : (huboAntesPeroSinPensamientos ? `⚠️ Algunos registros ANTES no tienen pensamiento legible (se omitieron).` : `✅ Se extrajeron pensamientos desde ANTES correctamente.`);
+    const diag =
+      !itemsAll.length
+        ? "⚠️ Hay ANTES en el scope, pero no se pudieron extraer pensamientos legibles."
+        : (huboAntesSinPensamientos
+          ? "⚠️ Algunos ANTES no tenían pensamiento legible (se omitieron)."
+          : "✅ Se extrajeron pensamientos desde ANTES correctamente.");
 
     const contenidoHTML = `
       <div class="pea-metricas-secundarias" style="margin-bottom:10px;">
-        <strong>Cómo leerlo:</strong> “Cuando aparece este pensamiento en <strong>ANTES</strong>, ¿cómo suele terminar el día?”<br>
-        <strong>Puente:</strong> el resultado se toma del <strong>último DESPUÉS</strong> del día (GANADA/PERDIDA).<br>
-        <strong>Scope:</strong> ${totalDias} día(s) con resultado válido. Ocurrencias ANTES analizadas = ${totalOcurrencias}.<br>
+        <strong>Cómo leerlo:</strong> “Cuando aparece este pensamiento en <strong>ANTES</strong>, ¿cómo suele terminar la operación?”<br>
+        <strong>Puente:</strong> se toma el <strong>último DESPUÉS</strong> con GANADA/PERDIDA del <strong>mismo día + misma dirección</strong> (COMPRA/VENTA).<br>
+        <strong>Scope:</strong> ${totalParesFechaDir} par(es) fecha+dirección con cierre válido. Ocurrencias ANTES analizadas = ${totalOcurrencias}.<br>
         <strong>Nota:</strong> cuenta <em>ocurrencias</em> (si el pensamiento aparece 2 veces, cuenta 2).<br>
-        <span style="opacity:.85;">${escapeHtml(warnPensamientos)}</span>
+        <span style="opacity:.85;">${escapeHtml(diag)}</span>
       </div>
 
       <table class="pea-table">
@@ -263,8 +279,8 @@
       </table>
 
       <div class="pea-metricas-secundarias" style="margin-top:10px;">
-        No interpreta. No establece causalidad. Solo muestra co-ocurrencia pensamiento → resultado del día.<br>
-        Si faltan DESPUÉS con GANADA/PERDIDA, esos días no entran al universo.
+        No interpreta. No establece causalidad. Solo muestra co-ocurrencia pensamiento → resultado (cierre) de la operación.<br>
+        Si faltan DESPUÉS con GANADA/PERDIDA para ese (día+dirección), ese ANTES no entra al universo.
       </div>
     `;
 
@@ -273,11 +289,11 @@
       indice: 16,
       titulo: "Pensamientos críticos por resultado",
       totalRegistros: totalOcurrencias,
-      universo: "Pensamientos (ANTES, según filtros) clasificados por resultado del día (último DESPUÉS).",
+      universo: "Pensamientos (ANTES, según filtros) clasificados por resultado del cierre (último DESPUÉS del mismo día + dirección).",
       criterios: [
         "Unidad = PENSAMIENTO (no día)",
         "Pensamientos desde ANTES (respeta filtros)",
-        "Resultado = último DESPUÉS del día (GANADA/PERDIDA)",
+        "Puente = último DESPUÉS del mismo día + dirección (GANADA/PERDIDA)",
         "Salida: GANADAS vs PERDIDAS por pensamiento (cantidad + %)",
         "Top 5 fijo + fila 6 totales",
         "Solo registros VALIDO y CORREGIDO",
@@ -327,6 +343,14 @@
     return s || "";
   }
 
+  function normalizeDireccion(v) {
+    const s = normalizeText(v);
+    if (!s) return "";
+    if (s === "BUY" || s === "LONG" || s === "COMPRA") return "COMPRA";
+    if (s === "SELL" || s === "SHORT" || s === "VENTA") return "VENTA";
+    return s; // por si en el futuro hay otras etiquetas
+  }
+
   function getResultadoAny(r) {
     return (
       r?.resultado_operativo ??
@@ -350,15 +374,15 @@
   function extractPensamientos(r) {
     const out = [];
 
-    // 1) keys arrays
+    // keys arrays
     if (Array.isArray(r?.pensamiento_keys)) r.pensamiento_keys.forEach((x) => x && out.push(String(x)));
     if (Array.isArray(r?.pensamientos_keys)) r.pensamientos_keys.forEach((x) => x && out.push(String(x)));
 
-    // 2) keys strings
+    // keys strings
     if (typeof r?.pensamiento_key === "string" && r.pensamiento_key.trim()) out.push(r.pensamiento_key.trim());
     if (typeof r?.pensamientos_key === "string" && r.pensamientos_key.trim()) out.push(r.pensamientos_key.trim());
 
-    // 3) campos típicos visibles en tabla (“Pensamiento”)
+    // campos típicos
     const candidates = [
       r?.pensamiento,
       r?.pensamientos,
@@ -388,7 +412,6 @@
       else if (Array.isArray(x)) x.forEach((y) => (y && String(y).trim() ? out.push(String(y).trim()) : null));
     });
 
-    // split si alguno viene “A, B, C”
     const expanded = [];
     out.forEach((s) => splitTextList(s).forEach((p) => expanded.push(p)));
 
