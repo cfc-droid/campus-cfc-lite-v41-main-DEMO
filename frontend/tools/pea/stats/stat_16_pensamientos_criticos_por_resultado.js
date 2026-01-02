@@ -28,6 +28,8 @@
 
    Robustez de pensamiento:
    - pensamiento / pensamientos / pensamiento_text / pensamiento_str / etc.
+   - pensamiento_key / pensamiento_keys / pensamientos_keys
+   - meta.pensamiento / meta.pensamiento_text
    - (lo que ves como “Pensamiento” en la tabla)
    ========================================================= */
 
@@ -115,12 +117,20 @@
     const counts = new Map();
     let totalOcurrencias = 0;
 
+    // flag diagnóstico (para mostrar aviso dentro del cuadro)
+    let huboAntesPeroSinPensamientos = false;
+
     antesFiltered.forEach((rec) => {
       const fecha = safeText(rec?.fecha).trim();
       const res = resultadoPorFecha[fecha]?.res; // GANADA/PERDIDA
       if (res !== "GANADA" && res !== "PERDIDA") return;
 
       const pensamientos = extractPensamientos(rec);
+      if (!pensamientos.length) {
+        huboAntesPeroSinPensamientos = true;
+        return;
+      }
+
       pensamientos.forEach((txt) => {
         const label = String(txt || "").trim();
         const key = normalizeText(label);
@@ -138,25 +148,22 @@
     });
 
     const itemsAll = Array.from(counts.values()).filter((x) => x.t > 0);
-    if (!itemsAll.length) {
-      return renderEmpty(
-        box,
-        "Hay ANTES en el scope, pero no se pudieron extraer pensamientos (campos vacíos o formato inesperado)."
-      );
-    }
 
     /* ===============================
-       4) Selección TOP 5 (dinámica, según filtro)
+       4) TOP 5 (dinámico) + tabla FIJA
+       - Si no hay itemsAll, igual renderizamos 5 filas vacías + Totales 0
        =============================== */
     const FIXED_ROWS = 5;
 
-    // Orden: más frecuencia primero; si empata, más % pérdida primero
-    itemsAll.sort((a, b) => {
-      if (b.t !== a.t) return b.t - a.t;
-      const ap = a.t ? (a.p / a.t) : 0;
-      const bp = b.t ? (b.p / b.t) : 0;
-      return bp - ap;
-    });
+    if (itemsAll.length) {
+      // Orden: más frecuencia primero; si empata, más % pérdida primero
+      itemsAll.sort((a, b) => {
+        if (b.t !== a.t) return b.t - a.t;
+        const ap = a.t ? (a.p / a.t) : 0;
+        const bp = b.t ? (b.p / b.t) : 0;
+        return bp - ap;
+      });
+    }
 
     const top = itemsAll.slice(0, FIXED_ROWS);
 
@@ -167,9 +174,9 @@
       return t ? Math.round((n / t) * 100) : 0;
     }
 
-    const sumG = top.reduce((acc, r) => acc + (r.g || 0), 0);
-    const sumP = top.reduce((acc, r) => acc + (r.p || 0), 0);
-    const sumT = top.reduce((acc, r) => acc + (r.t || 0), 0);
+    const sumG = top.reduce((acc, r) => acc + (r?.g || 0), 0);
+    const sumP = top.reduce((acc, r) => acc + (r?.p || 0), 0);
+    const sumT = top.reduce((acc, r) => acc + (r?.t || 0), 0);
 
     // Evitar negritas heredadas por CSS
     const tdPlain = 'style="font-weight:400 !important;"';
@@ -205,6 +212,7 @@
     const rowsHtml = [];
     for (let i = 1; i <= FIXED_ROWS; i++) rowsHtml.push(renderRow(i, top[i - 1]));
 
+    // Totales: sobre lo mostrado (sumT). Si sumT=0, % no aplica.
     const totGp = pct(sumG, sumT);
     const totPp = pct(sumP, sumT);
 
@@ -212,9 +220,9 @@
       <tr>
         <td ${tdNum}>6</td>
         <td ${tdPlain}>TOTALES</td>
-        <td ${tdNum}>${sumG} (${totGp}%)</td>
-        <td ${tdNum}>${sumP} (${totPp}%)</td>
-        <td ${tdNum}>${sumT} (100%)</td>
+        <td ${tdNum}>${sumG} (${sumT ? totGp : 0}%)</td>
+        <td ${tdNum}>${sumP} (${sumT ? totPp : 0}%)</td>
+        <td ${tdNum}>${sumT} (${sumT ? 100 : "—"}%)</td>
       </tr>
     `);
 
@@ -225,12 +233,18 @@
     if (totalOcurrencias >= 30) semaforo = "🟢 Datos suficientes";
     if (totalOcurrencias < 10) semaforo = "🔴 Datos insuficientes";
 
+    // Mensaje diagnóstico interno (sin romper el cuadro)
+    const warnPensamientos = (!itemsAll.length)
+      ? `⚠️ Hay ANTES en el scope, pero no se pudieron extraer pensamientos (campos vacíos o formato inesperado).`
+      : (huboAntesPeroSinPensamientos ? `⚠️ Algunos registros ANTES no tienen pensamiento legible (se omitieron).` : `✅ Se extrajeron pensamientos desde ANTES correctamente.`);
+
     const contenidoHTML = `
       <div class="pea-metricas-secundarias" style="margin-bottom:10px;">
         <strong>Cómo leerlo:</strong> “Cuando aparece este pensamiento en <strong>ANTES</strong>, ¿cómo suele terminar el día?”<br>
         <strong>Puente:</strong> el resultado se toma del <strong>último DESPUÉS</strong> del día (GANADA/PERDIDA).<br>
         <strong>Scope:</strong> ${totalDias} día(s) con resultado válido. Ocurrencias ANTES analizadas = ${totalOcurrencias}.<br>
-        <strong>Nota:</strong> cuenta <em>ocurrencias</em> (si el pensamiento aparece 2 veces, cuenta 2).
+        <strong>Nota:</strong> cuenta <em>ocurrencias</em> (si el pensamiento aparece 2 veces, cuenta 2).<br>
+        <span style="opacity:.85;">${escapeHtml(warnPensamientos)}</span>
       </div>
 
       <table class="pea-table">
@@ -336,7 +350,15 @@
   function extractPensamientos(r) {
     const out = [];
 
-    // Campos típicos (según tu tabla: “Pensamiento”)
+    // 1) keys arrays
+    if (Array.isArray(r?.pensamiento_keys)) r.pensamiento_keys.forEach((x) => x && out.push(String(x)));
+    if (Array.isArray(r?.pensamientos_keys)) r.pensamientos_keys.forEach((x) => x && out.push(String(x)));
+
+    // 2) keys strings
+    if (typeof r?.pensamiento_key === "string" && r.pensamiento_key.trim()) out.push(r.pensamiento_key.trim());
+    if (typeof r?.pensamientos_key === "string" && r.pensamientos_key.trim()) out.push(r.pensamientos_key.trim());
+
+    // 3) campos típicos visibles en tabla (“Pensamiento”)
     const candidates = [
       r?.pensamiento,
       r?.pensamientos,
@@ -347,7 +369,18 @@
       r?.pensamiento_label,
       r?.pensamiento_raw,
       r?.pensamiento_human,
-      r?.pensamiento_ui
+      r?.pensamiento_ui,
+
+      // variantes defensivas
+      r?.thought,
+      r?.thoughts,
+      r?.texto_pensamiento,
+
+      // meta
+      r?.meta?.pensamiento,
+      r?.meta?.pensamiento_text,
+      r?.meta?.pensamiento_str,
+      r?.meta?.pensamiento_display
     ];
 
     candidates.forEach((x) => {
@@ -355,7 +388,7 @@
       else if (Array.isArray(x)) x.forEach((y) => (y && String(y).trim() ? out.push(String(y).trim()) : null));
     });
 
-    // Si alguno viene “A, B, C”
+    // split si alguno viene “A, B, C”
     const expanded = [];
     out.forEach((s) => splitTextList(s).forEach((p) => expanded.push(p)));
 
@@ -382,7 +415,6 @@
     const iso = safeText(r?.meta?.created_at_iso).trim();
     if (iso) return iso;
 
-    // fallback determinista
     const f = safeText(r?.fecha).trim();
     const m = normalizeMomento(r?.momento);
     const mo = m === "ANTES" ? 1 : m === "DURANTE" ? 2 : m === "DESPUES" ? 3 : 9;
