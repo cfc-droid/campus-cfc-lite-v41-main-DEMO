@@ -1,0 +1,43 @@
+:root{
+  --pea-font: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+
+  --pea-radius: 12px;
+  --pea-radius-sm: 10px;
+
+  --pea-gap-1: 6px;
+  --pea-gap-2: 10px;
+  --pea-gap-3: 12px;
+  --pea-gap-4: 16px;
+
+  --pea-pad-1: 8px;
+  --pea-pad-2: 10px;
+  --pea-pad-3: 12px;
+  --pea-pad-4: 16px;
+
+  --pea-border: 1px solid rgba(255,255,255,.10);
+  --pea-border-soft: 1px solid rgba(255,255,255,.06);
+
+  --pea-shadow: 0 8px 24px rgba(0,0,0,.25);
+  --pea-shadow-soft: 0 6px 18px rgba(0,0,0,.18);
+
+  --pea-z-topbar: 50;
+  --pea-z-sticky: 20;
+
+  /* Colores base: neutros para no romper el theme global */
+  --pea-bg: rgba(18,18,19,1);
+  --pea-panel: rgba(21,21,23,1);
+  --pea-panel-2: rgba(17,17,18,1);
+
+  --pea-text: rgba(234,234,234,1);
+  --pea-text-2: rgba(216,216,216,.92);
+  --pea-text-3: rgba(216,216,216,.70);
+
+  --pea-accent: rgba(90,160,255,1);
+  --pea-good: rgba(70,220,90,1);
+  --pea-bad: rgba(255,90,90,1);
+  --pea-warn: rgba(255,200,70,1);
+}
+
+.pea-home, .pea-register, .pea-history{
+  font-family: var(--pea-font);
+}
