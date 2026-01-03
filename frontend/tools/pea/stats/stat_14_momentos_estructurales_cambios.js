@@ -167,29 +167,6 @@ ordered.forEach((r) => {
               </div>
             </div>
           </div>
-
-          <div
-            id="pea-stat14-chart-space"
-            style="
-              flex: 0 0 360px;
-              max-width:360px;
-              border:1px solid rgba(0,0,0,.15);
-              border-radius:12px;
-              padding:12px;
-              position:sticky;
-              top:10px;
-              min-height:420px;
-              background:#FFFFFF;
-              color:#222;
-            "
-          >
-            <div style="opacity:.85; font-size:13px;">
-              <em>Espacio reservado para gráfico</em><br>
-              (Se implementa cuando terminen las 17 estadísticas)
-            </div>
-          </div>
-        </div>
-      </div>
     `;
   }
 
