@@ -350,9 +350,9 @@ html.pea-dark .pea-floatbar{
   backdrop-filter: blur(10px);
 }
 
-/* Para que el contenido no quede tapado por la barra */
+/* Para que el contenido no quede tapado por la barra *
 body.pea-has-floatbar{
-  padding-top: 86px; /* ajustá si querés más/menos */
+  padding-top: 86px; /* ajustá si querés más/menos *
 }
 
 /* Dark */
