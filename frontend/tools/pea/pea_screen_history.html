@@ -62,7 +62,17 @@
 
             <!-- FILTROS -->
             <section class="pea-filters pea-register">
-              <h2>Filtros</h2>
+<div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap;">
+  <h2 style="margin:0;">Filtros</h2>
+
+  <div style="display:flex; align-items:center; gap:8px;">
+    <span style="font-weight:600;">Ir a estadísticas</span>
+    <select id="pea-jump-stat" aria-label="Ir a estadísticas">
+      <option value="">—</option>
+    </select>
+  </div>
+</div>
+
 
               <div class="pea-filters-grid">
 
@@ -353,6 +363,9 @@
 
 <!-- REGISTRO DE ESTADÍSTICAS -->
 <script src="./pea_stats_registry.js"></script>
+
+<!-- Jump rápido a estadísticas -->
+<script src="./pea_jump_stat.js"></script>  
 
 <script type="module" src="./pea_views.js"></script>
 
