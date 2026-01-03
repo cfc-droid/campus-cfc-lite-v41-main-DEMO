@@ -100,15 +100,17 @@
 
 <body class="pea-has-floatbar">
 
-  <!-- BOTONERA FLOTANTE -->
-<div class="pea-floatbar pea-actions"
+<!-- BOTONERA FLOTANTE -->
+<nav class="pea-floatbar pea-actions" aria-label="Accesos rápidos PEA">
+  <a class="btn-main" href="./index.html">Pantalla principal</a>
+  <a class="btn-main" href="./pea_screen_register.html">Cargar registro</a>
+  <a class="btn-main" href="./pea_screen_history.html">Historial y estadísticas</a>
+  <a class="btn-main" href="/index.html">Volver al Campus</a>
 
-  <button type="button" class="btn-main" onclick="window.location.href='./index.html'">Pantalla principal</button>
-  <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">Cargar registro</button>
-  <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">Historial y estadísticas</button>
-  <button type="button" class="btn-main" onclick="window.location.href='/index.html'">Volver al Campus</button>
-  <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme()">Claro / Oscuro</button>
-</div>
+  <!-- Theme toggle queda como button -->
+  <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme?.()">Claro / Oscuro
+  </button>
+</nav>
 
 <div class="pea-shell">
   <div class="pea-card pea-help-page">
