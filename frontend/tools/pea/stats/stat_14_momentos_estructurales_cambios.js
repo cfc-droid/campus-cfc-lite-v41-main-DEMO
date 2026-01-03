@@ -77,7 +77,7 @@ ordered.forEach((r) => {
           "CAPA 2: Resultado tomado SOLO de DESPUÉS (del tramo)",
           "CAPA 3: ANTES/DURANTE se asocian SOLO a fechas con DESPUÉS dentro del mismo tramo (consistente con CAPA 2)",
           "Top 3 fijo (aunque vacío)",
-          "Rail horizontal + espacio reservado a la derecha (sin gráfico)"
+          "Rail horizontal (sin gráfico)"
         ],
         contenidoHTML
       })
