@@ -12,105 +12,30 @@
 <link rel="stylesheet" href="./css/pea_tokens.css" />
 <link rel="stylesheet" href="./css/pea_layout.css" />
 <link rel="stylesheet" href="./css/pea_components.css" />
-
-<style>
-  /* =========================
-     PEA HELP — FIX MOBILE
-     ========================= */
-
-  /* 1) Contenido: usar mejor el ancho en mobile */
-  .pea-shell{
-    width: 100%;
-    max-width: 1100px; /* desktop ok */
-    margin: 0 auto;
-    padding: 0 16px;   /* reduce márgenes laterales */
-    box-sizing: border-box;
-  }
-
-  .pea-card.pea-help-page{
-    width: 100%;
-    max-width: 1100px;
-    margin: 0 auto;
-    box-sizing: border-box;
-  }
-
-  .pea-help-content{
-    width: 100%;
-    max-width: none;   /* clave: evita “columna angosta” */
-    box-sizing: border-box;
-  }
-
-  /* Tablas: en celular, permitir scroll horizontal (si no, rompen layout) */
-@media (max-width: 768px){
-  .pea-help-content table{
-    display: block;
-    overflow-x: auto;
-    width: 100%;
-  }
-}
-
-
-  /* 2) Botonera: 1 sola línea, botones más chicos */
-  .pea-floatbar.pea-actions{
-    width: min(1100px, calc(100% - 16px)) !important;
-    left: 50%;
-    transform: translateX(-50%);
-    display: flex;
-    flex-wrap: nowrap !important;     /* NO baja a 2 filas */
-    gap: 6px !important;
-    overflow-x: auto;                 /* si no entra, scroll horizontal */
-    -webkit-overflow-scrolling: touch;
-    padding: 6px 6px;
-  }
-
-  .pea-floatbar.pea-actions .btn-main{
-    white-space: nowrap;              /* no parten palabras */
-    font-size: 12px;                  /* “mitad” aprox */
-    padding: 8px 10px;                /* más chico */
-    line-height: 1;
-    flex: 0 0 auto;                   /* mantiene tamaño del botón */
-  }
-
-  /* 3) Tipografía para lectura en celular */
-  @media (max-width: 768px){
-    .pea-shell{ padding: 0 12px; }
-    .pea-help-content{
-      font-size: 15px;
-      line-height: 1.55;
-    }
-    .pea-help-content h1{ font-size: 22px; }
-    .pea-help-content h2{ font-size: 18px; }
-    .pea-help-content h3{ font-size: 16px; }
-  }
-
-  /* Modo horizontal / landscape: todavía más compacta la botonera */
-  @media (max-width: 900px) and (orientation: landscape){
-    .pea-floatbar.pea-actions{
-      padding: 4px 6px;
-      gap: 6px !important;
-    }
-    .pea-floatbar.pea-actions .btn-main{
-      font-size: 11px;
-      padding: 6px 8px;
-    }
-  }
-</style>
   
 </head>
 
 <body class="pea-has-floatbar">
 
-<!-- BOTONERA FLOTANTE -->
-<nav class="pea-floatbar pea-actions" aria-label="Accesos rápidos PEA">
-  <a class="btn-main" href="./index.html">Pantalla principal</a>
-  <a class="btn-main" href="./pea_screen_register.html">Cargar registro</a>
-  <a class="btn-main" href="./pea_screen_history.html">Historial y estadísticas</a>
-  <a class="btn-main" href="/index.html">Volver al Campus</a>
-
-  <!-- Theme toggle queda como button -->
-  <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme?.()">Claro / Oscuro
-  </button>
-</nav>
+  <!-- BOTONERA FLOTANTE -->
+<div class="pea-floatbar pea-actions"
+     style="
+       width: min(1100px, calc(100% - 32px));
+       left: 50%;
+       right: auto;
+       transform: translateX(-50%);
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       gap: 10px;
+       flex-wrap: wrap;
+     ">
+  <button type="button" class="btn-main" onclick="window.location.href='./index.html'">Pantalla principal</button>
+  <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">Cargar registro</button>
+  <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">Historial y estadísticas</button>
+  <button type="button" class="btn-main" onclick="window.location.href='/index.html'">Volver al Campus</button>
+  <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme()">Claro / Oscuro</button>
+</div>
 
 <div class="pea-shell">
   <div class="pea-card pea-help-page">
