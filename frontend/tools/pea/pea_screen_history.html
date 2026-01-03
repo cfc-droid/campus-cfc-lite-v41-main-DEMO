@@ -15,7 +15,44 @@
 
 </head>
 
-<body>
+<body class="pea-has-floatbar" style="padding-top: 96px;">
+
+  <!-- BOTONERA FLOTANTE (misma que las otras pantallas) -->
+<div class="pea-floatbar pea-actions"
+     style="
+       width: min(1100px, calc(100% - 32px));
+       left: 50%;
+       right: auto;
+       transform: translateX(-50%);
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       gap: 10px;
+       flex-wrap: wrap;
+     ">
+  <button type="button" class="btn-main" onclick="window.location.href='./index.html'">Pantalla principal</button>
+  <button type="button" class="btn-main" onclick="window.location.href='./pea_stats_help.html'">Cálculo de estadísticas</button>
+  <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">Cargar registro</button>
+  <button type="button" class="btn-main" onclick="window.location.href='/index.html'">Volver al Campus</button>
+
+  <!-- Export rápido (tabla / todo) -->
+  <button type="button" class="btn-main" id="pea-export-table">Export (tabla)</button>
+  <button type="button" class="btn-main" id="pea-export-all">Export (todo)</button>
+
+  <!-- Salto rápido -->
+  <select id="pea-jump-stat"
+          style="border-radius:12px; padding:10px 12px; font-weight:700; background:#ffd400; color:#111; border:0;">
+    <option value="">Ir a estadística…</option>
+    <option value="level-0">Nivel 0 (Info / cobertura)</option>
+    <option value="level-1">Nivel 1 (Pérdidas)</option>
+    <option value="level-2">Nivel 2 (Ganadas)</option>
+    <option value="level-3">Nivel 3 (Comparación)</option>
+    <option value="level-4">Nivel 4 (Salud / estructura)</option>
+  </select>
+
+  <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme()">Claro / Oscuro</button>
+</div>
+
 
   <!-- HEADER -->
   <header class="pea-header">
@@ -269,29 +306,6 @@
 <!-- =========================
      ACCESOS RÁPIDOS (UX — BLOQUE 1 TAREA 6)
      ========================= -->
-<section class="pea-actions">
-
-  <button id="pea-export" type="button">Export</button>
-
-  <button
-    type="button"
-    onclick="window.location.href='./pea_screen_register.html'">
-    Ir a Registro
-  </button>
-
-  <button
-    type="button"
-    onclick="window.location.href='/index.html'">
-    Volver al Campus
-  </button>
-
-  <button
-    type="button"
-    onclick="history.back()">
-    Volver atrás
-  </button>
-
-</section>
     
   </main>
 
