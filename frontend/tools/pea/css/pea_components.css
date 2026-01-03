@@ -824,3 +824,19 @@ html:not(.pea-dark) .pea-table-wrap .pea-table-scroll{
 html:not(.pea-dark) .pea-table-wrap .pea-table thead th{
   border-bottom: 1px solid rgba(0,0,0,.14) !important;
 }
+
+/* =========================================================
+   HISTORIAL — LAYOUT MÁS ANCHO (17 columnas)
+   Solo para pea_screen_history.html
+   ========================================================= */
+
+@media (min-width: 1200px){
+  body.pea-history-page .pea-shell{
+    max-width: 1500px;            /* probá 1400 / 1500 / 1600 */
+  }
+
+  /* La barra tiene width inline en el HTML -> lo pisamos con !important */
+  body.pea-history-page .pea-floatbar{
+    width: min(1500px, calc(100% - 32px)) !important;
+  }
+}
