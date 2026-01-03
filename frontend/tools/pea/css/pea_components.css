@@ -840,3 +840,77 @@ html:not(.pea-dark) .pea-table-wrap .pea-table thead th{
     width: min(1500px, calc(100% - 32px)) !important;
   }
 }
+
+/* =========================================================
+   PEA — Botones internos (Filtros / Vistas / Tabla)
+   Mismo look premium que la barra superior
+   ========================================================= */
+
+/* 1) Botones de Filtros (Aplicar/Quitar) + Vistas (Guardar/Cargar/Eliminar) */
+.pea-filter-actions button{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+
+.pea-filter-actions button:hover{
+  filter: brightness(0.97);
+}
+
+.pea-filter-actions button:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 2) Select "Mostrar 10/15/20 registros" (y otros selects dentro del bloque Registros) */
+.pea-table-wrap select{
+  border: 0;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(255,212,0,.55);
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.10);
+  outline: none;
+}
+
+.pea-table-wrap select:focus{
+  box-shadow: 0 0 0 3px rgba(255,212,0,.22);
+}
+
+/* 3) Botones por fila (Anular / Corregir) dentro de la tabla */
+.pea-table-wrap td button{
+  border: 0;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 800;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.pea-table-wrap td button:hover{
+  filter: brightness(0.97);
+}
+
+/* Dark: mantenemos el mismo botón amarillo (premium) */
+html.pea-dark .pea-filter-actions button,
+html.pea-dark .pea-table-wrap td button{
+  background: #ffd400;
+  color: #111;
+}
+
+html.pea-dark .pea-table-wrap select{
+  background: rgba(255,212,0,.42);
+  color: #111;
+}
