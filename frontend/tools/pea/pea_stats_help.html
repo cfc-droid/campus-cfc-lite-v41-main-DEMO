@@ -17,27 +17,20 @@
 
 <body class="pea-has-floatbar">
 
+  <!-- ✅ RECUADRO CONTENEDOR (CARD) QUE ENVUELVE TODO -->
+  <div class="pea-shell">
+    <div class="pea-card">
+
   <!-- BOTONERA FLOTANTE -->
 <div class="pea-floatbar pea-actions"
-     style="
-       width: min(1100px, calc(100% - 32px));
-       left: 50%;
-       right: auto;
-       transform: translateX(-50%);
-       display: flex;
-       justify-content: space-between;
-       align-items: center;
-       gap: 10px;
-       flex-wrap: wrap;
-     ">
+     style="width: 100%; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
   <button type="button" class="btn-main" onclick="window.location.href='./index.html'">Pantalla principal</button>
   <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">Cargar registro</button>
   <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">Historial y estadísticas</button>
   <button type="button" class="btn-main" onclick="window.location.href='/index.html'">Volver al Campus</button>
   <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme()">Claro / Oscuro</button>
 </div>
-
-<div class="pea-shell">
+    
   <div class="pea-card pea-help-page">
 
     <main class="pea-help-content"> 
