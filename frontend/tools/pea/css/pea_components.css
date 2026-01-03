@@ -791,3 +791,36 @@ html.pea-dark .pea-floatbar{
 .pea-table-wrap .pea-table-scroll .pea-table td{
   white-space: nowrap;
 }
+
+/* =========================================================
+   FIX DEFINITIVO — REGISTROS en MODO CLARO
+   (fuerza texto negro + títulos dorados dentro del bloque)
+   ========================================================= */
+
+html:not(.pea-dark) .pea-table-wrap{
+  color: #111 !important;
+}
+
+html:not(.pea-dark) .pea-table-wrap h2{
+  color: #7a5a00 !important;
+}
+
+/* Fuerza texto negro en TODA la tabla (evita herencia/opacidades globales) */
+html:not(.pea-dark) .pea-table-wrap .pea-table,
+html:not(.pea-dark) .pea-table-wrap .pea-table th,
+html:not(.pea-dark) .pea-table-wrap .pea-table td{
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* Opcional: que el “cuadro” de la tabla se vea como card clara */
+html:not(.pea-dark) .pea-table-wrap .pea-table-scroll{
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+}
+
+/* Opcional: encabezado un poquito más legible */
+html:not(.pea-dark) .pea-table-wrap .pea-table thead th{
+  border-bottom: 1px solid rgba(0,0,0,.14) !important;
+}
