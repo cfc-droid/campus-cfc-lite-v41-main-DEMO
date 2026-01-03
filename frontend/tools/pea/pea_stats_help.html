@@ -15,30 +15,19 @@
   
 </head>
 
-<body>
-<main class="pea-help-page">
+<body class="pea-has-floatbar">
 
-  <!-- ✅ BOTONES FLOTANTES (arriba) -->
+  <!-- BOTONERA FLOTANTE -->
   <div class="pea-floatbar pea-actions">
-    <button type="button" class="btn-main" onclick="window.location.href='./index.html'">
-      Pantalla principal
-    </button>
+    <button type="button" class="btn-main" onclick="window.location.href='./index.html'">Pantalla principal</button>
+    <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">Cargar registro</button>
+    <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">Historial y estadísticas</button>
+    <button type="button" class="btn-main" onclick="window.location.href='/index.html'">Volver al Campus</button>
+    <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme()">Claro / Oscuro</button>
+  </div>
 
-    <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">
-      Cargar registro
-    </button>
-
-    <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">
-      Historial y estadísticas
-    </button>
-
-    <button type="button" class="btn-main" onclick="window.location.href='/index.html'">
-      Volver al Campus
-    </button>
-
-<button type="button" class="btn-main" id="pea-btn-theme" onclick="peaToggleTheme()">
-  Claro / Oscuro
-</button>
+  <div class="pea-shell">
+    <div class="pea-card pea-help-page">
   </div>  
 
   <h1>PEA — Cálculo de estadísticas (guía metodológica completa)</h1>
