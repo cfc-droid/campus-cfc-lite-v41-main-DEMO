@@ -350,9 +350,9 @@ html.pea-dark .pea-floatbar{
   backdrop-filter: blur(10px);
 }
 
-/* Para que el contenido no quede tapado por la barra *
+/* Para que el contenido no quede tapado por la barra */
 body.pea-has-floatbar{
-  padding-top: 86px; /* ajustá si querés más/menos *
+  padding-top: 86px; /* ajustá si querés más/menos */
 }
 
 /* Dark */
@@ -361,3 +361,30 @@ html.pea-dark .pea-floatbar{
   border: 1px solid rgba(255,255,255,.10);
   box-shadow: 0 12px 34px rgba(0,0,0,.45);
 }
+
+/* =========================================================
+   FIX — Scroll en TABLA de REGISTROS (historial)
+   - Barra vertical (dentro del cuadro)
+   - Barra horizontal (muchas columnas)
+   ========================================================= */
+
+.pea-table-wrap .pea-table-scroll{
+  width: 100%;
+  overflow: auto;          /* X + Y */
+  max-height: 520px;       /* ajustá a gusto */
+  border-radius: var(--pea-radius);
+}
+
+/* Evitar que el navegador "apriete" 17 columnas y mate el overflow */
+.pea-table-wrap .pea-table-scroll .pea-table{
+  width: max-content;      /* permite crecer y forzar overflow-x */
+  min-width: 100%;         /* no achica de más */
+  table-layout: auto;      /* más natural para muchas columnas */
+}
+
+/* Opcional pero recomendado: que no se partan textos raros en celdas */
+.pea-table-wrap .pea-table-scroll .pea-table th,
+.pea-table-wrap .pea-table-scroll .pea-table td{
+  white-space: nowrap;
+}
+
