@@ -221,3 +221,25 @@ html.pea-dark .pea-register textarea:focus{
   border-color: rgba(255,212,0,.85);
   box-shadow: 0 0 0 3px rgba(255,212,0,.18);
 }
+
+/* =========================================
+   Light mode: texto negro + títulos dorados
+   ========================================= */
+html:not(.pea-dark) .pea-card{
+  color: #111;
+}
+
+html:not(.pea-dark) .pea-card p,
+html:not(.pea-dark) .pea-card label,
+html:not(.pea-dark) .pea-card li,
+html:not(.pea-dark) .pea-card small,
+html:not(.pea-dark) .pea-card .pea-help{
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* Títulos dorados en claro (dorado más “oscuro” para contraste) */
+html:not(.pea-dark) .pea-card h1,
+html:not(.pea-dark) .pea-card h2{
+  color: #7a5a00;
+}
