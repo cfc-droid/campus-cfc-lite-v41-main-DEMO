@@ -1,54 +1,74 @@
 /* =========================================================
    PEA_JUMP_STAT.JS
    Rol:
-   - Mostrar dropdown "Ir a estadísticas" (17)
-   - Construir opciones automáticamente leyendo lo renderizado
-   - Hacer scroll al cuadro seleccionado
-   - Re-armar la lista cuando cambian filtros (re-render)
+   - Dropdown "Ir a estadísticas" (17)
+   - Opciones con NOMBRE EXACTO desde .pea-estadistica
+   - IDs por número REAL de estadística (no por índice DOM)
+   - Scroll exacto con offset (barra flotante)
+   - Rebuild al re-render (PEA_FILTERS_UPDATED)
    ========================================================= */
 
 (function () {
   const SELECT_ID = "pea-jump-stat";
+  const HEADER_SELECTOR = ".pea-estadistica";
+  const CARD_SELECTOR = ".pea-cuadro-estadistico";
+
+  // Ajuste fino: altura aprox de la floatbar + aire
+  const SCROLL_OFFSET = 120;
 
   function getSelect() {
     return document.getElementById(SELECT_ID);
   }
 
-  function extractTitleFromHeader(text) {
+  function parseStatHeader(text) {
     // Ej: "ESTADÍSTICA 9/17 — Índice de Cumplimiento (GANADA vs PERDIDA)"
-    // Queremos: "9 — Índice de Cumplimiento (GANADA vs PERDIDA)"
     const m = String(text || "").match(/ESTADÍSTICA\s+(\d+)\/\d+\s+—\s+(.+)$/i);
     if (!m) return null;
-    return `${m[1]} — ${m[2]}`;
+    const num = parseInt(m[1], 10);
+    const titulo = m[2].trim();
+    return { num, titulo, label: `${num} — ${titulo}` };
   }
 
-  function tagStatsWithIds() {
-    const cards = Array.from(document.querySelectorAll(".pea-cuadro-estadistico"));
-    cards.forEach((card, idx) => {
-      // id estable por orden render
-      card.id = `pea-stat-${idx + 1}`;
+  function tagAndCollectStats() {
+    const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
+    const items = [];
+
+    cards.forEach((card) => {
+      const header = card.querySelector(HEADER_SELECTOR);
+      const parsed = parseStatHeader(header?.textContent);
+
+      if (!parsed || !parsed.num) return;
+
+      // ID estable por número real
+      const id = `pea-stat-${String(parsed.num).padStart(2, "0")}`;
+      card.id = id;
+
+      items.push({
+        num: parsed.num,
+        id,
+        label: parsed.label
+      });
     });
-    return cards;
+
+    // Orden numérico 1..17 (por si el DOM cambia)
+    items.sort((a, b) => a.num - b.num);
+
+    return items;
   }
 
   function buildOptionsFromDOM() {
     const sel = getSelect();
     if (!sel) return false;
 
-    const cards = tagStatsWithIds();
-    if (!cards.length) return false;
+    const items = tagAndCollectStats();
+    if (!items.length) return false;
 
-    // limpiar y reconstruir
     sel.innerHTML = `<option value="">—</option>`;
 
-    cards.forEach((card, idx) => {
-      const header = card.querySelector(".pea-estadistica");
-      const label =
-        extractTitleFromHeader(header?.textContent) || `${idx + 1} — Estadística`;
-
+    items.forEach((it) => {
       const opt = document.createElement("option");
-      opt.value = card.id;
-      opt.textContent = label;
+      opt.value = it.id;
+      opt.textContent = it.label;
       sel.appendChild(opt);
     });
 
@@ -60,15 +80,15 @@
     const el = document.getElementById(statId);
     if (!el) return;
 
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const y = el.getBoundingClientRect().top + window.pageYOffset - SCROLL_OFFSET;
+    window.scrollTo({ top: y, behavior: "smooth" });
   }
 
   function ensureBuiltWithRetries(tries = 0) {
     const ok = buildOptionsFromDOM();
     if (ok) return;
 
-    // stats pueden tardar un pelín en renderizar (DOMContentLoaded + registry)
-    if (tries < 25) {
+    if (tries < 30) {
       setTimeout(() => ensureBuiltWithRetries(tries + 1), 120);
     }
   }
@@ -79,8 +99,6 @@
 
     sel.addEventListener("change", () => {
       scrollToStat(sel.value);
-      // opcional: volver a placeholder después de saltar
-      // sel.value = "";
     });
   }
 
@@ -89,9 +107,8 @@
     ensureBuiltWithRetries();
   });
 
-  // Cuando cambian filtros se re-renderizan las stats (se vacían contenedores)
   document.addEventListener("PEA_FILTERS_UPDATED", () => {
-    // esperar a que runAllPEAStats termine
-    setTimeout(() => ensureBuiltWithRetries(), 50);
+    // esperar a que termine el re-render
+    setTimeout(() => ensureBuiltWithRetries(), 120);
   });
 })();
