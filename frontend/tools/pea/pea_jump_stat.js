@@ -1,51 +1,93 @@
 /* =========================================================
-   PEA_JUMP_STAT.JS (robusto)
-   - Reconstruye el dropdown cuando aparecen stats
-   - Funciona con re-render y con demoras
+   PEA_JUMP_STAT.JS (tolerante / a prueba de formato)
+   - NO depende de un header exacto
+   - Siempre arma el dropdown si hay cuadros
    ========================================================= */
 
 (function () {
   const SELECT_ID = "pea-jump-stat";
   const HEADER_SELECTOR = ".pea-estadistica";
   const CARD_SELECTOR = ".pea-cuadro-estadistico";
+
   const SCROLL_OFFSET = 120;
 
   function getSelect() {
     return document.getElementById(SELECT_ID);
   }
 
-  function parseStatHeader(text) {
-    // Soporta: "ESTADÍSTICA 9/17 — ..."
-    const m = String(text || "").match(/ESTADÍSTICA\s+(\d+)\/\d+\s+—\s+(.+)$/i);
-    if (!m) return null;
-    const num = parseInt(m[1], 10);
-    const titulo = m[2].trim();
-    return { num, label: `${num} — ${titulo}` };
+  function normalizeSpaces(s) {
+    return String(s || "").replace(/\s+/g, " ").trim();
+  }
+
+  function extractNumFlexible(headerText) {
+    // acepta: "ESTADÍSTICA 6/17 — ...", "ESTADISTICA 6 - ...", "6/17 — ...", "6 — ..."
+    const t = normalizeSpaces(headerText);
+
+    // 1) patrón clásico con /17
+    let m = t.match(/(\d+)\s*\/\s*17/i);
+    if (m) return parseInt(m[1], 10);
+
+    // 2) patrón con palabra ESTADÍSTICA/ESTADISTICA
+    m = t.match(/ESTAD[ÍI]STICA\s*(\d+)/i);
+    if (m) return parseInt(m[1], 10);
+
+    // 3) patrón: empieza con número
+    m = t.match(/^(\d+)\b/);
+    if (m) return parseInt(m[1], 10);
+
+    return null;
+  }
+
+  function makeNiceLabel(headerText, fallbackNum) {
+    const t = normalizeSpaces(headerText);
+
+    // intentamos “limpiar” el prefijo
+    // convierte: "ESTADÍSTICA 6/17 — TÍTULO" -> "6 — TÍTULO"
+    // convierte: "ESTADISTICA 6 - TÍTULO" -> "6 — TÍTULO"
+    const cleaned = t
+      .replace(/^ESTAD[ÍI]STICA\s*/i, "")
+      .replace(/\s*\/\s*17\s*/i, " ")
+      .replace(/\s*[—–-]\s*/g, " — ")
+      .trim();
+
+    if (cleaned) return cleaned.includes("—") ? cleaned : `${fallbackNum} — ${cleaned}`;
+    return `${fallbackNum} — Estadística`;
   }
 
   function tagAndCollectStats() {
     const cards = Array.from(document.querySelectorAll(CARD_SELECTOR));
     const items = [];
 
-    cards.forEach((card) => {
+    cards.forEach((card, idx) => {
       const header = card.querySelector(HEADER_SELECTOR);
-      const parsed = parseStatHeader(header?.textContent);
+      const rawHeaderText = header ? header.textContent : "";
+      const headerText = normalizeSpaces(rawHeaderText);
 
-      if (!parsed?.num) return;
+      const num = extractNumFlexible(headerText) ?? (idx + 1);
 
-      const id = `pea-stat-${String(parsed.num).padStart(2, "0")}`;
+      // id estable por número
+      const id = `pea-stat-${String(num).padStart(2, "0")}`;
       card.id = id;
 
-      items.push({ num: parsed.num, id, label: parsed.label });
+      const label = headerText
+        ? makeNiceLabel(headerText, num)
+        : `${num} — Estadística`;
+
+      items.push({ num, id, label });
     });
 
+    // orden por número (por si el DOM está raro)
     items.sort((a, b) => a.num - b.num);
+
     return items;
   }
 
   function buildOptionsFromDOM() {
     const sel = getSelect();
     if (!sel) return false;
+
+    const cards = document.querySelectorAll(CARD_SELECTOR);
+    if (!cards.length) return false;
 
     const items = tagAndCollectStats();
     if (!items.length) return false;
@@ -70,49 +112,36 @@
     window.scrollTo({ top: y, behavior: "smooth" });
   }
 
+  function ensureBuiltWithRetries(tries = 0) {
+    const ok = buildOptionsFromDOM();
+    if (ok) return;
+
+    if (tries < 40) {
+      setTimeout(() => ensureBuiltWithRetries(tries + 1), 150);
+    }
+  }
+
   function wireEvents() {
     const sel = getSelect();
     if (!sel) return;
-    sel.addEventListener("change", () => scrollToStat(sel.value));
-  }
 
-  // ✅ Observa cambios hasta que encuentre stats y pueda armar el combo
-  let obs = null;
-  function observeUntilBuilt(timeoutMs = 12000) {
-    if (buildOptionsFromDOM()) return;
-
-    if (obs) obs.disconnect();
-    const root = document.querySelector(".pea-zone-secondary") || document.body;
-
-    obs = new MutationObserver(() => {
-      if (buildOptionsFromDOM()) {
-        obs.disconnect();
-        obs = null;
-      }
+    sel.addEventListener("change", () => {
+      scrollToStat(sel.value);
     });
-
-    obs.observe(root, { childList: true, subtree: true });
-
-    setTimeout(() => {
-      if (obs) {
-        obs.disconnect();
-        obs = null;
-      }
-    }, timeoutMs);
   }
 
   document.addEventListener("DOMContentLoaded", () => {
     wireEvents();
-    observeUntilBuilt();
+    ensureBuiltWithRetries();
   });
 
-  // cuando termina el registry, reconstruimos
+  // si lo emitís desde el registry, mejor todavía
   document.addEventListener("PEA_STATS_RENDERED", () => {
-    observeUntilBuilt();
+    ensureBuiltWithRetries();
   });
 
-  // cuando cambian filtros se re-renderiza: volvemos a observar
+  // fallback por filtros
   document.addEventListener("PEA_FILTERS_UPDATED", () => {
-    observeUntilBuilt();
+    setTimeout(() => ensureBuiltWithRetries(), 200);
   });
 })();
