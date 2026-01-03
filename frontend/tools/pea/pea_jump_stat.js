@@ -144,4 +144,38 @@
   document.addEventListener("PEA_FILTERS_UPDATED", () => {
     setTimeout(() => ensureBuiltWithRetries(), 200);
   });
+
+   // ...adentro del IIFE, reemplazá buildOptionsFromDOM() por esta versión:
+
+function buildOptionsFromDOM() {
+  const sel = getSelect();
+  if (!sel) return false;
+
+  const cards = document.querySelectorAll(CARD_SELECTOR);
+  const items = tagAndCollectStats();
+
+  // Si hay cuadros pero falta el 1, lo agregamos como ancla a NIVEL 0
+  const has1 = items.some(it => it.num === 1);
+  const hasAny = cards.length > 0 || items.length > 0;
+
+  sel.innerHTML = `<option value="">—</option>`;
+
+  if (hasAny && !has1) {
+    const opt = document.createElement("option");
+    opt.value = "level-0";               // <-- ancla existente en tu HTML
+    opt.textContent = "1 — Brújula general";
+    sel.appendChild(opt);
+  }
+
+  // opciones reales del DOM
+  items.forEach((it) => {
+    const opt = document.createElement("option");
+    opt.value = it.id;
+    opt.textContent = it.label;
+    sel.appendChild(opt);
+  });
+
+  return true;
+}
+
 })();
