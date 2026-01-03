@@ -11,10 +11,10 @@
        * Estados/Emociones se toman SOLO desde los DESPUÉS del tramo.
 
    UX:
-   - Rail horizontal + selector 2/3/4
+   - Rail horizontal (sin grafico)
    - Estilo oscuro tipo IMA2 (forzado para que no lo rompa el tema claro)
    - Columnas compactas (Resultado/Cantidad/Porcentaje + ranking Top3)
-   - NO gráfico (solo espacio reservado)
+   - NO gráfico (decisión de producto: visual estructural)
    ======================================================== */
 
 (function () {
