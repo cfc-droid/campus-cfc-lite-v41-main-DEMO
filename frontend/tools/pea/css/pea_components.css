@@ -248,3 +248,80 @@ html:not(.pea-dark) .pea-card h1,
 html:not(.pea-dark) .pea-card h2{
   color: #7a5a00;
 }
+
+/* =========================================================
+   PEA — HELP PAGE (pea_stats_help.html)
+   - Card + tipografía + títulos dorados en claro
+   - Botonera flotante arriba
+   ========================================================= */
+
+.pea-help-page{
+  max-width: 1100px;
+  margin: 34px auto;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.92);
+  color: #111;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* En claro: texto negro bien legible */
+html:not(.pea-dark) .pea-help-page p,
+html:not(.pea-dark) .pea-help-page li,
+html:not(.pea-dark) .pea-help-page label,
+html:not(.pea-dark) .pea-help-page small{
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* ✅ En claro: títulos y subtítulos dorados */
+html:not(.pea-dark) .pea-help-page h1,
+html:not(.pea-dark) .pea-help-page h2,
+html:not(.pea-dark) .pea-help-page h3{
+  color: #7a5a00;
+}
+
+/* En oscuro: card oscura, texto claro, títulos dorados premium */
+html.pea-dark .pea-help-page{
+  background: rgba(20,20,20,.78);
+  color: #f3f3f3;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+html.pea-dark .pea-help-page p,
+html.pea-dark .pea-help-page li,
+html.pea-dark .pea-help-page label,
+html.pea-dark .pea-help-page small{
+  color: #f4f4f4 !important;
+  opacity: 1 !important;
+}
+
+html.pea-dark .pea-help-page h1,
+html.pea-dark .pea-help-page h2,
+html.pea-dark .pea-help-page h3,
+html.pea-dark .pea-help-page strong{
+  color: #d6b25e !important;
+}
+
+/* =========================================================
+   Botonera flotante (arriba)
+   ========================================================= */
+
+.pea-floatbar{
+  position: sticky;      /* se mantiene arriba al scrollear */
+  top: 10px;
+  z-index: 999;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 14px 0;
+  padding: 10px 0 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  backdrop-filter: blur(6px);
+}
+
+html.pea-dark .pea-floatbar{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
