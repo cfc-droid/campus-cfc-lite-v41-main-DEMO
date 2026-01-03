@@ -914,3 +914,87 @@ html.pea-dark .pea-table-wrap select{
   background: rgba(255,212,0,.42);
   color: #111;
 }
+
+/* =========================================================
+   PEA — ESTADÍSTICAS: separación + jerarquía de títulos
+   (RenderCuadroBasePEA)
+   ========================================================= */
+
+.pea-cuadro-estadistico{
+  margin: 18px 0 22px;              /* <-- separación entre stats */
+  padding: 16px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 10px 26px rgba(0,0,0,.06);
+}
+
+html.pea-dark .pea-cuadro-estadistico{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(20,20,20,.62);
+  box-shadow: 0 14px 34px rgba(0,0,0,.40);
+}
+
+/* “Identidad” (Nivel + Estadística) */
+.pea-identidad{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+/* NIVEL x/4 */
+.pea-nivel{
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: .35px;
+  text-transform: uppercase;
+  color: #7a5a00; /* dorado oscuro en claro */
+}
+
+html.pea-dark .pea-nivel{
+  color: #d6b25e; /* dorado premium en oscuro */
+}
+
+/* ESTADÍSTICA x/17 — título */
+.pea-estadistica{
+  font-weight: 950;
+  font-size: 15px;
+  color: #7a5a00;
+}
+
+html.pea-dark .pea-estadistica{
+  color: #d6b25e;
+}
+
+/* Cabecera (estado del sistema / total) */
+.pea-cabecera{
+  margin: 8px 0 10px;
+  line-height: 1.35;
+}
+
+/* Separador “ASCII” */
+.pea-separador{
+  opacity: .45;
+  margin: 10px 0;
+}
+
+/* Universo + criterios */
+.pea-universo{ margin-top: 8px; }
+.pea-criterios{ margin-top: 10px; }
+.pea-criterios ul{ margin: 6px 0 0 18px; }
+
+/* Cuerpo y warning */
+.pea-cuerpo{ margin-top: 12px; }
+.pea-warning{
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+/* Nav abajo */
+.pea-nav{
+  margin-top: 12px;
+  opacity: .9;
+}
+
