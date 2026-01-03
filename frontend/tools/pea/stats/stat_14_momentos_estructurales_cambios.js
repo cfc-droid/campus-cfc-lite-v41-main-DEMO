@@ -192,7 +192,7 @@ return `
     });
 
     function applyVisibleCount(nRaw) {
-      const n = clampInt(nRaw, 1, 4);
+      const n = clampInt(nRaw, 1, 3);
       const railWidth = rail.clientWidth || 900;
       const gap = 12;
       const padding = 24;
