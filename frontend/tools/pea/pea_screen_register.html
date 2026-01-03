@@ -18,6 +18,7 @@
   <!-- ✅ RECUADRO CONTENEDOR (CARD) QUE ENVUELVE TODO -->
   <div class="pea-shell">
     <div class="pea-card">
+    <body class="pea-has-floatbar">  
 
       <!-- ======================================================
            HEADER
@@ -26,24 +27,29 @@
         <h1>Análisis (PAE) — Registro operativo</h1>
       </header>
 
-      <!-- ✅ BOTONES ARRIBA (incluye Claro/Oscuro) -->
-      <div class="pea-top-actions pea-actions">
-        <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">
-          Historial y estadísticas
-        </button>
+    <!-- ✅ BOTONERA FLOTANTE (arriba) -->
+<div class="pea-floatbar pea-actions">
+  <button type="button" class="btn-main" onclick="window.location.href='./index.html'">
+    Pantalla principal
+  </button>
 
-        <button type="button" class="btn-main" onclick="window.location.href='/index.html'">
-          Volver al Campus
-        </button>
+  <!-- Estás en "Cargar registro", por eso lo cambiamos SOLO en este archivo -->
+  <button type="button" class="btn-main" onclick="window.location.href='./pea_stats_help.html'">
+    Cálculo de estadísticas
+  </button>
 
-        <button type="button" class="btn-main" id="pea-btn-theme">
-          Claro / Oscuro
-        </button>
+  <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">
+    Historial y estadísticas
+  </button>
 
-<button type="button" class="btn-main" onclick="window.location.href='./index.html'">
-  Pantalla principal
-</button>
+  <button type="button" class="btn-main" onclick="window.location.href='/index.html'">
+    Volver al Campus
+  </button>
 
+  <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme()">
+    Claro / Oscuro
+  </button>
+</div>
       </div>
 
       <!-- ======================================================
