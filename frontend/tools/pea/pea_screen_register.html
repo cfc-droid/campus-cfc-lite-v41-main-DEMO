@@ -225,48 +225,6 @@
 
   <script src="./pea_theme.js"></script>
 
-  <!-- ✅ FIX: garantiza que Claro/Oscuro funcione aunque pea_theme.js no enganche el botón -->
-  <script>
-    (function(){
-      const ROOT = document.documentElement;
-      const BTN = document.getElementById('pea-btn-theme');
-
-      function readPref(){
-        // Probamos varios keys por compatibilidad
-        const a = localStorage.getItem('pea_theme');
-        const b = localStorage.getItem('PEA_THEME');
-        const c = localStorage.getItem('theme');
-        const v = (a || b || c || '').toLowerCase();
-        if (v.includes('dark') || v === '1' || v === 'true') return 'dark';
-        if (v.includes('light') || v === '0' || v === 'false') return 'light';
-        return ROOT.classList.contains('pea-dark') ? 'dark' : 'light';
-      }
-
-      function writePref(mode){
-        localStorage.setItem('pea_theme', mode);
-        localStorage.setItem('PEA_THEME', mode);
-        localStorage.setItem('theme', mode);
-      }
-
-      function apply(mode){
-        if (mode === 'dark') ROOT.classList.add('pea-dark');
-        else ROOT.classList.remove('pea-dark');
-        writePref(mode);
-      }
-
-      // Estado inicial
-      apply(readPref());
-
-      // Click
-      if (BTN){
-        BTN.addEventListener('click', function(){
-          const isDark = ROOT.classList.contains('pea-dark');
-          apply(isDark ? 'light' : 'dark');
-        });
-      }
-    })();
-  </script>
-
   <!-- VALIDACIONES (window.validatePEAForm) -->
   <script src="./pea_validate.js"></script>
 
