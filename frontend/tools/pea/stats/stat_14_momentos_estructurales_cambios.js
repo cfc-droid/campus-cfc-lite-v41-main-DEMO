@@ -132,42 +132,50 @@ ordered.forEach((r) => {
       </style>
     `;
 
-    return `
-      ${style}
-      <div class="s14-root">
-        <div class="pea-metricas-secundarias" style="margin-bottom:10px;">
-          <strong>Vista:</strong> análisis por <strong>momento estructural</strong> (tramos consecutivos) con PAE (ANTES/DURANTE/DESPUÉS)
-          y resultado operativo (DESPUÉS).
+return `
+  ${style}
+  <div class="s14-root">
+    <div class="pea-metricas-secundarias" style="margin-bottom:10px;">
+      <strong>Vista:</strong> análisis por <strong>momento estructural</strong> (tramos consecutivos) con PAE (ANTES/DURANTE/DESPUÉS)
+      y resultado operativo (DESPUÉS).
+    </div>
+
+    <div id="pea-stat14-root" style="display:flex; gap:12px; align-items:flex-start;">
+      <div style="flex: 1 1 auto; min-width: 0;">
+        <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+          <label style="display:flex; gap:8px; align-items:center;">
+            <span class="s14-note">Mostrar:</span>
+            <select id="pea-stat14-visible" style="padding:4px 6px;">
+              <option value="2" selected>2</option>
+              <option value="3">3</option>
+            </select>
+            <span class="s14-note">momentos por pantalla</span>
+          </label>
+
+          <span style="opacity:.5;">|</span>
+
+          <span class="s14-note">
+            Tip: desplazate horizontalmente para ver más momentos sin “estirar” la página.
+          </span>
         </div>
 
-        <div id="pea-stat14-root" style="display:flex; gap:12px; align-items:flex-start;">
-          <div style="flex: 1 1 auto; min-width: 0;">
-            <div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
-              <label style="display:flex; gap:8px; align-items:center;">
-                <span class="s14-note">Mostrar:</span>
-                <select id="pea-stat14-visible" style="padding:4px 6px;">
-                  <option value="2" selected>2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                </select>
-                <span class="s14-note">momentos por pantalla</span>
-              </label>
-
-              <span style="opacity:.5;">|</span>
-
-              <span class="s14-note">
-                Tip: desplazate horizontalmente para ver más momentos sin “estirar” la página.
-              </span>
-            </div>
-
-            <div id="pea-stat14-rail" class="s14-rail"
-              style="overflow-x:auto; overflow-y:hidden; padding-bottom:8px; scroll-behavior:smooth;">
-              <div id="pea-stat14-rail-inner" style="display:flex; gap:12px; padding:12px; align-items:flex-start;">
-                ${cardsHtml}
-              </div>
-            </div>
+        <div
+          id="pea-stat14-rail"
+          class="s14-rail"
+          style="overflow-x:auto; overflow-y:hidden; padding-bottom:8px; scroll-behavior:smooth;"
+        >
+          <div
+            id="pea-stat14-rail-inner"
+            style="display:flex; gap:12px; padding:12px; align-items:flex-start;"
+          >
+            ${cardsHtml}
           </div>
-    `;
+        </div>
+      </div>
+    </div>
+  </div>
+`;
+
   }
 
   function wireStat14UI() {
