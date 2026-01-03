@@ -998,3 +998,22 @@ html.pea-dark .pea-estadistica{
   opacity: .9;
 }
 
+/* =========================================================
+   PEA — FIX: centrar contenido de tablas en cuadros stats
+   (th ya suele venir centrado; td no)
+   ========================================================= */
+
+.pea-cuadro-estadistico .pea-table th,
+.pea-cuadro-estadistico .pea-table td{
+  text-align: center;
+}
+
+/* Mantener numeritos a la derecha si querés (tu clase existente) */
+.pea-cuadro-estadistico .pea-table .pea-n{
+  text-align: right;
+}
+
+/* Por si algunos stats meten inline style en td (como tdPlain/tdNum) */
+.pea-cuadro-estadistico .pea-table td[style*="font-weight"]{
+  text-align: center;
+}
