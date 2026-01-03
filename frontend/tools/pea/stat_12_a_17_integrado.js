@@ -1,7 +1,10 @@
 /* =========================================================
    CAMPUS CFC LITE — PEA
    ESTADÍSTICAS 12 → 17 INTEGRADAS
-   + GRÁFICOS SVG INLINE (AUTO-INJECT ROBUSTO)
+   + GRÁFICOS SVG INLINE (AUTO-INJECT ULTRA ROBUSTO)
+   - No depende de #pea-level-4
+   - Detecta bloques por "ESTADÍSTICA x/17"
+   - Funciona aunque el render sea tardío o re-renderice
    ========================================================= */
 
 (function () {
@@ -11,8 +14,46 @@
   console.log("[PEA] stat_12_a_17_integrado.js LOADED");
 
   /* =========================================================
+     UTILS
+     ========================================================= */
+
+  function qsAll(root, sel) {
+    try { return Array.from(root.querySelectorAll(sel)); } catch { return []; }
+  }
+
+  function safeText(el) {
+    return (el && (el.innerText || el.textContent) ? (el.innerText || el.textContent) : "").trim();
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
+  function parseIntLoose(s) {
+    const m = String(s ?? "").match(/-?\d+/);
+    return m ? parseInt(m[0], 10) : 0;
+  }
+
+  function parseFloatLoose(s) {
+    const m = String(s ?? "").replace(",", ".").match(/-?\d+(\.\d+)?/);
+    return m ? parseFloat(m[0]) : 0;
+  }
+
+  function isVisible(el) {
+    if (!el || !el.getBoundingClientRect) return false;
+    const r = el.getBoundingClientRect();
+    return r.width > 10 && r.height > 10;
+  }
+
+  /* =========================================================
      SVG HELPERS
      ========================================================= */
+
   function svgEl(tag) {
     return document.createElementNS("http://www.w3.org/2000/svg", tag);
   }
@@ -38,18 +79,11 @@
     return t;
   }
 
-  function escapeHtml(s) {
-    return String(s ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
   function wrapChartContainer(title) {
     const div = document.createElement("div");
+    // ✅ clase para que tu CSS lo estilice si querés
     div.className = "pea-inline-chart";
+    // estilos inline de fallback (si el CSS no se cargó)
     div.style.margin = "10px 0 18px";
     div.style.padding = "10px 12px";
     div.style.border = "1px solid rgba(255,255,255,.10)";
@@ -57,20 +91,8 @@
     div.style.background = "#0F0F10";
     div.style.color = "#EAEAEA";
     div.style.fontSize = "13px";
-    div.innerHTML = `<div style="font-weight:800; margin-bottom:8px;">${escapeHtml(
-      title
-    )}</div>`;
+    div.innerHTML = `<div style="font-weight:900; margin-bottom:8px;">${escapeHtml(title)}</div>`;
     return div;
-  }
-
-  function parseIntLoose(s) {
-    const m = String(s ?? "").match(/-?\d+/);
-    return m ? parseInt(m[0], 10) : 0;
-  }
-
-  function parseFloatLoose(s) {
-    const m = String(s ?? "").replace(",", ".").match(/-?\d+(\.\d+)?/);
-    return m ? parseFloat(m[0]) : 0;
   }
 
   /* =========================================================
@@ -81,9 +103,9 @@
   function renderBarChartGP({ data, width = 520 }) {
     const barH = 18;
     const gap = 8;
-    const leftPad = 170; // label
-    const rightPad = 70; // numbers
-    const usableW = Math.max(200, width - leftPad - rightPad);
+    const leftPad = 170;
+    const rightPad = 70;
+    const usableW = Math.max(220, width - leftPad - rightPad);
 
     const max = Math.max(...data.map((d) => (d.g || 0) + (d.p || 0)), 1);
     const height = data.length * (barH + gap) + 18;
@@ -107,13 +129,13 @@
     return svg;
   }
 
-  // 1-series bars (Stat 12: intensidad / picos)
+  // 1-series bars (Stat 12)
   function renderBarChart1({ data, valueMax, width = 520, color = "#5AA0FF", suffix = "" }) {
     const barH = 16;
     const gap = 8;
     const leftPad = 170;
     const rightPad = 70;
-    const usableW = Math.max(200, width - leftPad - rightPad);
+    const usableW = Math.max(220, width - leftPad - rightPad);
 
     const max = Math.max(valueMax || 1, 1);
     const height = data.length * (barH + gap) + 18;
@@ -136,68 +158,118 @@
   }
 
   /* =========================================================
-     DETECTION (ROBUSTA)
+     DETECTION (bloques por texto "ESTADÍSTICA x/17")
      ========================================================= */
 
-  function detectStatFromText(txtRaw) {
-    const txt = String(txtRaw || "").toLowerCase();
-
-    // Stat 12 (por título o por "12/17")
-    if (
-      txt.includes("estadística 12/17") ||
-      txt.includes("intensidad promedio") ||
-      txt.includes("picos por resultado")
-    ) {
-      return 12;
+  function detectStatFromBlockText(txtRaw) {
+    const txt = String(txtRaw || "");
+    // match: "ESTADÍSTICA 15/17" o "ESTADISTICA 15/17"
+    const m = txt.match(/ESTAD[ÍI]STICA\s+(\d+)\s*\/\s*17/i);
+    if (m && m[1]) {
+      const n = parseInt(m[1], 10);
+      if ([12, 15, 16, 17].includes(n)) return n;
     }
 
-    if (txt.includes("estadística 15/17") || txt.includes("acciones críticas")) return 15;
-    if (txt.includes("estadística 16/17") || txt.includes("pensamientos críticos")) return 16;
-
-    // OJO: “Estados críticos por resultado”
-    if (txt.includes("estadística 17/17") || (txt.includes("estados") && txt.includes("crític"))) return 17;
+    // fallback por keywords (por si cambian títulos)
+    const low = txt.toLowerCase();
+    if (low.includes("intensidad promedio") || low.includes("picos por resultado")) return 12;
+    if (low.includes("acciones críticas")) return 15;
+    if (low.includes("pensamientos críticos")) return 16;
+    if (low.includes("estados") && low.includes("(e)")) return 17;
+    if (low.includes("estados") && low.includes("por resultado")) return 17;
 
     return null;
   }
 
-  // Sube desde la tabla hasta encontrar un contenedor que tenga texto de “ESTADÍSTICA”
-  function findStatContainerForTable(root, table) {
-    let el = table;
-    while (el && el !== root) {
-      const t = (el.innerText || "");
-      if (/ESTAD[IÍ]STICA/i.test(t)) return el;
-      el = el.parentElement;
-    }
-    return table.parentElement || root;
-  }
+  function findStatBlocks() {
+    // buscamos contenedores "grandes" que contengan la palabra ESTADÍSTICA
+    // (tomamos padres razonables para que "la tabla" esté dentro)
+    const hits = [];
 
-  function findLastTableInContainer(container) {
-    const tables = container.querySelectorAll("table");
-    if (!tables.length) return null;
-    return tables[tables.length - 1];
+    // 1) tu wrapper nuevo (si existe)
+    qsAll(document, ".pea-cuadro-estadistico").forEach((b) => hits.push(b));
+
+    // 2) fallback: cualquier elemento que tenga “ESTADÍSTICA x/17”
+    // buscamos headers y subimos al contenedor más cercano con tabla
+    const headers = qsAll(document, "h1,h2,h3,h4,div,section");
+    headers.forEach((el) => {
+      const t = safeText(el);
+      if (!/ESTAD[ÍI]STICA\s+\d+\s*\/\s*17/i.test(t)) return;
+
+      // subimos un poco para agarrar el bloque completo
+      let block = el;
+      for (let i = 0; i < 6; i++) {
+        if (!block || !block.parentElement) break;
+        // si el parent contiene una tabla, lo elegimos
+        const p = block.parentElement;
+        const hasTable = qsAll(p, "table, .pea-table, [role='table']").length > 0;
+        if (hasTable) block = p;
+        else block = p;
+      }
+      if (block) hits.push(block);
+    });
+
+    // dedupe
+    return Array.from(new Set(hits)).filter((b) => b && b.nodeType === 1);
   }
 
   /* =========================================================
-     PARSERS
+     TABLE FINDERS (tabla real o "table-like")
      ========================================================= */
 
-  // Stats 15/16/17: col2=label, col3=ganadas, col4=perdidas (puede venir "2 (33%)")
-  function parseTableForGP(table) {
-    const rows = Array.from(table.querySelectorAll("tbody tr"));
+  function findMainTableInBlock(block) {
+    // preferimos la tabla que sea visible y que esté "cerca" del header
+    const tables = qsAll(block, "table.pea-table, table, [role='table'], .pea-table");
+    const vis = tables.filter(isVisible);
+    const list = vis.length ? vis : tables;
+    if (!list.length) return null;
+
+    // tomamos la última (normalmente tu layout pone 1 tabla por stat al final del bloque)
+    return list[list.length - 1];
+  }
+
+  function getRowsAndCells(tableLike) {
+    // Caso A: <table>
+    if (tableLike && tableLike.tagName && tableLike.tagName.toLowerCase() === "table") {
+      const rows = qsAll(tableLike, "tbody tr");
+      const out = rows.map((r) => qsAll(r, "td").map((td) => safeText(td)));
+      return out.filter((r) => r && r.length);
+    }
+
+    // Caso B: role=table o divs con .pea-table (grid)
+    // Intentamos detectar filas por [role=row] o .row
+    const roleRows = qsAll(tableLike, "[role='row']");
+    if (roleRows.length) {
+      return roleRows
+        .map((rr) => qsAll(rr, "[role='cell'], [role='gridcell'], td, div").map((c) => safeText(c)))
+        .filter((r) => r && r.length && r.some((x) => x));
+    }
+
+    // Último fallback: si no podemos parsear, devolvemos vacío
+    return [];
+  }
+
+  /* =========================================================
+     PARSERS (12 vs 15/16/17)
+     ========================================================= */
+
+  function parseGPFromGrid(grid) {
+    // esperamos algo tipo:
+    // [CANTIDAD, NOMBRE, GANADAS, PERDIDAS, TOTAL]
     const out = [];
+    grid.forEach((row) => {
+      if (!row || row.length < 4) return;
 
-    rows.forEach((r) => {
-      const tds = r.querySelectorAll("td");
-      if (!tds || tds.length < 4) return;
-
-      const label = (tds[1]?.innerText || "").trim();
+      // tu label está en col 2 (index 1)
+      const label = (row[1] || "").trim();
       if (!label || label === "—") return;
 
       const up = label.toUpperCase();
       if (up === "TOTALES" || up === "TOTAL") return;
 
-      const g = parseIntLoose(tds[2]?.innerText);
-      const p = parseIntLoose(tds[3]?.innerText);
+      // ganadas/perdidas: col 3 y 4 (index 2,3) aunque vengan "2 (33%)"
+      const g = parseIntLoose(row[2]);
+      const p = parseIntLoose(row[3]);
 
       out.push({ label, g, p });
     });
@@ -206,24 +278,23 @@
     return anyNonZero ? out : [];
   }
 
-  // Stat 12: Resultado | Registros | Intensidad promedio | % picos (4–5)
-  function parseTableForIntensity(table) {
-    const rows = Array.from(table.querySelectorAll("tbody tr"));
+  function parseIntensityFromGrid(grid) {
+    // esperamos:
+    // [Resultado, Registros, Intensidad promedio, % picos]
     const intensidad = [];
     const picos = [];
 
-    rows.forEach((r) => {
-      const tds = r.querySelectorAll("td");
-      if (!tds || tds.length < 4) return;
+    grid.forEach((row) => {
+      if (!row || row.length < 4) return;
 
-      const resultado = (tds[0]?.innerText || "").trim(); // GANADA / PERDIDA
+      const resultado = (row[0] || "").trim(); // GANADA / PERDIDA
       if (!resultado || resultado === "—") return;
 
       const up = resultado.toUpperCase();
       if (up === "TOTALES" || up === "TOTAL") return;
 
-      const inten = parseFloatLoose(tds[2]?.innerText);
-      const pico = parseIntLoose(tds[3]?.innerText); // “67%” -> 67
+      const inten = parseFloatLoose(row[2]);
+      const pico = parseIntLoose(row[3]);
 
       intensidad.push({ label: resultado, v: Number.isFinite(inten) ? inten : 0 });
       picos.push({ label: resultado, v: Number.isFinite(pico) ? pico : 0 });
@@ -236,37 +307,49 @@
   }
 
   /* =========================================================
-     INJECT (ESCANEO GLOBAL)
+     INJECTION (por bloque)
      ========================================================= */
 
-  function injectForTable(root, table) {
-    if (!table || table.dataset.chartDone === "1") return;
+  function injectIntoBlock(block) {
+    if (!block || block.dataset.peaChartDone === "1") return;
 
-    const container = findStatContainerForTable(root, table);
-    const stat = detectStatFromText(container.innerText || "");
-    if (!stat) return;
+    const txt = safeText(block);
+    if (!txt) return;
 
-    // Evitar que meta el chart en tablas “no target” dentro del mismo cuadro
-    // (tomamos la última tabla del container como la “tabla principal”)
-    const mainTable = findLastTableInContainer(container);
-    if (mainTable !== table) return;
+    const stat = detectStatFromBlockText(txt);
+    if (![12, 15, 16, 17].includes(stat)) return;
 
-    // STAT 15/16/17
+    const tableLike = findMainTableInBlock(block);
+    if (!tableLike) return;
+
+    const grid = getRowsAndCells(tableLike);
+    if (!grid.length) return;
+
+    // ya lo hicimos?
+    if (block.dataset.peaChartDone === "1") return;
+
+    // --- STAT 15/16/17
     if (stat === 15 || stat === 16 || stat === 17) {
-      const data = parseTableForGP(table);
+      const data = parseGPFromGrid(grid);
       if (!data.length) return;
 
       const wrap = wrapChartContainer("Gráfico: Ganadas vs Perdidas (por ítem)");
       wrap.appendChild(renderBarChartGP({ data, width: 520 }));
 
-      table.insertAdjacentElement("afterend", wrap);
-      table.dataset.chartDone = "1";
+      // Insertamos después de la tabla (si es table real) o al final del bloque
+      if (tableLike.insertAdjacentElement) {
+        tableLike.insertAdjacentElement("afterend", wrap);
+      } else {
+        block.appendChild(wrap);
+      }
+
+      block.dataset.peaChartDone = "1";
       return;
     }
 
-    // STAT 12
+    // --- STAT 12
     if (stat === 12) {
-      const parsed = parseTableForIntensity(table);
+      const parsed = parseIntensityFromGrid(grid);
       if (!parsed.intensidad.length && !parsed.picos.length) return;
 
       const wrap = wrapChartContainer("Gráficos: Intensidad promedio y % Picos (4–5)");
@@ -295,35 +378,46 @@
         );
       }
 
-      table.insertAdjacentElement("afterend", wrap);
-      table.dataset.chartDone = "1";
+      if (tableLike.insertAdjacentElement) {
+        tableLike.insertAdjacentElement("afterend", wrap);
+      } else {
+        block.appendChild(wrap);
+      }
+
+      block.dataset.peaChartDone = "1";
       return;
     }
   }
 
-  function scanAndInjectAll(root) {
-    const tables = Array.from(root.querySelectorAll("table"));
-    if (!tables.length) return;
-    tables.forEach((t) => injectForTable(root, t));
+  function scanAll() {
+    const blocks = findStatBlocks();
+    if (!blocks.length) return;
+    blocks.forEach(injectIntoBlock);
   }
 
   /* =========================================================
-     BOOTSTRAP
+     BOOTSTRAP (Observer + Interval)
      ========================================================= */
 
   function start() {
-    const root = document.getElementById("pea-level-4");
-    if (!root) return;
-
     // intento inicial
-    scanAndInjectAll(root);
+    scanAll();
 
-    // observer: cada cambio => re-scan
+    // observer global (porque no sabemos qué root exacto cambia)
     const obs = new MutationObserver(() => {
-      scanAndInjectAll(root);
+      scanAll();
     });
 
-    obs.observe(root, { childList: true, subtree: true });
+    obs.observe(document.documentElement, { childList: true, subtree: true });
+
+    // interval de respaldo (por renders que pisan el DOM o llegan tarde)
+    let ticks = 0;
+    const iv = setInterval(() => {
+      ticks++;
+      scanAll();
+      // 30 ticks * 500ms = 15s de refuerzo
+      if (ticks >= 30) clearInterval(iv);
+    }, 500);
   }
 
   if (document.readyState === "loading") {
