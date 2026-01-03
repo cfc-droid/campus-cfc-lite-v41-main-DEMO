@@ -1,11 +1,14 @@
 /* =========================================================
    CAMPUS CFC LITE — PEA
    ESTADÍSTICAS 12 → 17 INTEGRADAS
-   + GRÁFICOS SVG INLINE (AUTO-INJECT)
+   + GRÁFICOS SVG INLINE (AUTO-INJECT ROBUSTO)
    ========================================================= */
 
 (function () {
   "use strict";
+
+  // ✅ DEBUG: si NO ves este log en consola, el archivo NO se está cargando.
+  console.log("[PEA] stat_12_a_17_integrado.js LOADED");
 
   /* =========================================================
      SVG HELPERS
@@ -35,8 +38,18 @@
     return t;
   }
 
+  function escapeHtml(s) {
+    return String(s ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
+
   function wrapChartContainer(title) {
     const div = document.createElement("div");
+    div.className = "pea-inline-chart";
     div.style.margin = "10px 0 18px";
     div.style.padding = "10px 12px";
     div.style.border = "1px solid rgba(255,255,255,.10)";
@@ -48,15 +61,6 @@
       title
     )}</div>`;
     return div;
-  }
-
-  function escapeHtml(s) {
-    return String(s ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
   }
 
   function parseIntLoose(s) {
@@ -73,18 +77,15 @@
      CHARTS
      ========================================================= */
 
-  // 2-series stacked: GANADAS vs PERDIDAS
+  // 2-series stacked: GANADAS vs PERDIDAS (Stats 15/16/17)
   function renderBarChartGP({ data, width = 520 }) {
     const barH = 18;
     const gap = 8;
-    const leftPad = 170; // espacio para label
-    const rightPad = 60; // espacio para valores
-    const usableW = Math.max(180, width - leftPad - rightPad);
+    const leftPad = 170; // label
+    const rightPad = 70; // numbers
+    const usableW = Math.max(200, width - leftPad - rightPad);
 
-    const max = Math.max(
-      ...data.map((d) => (d.g || 0) + (d.p || 0)),
-      1
-    );
+    const max = Math.max(...data.map((d) => (d.g || 0) + (d.p || 0)), 1);
     const height = data.length * (barH + gap) + 18;
 
     const svg = svgEl("svg");
@@ -98,27 +99,21 @@
       const pW = ((d.p || 0) / max) * usableW;
 
       svg.appendChild(text(0, y + 13, d.label, "#ddd", 12));
-
-      // ganadas (verde)
       svg.appendChild(rect(leftPad, y, gW, barH, "#3fb950"));
-      // perdidas (rojo)
       svg.appendChild(rect(leftPad + gW, y, pW, barH, "#f85149"));
-
-      svg.appendChild(
-        text(leftPad + gW + pW + 8, y + 13, `${d.g}/${d.p}`, "#ddd", 12)
-      );
+      svg.appendChild(text(leftPad + gW + pW + 8, y + 13, `${d.g}/${d.p}`, "#ddd", 12));
     });
 
     return svg;
   }
 
-  // 1-series bars (para Stat 12 intensidad / picos)
+  // 1-series bars (Stat 12: intensidad / picos)
   function renderBarChart1({ data, valueMax, width = 520, color = "#5AA0FF", suffix = "" }) {
     const barH = 16;
     const gap = 8;
     const leftPad = 170;
-    const rightPad = 60;
-    const usableW = Math.max(180, width - leftPad - rightPad);
+    const rightPad = 70;
+    const usableW = Math.max(200, width - leftPad - rightPad);
 
     const max = Math.max(valueMax || 1, 1);
     const height = data.length * (barH + gap) + 18;
@@ -141,41 +136,52 @@
   }
 
   /* =========================================================
-     DETECTION + PARSERS
+     DETECTION (ROBUSTA)
      ========================================================= */
 
-  function detectStatFromContainer(container) {
-    // Busca títulos dentro del mismo cuadro/segmento
-    const h = container.querySelector("h3, h4");
-    const txt = (h?.innerText || "").toLowerCase();
+  function detectStatFromText(txtRaw) {
+    const txt = String(txtRaw || "").toLowerCase();
 
-    if (txt.includes("intensidad promedio") || txt.includes("picos por resultado")) return 12;
-    if (txt.includes("acciones críticas")) return 15;
-    if (txt.includes("pensamientos críticos")) return 16;
-    if (txt.includes("estados") && txt.includes("crític")) return 17; // “Estados críticos…”
+    // Stat 12 (por título o por "12/17")
+    if (
+      txt.includes("estadística 12/17") ||
+      txt.includes("intensidad promedio") ||
+      txt.includes("picos por resultado")
+    ) {
+      return 12;
+    }
+
+    if (txt.includes("estadística 15/17") || txt.includes("acciones críticas")) return 15;
+    if (txt.includes("estadística 16/17") || txt.includes("pensamientos críticos")) return 16;
+
+    // OJO: “Estados críticos por resultado”
+    if (txt.includes("estadística 17/17") || (txt.includes("estados") && txt.includes("crític"))) return 17;
+
     return null;
   }
 
-  function getLastRelevantBlock(root) {
-    // Intento 1: último “cuadro” (si existe una clase típica)
-    const candidates = root.querySelectorAll(".pea-cuadro, .pea-card, .pea-cuadro-base, .pea-box, .pea-cuadro-estadistica");
-    if (candidates && candidates.length) return candidates[candidates.length - 1];
-
-    // Intento 2: último hijo element
-    const kids = Array.from(root.children || []).filter((x) => x && x.nodeType === 1);
-    return kids.length ? kids[kids.length - 1] : root;
+  // Sube desde la tabla hasta encontrar un contenedor que tenga texto de “ESTADÍSTICA”
+  function findStatContainerForTable(root, table) {
+    let el = table;
+    while (el && el !== root) {
+      const t = (el.innerText || "");
+      if (/ESTAD[IÍ]STICA/i.test(t)) return el;
+      el = el.parentElement;
+    }
+    return table.parentElement || root;
   }
 
-  function findLastTable(block) {
-    // tablas posibles
-    const tables = block.querySelectorAll("table.pea-table, table");
+  function findLastTableInContainer(container) {
+    const tables = container.querySelectorAll("table");
     if (!tables.length) return null;
-
-    // elegimos la última tabla visible
     return tables[tables.length - 1];
   }
 
-  // Stats 15/16/17: label en col 2; ganadas en col 3; perdidas en col 4 (texto puede venir "2 (33%)")
+  /* =========================================================
+     PARSERS
+     ========================================================= */
+
+  // Stats 15/16/17: col2=label, col3=ganadas, col4=perdidas (puede venir "2 (33%)")
   function parseTableForGP(table) {
     const rows = Array.from(table.querySelectorAll("tbody tr"));
     const out = [];
@@ -188,7 +194,7 @@
       if (!label || label === "—") return;
 
       const up = label.toUpperCase();
-      if (up === "TOTALES" || up === "TOTAL" || up === "TOT") return;
+      if (up === "TOTALES" || up === "TOTAL") return;
 
       const g = parseIntLoose(tds[2]?.innerText);
       const p = parseIntLoose(tds[3]?.innerText);
@@ -196,7 +202,6 @@
       out.push({ label, g, p });
     });
 
-    // si todas son 0/0, no tiene sentido dibujar
     const anyNonZero = out.some((d) => (d.g || 0) + (d.p || 0) > 0);
     return anyNonZero ? out : [];
   }
@@ -211,50 +216,42 @@
       const tds = r.querySelectorAll("td");
       if (!tds || tds.length < 4) return;
 
-      const label = (tds[0]?.innerText || tds[1]?.innerText || "").trim();
-      // Algunas tablas ponen “Resultado” como primera col, otras como segunda.
-      // Preferimos detectar GANADA/PERDIDA/BE/NA:
-      const label2 = (tds[0]?.innerText || "").trim();
-      const label3 = (tds[1]?.innerText || "").trim();
-      const pick = [label2, label3].find((x) => x && x !== "—") || label;
-      const L = pick.toUpperCase();
+      const resultado = (tds[0]?.innerText || "").trim(); // GANADA / PERDIDA
+      if (!resultado || resultado === "—") return;
 
-      if (!pick || pick === "—") return;
-      if (L === "TOTALES" || L === "TOTAL") return;
+      const up = resultado.toUpperCase();
+      if (up === "TOTALES" || up === "TOTAL") return;
 
-      // Intentamos intensidad desde la col que contenga un decimal típico
       const inten = parseFloatLoose(tds[2]?.innerText);
       const pico = parseIntLoose(tds[3]?.innerText); // “67%” -> 67
 
-      intensidad.push({ label: pick, v: Number.isFinite(inten) ? inten : 0 });
-      picos.push({ label: pick, v: Number.isFinite(pico) ? pico : 0 });
+      intensidad.push({ label: resultado, v: Number.isFinite(inten) ? inten : 0 });
+      picos.push({ label: resultado, v: Number.isFinite(pico) ? pico : 0 });
     });
 
     const anyI = intensidad.some((d) => (d.v || 0) > 0);
     const anyP = picos.some((d) => (d.v || 0) > 0);
 
-    return {
-      intensidad: anyI ? intensidad : [],
-      picos: anyP ? picos : []
-    };
+    return { intensidad: anyI ? intensidad : [], picos: anyP ? picos : [] };
   }
 
   /* =========================================================
-     INJECTOR
+     INJECT (ESCANEO GLOBAL)
      ========================================================= */
-  function tryInject(root) {
-    const block = getLastRelevantBlock(root);
-    if (!block) return;
 
-    const table = findLastTable(block);
-    if (!table) return;
+  function injectForTable(root, table) {
+    if (!table || table.dataset.chartDone === "1") return;
 
-    if (table.dataset.chartDone === "1") return;
-
-    const stat = detectStatFromContainer(block);
+    const container = findStatContainerForTable(root, table);
+    const stat = detectStatFromText(container.innerText || "");
     if (!stat) return;
 
-    // STAT 15/16/17 (GP)
+    // Evitar que meta el chart en tablas “no target” dentro del mismo cuadro
+    // (tomamos la última tabla del container como la “tabla principal”)
+    const mainTable = findLastTableInContainer(container);
+    if (mainTable !== table) return;
+
+    // STAT 15/16/17
     if (stat === 15 || stat === 16 || stat === 17) {
       const data = parseTableForGP(table);
       if (!data.length) return;
@@ -267,12 +264,13 @@
       return;
     }
 
-    // STAT 12 (Intensidad + Picos)
+    // STAT 12
     if (stat === 12) {
       const parsed = parseTableForIntensity(table);
       if (!parsed.intensidad.length && !parsed.picos.length) return;
 
       const wrap = wrapChartContainer("Gráficos: Intensidad promedio y % Picos (4–5)");
+
       if (parsed.intensidad.length) {
         wrap.appendChild(
           renderBarChart1({
@@ -284,6 +282,7 @@
           })
         );
       }
+
       if (parsed.picos.length) {
         wrap.appendChild(
           renderBarChart1({
@@ -302,19 +301,26 @@
     }
   }
 
+  function scanAndInjectAll(root) {
+    const tables = Array.from(root.querySelectorAll("table"));
+    if (!tables.length) return;
+    tables.forEach((t) => injectForTable(root, t));
+  }
+
   /* =========================================================
-     BOOTSTRAP (Observer)
+     BOOTSTRAP
      ========================================================= */
+
   function start() {
     const root = document.getElementById("pea-level-4");
     if (!root) return;
 
-    // Intento inicial (por si ya estaba renderizado)
-    tryInject(root);
+    // intento inicial
+    scanAndInjectAll(root);
 
+    // observer: cada cambio => re-scan
     const obs = new MutationObserver(() => {
-      // en cuanto cambia el DOM, intentamos inyectar en el último bloque
-      tryInject(root);
+      scanAndInjectAll(root);
     });
 
     obs.observe(root, { childList: true, subtree: true });
