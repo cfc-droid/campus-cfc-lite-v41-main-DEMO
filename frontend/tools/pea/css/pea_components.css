@@ -914,33 +914,3 @@ html.pea-dark .pea-table-wrap select{
   background: rgba(255,212,0,.42);
   color: #111;
 }
-
-/* Intento sin tocar HTML: separar secciones dentro de Estadísticas */
-.pea-card .pea-zone,
-.pea-card .pea-section{
-  margin-top: 16px;
-}
-
-.pea-card .pea-zone{
-  padding: 16px;
-  border-radius: 16px;
-  border: 1px solid rgba(0,0,0,.08);
-  background: rgba(255,255,255,.92);
-  box-shadow: 0 8px 20px rgba(0,0,0,.06);
-}
-
-html.pea-dark .pea-card .pea-zone{
-  border: 1px solid rgba(255,255,255,.10);
-  background: rgba(20,20,20,.55);
-  box-shadow: 0 10px 26px rgba(0,0,0,.35);
-}
-
-/* Si “NIVEL…” / “ESTADÍSTICA…” están como h3/h4/strong, esto los levanta */
-.pea-card h3, .pea-card h4{
-  font-weight: 900;
-}
-html:not(.pea-dark) .pea-card h3,
-html:not(.pea-dark) .pea-card h4{ color:#7a5a00; }
-
-html.pea-dark .pea-card h3,
-html.pea-dark .pea-card h4{ color:#d6b25e !important; }
