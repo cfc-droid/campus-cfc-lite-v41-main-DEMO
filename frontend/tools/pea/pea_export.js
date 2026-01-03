@@ -50,14 +50,69 @@
 
   async function captureToCanvas(element) {
     if (!window.html2canvas) throw new Error("html2canvas no está cargado");
+
+    // Captura del tamaño REAL del elemento (incluye scrollWidth/scrollHeight)
+    const w = Math.max(
+      element.scrollWidth || 0,
+      element.offsetWidth || 0,
+      element.clientWidth || 0
+    );
+    const h = Math.max(
+      element.scrollHeight || 0,
+      element.offsetHeight || 0,
+      element.clientHeight || 0
+    );
+
     // Mejor calidad
     return await window.html2canvas(element, {
       scale: 2,
       useCORS: true,
       backgroundColor: null,
       scrollX: 0,
-      scrollY: -window.scrollY,
+      scrollY: 0,
+      windowWidth: w,
+      windowHeight: h,
+      width: w,
+      height: h,
     });
+  }
+
+  // 🔑 Captura expandida: clona el bloque y abre contenedores con scroll interno
+  async function captureExpandedClone(originalEl) {
+    const clone = originalEl.cloneNode(true);
+
+    // contenedor offscreen
+    const host = document.createElement("div");
+    host.style.position = "fixed";
+    host.style.left = "-100000px";
+    host.style.top = "0";
+    host.style.width = "max-content";
+    host.style.zIndex = "-1";
+    host.appendChild(clone);
+    document.body.appendChild(host);
+
+    // Abrir scroll interno típico de la tabla
+    const scrollBoxes = clone.querySelectorAll(".pea-table-scroll");
+    scrollBoxes.forEach((box) => {
+      box.style.overflow = "visible";
+      box.style.maxHeight = "none";
+      box.style.height = "auto";
+    });
+
+    // Por si hay wrappers con overflow/height
+    clone.style.overflow = "visible";
+    clone.style.maxHeight = "none";
+    clone.style.height = "auto";
+
+    // esperar layout
+    await new Promise((r) => requestAnimationFrame(r));
+
+    const canvas = await captureToCanvas(clone);
+
+    // limpiar
+    host.remove();
+
+    return canvas;
   }
 
   async function exportPNG(element, baseName) {
@@ -160,8 +215,44 @@
       if (fmt === "CSV") return exportCSVFromTable(table, "PEA_REGISTROS");
       if (fmt === "XLSX") return exportXLSXFromTable(table, "PEA_REGISTROS");
       if (fmt === "DOC") return exportDOCFromElement(wrap, "PEA_REGISTROS");
-      if (fmt === "PNG") return exportPNG(wrap, "PEA_REGISTROS");
-      if (fmt === "PDF") return exportPDF(wrap, "PEA_REGISTROS");
+
+      // 🔑 PNG/PDF: capturar el bloque expandido para que no recorte por overflow/scroll
+      if (fmt === "PNG") {
+        const canvas = await captureExpandedClone(wrap);
+        const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+        return downloadBlob(blob, `${safeFileName("PEA_REGISTROS")}.png`);
+      }
+
+      if (fmt === "PDF") {
+        const canvas = await captureExpandedClone(wrap);
+        const imgData = canvas.toDataURL("image/png");
+
+        const { jsPDF } = window.jspdf || {};
+        if (!jsPDF) throw new Error("jsPDF no está cargado");
+
+        // A4 portrait
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let y = 0;
+        let remaining = imgHeight;
+
+        while (remaining > 0) {
+          pdf.addImage(imgData, "PNG", 0, y, imgWidth, imgHeight);
+          remaining -= pageHeight;
+          if (remaining > 0) {
+            pdf.addPage();
+            y -= pageHeight;
+          }
+        }
+
+        return pdf.save(`${safeFileName("PEA_REGISTROS")}.pdf`);
+      }
     } catch (e) {
       console.error("[PEA][EXPORT]", e);
       alert("Error exportando REGISTROS. Mirá consola (F12).");
