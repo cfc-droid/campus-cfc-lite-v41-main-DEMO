@@ -194,9 +194,14 @@ html.pea-dark .pea-actions button{
   box-shadow: 0 0 0 3px rgba(255,212,0,.22);
 }
 
-/* Dropdown (lo máximo posible, depende del navegador) */
-.pea-register select option{
-  background: #1a1a1a;   /* para que al abrir no “cante” blanco en muchos casos */
+/* Opciones del select: claro y oscuro coherentes */
+html:not(.pea-dark) .pea-register select option{
+  background: #fff7d1;   /* crema doradita */
+  color: #111;
+}
+
+html.pea-dark .pea-register select option{
+  background: #1a1a1a;
   color: #f4f4f4;
 }
 
