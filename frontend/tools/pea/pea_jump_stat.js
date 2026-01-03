@@ -102,13 +102,19 @@
     });
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    wireEvents();
-    ensureBuiltWithRetries();
-  });
+document.addEventListener("DOMContentLoaded", () => {
+  wireEvents();
+  // por si ya están listas
+  ensureBuiltWithRetries();
+});
 
-  document.addEventListener("PEA_FILTERS_UPDATED", () => {
-    // esperar a que termine el re-render
-    setTimeout(() => ensureBuiltWithRetries(), 120);
-  });
+// ✅ cuando el registry termina de renderizar, reconstruimos SÍ o SÍ
+document.addEventListener("PEA_STATS_RENDERED", () => {
+  ensureBuiltWithRetries();
+});
+
+// cuando cambian filtros, el registry re-renderiza y luego emitirá PEA_STATS_RENDERED
+document.addEventListener("PEA_FILTERS_UPDATED", () => {
+  // no reconstruyas acá con timeout; esperá el evento final del registry
+});
 })();
