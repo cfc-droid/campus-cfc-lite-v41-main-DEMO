@@ -88,6 +88,9 @@ function runAllPEAStats() {
       console.error('[PEA][STATS] Error ejecutando', fnName, err);
     }
   });
+
+  // ✅ avisar que ya están renderizadas
+  document.dispatchEvent(new CustomEvent("PEA_STATS_RENDERED"));
 }
 
 /* =========================================================
