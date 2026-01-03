@@ -18,6 +18,29 @@
 <body>
 <main class="pea-help-page">
 
+  <!-- ✅ BOTONES FLOTANTES (arriba) -->
+  <div class="pea-floatbar pea-actions">
+    <button type="button" class="btn-main" onclick="window.location.href='./index.html'">
+      Pantalla principal
+    </button>
+
+    <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">
+      Cargar registro
+    </button>
+
+    <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">
+      Historial y estadísticas
+    </button>
+
+    <button type="button" class="btn-main" onclick="window.location.href='/index.html'">
+      Volver al Campus
+    </button>
+
+    <button type="button" class="btn-main" id="pea-btn-theme">
+      Claro / Oscuro
+    </button>
+  </div>  
+
   <h1>PEA — Cálculo de estadísticas (guía metodológica completa)</h1>
 
   <p>
@@ -855,10 +878,6 @@
     <br>
     Si una etiqueta, campo o filtro no existe en un registro, ese registro puede quedar fuera del universo de una estadística específica (por ejemplo, falta dirección en estadísticas que puentean por fecha+dirección).
   </p>
-
-  <div style="margin-top:24px;">
-    <button onclick="history.back()">Volver</button>
-  </div>
 
   <script src="./pea_theme.js"></script>
 
