@@ -18,13 +18,24 @@
 <body class="pea-has-floatbar">
 
   <!-- BOTONERA FLOTANTE -->
-  <div class="pea-floatbar pea-actions">
-    <button type="button" class="btn-main" onclick="window.location.href='./index.html'">Pantalla principal</button>
-    <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">Cargar registro</button>
-    <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">Historial y estadísticas</button>
-    <button type="button" class="btn-main" onclick="window.location.href='/index.html'">Volver al Campus</button>
-    <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme()">Claro / Oscuro</button>
-  </div>
+<div class="pea-floatbar pea-actions"
+     style="
+       width: 100%;
+       left: 0;
+       right: 0;
+       transform: none;
+       display: flex;
+       justify-content: space-between;
+       align-items: center;
+       gap: 10px;
+       flex-wrap: wrap;
+     ">
+  <button type="button" class="btn-main" onclick="window.location.href='./index.html'">Pantalla principal</button>
+  <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">Cargar registro</button>
+  <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_history.html'">Historial y estadísticas</button>
+  <button type="button" class="btn-main" onclick="window.location.href='/index.html'">Volver al Campus</button>
+  <button type="button" class="btn-main" id="pea-btn-theme" onclick="window.peaToggleTheme()">Claro / Oscuro</button>
+</div>
 
 <div class="pea-shell">
   <div class="pea-card pea-help-page">
