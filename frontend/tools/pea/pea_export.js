@@ -99,6 +99,28 @@
       box.style.height = "auto";
     });
 
+    // Abrir cualquier overflow/scroll interno que pueda recortar (solo en el clone)
+    const allNodes = clone.querySelectorAll("*");
+    allNodes.forEach((node) => {
+      try {
+        const cs = window.getComputedStyle(node);
+        const ox = cs.overflowX;
+        const oy = cs.overflowY;
+        if (ox === "auto" || ox === "scroll") node.style.overflowX = "visible";
+        if (oy === "auto" || oy === "scroll") node.style.overflowY = "visible";
+
+        if (
+          (ox === "auto" || ox === "scroll" || oy === "auto" || oy === "scroll") &&
+          (cs.maxHeight && cs.maxHeight !== "none")
+        ) {
+          node.style.maxHeight = "none";
+          node.style.height = "auto";
+        }
+      } catch (_) {
+        // no-op
+      }
+    });
+
     // Por si hay wrappers con overflow/height
     clone.style.overflow = "visible";
     clone.style.maxHeight = "none";
@@ -270,8 +292,44 @@
       const full = findElementOrThrow(FULL_SELECTOR);
 
       if (fmt === "DOC") return exportDOCFromElement(full, "PEA_HISTORIAL_TODO");
-      if (fmt === "PNG") return exportPNG(full, "PEA_HISTORIAL_TODO");
-      if (fmt === "PDF") return exportPDF(full, "PEA_HISTORIAL_TODO");
+
+      // 🔑 PNG/PDF: usar captura expandida para NO recortar la tabla (17 columnas) dentro del historial
+      if (fmt === "PNG") {
+        const canvas = await captureExpandedClone(full);
+        const blob = await new Promise((res) => canvas.toBlob(res, "image/png"));
+        return downloadBlob(blob, `${safeFileName("PEA_HISTORIAL_TODO")}.png`);
+      }
+
+      if (fmt === "PDF") {
+        const canvas = await captureExpandedClone(full);
+        const imgData = canvas.toDataURL("image/png");
+
+        const { jsPDF } = window.jspdf || {};
+        if (!jsPDF) throw new Error("jsPDF no está cargado");
+
+        // A4 portrait
+        const pdf = new jsPDF("p", "mm", "a4");
+
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+        let y = 0;
+        let remaining = imgHeight;
+
+        while (remaining > 0) {
+          pdf.addImage(imgData, "PNG", 0, y, imgWidth, imgHeight);
+          remaining -= pageHeight;
+          if (remaining > 0) {
+            pdf.addPage();
+            y -= pageHeight;
+          }
+        }
+
+        return pdf.save(`${safeFileName("PEA_HISTORIAL_TODO")}.pdf`);
+      }
     } catch (e) {
       console.error("[PEA][EXPORT]", e);
       alert("Error exportando HISTORIAL COMPLETO. Mirá consola (F12).");
