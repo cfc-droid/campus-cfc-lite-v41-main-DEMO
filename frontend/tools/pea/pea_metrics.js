@@ -149,11 +149,19 @@ function renderMetrics(metrics) {
   if (!box) return;
 
 if (!metrics) {
-  box.innerHTML = `
-    <div class="pea-empty">
-      Evidencia insuficiente para calcular esta métrica.
-    </div>
-  `;
+  box.innerHTML = renderCuadroBasePEA({
+    nivel: 0,
+    indice: 1,
+    titulo: "Cobertura por día (faltantes de los 3 registros)",
+    totalRegistros: 0,
+    universo: "registros con estado_registro = VALIDO",
+    criterios: null,
+    contenidoHTML: `
+      <div class="pea-metric-item">
+        Evidencia insuficiente para calcular esta métrica.
+      </div>
+    `
+  });
   return;
 }
    
