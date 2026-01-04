@@ -113,9 +113,9 @@ function initTableLimitSelect() {
     if ([5, 10, 15, 20].includes(current)) {
       setTableLimit(current);
       PEA_TABLE_LIMIT = current;
+   }
   }
- 
-
+ }
 
 /* ============================================================
    Helpers
