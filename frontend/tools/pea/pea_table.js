@@ -6,7 +6,7 @@
 const $ = (id) => document.getElementById(id);
 
 /* ============================================================
-   TAREA 22c — control REAL de registros visibles
+   TAREA 22c — control REAL de registros visibles (DEFINITIVO)
    ============================================================ */
 
 let PEA_TABLE_LIMIT = 10;
@@ -15,20 +15,8 @@ function setTableLimit(value) {
   const v = parseInt(value, 10);
   if (![10, 15, 20].includes(v)) return;
 
-  const container = document.querySelector(".pea-table-scroll");
-  const table = container?.querySelector("table");
-  if (!container || !table) return;
-
-  // Medimos una fila REAL
-  const firstRow = table.querySelector("tbody tr");
-  if (!firstRow) return;
-
-  const rowHeight = firstRow.getBoundingClientRect().height;
-  const headerHeight = table.querySelector("thead").getBoundingClientRect().height;
-
-  const totalHeight = (rowHeight * v) + headerHeight;
-
-  container.style.maxHeight = `${Math.ceil(totalHeight)}px`;
+  PEA_TABLE_LIMIT = v;   // ✅ guarda el límite real
+  updateTable();         // ✅ re-renderiza mostrando EXACTAMENTE v filas
 }
 
 /* ============================================================
@@ -119,12 +107,9 @@ function renderTable(records) {
 
   if (empty) empty.style.display = "none";
 
-tbody.innerHTML = list.map(renderRow).join("");
+const limited = list.slice(0, PEA_TABLE_LIMIT); // ✅ SOLO N filas
+tbody.innerHTML = limited.map(renderRow).join("");
 
-// 🔑 Recalcula altura visible según límite actual
-setTimeout(() => {
-  setTableLimit(PEA_TABLE_LIMIT);
-}, 0);
 }
 
 /* ============================================================
