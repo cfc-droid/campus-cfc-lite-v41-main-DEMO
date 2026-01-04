@@ -1017,3 +1017,1037 @@ html.pea-dark .pea-estadistica{
 .pea-cuadro-estadistico .pea-table td[style*="font-weight"]{
   text-align: center;
 }
+
+campus-cfc-lite-v41-main-DEMO/frontend/tools/pea/css
+/pea_components.css
+Go to file
+t
+cfc-droid
+cfc-droid
+Update pea_components.css
+c4f24dd
+ · 
+19 hours ago
+
+Code
+
+Blame
+/* Cards / Paneles */
+.pea-zone, .pea-section, .pea-filters, .pea-table-wrap{
+  border-radius: var(--pea-radius);
+}
+
+/* Cuadros “base” (stats) *
+.pea-table{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.pea-table th,
+.pea-table td{
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+.pea-table thead th{
+  border-bottom: var(--pea-border-soft);
+  font-weight: 800;
+}
+
+.pea-table tbody tr:not(:last-child) td{
+  border-bottom: var(--pea-border-soft);
+}
+
+.pea-empty,
+.pea-warning{
+  padding: var(--pea-pad-3);
+  border-radius: var(--pea-radius-sm);
+  border: var(--pea-border);
+}
+
+.pea-warning{
+  background: rgba(255,200,70,.08);
+}
+
+/* Tipos de texto */
+.pea-help{
+  color: var(--pea-text-2);
+}
+
+.pea-metricas-secundarias{
+  color: var(--pea-text-2);
+}
+
+/* Numeritos alineados (stats) */
+.pea-n{ text-align:right; }
+
+/* =========================================
+   PEA — Premium Dark global
+   Activado por: html.pea-dark
+   ========================================= */
+
+html.pea-dark body{
+  background: #0f0f10;
+  color: #f4f4f4;
+}
+
+/* Texto blanco legible */
+html.pea-dark p,
+html.pea-dark li,
+html.pea-dark label,
+html.pea-dark small,
+html.pea-dark .pea-help,
+html.pea-dark .pea-metricas-secundarias{
+  color: #f4f4f4 !important;
+  opacity: 1 !important;
+}
+
+/* Dorado premium */
+html.pea-dark h1,
+html.pea-dark h2,
+html.pea-dark strong{
+  color: #d6b25e !important;
+}
+
+/* Links dorados */
+html.pea-dark a{
+  color: #d6b25e !important;
+  text-decoration-color: rgba(214,178,94,.55);
+}
+
+/* ===========================
+   PEA — Shell + Card (como Home)
+   =========================== */
+
+.pea-shell{
+  max-width: 1100px;
+  margin: 34px auto;
+  padding: 0 16px;
+}
+
+.pea-card{
+  border-radius: 18px;
+  padding: 22px 24px;
+  background: rgba(255,255,255,.92);
+  color: #111;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* Barra de botones arriba (tipo Home) */
+.pea-top-actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0 18px 0;
+  padding: 10px 0 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+/* Botón premium (mismo “look” que Home) */
+.btn-main{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+
+.btn-main:hover{
+  filter: brightness(0.97);
+}
+
+/* ✅ Botones de abajo: mismo look aunque no tengan class (por si acaso) */
+.pea-actions button{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+
+.pea-actions button:hover{
+  filter: brightness(0.97);
+}
+
+/* Dark: mismo criterio que Home */
+html.pea-dark .pea-card{
+  background: rgba(20,20,20,.78);
+  color: #f3f3f3;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+html.pea-dark .pea-top-actions{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+/* En dark, mantenemos botón premium amarillo */
+html.pea-dark .btn-main,
+html.pea-dark .pea-actions button{
+  background: #ffd400;
+  color: #111;
+}
+
+/* =========================================
+   ✅ CAMPOS (inputs/select/textarea) DORADOS
+   ========================================= */
+
+/* Base claro */
+.pea-register input[type="text"],
+.pea-register input[type="date"],
+.pea-register select,
+.pea-register textarea{
+  width: 100%;
+  background: rgba(255,212,0,.18);       /* doradito */
+  border: 1px solid rgba(0,0,0,.18);
+  color: #111;
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+/* Placeholder */
+.pea-register textarea::placeholder,
+.pea-register input::placeholder{
+  color: rgba(0,0,0,.55);
+}
+
+/* Focus */
+.pea-register input:focus,
+.pea-register select:focus,
+.pea-register textarea:focus{
+  border-color: rgba(255,212,0,.85);
+  box-shadow: 0 0 0 3px rgba(255,212,0,.22);
+}
+
+/* Opciones del select: claro y oscuro coherentes */
+html:not(.pea-dark) .pea-register select option{
+  background: #fff7d1;   /* crema doradita */
+  color: #111;
+}
+
+html.pea-dark .pea-register select option{
+  background: #1a1a1a;
+  color: #f4f4f4;
+}
+
+/* Dark fields */
+html.pea-dark .pea-register input[type="text"],
+html.pea-dark .pea-register input[type="date"],
+html.pea-dark .pea-register select,
+html.pea-dark .pea-register textarea{
+  background: rgba(255,212,0,.14);
+  border: 1px solid rgba(255,255,255,.14);
+  color: #f4f4f4;
+}
+
+html.pea-dark .pea-register textarea::placeholder,
+html.pea-dark .pea-register input::placeholder{
+  color: rgba(255,255,255,.55);
+}
+
+html.pea-dark .pea-register input:focus,
+html.pea-dark .pea-register select:focus,
+html.pea-dark .pea-register textarea:focus{
+  border-color: rgba(255,212,0,.85);
+  box-shadow: 0 0 0 3px rgba(255,212,0,.18);
+}
+
+/* =========================================
+   Light mode: texto negro + títulos dorados
+   ========================================= */
+html:not(.pea-dark) .pea-card{
+  color: #111;
+}
+
+html:not(.pea-dark) .pea-card p,
+html:not(.pea-dark) .pea-card label,
+html:not(.pea-dark) .pea-card li,
+html:not(.pea-dark) .pea-card small,
+html:not(.pea-dark) .pea-card .pea-help{
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* Títulos dorados en claro (dorado más “oscuro” para contraste) */
+html:not(.pea-dark) .pea-card h1,
+html:not(.pea-dark) .pea-card h2{
+  color: #7a5a00;
+}
+
+/* =========================================================
+   PEA — HELP PAGE (pea_stats_help.html)
+   - Card + tipografía + títulos dorados en claro
+   - Botonera flotante arriba
+   ========================================================= */
+
+.pea-help-page{
+  max-width: 1100px;
+  margin: 34px auto;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.92);
+  color: #111;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* En claro: texto negro bien legible */
+html:not(.pea-dark) .pea-help-page p,
+html:not(.pea-dark) .pea-help-page li,
+html:not(.pea-dark) .pea-help-page label,
+html:not(.pea-dark) .pea-help-page small{
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* ✅ En claro: títulos y subtítulos dorados */
+html:not(.pea-dark) .pea-help-page h1,
+html:not(.pea-dark) .pea-help-page h2,
+html:not(.pea-dark) .pea-help-page h3{
+  color: #7a5a00;
+}
+
+/* En oscuro: card oscura, texto claro, títulos dorados premium */
+html.pea-dark .pea-help-page{
+  background: rgba(20,20,20,.78);
+  color: #f3f3f3;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+html.pea-dark .pea-help-page p,
+html.pea-dark .pea-help-page li,
+html.pea-dark .pea-help-page label,
+html.pea-dark .pea-help-page small{
+  color: #f4f4f4 !important;
+  opacity: 1 !important;
+}
+
+html.pea-dark .pea-help-page h1,
+html.pea-dark .pea-help-page h2,
+html.pea-dark .pea-help-page h3,
+html.pea-dark .pea-help-page strong{
+  color: #d6b25e !important;
+}
+
+/* =========================================================
+   Botonera flotante (arriba)
+   ========================================================= */
+
+.pea-floatbar{
+  position: sticky;      /* se mantiene arriba al scrollear */
+  top: 10px;
+  z-index: 999;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 14px 0;
+  padding: 10px 0 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  backdrop-filter: blur(6px);
+}
+
+html.pea-dark .pea-floatbar{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+/* =========================================
+   PEA — Barra flotante superior
+   ========================================= */
+
+.pea-floatbar{
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 16px;
+
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,.12);
+  backdrop-filter: blur(10px);
+}
+
+/* Para que el contenido no quede tapado por la barra */
+body.pea-has-floatbar{
+  padding-top: 86px; /* ajustá si querés más/menos */
+}
+
+/* Dark */
+html.pea-dark .pea-floatbar{
+  background: rgba(20,20,20,.78);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 12px 34px rgba(0,0,0,.45);
+}
+
+/* =========================================================
+   FIX — Scroll en TABLA de REGISTROS (historial)
+   - Barra vertical (dentro del cuadro)
+   - Barra horizontal (muchas columnas)
+   ========================================================= */
+
+.pea-table-wrap .pea-table-scroll{
+  width: 100%;
+  overflow: auto;          /* X + Y */
+  max-height: 520px;       /* ajustá a gusto */
+  border-radius: var(--pea-radius);
+}
+
+/* Evitar que el navegador "apriete" 17 columnas y mate el overflow */
+.pea-table-wrap .pea-table-scroll .pea-table{
+  width: max-content;      /* permite crecer y forzar overflow-x */
+  min-width: 100%;         /* no achica de más */
+  table-layout: auto;      /* más natural para muchas columnas */
+}
+
+/* Opcional pero recomendado: que no se partan textos raros en celdas */
+.pea-table-wrap .pea-table-scroll .pea-table th,
+.pea-table-wrap .pea-table-scroll .pea-table td{
+  white-space: nowrap;
+}
+
+campus-cfc-lite-v41-main-DEMO/frontend/tools/pea/css
+/pea_components.css
+Go to file
+t
+cfc-droid
+cfc-droid
+Update pea_components.css
+1b4f02d
+ · 
+now
+
+Code
+
+Blame
+/* Cards / Paneles */
+.pea-zone, .pea-section, .pea-filters, .pea-table-wrap{
+  border-radius: var(--pea-radius);
+}
+
+/* Cuadros “base” (stats) */
+.pea-table{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+.pea-table th,
+.pea-table td{
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+.pea-table thead th{
+  border-bottom: var(--pea-border-soft);
+  font-weight: 800;
+}
+
+.pea-table tbody tr:not(:last-child) td{
+  border-bottom: var(--pea-border-soft);
+}
+
+.pea-empty,
+.pea-warning{
+  padding: var(--pea-pad-3);
+  border-radius: var(--pea-radius-sm);
+  border: var(--pea-border);
+}
+
+.pea-warning{
+  background: rgba(255,200,70,.08);
+}
+
+/* Tipos de texto */
+.pea-help{
+  color: var(--pea-text-2);
+}
+
+.pea-metricas-secundarias{
+  color: var(--pea-text-2);
+}
+
+/* Numeritos alineados (stats) */
+.pea-n{ text-align:right; }
+
+/* =========================================
+   PEA — Premium Dark global
+   Activado por: html.pea-dark
+   ========================================= */
+
+html.pea-dark body{
+  background: #0f0f10;
+  color: #f4f4f4;
+}
+
+/* Texto blanco legible */
+html.pea-dark p,
+html.pea-dark li,
+html.pea-dark label,
+html.pea-dark small,
+html.pea-dark .pea-help,
+html.pea-dark .pea-metricas-secundarias{
+  color: #f4f4f4 !important;
+  opacity: 1 !important;
+}
+
+/* Dorado premium */
+html.pea-dark h1,
+html.pea-dark h2,
+html.pea-dark strong{
+  color: #d6b25e !important;
+}
+
+/* Links dorados */
+html.pea-dark a{
+  color: #d6b25e !important;
+  text-decoration-color: rgba(214,178,94,.55);
+}
+
+/* ===========================
+   PEA — Shell + Card (como Home)
+   =========================== */
+
+.pea-shell{
+  max-width: 1100px;
+  margin: 34px auto;
+  padding: 0 16px;
+}
+
+.pea-card{
+  border-radius: 18px;
+  padding: 22px 24px;
+  background: rgba(255,255,255,.92);
+  color: #111;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* Barra de botones arriba (tipo Home) */
+.pea-top-actions{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 14px 0 18px 0;
+  padding: 10px 0 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+}
+
+/* Botón premium (mismo “look” que Home) */
+.btn-main{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+
+.btn-main:hover{
+  filter: brightness(0.97);
+}
+
+/* ✅ Botones de abajo: mismo look aunque no tengan class (por si acaso) */
+.pea-actions button{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+
+.pea-actions button:hover{
+  filter: brightness(0.97);
+}
+
+/* Dark: mismo criterio que Home */
+html.pea-dark .pea-card{
+  background: rgba(20,20,20,.78);
+  color: #f3f3f3;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+html.pea-dark .pea-top-actions{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+/* En dark, mantenemos botón premium amarillo */
+html.pea-dark .btn-main,
+html.pea-dark .pea-actions button{
+  background: #ffd400;
+  color: #111;
+}
+
+/* =========================================
+   ✅ CAMPOS (inputs/select/textarea) DORADOS
+   ========================================= */
+
+/* Base claro */
+.pea-register input[type="text"],
+.pea-register input[type="date"],
+.pea-register select,
+.pea-register textarea{
+  width: 100%;
+  background: rgba(255,212,0,.18);       /* doradito */
+  border: 1px solid rgba(0,0,0,.18);
+  color: #111;
+  border-radius: 10px;
+  padding: 8px 10px;
+  outline: none;
+}
+
+/* Placeholder */
+.pea-register textarea::placeholder,
+.pea-register input::placeholder{
+  color: rgba(0,0,0,.55);
+}
+
+/* Focus */
+.pea-register input:focus,
+.pea-register select:focus,
+.pea-register textarea:focus{
+  border-color: rgba(255,212,0,.85);
+  box-shadow: 0 0 0 3px rgba(255,212,0,.22);
+}
+
+/* Opciones del select: claro y oscuro coherentes */
+html:not(.pea-dark) .pea-register select option{
+  background: #fff7d1;   /* crema doradita */
+  color: #111;
+}
+
+html.pea-dark .pea-register select option{
+  background: #1a1a1a;
+  color: #f4f4f4;
+}
+
+/* Dark fields */
+html.pea-dark .pea-register input[type="text"],
+html.pea-dark .pea-register input[type="date"],
+html.pea-dark .pea-register select,
+html.pea-dark .pea-register textarea{
+  background: rgba(255,212,0,.14);
+  border: 1px solid rgba(255,255,255,.14);
+  color: #f4f4f4;
+}
+
+html.pea-dark .pea-register textarea::placeholder,
+html.pea-dark .pea-register input::placeholder{
+  color: rgba(255,255,255,.55);
+}
+
+html.pea-dark .pea-register input:focus,
+html.pea-dark .pea-register select:focus,
+html.pea-dark .pea-register textarea:focus{
+  border-color: rgba(255,212,0,.85);
+  box-shadow: 0 0 0 3px rgba(255,212,0,.18);
+}
+
+/* =========================================
+   Light mode: texto negro + títulos dorados
+   ========================================= */
+html:not(.pea-dark) .pea-card{
+  color: #111;
+}
+
+html:not(.pea-dark) .pea-card p,
+html:not(.pea-dark) .pea-card label,
+html:not(.pea-dark) .pea-card li,
+html:not(.pea-dark) .pea-card small,
+html:not(.pea-dark) .pea-card .pea-help{
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* Títulos dorados en claro (dorado más “oscuro” para contraste) */
+html:not(.pea-dark) .pea-card h1,
+html:not(.pea-dark) .pea-card h2{
+  color: #7a5a00;
+}
+
+/* =========================================================
+   PEA — HELP PAGE (pea_stats_help.html)
+   - Card + tipografía + títulos dorados en claro
+   - Botonera flotante arriba
+   ========================================================= */
+
+.pea-help-page{
+  max-width: 1100px;
+  margin: 34px auto;
+  padding: 22px 24px;
+  border-radius: 18px;
+  background: rgba(255,255,255,.92);
+  color: #111;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  border: 1px solid rgba(0,0,0,.06);
+}
+
+/* En claro: texto negro bien legible */
+html:not(.pea-dark) .pea-help-page p,
+html:not(.pea-dark) .pea-help-page li,
+html:not(.pea-dark) .pea-help-page label,
+html:not(.pea-dark) .pea-help-page small{
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* ✅ En claro: títulos y subtítulos dorados */
+html:not(.pea-dark) .pea-help-page h1,
+html:not(.pea-dark) .pea-help-page h2,
+html:not(.pea-dark) .pea-help-page h3{
+  color: #7a5a00;
+}
+
+/* En oscuro: card oscura, texto claro, títulos dorados premium */
+html.pea-dark .pea-help-page{
+  background: rgba(20,20,20,.78);
+  color: #f3f3f3;
+  border: 1px solid rgba(255,255,255,.08);
+  box-shadow: 0 10px 30px rgba(0,0,0,.35);
+}
+
+html.pea-dark .pea-help-page p,
+html.pea-dark .pea-help-page li,
+html.pea-dark .pea-help-page label,
+html.pea-dark .pea-help-page small{
+  color: #f4f4f4 !important;
+  opacity: 1 !important;
+}
+
+html.pea-dark .pea-help-page h1,
+html.pea-dark .pea-help-page h2,
+html.pea-dark .pea-help-page h3,
+html.pea-dark .pea-help-page strong{
+  color: #d6b25e !important;
+}
+
+/* =========================================================
+   Botonera flotante (arriba)
+   ========================================================= */
+
+.pea-floatbar{
+  position: sticky;      /* se mantiene arriba al scrollear */
+  top: 10px;
+  z-index: 999;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0 0 14px 0;
+  padding: 10px 0 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,.08);
+  backdrop-filter: blur(6px);
+}
+
+html.pea-dark .pea-floatbar{
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+
+/* =========================================
+   PEA — Barra flotante superior
+   ========================================= */
+
+.pea-floatbar{
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+
+  padding: 10px 12px;
+  border-radius: 16px;
+
+  background: rgba(255,255,255,.88);
+  border: 1px solid rgba(0,0,0,.08);
+  box-shadow: 0 10px 28px rgba(0,0,0,.12);
+  backdrop-filter: blur(10px);
+}
+
+/* Para que el contenido no quede tapado por la barra */
+body.pea-has-floatbar{
+  padding-top: 86px; /* ajustá si querés más/menos */
+}
+
+/* Dark */
+html.pea-dark .pea-floatbar{
+  background: rgba(20,20,20,.78);
+  border: 1px solid rgba(255,255,255,.10);
+  box-shadow: 0 12px 34px rgba(0,0,0,.45);
+}
+
+/* =========================================================
+   FIX — Scroll en TABLA de REGISTROS (historial)
+   - Barra vertical (dentro del cuadro)
+   - Barra horizontal (muchas columnas)
+   ========================================================= */
+
+.pea-table-wrap .pea-table-scroll{
+  width: 100%;
+  overflow: auto;          /* X + Y */
+  max-height: 520px;       /* ajustá a gusto */
+  border-radius: var(--pea-radius);
+}
+
+/* Evitar que el navegador "apriete" 17 columnas y mate el overflow */
+.pea-table-wrap .pea-table-scroll .pea-table{
+  width: max-content;      /* permite crecer y forzar overflow-x */
+  min-width: 100%;         /* no achica de más */
+  table-layout: auto;      /* más natural para muchas columnas */
+}
+
+/* Opcional pero recomendado: que no se partan textos raros en celdas */
+.pea-table-wrap .pea-table-scroll .pea-table th,
+.pea-table-wrap .pea-table-scroll .pea-table td{
+  white-space: nowrap;
+}
+
+/* =========================================================
+   FIX DEFINITIVO — REGISTROS en MODO CLARO
+   (fuerza texto negro + títulos dorados dentro del bloque)
+   ========================================================= */
+
+html:not(.pea-dark) .pea-table-wrap{
+  color: #111 !important;
+}
+
+html:not(.pea-dark) .pea-table-wrap h2{
+  color: #7a5a00 !important;
+}
+
+/* Fuerza texto negro en TODA la tabla (evita herencia/opacidades globales) */
+html:not(.pea-dark) .pea-table-wrap .pea-table,
+html:not(.pea-dark) .pea-table-wrap .pea-table th,
+html:not(.pea-dark) .pea-table-wrap .pea-table td{
+  color: #111 !important;
+  opacity: 1 !important;
+}
+
+/* Opcional: que el “cuadro” de la tabla se vea como card clara */
+html:not(.pea-dark) .pea-table-wrap .pea-table-scroll{
+  background: rgba(255,255,255,.92);
+  border: 1px solid rgba(0,0,0,.10);
+  border-radius: 14px;
+}
+
+/* Opcional: encabezado un poquito más legible */
+html:not(.pea-dark) .pea-table-wrap .pea-table thead th{
+  border-bottom: 1px solid rgba(0,0,0,.14) !important;
+}
+
+/* =========================================================
+   HISTORIAL — LAYOUT MÁS ANCHO (17 columnas)
+   Solo para pea_screen_history.html
+   ========================================================= */
+
+@media (min-width: 1200px){
+  body.pea-history-page .pea-shell{
+    max-width: 1500px;            /* probá 1400 / 1500 / 1600 */
+  }
+
+  /* La barra tiene width inline en el HTML -> lo pisamos con !important */
+  body.pea-history-page .pea-floatbar{
+    width: min(1500px, calc(100% - 32px)) !important;
+  }
+}
+
+/* =========================================================
+   PEA — Botones internos (Filtros / Vistas / Tabla)
+   Mismo look premium que la barra superior
+   ========================================================= */
+
+/* 1) Botones de Filtros (Aplicar/Quitar) + Vistas (Guardar/Cargar/Eliminar) */
+.pea-filter-actions button{
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 700;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.12);
+}
+
+.pea-filter-actions button:hover{
+  filter: brightness(0.97);
+}
+
+.pea-filter-actions button:disabled{
+  opacity: .55;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* 2) Select "Mostrar 10/15/20 registros" (y otros selects dentro del bloque Registros) */
+.pea-table-wrap select{
+  border: 0;
+  border-radius: 12px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+  background: rgba(255,212,0,.55);
+  color: #111;
+  box-shadow: 0 6px 18px rgba(0,0,0,.10);
+  outline: none;
+}
+
+.pea-table-wrap select:focus{
+  box-shadow: 0 0 0 3px rgba(255,212,0,.22);
+}
+
+/* 3) Botones por fila (Anular / Corregir) dentro de la tabla */
+.pea-table-wrap td button{
+  border: 0;
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-weight: 800;
+  cursor: pointer;
+  background: #ffd400;
+  color: #111;
+  box-shadow: 0 6px 14px rgba(0,0,0,.12);
+  margin-right: 6px;
+  white-space: nowrap;
+}
+
+.pea-table-wrap td button:hover{
+  filter: brightness(0.97);
+}
+
+/* Dark: mantenemos el mismo botón amarillo (premium) */
+html.pea-dark .pea-filter-actions button,
+html.pea-dark .pea-table-wrap td button{
+  background: #ffd400;
+  color: #111;
+}
+
+html.pea-dark .pea-table-wrap select{
+  background: rgba(255,212,0,.42);
+  color: #111;
+}
+
+/* =========================================================
+   PEA — ESTADÍSTICAS: separación + jerarquía de títulos
+   (RenderCuadroBasePEA)
+   ========================================================= */
+
+.pea-cuadro-estadistico{
+  margin: 18px 0 22px;              /* <-- separación entre stats */
+  padding: 16px 16px;
+  border-radius: 16px;
+  border: 1px solid rgba(0,0,0,.08);
+  background: rgba(255,255,255,.96);
+  box-shadow: 0 10px 26px rgba(0,0,0,.06);
+}
+
+html.pea-dark .pea-cuadro-estadistico{
+  border: 1px solid rgba(255,255,255,.10);
+  background: rgba(20,20,20,.62);
+  box-shadow: 0 14px 34px rgba(0,0,0,.40);
+}
+
+/* “Identidad” (Nivel + Estadística) */
+.pea-identidad{
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+/* NIVEL x/4 */
+.pea-nivel{
+  font-weight: 900;
+  font-size: 12px;
+  letter-spacing: .35px;
+  text-transform: uppercase;
+  color: #7a5a00; /* dorado oscuro en claro */
+}
+
+html.pea-dark .pea-nivel{
+  color: #d6b25e; /* dorado premium en oscuro */
+}
+
+/* ESTADÍSTICA x/17 — título */
+.pea-estadistica{
+  font-weight: 950;
+  font-size: 15px;
+  color: #7a5a00;
+}
+
+html.pea-dark .pea-estadistica{
+  color: #d6b25e;
+}
+
+/* Cabecera (estado del sistema / total) */
+.pea-cabecera{
+  margin: 8px 0 10px;
+  line-height: 1.35;
+}
+
+/* Separador “ASCII” */
+.pea-separador{
+  opacity: .45;
+  margin: 10px 0;
+}
+
+/* Universo + criterios */
+.pea-universo{ margin-top: 8px; }
+.pea-criterios{ margin-top: 10px; }
+.pea-criterios ul{ margin: 6px 0 0 18px; }
+
+/* Cuerpo y warning */
+.pea-cuerpo{ margin-top: 12px; }
+.pea-warning{
+  border-radius: 12px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+}
+
+/* Nav abajo */
+.pea-nav{
+  margin-top: 12px;
+  opacity: .9;
+}
+
+/* =========================================================
+   PEA — FIX: centrar contenido de tablas en cuadros stats
+   (th ya suele venir centrado; td no)
+   ========================================================= */
+
+.pea-cuadro-estadistico .pea-table th,
+.pea-cuadro-estadistico .pea-table td{
+  text-align: center;
+}
+
+/* Mantener numeritos a la derecha si querés (tu clase existente) */
+.pea-cuadro-estadistico .pea-table .pea-n{
+  text-align: right;
+}
+
+/* Por si algunos stats meten inline style en td (como tdPlain/tdNum) */
+.pea-cuadro-estadistico .pea-table td[style*="font-weight"]{
+  text-align: center;
+}
