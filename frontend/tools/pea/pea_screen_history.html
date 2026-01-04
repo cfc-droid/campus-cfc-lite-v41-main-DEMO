@@ -55,6 +55,21 @@
     flex: 0 0 auto !important;
   }  
 }
+
+  <style>
+  /* MOBILE real (incluye landscape) */
+  @media (max-width: 900px), (pointer: coarse) {
+    /* ...tus estilos mobile... */
+  }
+
+  /* ✅ GLOBAL (PC + CELU): que se vean todas las filas que se renderizan */
+  .pea-table-scroll{
+    max-height: none !important;
+    height: auto !important;
+    overflow: visible !important;
+  }
+</style>
+  
 </style>
 
 </head>
