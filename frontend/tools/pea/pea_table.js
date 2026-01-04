@@ -7,41 +7,53 @@ const $ = (id) => document.getElementById(id);
 
 /* ============================================================
    TAREA 22c — control REAL de registros visibles
+   Objetivo:
+   - Renderizar TODOS los registros (sin recortar datos)
+   - Ajustar la "ventana" visible para que entren EXACTO 10/15/20 filas
+   - SIN scroll interno: el scroll es el de la página (vertical)
    ============================================================ */
 
 let PEA_TABLE_LIMIT = 10;
 
+/**
+ * Ajusta la altura visible del bloque de tabla para que entren EXACTO N filas
+ * (sumando la altura REAL de cada fila, no aproximando "fila1*N").
+ */
 function setTableLimit(value) {
   const v = parseInt(value, 10);
   if (![10, 15, 20].includes(v)) return;
 
-  PEA_TABLE_LIMIT = v; // ✅ guardo el valor seleccionado
+  PEA_TABLE_LIMIT = v;
 
   const container = document.querySelector(".pea-table-scroll");
   const table = container?.querySelector("table");
   if (!container || !table) return;
 
-  const tbodyRows = table.querySelectorAll("tbody tr");
-  if (!tbodyRows || tbodyRows.length === 0) return;
+  const rows = table.querySelectorAll("tbody tr");
+  if (!rows || rows.length === 0) return;
 
-  const headerHeight = table.querySelector("thead")?.getBoundingClientRect().height || 0;
+  const thead = table.querySelector("thead");
+  const headerHeight = thead ? thead.getBoundingClientRect().height : 0;
 
-  // ✅ SUMA REAL de alturas de las primeras N filas (no aproximación)
+  // Sumar alturas reales de las primeras N filas
+  const n = Math.min(v, rows.length);
   let rowsHeight = 0;
-  const n = Math.min(v, tbodyRows.length);
-
   for (let i = 0; i < n; i++) {
-    rowsHeight += tbodyRows[i].getBoundingClientRect().height;
+    rowsHeight += rows[i].getBoundingClientRect().height;
   }
 
   const total = Math.ceil(headerHeight + rowsHeight);
 
-  // ✅ Altura exacta para que entren N filas completas
+  // "Ventana" visible exacta
   container.style.height = `${total}px`;
   container.style.maxHeight = `${total}px`;
 
-  // ✅ IMPORTANTE: sin scroll interno; el scroll es el de la página
-  container.style.overflow = "visible";
+  // Muy importante: que NO haya scroll interno vertical (la página scrollea)
+  container.style.overflowY = "visible";
+
+  // Mantener scroll horizontal si existe (por columnas)
+  // Si tu CSS ya maneja esto, no molesta:
+  container.style.overflowX = container.style.overflowX || "auto";
 }
 
 /* ============================================================
@@ -54,9 +66,7 @@ function safeText(v) {
 }
 
 function renderAcciones(record) {
-  const aks = Array.isArray(record?.acciones_keys)
-    ? record.acciones_keys
-    : [];
+  const aks = Array.isArray(record?.acciones_keys) ? record.acciones_keys : [];
   return aks.length ? aks.join(", ") : "";
 }
 
@@ -65,9 +75,7 @@ function renderEstadoE(record) {
 }
 
 function renderIntensidad(record) {
-  return record?.intensidad == null
-    ? ""
-    : safeText(record.intensidad);
+  return record?.intensidad == null ? "" : safeText(record.intensidad);
 }
 
 function renderRowActions(record) {
@@ -75,10 +83,7 @@ function renderRowActions(record) {
   const id = record?.id;
 
   if (!id) return "";
-
-  if (estado === "ANULADO") {
-    return "—";
-  }
+  if (estado === "ANULADO") return "—";
 
   return `
     <button onclick="handleAnular('${id}')">Anular</button>
@@ -113,13 +118,12 @@ function renderRow(record) {
 }
 
 /* ============================================================
-   Render (LÍMITE REAL DE DATOS)
+   Render (NO recorta datos; ajusta solo la "ventana" visible)
    ============================================================ */
 
 function renderTable(records) {
   const tbody = $("pea-table-body");
   const empty = $("pea-table-empty");
-
   if (!tbody) return;
 
   const list = Array.isArray(records) ? records : [];
@@ -129,15 +133,14 @@ function renderTable(records) {
     if (empty) empty.style.display = "block";
     return;
   }
-
   if (empty) empty.style.display = "none";
 
-tbody.innerHTML = list.map(renderRow).join("");
+  // ✅ Renderiza TODOS los registros (sin slice)
+  tbody.innerHTML = list.map(renderRow).join("");
 
-// 🔑 Recalcula altura visible según límite actual
-setTimeout(() => {
-  setTableLimit(PEA_TABLE_LIMIT);
-}, 0);
+  // ✅ Recalcular altura visible (2 veces por fuentes / layout tardío)
+  setTimeout(() => setTableLimit(PEA_TABLE_LIMIT), 0);
+  setTimeout(() => setTableLimit(PEA_TABLE_LIMIT), 200);
 }
 
 /* ============================================================
@@ -155,6 +158,11 @@ function updateTable() {
 
 document.addEventListener("DOMContentLoaded", updateTable);
 document.addEventListener("PEA_FILTERS_UPDATED", updateTable);
+
+// Recalcular si cambia el tamaño de pantalla (PC/celular/rotación)
+window.addEventListener("resize", () => {
+  setTimeout(() => setTableLimit(PEA_TABLE_LIMIT), 0);
+});
 
 /* ============================================================
    API pública
