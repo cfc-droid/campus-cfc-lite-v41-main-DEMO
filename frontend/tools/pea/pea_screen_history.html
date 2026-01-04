@@ -13,15 +13,75 @@
 <link rel="stylesheet" href="./css/pea_layout.css" />
 <link rel="stylesheet" href="./css/pea_components.css" />
 
+<style>
+  /* MOBILE real (incluye landscape) */
+  @media (max-width: 900px), (pointer: coarse) {
+
+    /* 0) Ajuste de padding-top (tu body tiene 96px fijo) */
+    body.pea-has-floatbar{
+      padding-top: 64px !important; /* más chico en celu */
+    }
+
+    /* 1) Centrado / ancho correcto del contenido */
+    .pea-shell,
+    .pea-card{
+      width: 100% !important;
+      max-width: 980px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      box-sizing: border-box !important;
+    }
+
+    /* si el card tiene padding enorme en mobile */
+    .pea-card{
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+
+    /* 2) Barra flotante: más fina y en 1 línea (pisando inline styles) */
+    .pea-floatbar.pea-actions{
+      width: 100% !important;
+      left: 0 !important;
+      right: 0 !important;
+      transform: none !important;
+
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+
+      gap: 8px !important;
+      padding: 6px 8px !important;
+
+      flex-wrap: nowrap !important;         /* 1 fila */
+      overflow-x: auto !important;          /* scroll si no entra */
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;                /* firefox */
+    }
+    .pea-floatbar.pea-actions::-webkit-scrollbar{
+      display: none;                        /* chrome */
+    }
+
+    /* 3) Botones: más chicos */
+    .pea-floatbar.pea-actions .btn-main{
+      font-size: 11px !important;
+      padding: 5px 8px !important;
+      line-height: 1 !important;
+
+      min-height: 28px !important;
+      border-radius: 999px !important;
+
+      white-space: nowrap !important;       /* no partir texto */
+      flex: 0 0 auto !important;            /* no se estiran raro */
+    }
+  }
+</style>
+
 </head>
 
 <body class="pea-has-floatbar pea-history-page" style="padding-top: 96px;">
 
   <!-- BOTONERA FLOTANTE (misma que las otras pantallas) -->
 <div class="pea-floatbar pea-actions"
-
-  
-     ">
   <button type="button" class="btn-main" onclick="window.location.href='./index.html'">Pantalla principal</button>
   <button type="button" class="btn-main" onclick="window.location.href='./pea_stats_help.html'">Cálculo de estadísticas</button>
   <button type="button" class="btn-main" onclick="window.location.href='./pea_screen_register.html'">Cargar registro</button>
