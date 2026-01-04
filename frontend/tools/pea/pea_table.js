@@ -15,20 +15,33 @@ function setTableLimit(value) {
   const v = parseInt(value, 10);
   if (![10, 15, 20].includes(v)) return;
 
+  PEA_TABLE_LIMIT = v; // ✅ guardo el valor seleccionado
+
   const container = document.querySelector(".pea-table-scroll");
   const table = container?.querySelector("table");
   if (!container || !table) return;
 
-  // Medimos una fila REAL
-  const firstRow = table.querySelector("tbody tr");
-  if (!firstRow) return;
+  const tbodyRows = table.querySelectorAll("tbody tr");
+  if (!tbodyRows || tbodyRows.length === 0) return;
 
-  const rowHeight = firstRow.getBoundingClientRect().height;
-  const headerHeight = table.querySelector("thead").getBoundingClientRect().height;
+  const headerHeight = table.querySelector("thead")?.getBoundingClientRect().height || 0;
 
-  const totalHeight = (rowHeight * v) + headerHeight;
+  // ✅ SUMA REAL de alturas de las primeras N filas (no aproximación)
+  let rowsHeight = 0;
+  const n = Math.min(v, tbodyRows.length);
 
-  container.style.maxHeight = `${Math.ceil(totalHeight)}px`;
+  for (let i = 0; i < n; i++) {
+    rowsHeight += tbodyRows[i].getBoundingClientRect().height;
+  }
+
+  const total = Math.ceil(headerHeight + rowsHeight);
+
+  // ✅ Altura exacta para que entren N filas completas
+  container.style.height = `${total}px`;
+  container.style.maxHeight = `${total}px`;
+
+  // ✅ IMPORTANTE: sin scroll interno; el scroll es el de la página
+  container.style.overflow = "visible";
 }
 
 /* ============================================================
