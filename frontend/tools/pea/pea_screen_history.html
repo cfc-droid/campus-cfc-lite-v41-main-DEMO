@@ -15,7 +15,16 @@
 
 <style>
   /* MOBILE real (incluye landscape) */
-  @media (max-width: 900px), (pointer: coarse) {
+ @media (max-width: 900px), (pointer: coarse) {
+
+  /* ...tus reglas... */
+
+  /* Empuja un poco a la izquierda el último botón */
+  #pea-btn-theme{
+    margin-right: 10px !important; /* probá 8–16px */
+  }
+}
+
 
     /* 0) Ajuste de padding-top (tu body tiene 96px fijo) */
     body.pea-has-floatbar{
