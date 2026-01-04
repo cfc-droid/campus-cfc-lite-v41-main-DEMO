@@ -14,30 +14,60 @@
 <link rel="stylesheet" href="./css/pea_components.css" />
 
 <style>
-  /* CELU: aplica casi siempre en mobile */
-  @media (max-width: 520px) {
+  /* MOBILE real (incluye landscape) */
+  @media (max-width: 900px), (pointer: coarse) {
 
-    /* Barra flotante: menos “alto” */
+    /* 1) Centrado / ancho correcto del contenido */
+    .pea-shell,
+    .pea-card,
+    .pea-help-page,
+    .pea-help-content{
+      width: 100% !important;
+      max-width: 980px !important;
+      margin-left: auto !important;
+      margin-right: auto !important;
+      box-sizing: border-box !important;
+    }
+
+    /* si el card tiene padding enorme en mobile */
+    .pea-card{
+      padding-left: 12px !important;
+      padding-right: 12px !important;
+    }
+
+    /* 2) Barra flotante: más fina y en 1 línea */
     .pea-floatbar.pea-actions{
-      gap: 6px !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+
+      gap: 8px !important;
       padding: 6px 8px !important;
-      min-height: unset !important;
+
+      flex-wrap: nowrap !important;         /* 1 fila */
+      overflow-x: auto !important;          /* scroll si no entra */
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;                /* firefox */
+    }
+    .pea-floatbar.pea-actions::-webkit-scrollbar{
+      display: none;                        /* chrome */
     }
 
-    /* Botones más chicos */
+    /* 3) Botones: más chicos */
     .pea-floatbar.pea-actions .btn-main{
-      font-size: 12px !important;
-      padding: 6px 8px !important;
-      line-height: 1.1 !important;
-      min-height: 32px !important; /* <- importante si style.css fuerza altura */
-    }
+      font-size: 11px !important;
+      padding: 5px 8px !important;
+      line-height: 1 !important;
 
-    /* Si el Campus mete bordes o cosas que inflan */
-    .pea-floatbar.pea-actions .btn-main{
-      border-width: 1px !important;
+      min-height: 28px !important;
+      border-radius: 999px !important;
+
+      white-space: nowrap !important;       /* no partir texto */
+      flex: 0 0 auto !important;            /* no se estiran raro */
     }
   }
 </style>
+
   
 </head>
 
