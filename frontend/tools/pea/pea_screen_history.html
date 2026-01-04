@@ -55,46 +55,6 @@
     flex: 0 0 auto !important;
   }  
 }
-
- /* =========
-     ✅ STICKY del encabezado de la TABLA (Fecha / Momento / etc.)
-     Esto es lo que hace que “el título de la tabla” quede fijo al scrollear la página
-     ========= */
-
-  /* importante para sticky con tablas */
-  .pea-table{
-    border-collapse: separate;
-    border-spacing: 0;
-  }
-
-  .pea-table thead th{
-    position: sticky;
-    top: var(--pea-sticky-top);
-    z-index: 50;
-
-    /* fondo para que no se vea “transparente” al pasar filas debajo */
-    background: var(--pea-card-bg, #111);
-  }
-
-  /* opcional: una sombrita para separar visualmente */
-  .pea-table thead{
-    position: relative;
-    z-index: 49;
-  }
-
-  /* =========
-     ✅ Si además querés que el H1 “Análisis (PAE) — Historial” quede fijo,
-     descomentá esto:
-     ========= */
-  /*
-  .pea-header{
-    position: sticky;
-    top: var(--pea-sticky-top);
-    z-index: 60;
-    background: var(--pea-card-bg, #111);
-    padding-top: 8px;
-  }
-  */
   
 </style>
 
