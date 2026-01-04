@@ -1048,3 +1048,38 @@ html.pea-dark .pea-table-wrap .pea-table thead th{
   border-bottom: 1px solid rgba(255,255,255,.10);
   box-shadow: 0 1px 0 rgba(0,0,0,.35);
 }
+
+/* =========================================================
+   FIX FINAL — HEADER (thead) fijo en tabla de REGISTROS
+   - Se pega al top del scroll interno
+   - NO se transparenta (no se superpone feo)
+   - Mantiene líneas/bordes
+   ========================================================= */
+
+.pea-table-wrap .pea-table-scroll{
+  position: relative;              /* contexto para sticky */
+}
+
+/* Solo la tabla de REGISTROS (no toca stats) */
+.pea-table-wrap .pea-table-scroll .pea-table thead th{
+  position: sticky;
+  top: 0;
+  z-index: 50;
+
+  /* CLAVE: fondo sólido para que NO se vea el texto detrás */
+  background: rgba(255,255,255,.96) !important;
+
+  /* Líneas del encabezado + separación visual */
+  border-bottom: 1px solid rgba(0,0,0,.14) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,.08);
+
+  /* opcional: mejora visual al scrollear */
+  background-clip: padding-box;
+}
+
+/* Dark mode */
+html.pea-dark .pea-table-wrap .pea-table-scroll .pea-table thead th{
+  background: rgba(20,20,20,.92) !important;
+  border-bottom: 1px solid rgba(255,255,255,.12) !important;
+  box-shadow: 0 1px 0 rgba(0,0,0,.35);
+}
