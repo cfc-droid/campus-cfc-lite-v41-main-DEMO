@@ -13,7 +13,7 @@ const $ = (id) => document.getElementById(id);
    - SIN scroll interno: el scroll es el de la página (vertical)
    ============================================================ */
 
-let PEA_TABLE_LIMIT = 10;
+let PEA_TABLE_LIMIT = 10; // (default general)
 
 /**
  * Ajusta la altura visible del bloque de tabla para que entren EXACTO N filas
@@ -21,7 +21,7 @@ let PEA_TABLE_LIMIT = 10;
  */
 function setTableLimit(value) {
   const v = parseInt(value, 10);
-  if (![10, 15, 20].includes(v)) return;
+  if (![5, 10, 15, 20].includes(v)) return;
 
   PEA_TABLE_LIMIT = v;
 
@@ -55,6 +55,67 @@ function setTableLimit(value) {
   // Si tu CSS ya maneja esto, no molesta:
   container.style.overflowX = container.style.overflowX || "auto";
 }
+
+/* ============================================================
+   TAREA — agregar opción 5 registros (sin tocar HTML)
+   - Detecta el select que tiene 10/15/20
+   - Inyecta opción 5
+   - Conecta change -> setTableLimit
+   - (Opcional) En móvil arranca en 5 automáticamente
+   ============================================================ */
+
+function initTableLimitSelect() {
+  // Buscamos selects dentro del bloque de registros
+  const root = document.querySelector(".pea-table-wrap") || document;
+  const selects = Array.from(root.querySelectorAll("select"));
+
+  // Heurística: el select correcto suele tener exactamente {10,15,20}
+  const isLimitSelect = (sel) => {
+    const values = Array.from(sel.options || []).map(o => parseInt(o.value, 10)).filter(n => !Number.isNaN(n));
+    if (values.length < 3) return false;
+    const set = new Set(values);
+    return set.has(10) && set.has(15) && set.has(20);
+  };
+
+  const sel = selects.find(isLimitSelect);
+  if (!sel) return;
+
+  // Si ya existe 5, no hacemos nada
+  const has5 = Array.from(sel.options).some(o => String(o.value) === "5");
+  if (!has5) {
+    const opt5 = document.createElement("option");
+    opt5.value = "5";
+    opt5.textContent = "5";
+
+    // Insertar 5 al principio (queda 5/10/15/20)
+    sel.insertBefore(opt5, sel.firstChild);
+  }
+
+  // Enganchar change (por si no estaba)
+  sel.addEventListener("change", (e) => {
+    setTableLimit(e.target.value);
+  });
+
+  // ✅ OPCIONAL: en móvil arrancar con 5 (solo si el usuario no eligió otra cosa)
+  const isMobile = window.matchMedia && window.matchMedia("(max-width: 640px)").matches;
+  if (isMobile) {
+    // Si el select está en 10/15/20, lo pasamos a 5 por comodidad
+    // (si ya está en 5 o el usuario lo cambió, queda como está)
+    const current = parseInt(sel.value, 10);
+    if (![5, 10, 15, 20].includes(current) || current === 10) {
+      sel.value = "5";
+      setTableLimit(5);
+      PEA_TABLE_LIMIT = 5;
+    }
+  } else {
+    // Desktop: respetamos lo que esté seleccionado, y aplicamos limit
+    const current = parseInt(sel.value, 10);
+    if ([5, 10, 15, 20].includes(current)) {
+      setTableLimit(current);
+      PEA_TABLE_LIMIT = current;
+  }
+ 
+
 
 /* ============================================================
    Helpers
@@ -156,7 +217,11 @@ function updateTable() {
   renderTable(filtered);
 }
 
-document.addEventListener("DOMContentLoaded", updateTable);
+document.addEventListener("DOMContentLoaded", () => {
+  initTableLimitSelect();
+  updateTable();
+});
+
 document.addEventListener("PEA_FILTERS_UPDATED", updateTable);
 
 // Recalcular si cambia el tamaño de pantalla (PC/celular/rotación)
